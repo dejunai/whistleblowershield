@@ -1,4 +1,11 @@
-﻿# CPT Relationship Map
+Write-Host "Creating CPT relationship map documentation..."
+
+$path = "documentation/architecture/cpt-relationship-map.md"
+
+New-Item -ItemType Directory -Force -Path "documentation/architecture" | Out-Null
+
+$content = @"
+# CPT Relationship Map
 
 ## Purpose
 
@@ -39,13 +46,6 @@ United States
 California  
 European Union
 
-Fields:
-
-- name
-- region
-- governing body
-- notes
-
 Relationships:
 
 - has many summaries
@@ -65,31 +65,15 @@ Relationships:
 
 jx-summary → jurisdiction
 
-Purpose:
-
-Provides the primary overview page for the jurisdiction.
-
 ---
 
 ## jx-statute
 
 Represents a legal statute or law.
 
-Examples:
-
-False Claims Act  
-Sarbanes-Oxley Act
-
 Relationships:
 
 jx-statute → jurisdiction
-
-Fields:
-
-- statute name
-- citation
-- official source
-- notes
 
 ---
 
@@ -97,32 +81,15 @@ Fields:
 
 Describes how a whistleblower can report violations.
 
-Examples:
-
-SEC reporting procedure  
-OSHA complaint procedure
-
 Relationships:
 
 jx-procedure → jurisdiction
-
-Fields:
-
-- reporting agency
-- process description
-- official guidance links
 
 ---
 
 ## jx-resource
 
 External resource relevant to whistleblowers.
-
-Examples:
-
-advocacy organizations  
-legal assistance resources  
-government guidance
 
 Relationships:
 
@@ -134,22 +101,9 @@ jx-resource → jurisdiction
 
 Represents a change in law or policy.
 
-Examples:
-
-new statute passed  
-court interpretation  
-agency rule change
-
 Relationships:
 
 ws-legal-update → jurisdiction
-
-Fields:
-
-- law name
-- summary
-- source URL
-- effective date
 
 ---
 
@@ -162,8 +116,6 @@ jurisdiction
  ├ jx-resource
  └ ws-legal-update
 
-All entities reference a jurisdiction using ACF relationship fields.
-
 ---
 
 # Future Extensions
@@ -174,14 +126,20 @@ case-law
 regulatory-agency  
 enforcement-action  
 legal-commentary
+"@
 
-These would also attach to jurisdictions.
+$content | Out-File -Encoding utf8 $path
 
----
+Write-Host "Adding file to git..."
 
-# Design Principles
+git add $path
 
-1. Jurisdiction is always the root entity
-2. All legal data must attach to a jurisdiction
-3. Relationships must be explicit
-4. No orphan legal entities should exist
+Write-Host "Creating commit..."
+
+git commit -m "Add CPT relationship map documentation"
+
+Write-Host "Pushing to GitHub..."
+
+git push
+
+Write-Host "CPT relationship map added."

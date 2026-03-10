@@ -1,16 +1,38 @@
 # Project Roadmap
 
-Phase 1
-Platform architecture and documentation.
+## Phase 1 — Architecture
 
-Phase 2
-Jurisdiction coverage.
+Completed or in progress:
 
-Phase 3
-Search system.
+- legal ontology
+- taxonomy
+- citation model
+- jurisdiction model
+- ws-core plugin foundation
 
-Phase 4
-Case law database.
+## Phase 2 — Data Population
 
-Phase 5
-Comparative law tools.
+Focus on building the legal knowledge base.
+
+Tasks include:
+
+- documenting federal whistleblower statutes
+- documenting major regulatory programs
+- linking agencies and authorities
+
+## Phase 3 — Editorial Expansion
+
+Introduce structured editorial processes and research contributions.
+
+## Phase 4 — Platform Features
+
+Future features may include:
+
+- structured search
+- API access
+- data export
+- visualization tools
+
+## Long-Term Vision
+
+WhistleblowerShield aims to become a comprehensive, structured reference for United States whistleblower law.

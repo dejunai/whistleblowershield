@@ -1,16 +1,17 @@
-# WhistleblowerShield Documentation
+# Documentation
 
-This repository contains the architecture and governance documentation
-for the WhistleblowerShield legal knowledge platform.
+This directory contains architecture, development, editorial, and policy documentation for the WhistleblowerShield platform.
 
-## Structure
+## Sections
 
-documentation/
-  architecture/
-  development/
-  editorial/
-  policy/
-  project/
+Architecture  
+System design and knowledge models.
 
-The platform is designed as a jurisdiction-centric legal database
-for whistleblower protections.
+Development  
+Technical documentation for the ws-core plugin.
+
+Editorial  
+Processes governing legal research and publication.
+
+Policy  
+Guidelines for transparency and research standards.
