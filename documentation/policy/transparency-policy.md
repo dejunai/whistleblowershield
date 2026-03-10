@@ -1,4 +1,4 @@
-﻿# Transparency Policy
+# Transparency Policy
 
 The project commits to:
 

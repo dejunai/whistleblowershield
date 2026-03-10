@@ -1,4 +1,4 @@
-﻿# Project Roadmap
+# Project Roadmap
 
 Phase 1
 Platform architecture and documentation.

@@ -1,4 +1,4 @@
-﻿# Editorial Workflow
+# Editorial Workflow
 
 Content pipeline:
 

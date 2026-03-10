@@ -1,4 +1,4 @@
-﻿# System Architecture
+# System Architecture
 
 WhistleblowerShield is designed as a jurisdiction-centric
 legal knowledge platform.

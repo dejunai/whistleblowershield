@@ -1,4 +1,4 @@
-﻿# Security Model
+# Security Model
 
 The platform handles sensitive legal information.
 

@@ -1,4 +1,4 @@
-﻿# ws-core Plugin Architecture
+# ws-core Plugin Architecture
 
 The ws-core plugin powers the structured legal database.
 

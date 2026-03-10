@@ -1,4 +1,4 @@
-﻿# Query Layer
+# Query Layer
 
 To prevent duplicated logic the plugin exposes helper functions.
 

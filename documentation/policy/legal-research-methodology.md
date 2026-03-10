@@ -1,4 +1,4 @@
-﻿# Legal Research Methodology
+# Legal Research Methodology
 
 Sources used:
 

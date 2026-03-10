@@ -1,4 +1,4 @@
-﻿# WhistleblowerShield Documentation
+# WhistleblowerShield Documentation
 
 This repository contains the architecture and governance documentation
 for the WhistleblowerShield legal knowledge platform.
