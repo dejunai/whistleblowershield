@@ -1,0 +1,168 @@
+<?php
+/**
+ * acf-procedures.php
+ *
+ * Registers the ACF Pro field group for the `jx-procedures` CPT.
+ *
+ * The jx-procedures CPT describes how a whistleblower can report violations
+ * within a given jurisdiction — what agency to contact, what the formal
+ * process looks like, and where to find official guidance.
+ *
+ * Each procedure record attaches to a parent jurisdiction via an ACF
+ * relationship field, consistent with the jurisdiction-centric data model
+ * used throughout ws-core.
+ *
+ * Per the data integrity rules documented in ws-core-data-integrity-rules.md:
+ *   - Procedures must describe the reporting process in clear, step-by-step language.
+ *   - Procedures must include: responsible agency, reporting mechanism,
+ *     and official instructions link.
+ *
+ * Fields registered:
+ *   ws_procedure_jurisdiction        (Relationship → jurisdiction, required)
+ *   ws_procedure_type                (Select: internal | external | qui_tam |
+ *                                     agency_hotline | court_filing | other)
+ *   ws_procedure_reporting_agency    (Text, required)
+ *   ws_procedure_agency_url          (URL)
+ *   ws_procedure_description         (WYSIWYG, required)
+ *   ws_procedure_official_guidance   (URL — direct link to official instructions)
+ *   ws_procedure_time_limit          (Text — e.g., "180 days from retaliatory act")
+ *   ws_procedure_notes               (Textarea — internal notes only)
+ *
+ * Added in v2.0.0. The jx-procedures CPT was registered in v1.8.0 but had
+ * no ACF field group until this release.
+ */
+
+defined( 'ABSPATH' ) || exit;
+
+add_action( 'acf/init', 'ws_register_acf_procedure_fields' );
+function ws_register_acf_procedure_fields() {
+
+    if ( ! function_exists( 'acf_add_local_field_group' ) ) {
+        return;
+    }
+
+    acf_add_local_field_group( [
+        'key'      => 'group_ws_procedure',
+        'title'    => 'Procedure Details',
+        'location' => [ [ [
+            'param'    => 'post_type',
+            'operator' => '==',
+            'value'    => 'jx-procedures',
+        ] ] ],
+        'menu_order'            => 0,
+        'position'              => 'normal',
+        'style'                 => 'default',
+        'label_placement'       => 'top',
+        'instruction_placement' => 'label',
+        'fields' => [
+
+            // ── Jurisdiction ──────────────────────────────────────────────
+
+            [
+                'key'          => 'field_ws_procedure_jurisdiction',
+                'label'        => 'Jurisdiction',
+                'name'         => 'ws_procedure_jurisdiction',
+                'type'         => 'relationship',
+                'instructions' => 'Select the jurisdiction this procedure applies to. Every procedure must reference a jurisdiction. For federal-level procedures, select the United States jurisdiction.',
+                'required'     => 1,
+                'post_type'    => [ 'jurisdiction' ],
+                'filters'      => [ 'search' ],
+                'max'          => 1,
+                'return_format' => 'object',
+            ],
+
+            // ── Procedure Type ────────────────────────────────────────────
+
+            [
+                'key'          => 'field_ws_procedure_type',
+                'label'        => 'Procedure Type',
+                'name'         => 'ws_procedure_type',
+                'type'         => 'select',
+                'instructions' => 'Select the category that best describes this reporting procedure.',
+                'required'     => 1,
+                'choices'      => [
+                    'internal'      => 'Internal Reporting (within organization)',
+                    'external'      => 'External Government Reporting',
+                    'agency_hotline' => 'Agency Hotline / Tip Line',
+                    'qui_tam'       => 'Qui Tam Lawsuit (False Claims Act)',
+                    'court_filing'  => 'Court Filing / Civil Complaint',
+                    'other'         => 'Other',
+                ],
+                'default_value' => 'external',
+                'allow_null'    => 0,
+                'ui'            => 1,
+            ],
+
+            // ── Reporting Agency ──────────────────────────────────────────
+
+            [
+                'key'          => 'field_ws_procedure_reporting_agency',
+                'label'        => 'Responsible Agency',
+                'name'         => 'ws_procedure_reporting_agency',
+                'type'         => 'text',
+                'instructions' => 'The government agency, office, or body that receives or investigates this type of report — e.g., U.S. Securities and Exchange Commission, OSHA Whistleblower Protection Program, California Labor Commissioner\'s Office. Use the full official name.',
+                'required'     => 1,
+            ],
+
+            // ── Agency URL ────────────────────────────────────────────────
+
+            [
+                'key'          => 'field_ws_procedure_agency_url',
+                'label'        => 'Agency URL',
+                'name'         => 'ws_procedure_agency_url',
+                'type'         => 'url',
+                'instructions' => 'Link to the official homepage for the responsible agency. For reporting sub-offices, link to the specific program page rather than the agency root if more useful.',
+                'placeholder'  => 'https://',
+            ],
+
+            // ── Procedure Description ─────────────────────────────────────
+
+            [
+                'key'          => 'field_ws_procedure_description',
+                'label'        => 'Procedure Description',
+                'name'         => 'ws_procedure_description',
+                'type'         => 'wysiwyg',
+                'instructions' => '<strong>Required.</strong> Describe how a whistleblower uses this procedure in clear, step-by-step language. Cover: who is eligible, how to submit a report (online form, mail, phone), what information is required, and what to expect afterward. Write for a general audience — avoid legal jargon without explanation. This field is rendered publicly.',
+                'required'     => 1,
+                'tabs'         => 'all',
+                'toolbar'      => 'full',
+                'media_upload'  => 0,
+                'delay'         => 0,
+            ],
+
+            // ── Official Guidance URL ─────────────────────────────────────
+
+            [
+                'key'          => 'field_ws_procedure_official_guidance',
+                'label'        => 'Official Guidance URL',
+                'name'         => 'ws_procedure_official_guidance',
+                'type'         => 'url',
+                'instructions' => 'Direct link to the official government instructions for this reporting procedure — e.g., the agency\'s "How to File a Complaint" or "Whistleblower Program" page. This is the primary source link shown to users. Use a Tier 1 or Tier 2 source per the Source Verification Policy.',
+                'placeholder'  => 'https://',
+            ],
+
+            // ── Filing Time Limit ─────────────────────────────────────────
+
+            [
+                'key'          => 'field_ws_procedure_time_limit',
+                'label'        => 'Filing Time Limit',
+                'name'         => 'ws_procedure_time_limit',
+                'type'         => 'text',
+                'instructions' => 'The statutory or regulatory time limit for initiating this procedure, if one exists — e.g., "180 days from date of retaliatory action", "3 years from date of violation". Leave blank if no specific limit applies or if the limit is unclear. Always cite the source in the Procedure Description.',
+                'placeholder'  => 'e.g., 180 days from date of retaliatory action',
+            ],
+
+            // ── Internal Notes ────────────────────────────────────────────
+
+            [
+                'key'          => 'field_ws_procedure_notes',
+                'label'        => 'Internal Notes',
+                'name'         => 'ws_procedure_notes',
+                'type'         => 'textarea',
+                'instructions' => 'Internal editorial notes — not displayed publicly. Use to document research sources, clarification questions, review status, or anything an editor needs to know about this procedure record.',
+                'rows'         => 4,
+            ],
+
+        ], // end fields
+    ] ); // end acf_add_local_field_group
+}
