@@ -37,15 +37,15 @@
     margin-bottom: 1.5rem;
 }
 
-/* ── Flag Image ──────────────────────────────────────────────────────────── */
+/* ── Jurisdiction Flag Image ──────────────────────────────────────────────────────────── */
 
 .ws-jurisdiction-flag {
     flex-shrink: 0;
 }
 
-.ws-flag-img,
-.ws-jurisdiction-header .ws-flag {
-    height: 100px;
+.ws-jx-flag-img,
+.ws-jurisdiction-header .ws-jx-flag {
+    height: 130px;
     width: auto;
     border: 1px solid #D8D2C7;
     background: #fff;
@@ -53,28 +53,28 @@
     object-fit: contain;
 }
 
-/* ── Flag Attribution ────────────────────────────────────────────────────── */
+/* ── Jurisdiction Flag Attribution ────────────────────────────────────────────────────── */
 /*
  * Deliberately smaller and visually subordinate to the government links.
  * Satisfies Wikimedia Commons attribution requirements without
  * competing visually with primary jurisdiction information.
  */
 
-.ws-flag-attribution {
+.ws-jx-flag-attribution {
     font-size: 0.65rem;       /* Noticeably smaller than body text */
     line-height: 1.3;
     color: #888;
     margin: 0.3rem 0 0 0;
-    max-width: 120px;         /* Constrain to roughly the width of the flag */
-    word-break: break-word;
+/*    max-width: 120px;         /* Constrain to roughly the width of the flag */
+/*    word-break: break-word; */
 }
 
-.ws-flag-attribution a {
+.ws-jx-flag-attribution a {
     color: #888;
     text-decoration: underline;
 }
 
-.ws-flag-attribution a:hover {
+.ws-jx-flag-attribution a:hover {
     color: #555;
 }
 
@@ -84,7 +84,7 @@
     flex: 1;
 }
 
-/* ── Government Offices Box ──────────────────────────────────────────────── */
+/* ── Jurisdiction Government Offices Box ──────────────────────────────────────────────── */
 /*
  * Styled panel containing the stacked leadership office links.
  * Label and links are scoped within this box.
@@ -92,7 +92,7 @@
  * Color and border will be refined in the pre-launch design pass.
  */
 
-.ws-gov-offices-box {
+.ws-jx-gov-offices-box {
     display: inline-block;
     background: #f4f2ee;
     border: 1px solid #D8D2C7;
@@ -101,7 +101,7 @@
     margin-top: 0.25rem;
 }
 
-.ws-gov-offices-label {
+.ws-jx-gov-offices-label {
     font-size: 0.7rem;
     font-weight: 700;
     text-transform: uppercase;
@@ -110,9 +110,9 @@
     margin: 0 0 0.4rem 0;
 }
 
-/* ── Government Links List ───────────────────────────────────────────────── */
+/* ── Jurisdiction Government Links List ───────────────────────────────────────────────── */
 
-.ws-gov-links {
+.ws-jx-gov-links {
     list-style: none;
     margin: 0;
     padding: 0;
@@ -121,24 +121,24 @@
     gap: 0;                   /* Let line-height and padding do the work */
 }
 
-.ws-gov-link {
+.ws-jx-gov-link {
     line-height: 1;
     padding: 0.2rem 0;        /* Tight, even spacing between each link */
 }
 
-.ws-gov-link a {
+.ws-jx-gov-link a {
     text-decoration: none;
     font-size: 0.88rem;
     line-height: 1;
 }
 
-.ws-gov-link a:hover {
+.ws-jx-gov-link a:hover {
     text-decoration: underline;
 }
 
-/* ── Summary Notice Box ──────────────────────────────────────────────────── */
+/* ── "Not Legal Advice" Notice Box ──────────────────────────────────────────────────── */
 /*
- * Used by the [ws_disclaimer_notice] shortcode and any summary page
+ * Used by the [ws_nla_disclaimer_notice] shortcode and any page
  * that displays the standard "not legal advice" notice.
  *
  * Intentionally softer than the original inline-styled version:
@@ -147,10 +147,10 @@
  * — Font size slightly reduced; notice is informational, not a warning sign
  *
  * To update the notice appearance site-wide, edit only this block.
- * Do not add inline styles to individual summary files.
+ * Do not add inline styles to individual files.
  */
 
-.ws-summary-notice {
+.ws-nla-disclaimer-notice {
     border: 1px solid #c8c0b0;
     border-radius: 4px;
     padding: 12px 15px;
@@ -163,24 +163,24 @@
 
 /* ── Summary Block ───────────────────────────────────────────────────────── */
 
-.ws-summary-block {
+.ws-jx-summary-block {
     margin-top: 1.5rem;
 }
 
-.ws-summary-content {
+.ws-jx-summary-content {
     margin-bottom: 1.5rem;
 }
 
 /* ── Summary Footer ──────────────────────────────────────────────────────── */
 
-.ws-summary-footer {
+.ws-jx-summary-footer {
     border-top: 1px solid #e0e0e0;
     padding-top: 1rem;
     font-size: 0.85rem;
     color: #555;
 }
 
-.ws-summary-footer p {
+.ws-jx-summary-footer p {
     margin: 0.2rem 0;
 }
 
@@ -218,12 +218,12 @@
 
 /* ── Sources Block ───────────────────────────────────────────────────────── */
 
-.ws-summary-sources {
+.ws-jx-summary-sources {
     margin-top: 0.75rem;
     font-size: 0.8rem;
 }
 
-.ws-sources-text {
+.ws-jx-sources-text {
     white-space: pre-wrap;
     word-break: break-word;
     font-family: inherit;
@@ -251,26 +251,26 @@
     border-bottom: none;
 }
 
-.ws-update-title {
+.ws-legal-update-title {
     margin-top: 0;
     margin-bottom: 0.4rem;
     font-size: 1rem;
 }
 
-.ws-update-law,
-.ws-update-effective,
-.ws-update-posted {
+.ws-legal-update-law,
+.ws-legal-update-effective,
+.ws-legal-update-posted {
     font-size: 0.85rem;
     margin: 0.15rem 0;
     color: #555;
 }
 
-.ws-update-summary {
+.ws-legal-update-summary {
     margin-top: 0.5rem;
     font-size: 0.9rem;
 }
 
-.ws-no-updates {
+.ws-legal-no-updates {
     font-style: italic;
     color: #888;
 }
@@ -282,7 +282,7 @@
 }
 
 .ws-flag-block .ws-flag-attribution {
-    max-width: 120px;
+ /*   max-width: 120px; */
 }
 
 /* ── Responsive: stack header on small screens ───────────────────────────── */
@@ -384,11 +384,11 @@
  * Header - Entire Site" disables the header at the template level.
  * Kept as a CSS fallback. Safe to remove in a future cleanup pass.
  */
-
+/*
 .site-title,
 .site-description {
     display: none;
-}
+} */
 
 /* ── Term Highlight Tooltip ──────────────────────────────────────────────── */
 /*
@@ -428,4 +428,11 @@
     text-align: left;
     white-space: normal;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+/* ── Footnote Return ──────────────────────────────────────────────── */
+/*
+/* Footnote return links — constrain to small text baseline */
+.ws-case-law .ws-footnote-return {
+    height: 12px;
+	width:  auto;
 }

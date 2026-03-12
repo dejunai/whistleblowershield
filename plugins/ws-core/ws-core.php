@@ -3,8 +3,8 @@
  * Plugin Name: WhistleblowerShield Core (ws-core)
  * Plugin URI:  https://whistleblowershield.org
  * Description: Core plugin for WhistleblowerShield.org. Registers all Custom Post Types,
- *              taxonomies, ACF field groups, shortcodes, and audit trail functionality.
- * Version:     1.9.0
+ *              ACF field groups, shortcodes, and audit trail functionality.
+ * Version:     2.0.0
  * Author:      Dejunai
  * Author URI:  https://whistleblowershield.org
  * License:     GPL-2.0+
@@ -30,9 +30,9 @@
  *            Filter tabs by jurisdiction type + alphabetical grid.
  *            Tabs auto-hide if no jurisdictions of that type are published.
  *            Client-side filtering, no jQuery dependency.
- *   1.7.0 — Added [ws_disclaimer_notice] shortcode.
+ *   1.7.0 — Added [ws_nla_disclaimer_notice] shortcode.
  *            Centralizes the "not legal advice" notice. Replaces per-summary
- *            inline <div> blocks.
+ *            inline <div> blocks. Can be used on other pages.
  *   1.7.1 — Migrated .ws-term-highlight tooltip styles from Additional CSS
  *            into ws-core-front.css.
  *   1.8.0 — Renamed addendum CPTs to satisfy WordPress 20-character post type
@@ -52,32 +52,56 @@
  *                A one-time DB cleanup routine removes the orphaned terms,
  *                term_taxonomy records, and term_relationships on first
  *                admin_init after deployment.
+ *   1.9.1 — ACF field name prefixes corrected from `ws_update_*` to
+ *            `ws_legal_update_*` in acf-legal-updates.php.
+ *   1.9.2 — CPT renamed from `ws-update` to `ws-legal-update`. ACF location
+ *            rule and audit trail CPT list updated to match. Public archive
+ *            slug updated to /ws-legal-update/.
+ *   2.0.0 — Version constant corrected to match README (was stuck at 1.9.0).
+ *            Added three missing ACF field groups for placeholder addendum CPTs:
+ *              acf-jx-statutes.php    — jx-statutes fields (statute_name, citation,
+ *                                    official_source, statute_type, notes,
+ *                                    jurisdiction relationship)
+ *              acf-jx-resources.php   — jx-resources fields (organization_name,
+ *                                    resource_type, resource_url, resource_description,
+ *                                    jurisdiction relationship)
+ *              acf-jx-procedures.php  — jx-procedures fields (reporting_agency,
+ *                                    agency_url, procedure_description,
+ *                                    official_guidance_url, procedure_type,
+ *                                    jurisdiction relationship)
+ *            Added one-time DB migration routine (ws_migrate_ws_update_cpt) to
+ *            rename any remaining `legal-update` and `ws-update` post_type rows
+ *            to `ws-legal-update` in wp_posts. Replaces the raw SQL comment
+ *            that was left in cpt-legal-updates.php.
  *
- * ── Post type naming conventions (v1.9.0+) ──────────────────────────────────
- *   jurisdiction   — the parent page CPT (public, has archive)
- *   jx-summary     — jurisdiction addendum: legal protections overview
- *   jx-resources   — jurisdiction addendum: resources (future)
- *   jx-procedures  — jurisdiction addendum: procedures (future)
- *   jx-statutes    — jurisdiction addendum: statutes of limitations (future)
- *   ws-update      — site-wide legal updates change log (public, has archive)
+ * ── Post type naming conventions (v2.0.0+) ──────────────────────────────────
+ *   jurisdiction    — the parent page CPT (public, has archive)
+ *   jx-summary      — jurisdiction addendum: legal protections overview
+ *   jx-resources    — jurisdiction addendum: external resources
+ *   jx-procedures   — jurisdiction addendum: reporting procedures
+ *   jx-statutes     — jurisdiction addendum: statutes of limitations
+ *   ws-legal-update — site-wide legal updates change log (public, has archive)
  */
 
 defined( 'ABSPATH' ) || exit;
 
 // ── Constants ────────────────────────────────────────────────────────────────
 
-define( 'WS_CORE_VERSION',  '1.9.0' );
+define( 'WS_CORE_VERSION',  '2.0.0' );
 define( 'WS_CORE_DIR',      plugin_dir_path( __FILE__ ) );
 define( 'WS_CORE_URL',      plugin_dir_url( __FILE__ ) );
 
 // ── Load includes ────────────────────────────────────────────────────────────
 
 require_once WS_CORE_DIR . 'includes/cpt-jurisdiction.php';
-require_once WS_CORE_DIR . 'includes/cpt-summaries.php';
+require_once WS_CORE_DIR . 'includes/cpt-jx-summaries.php';
 require_once WS_CORE_DIR . 'includes/cpt-legal-updates.php';
 require_once WS_CORE_DIR . 'includes/acf-jurisdiction.php';
-require_once WS_CORE_DIR . 'includes/acf-summary.php';
+require_once WS_CORE_DIR . 'includes/acf-jx-summary.php';
 require_once WS_CORE_DIR . 'includes/acf-legal-updates.php';
+require_once WS_CORE_DIR . 'includes/acf-jx-statutes.php';
+require_once WS_CORE_DIR . 'includes/acf-jx-resources.php';
+require_once WS_CORE_DIR . 'includes/acf-jx-procedures.php';
 require_once WS_CORE_DIR . 'includes/audit-trail.php';
 require_once WS_CORE_DIR . 'includes/shortcodes.php';
 
@@ -98,7 +122,7 @@ function ws_core_enqueue_styles() {
 register_activation_hook( __FILE__, 'ws_core_activate' );
 function ws_core_activate() {
     ws_register_jurisdiction_cpt();
-    ws_register_summary_cpts();
+    ws_register_jx_summary_cpts();
     ws_register_legal_update_cpt();
     flush_rewrite_rules();
 }

@@ -56,7 +56,35 @@ function ws_register_jurisdiction_cpt() {
     register_post_type( 'jurisdiction', $args );
 }
 
-// ── One-time cleanup: remove orphaned jurisdiction-type taxonomy data ─────────
+/**
+ * BRIDGE: Migration routine to copy legacy taxonomy terms to ACF field.
+ * Run during the same admin_init pass as the cleanup.
+ */
+add_action( 'admin_init', 'ws_bridge_taxonomy_to_acf', 5 ); // Priority 5 runs BEFORE cleanup
+function ws_bridge_taxonomy_to_acf() {
+    if ( get_option( 'ws_jx_type_taxonomy_cleanup' ) ) {
+        return; // Don't run if cleanup is already done
+    }
+
+    $jurisdictions = get_posts([
+        'post_type'      => 'jurisdiction',
+        'posts_per_page' => -1,
+        'post_status'    => 'any',
+    ]);
+
+    foreach ( $jurisdictions as $post ) {
+        $terms = wp_get_post_terms( $post->ID, 'jurisdiction-type' );
+        if ( ! empty( $terms ) && ! is_wp_error( $terms ) ) {
+            $term_name = $terms[0]->name;
+            
+            // Map Taxonomy Name to ACF Select Value
+            $acf_value = strtolower( str_replace( [' ', '.'], ['_', ''], $term_name ) );
+            
+            // Update the new ACF field
+            update_field( 'field_ws_jurisdiction_type', $acf_value, $post->ID );
+        }
+    }
+}// ── One-time cleanup: remove orphaned jurisdiction-type taxonomy data ─────────
 //
 // The `jurisdiction-type` taxonomy was registered in earlier versions but never
 // used functionally. Type classification is handled by the ws_jurisdiction_type

@@ -22,6 +22,7 @@
  *   ws_statute_official_source (URL — link to govinfo.gov, congress.gov, etc.)
  *   ws_statute_effective_date  (Date Picker)
  *   ws_statute_notes           (Textarea — internal commentary only)
+ *   ws_statute_post_author     (User - selectable, defaults to current user)
  *
  * Citation format guidance follows the U.S. Legal Citation Model documented
  * in documentation/architecture/legal-citation-model.md.
@@ -109,7 +110,7 @@ function ws_register_acf_statute_fields() {
                     'executive_order'    => 'Executive Order',
                     'other'              => 'Other',
                 ],
-                'default_value' => 'federal_statute',
+                'default_value' => 'state_statute',
                 'allow_null'    => 0,
                 'ui'            => 1,
             ],
@@ -148,7 +149,30 @@ function ws_register_acf_statute_fields() {
                 'instructions' => 'Internal editorial notes about this statute — not displayed publicly. Use to document research sources, outstanding questions, or review status notes.',
                 'rows'         => 4,
             ],
+			
+			// ── Post Author ─────────────────────────────────────────
+
+            [
+                'key'          => 'field_ws_statute_post_author',
+                'label'        => 'Post Author',
+                'name'         => 'ws_statute_post_author',
+                'type'         => 'user',
+                'instructions' => 'Credited author displayed on the front end. Defaults to the current user. May be changed to any registered user with Author role or above.',
+                'role'         => [ 'author', 'editor', 'administrator' ],
+                'allow_null'   => 0,
+                'multiple'     => 0,
+                'return_format' => 'array',
+            ],
 
         ], // end fields
     ] ); // end acf_add_local_field_group
+}
+// ── Auto-fill: ws_statute_post_author (current user, new posts only) ───────────────────────
+
+add_filter( 'acf/load_value/name=ws_statute_post_author', 'ws_autofill_statute_post_author', 10, 3 );
+function ws_autofill_statute_post_author( $value, $post_id, $field ) {
+    if ( empty( $value ) ) {
+        $value = get_current_user_id();
+    }
+    return $value;
 }

@@ -91,3 +91,32 @@ function ws_get_edit_history( $post_id ) {
     $data = get_post_meta( (int) $post_id, '_ws_edit_history', true );
     return is_array( $data ) ? $data : [];
 }
+/**
+ * DATA INTEGRITY: Automatically sync two-way relationships.
+ * When an addendum (jx-*) is saved, update the parent Jurisdiction's relationship field.
+ */
+add_action( 'acf/save_post', 'ws_sync_jurisdiction_relationships', 20 );
+function ws_sync_jurisdiction_relationships( $post_id ) {
+    $post_type = get_post_type( $post_id );
+    $addendum_types = ['jx-summary', 'jx-statutes', 'jx-procedures', 'jx-resources'];
+
+    if ( ! in_array( $post_type, $addendum_types ) ) {
+        return;
+    }
+
+    // Get the linked jurisdiction ID from this post
+    // Note: Adjust the 'ws_*_jurisdiction' key if your field names differ per type
+    $jurisdiction_id = get_field( 'ws_jurisdiction', $post_id ); 
+
+    if ( $jurisdiction_id ) {
+        // Map CPT to the corresponding relationship field on the Jurisdiction CPT
+        $map = [
+            'jx-summary'    => 'ws_related_summary',
+            'jx-statutes'   => 'ws_related_statutes',
+            'jx-procedures' => 'ws_related_procedures',
+            'jx-resources'  => 'ws_related_resources'
+        ];
+
+        update_field( $map[$post_type], $post_id, $jurisdiction_id );
+    }
+}

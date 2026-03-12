@@ -27,6 +27,7 @@
  *   ws_procedure_official_guidance   (URL — direct link to official instructions)
  *   ws_procedure_time_limit          (Text — e.g., "180 days from retaliatory act")
  *   ws_procedure_notes               (Textarea — internal notes only)
+ *   ws_procedure_post_author         (User - selectable, defaults to current user)
  *
  * Added in v2.0.0. The jx-procedures CPT was registered in v1.8.0 but had
  * no ACF field group until this release.
@@ -63,7 +64,7 @@ function ws_register_acf_procedure_fields() {
                 'label'        => 'Jurisdiction',
                 'name'         => 'ws_procedure_jurisdiction',
                 'type'         => 'relationship',
-                'instructions' => 'Select the jurisdiction this procedure applies to. Every procedure must reference a jurisdiction. For federal-level procedures, select the United States jurisdiction.',
+                'instructions' => 'Select the jurisdiction this procedure applies to. Every procedure must reference a jurisdiction. For federal-level procedures, select the Federal jurisdiction.',
                 'required'     => 1,
                 'post_type'    => [ 'jurisdiction' ],
                 'filters'      => [ 'search' ],
@@ -162,7 +163,30 @@ function ws_register_acf_procedure_fields() {
                 'instructions' => 'Internal editorial notes — not displayed publicly. Use to document research sources, clarification questions, review status, or anything an editor needs to know about this procedure record.',
                 'rows'         => 4,
             ],
+			
+			// ── Post Author ─────────────────────────────────────────
+
+            [
+                'key'          => 'field_ws_procedure_post_author',
+                'label'        => 'Post Author',
+                'name'         => 'ws_procedure_post_author',
+                'type'         => 'user',
+                'instructions' => 'Credited author displayed on the front end. Defaults to the current user. May be changed to any registered user with Author role or above.',
+                'role'         => [ 'author', 'editor', 'administrator' ],
+                'allow_null'   => 0,
+                'multiple'     => 0,
+                'return_format' => 'array',
+            ],
 
         ], // end fields
     ] ); // end acf_add_local_field_group
+}
+// ── Auto-fill: ws_procedure_post_author (current user, new posts only) ───────────────────────
+
+add_filter( 'acf/load_value/name=ws_procedure_post_author', 'ws_autofill_procedure_post_author', 10, 3 );
+function ws_autofill_procedure_post_author( $value, $post_id, $field ) {
+    if ( empty( $value ) ) {
+        $value = get_current_user_id();
+    }
+    return $value;
 }

@@ -57,7 +57,7 @@ function ws_register_acf_legal_update_fields() {
                 'label'        => 'Law / Statute Name',
                 'name'         => 'ws_legal_update_law_name',
                 'type'         => 'text',
-                'instructions' => 'Name of the law, statute, regulation, or court ruling that changed — e.g., California Labor Code Section 1102.5',
+                'instructions' => 'Name of the law, statute, regulation, or court ruling that changed — e.g., California Labor Code Section § 1102.5',
                 'required'     => 1,
             ],
             [
@@ -93,7 +93,7 @@ function ws_register_acf_legal_update_fields() {
                 'label'        => 'Author',
                 'name'         => 'ws_legal_update_author',
                 'type'         => 'user',
-                'instructions' => 'Defaults to the current user. May be changed to any Author, Editor, or Administrator.',
+                'instructions' => 'Defaults to the current user. May be changed to any author, editor, or administrator.',
                 'role'         => [ 'author', 'editor', 'administrator' ],
                 'allow_null'   => 0,
                 'multiple'     => 0,
