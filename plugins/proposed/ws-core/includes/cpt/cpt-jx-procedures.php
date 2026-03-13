@@ -1,6 +1,6 @@
 <?php
 /**
- * File: cpt-jx-procedures.php
+ * cpt-jx-procedures.php
  *
  * Registers the Jurisdiction Procedures Custom Post Type.
  *
@@ -19,12 +19,12 @@
  * ARCHITECTURE
  * ------------
  * jurisdiction (public CPT)
- *      └── jx_procedures (private dataset)
+ *      └── jx-procedures (private dataset)
  *
  * Example relationship:
  *
  *      California (jurisdiction)
- *            ↳ California Procedures (jx_procedures)
+ *            ↳ California Procedures (jx-procedures)
  *
  * CONTENT GUIDELINES
  * ------------------
@@ -39,25 +39,29 @@
  * Content should be written in clear plain English suitable for
  * non-lawyers seeking guidance.
  *
+ * @package    WhistleblowerShield
+ * @since      1.0.0
+ * @author     Whistleblower Shield
+ * @link       https://whistleblowershield.org
+ * @copyright  Copyright (c) Whistleblower Shield
+ *
  * VERSION
  * -------
- * 2.1.0  Refactored for ws-core architecture
+ * 1.0.0  Initial release.
+ * 2.1.0  Refactored for ws-core architecture. CPT slug standardized
+ *         to hyphenated convention: jx-procedures.
  */
 
-if (!defined('ABSPATH')) {
-    exit;
-}
+defined( 'ABSPATH' ) || exit;
 
-add_action('init', 'ws_register_cpt_jx_procedures');
+add_action( 'init', 'ws_register_cpt_jx_procedures' );
 
 function ws_register_cpt_jx_procedures() {
 
-    $labels = array(
-
+    $labels = [
         'name'               => 'Jurisdiction Procedures',
         'singular_name'      => 'Jurisdiction Procedures',
         'menu_name'          => 'JX Procedures',
-
         'add_new'            => 'Add Procedures',
         'add_new_item'       => 'Add New Jurisdiction Procedures',
         'edit_item'          => 'Edit Jurisdiction Procedures',
@@ -65,64 +69,40 @@ function ws_register_cpt_jx_procedures() {
         'view_item'          => 'View Procedures',
         'search_items'       => 'Search Procedures',
         'not_found'          => 'No procedures found',
-        'not_found_in_trash' => 'No procedures found in trash'
+        'not_found_in_trash' => 'No procedures found in trash',
+    ];
 
-    );
+    $args = [
 
-    $args = array(
+        'labels'              => $labels,
 
-        'labels' => $labels,
+        // ── Visibility ────────────────────────────────────────────────────
+        // Private dataset — rendered through the parent jurisdiction page.
+        // Not directly accessible to the public.
 
-        /*
-        ---------------------------------------------------------
-        Visibility
-        ---------------------------------------------------------
-        */
-
-        'public' => false,
-
-        'show_ui' => true,
-
-        'show_in_menu' => true,
-
-        'publicly_queryable' => false,
-
+        'public'              => false,
+        'show_ui'             => true,
+        'show_in_menu'        => true,
+        'publicly_queryable'  => false,
         'exclude_from_search' => true,
+        'has_archive'         => false,
 
-        'has_archive' => false,
+        // ── Editor ────────────────────────────────────────────────────────
 
-        /*
-        ---------------------------------------------------------
-        Editor
-        ---------------------------------------------------------
-        */
+        'supports'            => [ 'title', 'editor', 'revisions' ],
 
-        'supports' => array(
-            'title',
-            'editor',
-            'revisions'
-        ),
+        // ── REST ──────────────────────────────────────────────────────────
 
-        /*
-        ---------------------------------------------------------
-        REST Support
-        ---------------------------------------------------------
-        */
+        'show_in_rest'        => true,
 
-        'show_in_rest' => true,
+        // ── Admin Menu ────────────────────────────────────────────────────
 
-        /*
-        ---------------------------------------------------------
-        Admin Menu
-        ---------------------------------------------------------
-        */
+        'menu_icon'           => 'dashicons-list-view',
+        'menu_position'       => 27,
 
-        'menu_icon' => 'dashicons-list-view',
+    ];
 
-        'menu_position' => 27
-
-    );
-
-    register_post_type('jx_procedures', $args);
-
+    // Slug uses hyphen convention — must match ACF location rules
+    // and relationship field post_type references throughout ws-core.
+    register_post_type( 'jx-procedures', $args );
 }

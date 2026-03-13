@@ -102,6 +102,8 @@ if ( is_admin() ) {
     require_once WS_CORE_PATH . 'includes/admin/admin-navigation.php';
     require_once WS_CORE_PATH . 'includes/admin/admin-columns.php';
     require_once WS_CORE_PATH . 'includes/admin/admin-hooks.php';
+    require_once WS_CORE_PATH . 'includes/admin/admin-audit-trail.php';
+    require_once WS_CORE_PATH . 'includes/admin/admin-relationships.php';
     require_once WS_CORE_PATH . 'includes/admin/jurisdiction-dashboard.php';
 }
 

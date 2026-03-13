@@ -1,6 +1,6 @@
 <?php
 /**
- * File: cpt-jx-resources.php
+ * cpt-jx-resources.php
  *
  * Registers the Jurisdiction Resources Custom Post Type.
  *
@@ -27,12 +27,12 @@
  * ARCHITECTURE
  * ------------
  * jurisdiction (public CPT)
- *      └── jx_resources (private dataset)
+ *      └── jx-resources (private dataset)
  *
  * Example relationship:
  *
  *      California (jurisdiction)
- *            ↳ California Resources (jx_resources)
+ *            ↳ California Resources (jx-resources)
  *
  * CONTENT GUIDELINES
  * ------------------
@@ -45,25 +45,29 @@
  *
  * External links should be verified periodically to ensure accuracy.
  *
+ * @package    WhistleblowerShield
+ * @since      1.0.0
+ * @author     Whistleblower Shield
+ * @link       https://whistleblowershield.org
+ * @copyright  Copyright (c) Whistleblower Shield
+ *
  * VERSION
  * -------
- * 2.1.0  Refactored for ws-core architecture
+ * 1.0.0  Initial release.
+ * 2.1.0  Refactored for ws-core architecture. CPT slug standardized
+ *         to hyphenated convention: jx-resources.
  */
 
-if (!defined('ABSPATH')) {
-    exit;
-}
+defined( 'ABSPATH' ) || exit;
 
-add_action('init', 'ws_register_cpt_jx_resources');
+add_action( 'init', 'ws_register_cpt_jx_resources' );
 
 function ws_register_cpt_jx_resources() {
 
-    $labels = array(
-
+    $labels = [
         'name'               => 'Jurisdiction Resources',
         'singular_name'      => 'Jurisdiction Resources',
         'menu_name'          => 'JX Resources',
-
         'add_new'            => 'Add Resources',
         'add_new_item'       => 'Add New Jurisdiction Resources',
         'edit_item'          => 'Edit Jurisdiction Resources',
@@ -71,64 +75,40 @@ function ws_register_cpt_jx_resources() {
         'view_item'          => 'View Resources',
         'search_items'       => 'Search Resources',
         'not_found'          => 'No resources found',
-        'not_found_in_trash' => 'No resources found in trash'
+        'not_found_in_trash' => 'No resources found in trash',
+    ];
 
-    );
+    $args = [
 
-    $args = array(
+        'labels'              => $labels,
 
-        'labels' => $labels,
+        // ── Visibility ────────────────────────────────────────────────────
+        // Private dataset — rendered through the parent jurisdiction page.
+        // Not directly accessible to the public.
 
-        /*
-        ---------------------------------------------------------
-        Visibility
-        ---------------------------------------------------------
-        */
-
-        'public' => false,
-
-        'show_ui' => true,
-
-        'show_in_menu' => true,
-
-        'publicly_queryable' => false,
-
+        'public'              => false,
+        'show_ui'             => true,
+        'show_in_menu'        => true,
+        'publicly_queryable'  => false,
         'exclude_from_search' => true,
+        'has_archive'         => false,
 
-        'has_archive' => false,
+        // ── Editor ────────────────────────────────────────────────────────
 
-        /*
-        ---------------------------------------------------------
-        Editor
-        ---------------------------------------------------------
-        */
+        'supports'            => [ 'title', 'editor', 'revisions' ],
 
-        'supports' => array(
-            'title',
-            'editor',
-            'revisions'
-        ),
+        // ── REST ──────────────────────────────────────────────────────────
 
-        /*
-        ---------------------------------------------------------
-        REST Support
-        ---------------------------------------------------------
-        */
+        'show_in_rest'        => true,
 
-        'show_in_rest' => true,
+        // ── Admin Menu ────────────────────────────────────────────────────
 
-        /*
-        ---------------------------------------------------------
-        Admin Menu
-        ---------------------------------------------------------
-        */
+        'menu_icon'           => 'dashicons-admin-links',
+        'menu_position'       => 29,
 
-        'menu_icon' => 'dashicons-admin-links',
+    ];
 
-        'menu_position' => 29
-
-    );
-
-    register_post_type('jx_resources', $args);
-
+    // Slug uses hyphen convention — must match ACF location rules
+    // and relationship field post_type references throughout ws-core.
+    register_post_type( 'jx-resources', $args );
 }

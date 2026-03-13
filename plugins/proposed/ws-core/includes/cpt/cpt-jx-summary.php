@@ -1,6 +1,6 @@
 <?php
 /**
- * File: cpt-jx-summary.php
+ * cpt-jx-summary.php
  *
  * Registers the Jurisdiction Summary Custom Post Type.
  *
@@ -18,12 +18,12 @@
  * ARCHITECTURE
  * ------------
  * jurisdiction (public CPT)
- *      └── jx_summary (private dataset)
+ *      └── jx-summary (private dataset)
  *
  * Example relationship:
  *
  *      California (jurisdiction)
- *            ↳ California Summary (jx_summary)
+ *            ↳ California Summary (jx-summary)
  *
  * CONTENT GUIDELINES
  * ------------------
@@ -39,25 +39,29 @@
  *
  * The summary should not attempt to replicate statutory text.
  *
+ * @package    WhistleblowerShield
+ * @since      1.0.0
+ * @author     Whistleblower Shield
+ * @link       https://whistleblowershield.org
+ * @copyright  Copyright (c) Whistleblower Shield
+ *
  * VERSION
  * -------
- * 2.1.0  Refactored for ws-core architecture
+ * 1.0.0  Initial release.
+ * 2.1.0  Refactored for ws-core architecture. CPT slug standardized
+ *         to hyphenated convention: jx-summary.
  */
 
-if (!defined('ABSPATH')) {
-    exit;
-}
+defined( 'ABSPATH' ) || exit;
 
-add_action('init', 'ws_register_cpt_jx_summary');
+add_action( 'init', 'ws_register_cpt_jx_summary' );
 
 function ws_register_cpt_jx_summary() {
 
-    $labels = array(
-
+    $labels = [
         'name'               => 'Jurisdiction Summaries',
         'singular_name'      => 'Jurisdiction Summary',
         'menu_name'          => 'JX Summaries',
-
         'add_new'            => 'Add Summary',
         'add_new_item'       => 'Add New Jurisdiction Summary',
         'edit_item'          => 'Edit Jurisdiction Summary',
@@ -65,64 +69,40 @@ function ws_register_cpt_jx_summary() {
         'view_item'          => 'View Summary',
         'search_items'       => 'Search Summaries',
         'not_found'          => 'No summaries found',
-        'not_found_in_trash' => 'No summaries found in trash'
+        'not_found_in_trash' => 'No summaries found in trash',
+    ];
 
-    );
+    $args = [
 
-    $args = array(
+        'labels'              => $labels,
 
-        'labels' => $labels,
+        // ── Visibility ────────────────────────────────────────────────────
+        // Private dataset — rendered through the parent jurisdiction page.
+        // Not directly accessible to the public.
 
-        /*
-        ---------------------------------------------------------
-        Visibility
-        ---------------------------------------------------------
-        */
-
-        'public' => false,
-
-        'show_ui' => true,
-
-        'show_in_menu' => true,
-
-        'publicly_queryable' => false,
-
+        'public'              => false,
+        'show_ui'             => true,
+        'show_in_menu'        => true,
+        'publicly_queryable'  => false,
         'exclude_from_search' => true,
+        'has_archive'         => false,
 
-        'has_archive' => false,
+        // ── Editor ────────────────────────────────────────────────────────
 
-        /*
-        ---------------------------------------------------------
-        Editor
-        ---------------------------------------------------------
-        */
+        'supports'            => [ 'title', 'editor', 'revisions' ],
 
-        'supports' => array(
-            'title',
-            'editor',
-            'revisions'
-        ),
+        // ── REST ──────────────────────────────────────────────────────────
 
-        /*
-        ---------------------------------------------------------
-        REST Support
-        ---------------------------------------------------------
-        */
+        'show_in_rest'        => true,
 
-        'show_in_rest' => true,
+        // ── Admin Menu ────────────────────────────────────────────────────
 
-        /*
-        ---------------------------------------------------------
-        Menu Placement
-        ---------------------------------------------------------
-        */
+        'menu_icon'           => 'dashicons-media-text',
+        'menu_position'       => 26,
 
-        'menu_icon' => 'dashicons-media-text',
+    ];
 
-        'menu_position' => 26
-
-    );
-
-    register_post_type('jx_summary', $args);
-
+    // Slug uses hyphen convention — must match ACF location rules
+    // and relationship field post_type references throughout ws-core.
+    register_post_type( 'jx-summary', $args );
 }
