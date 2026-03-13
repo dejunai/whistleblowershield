@@ -1,4 +1,7 @@
-﻿# WhistleblowerShield
+$readme = "README.md"
+
+$content = @"
+# WhistleblowerShield
 
 WhistleblowerShield is a public-interest project focused on helping workers understand whistleblower protections and navigate situations involving retaliation or reporting misconduct.
 
@@ -165,3 +168,8 @@ Laws vary by jurisdiction and individual situations differ. Individuals facing l
 ---
 
 End of README.
+"@
+
+Set-Content -Path $readme -Value $content -Encoding UTF8
+
+Write-Host "README.md generated successfully."
