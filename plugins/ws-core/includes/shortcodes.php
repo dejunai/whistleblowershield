@@ -1,4 +1,4 @@
-<?php
+..<?php
 /**
  * shortcodes.php
  *
@@ -106,6 +106,27 @@ function ws_shortcode_nla_disclaimer_notice() {
         . esc_html( $notice_text )
         . '</div>';
 }
+if ( ! function_exists( 'ws_get_government_label' ) ) {
+    function ws_get_government_label( $pid ) {
+        $choices_gl = [
+            'governor' => 'Office of the Governor',
+            'mayor'    => 'Office of the Mayor',
+        ];
+        $key_gl        = get_field( 'ws_head_of_government_label', $pid ) ?: 'governor';
+        return $choices_gl[$key_gl] ?? 'Office of the Governor';
+    }
+}
+	function ws_get_legal_authority_label( $pid ) {
+    $choices_lal = [
+		'attorney'   => 'Office of the Attorney General',
+		'inspector'  => 'D.C. Office of the Inspector General',
+		'secretary'  => 'Office of the Secretary of Justice',
+		'special'    => 'U.S. Office of Special Counsel',
+	];
+    $key_lal         = get_field( 'ws_legal_authority_label', $pid ) ?: 'attorney';
+    return $choices_lal[$key_lal] ?? 'Office of the Attorney General';
+	}
+
 
 // ── [ws_jurisdiction_header] ──────────────────────────────────────────────────
 
@@ -135,29 +156,11 @@ function ws_shortcode_jurisdiction_header( $atts ) {
     $portal_label   = get_field( 'ws_gov_portal_label', $pid ) ?: 'Official Government Portal';
     $head_url   	= get_field( 'ws_head_of_government_url', $pid );
 	//
-	function get_government_label( $pid ) {
-    $choices_gl = [
-        'governor' => 'Office of the Governor',
-        'mayor'    => 'Office of the Mayor',
-    ];
-    $key_gl        = get_field( 'ws_head_of_government_label', $pid ) ?: 'governor';
-    return $choices_gl[$key_gl] ?? 'Office of the Governor';
-	}
-	$head_label     = get_government_label( $pid );
+	$head_label     = ws_get_government_label( $pid );
 	//
 	$legal_url      = get_field( 'ws_legal_authority_url', $pid );
     //
-	function get_legal_authority_label( $pid ) {
-    $choices_lal = [
-		'attorney'   => 'Office of the Attorney General',
-		'inspector'  => 'D.C. Office of the Inspector General',
-		'secretary'  => 'Office of the Secretary of Justice',
-		'special'    => 'U.S. Office of Special Counsel',
-	];
-    $key_lal         = get_field( 'ws_legal_authority_label', $pid ) ?: 'attorney';
-    return $choices_lal[$key_lal] ?? 'Office of the Attorney General';
-	}
-	$legal_label    = get_legal_authority_label( $pid );
+	$legal_label    = ws_get_legal_authority_label( $pid );
 	//
 	
 
