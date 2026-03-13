@@ -144,129 +144,194 @@ Outputs the jurisdiction header block including:
 Data comes from ACF fields attached to the jurisdiction
 post itself.
 */
-
-function ws_render_jx_header($post_id)
-{
-
-    $title = get_the_title($post_id);
-
-    $type = get_field('ws_jx_type', $post_id);
-
-    $flag = get_field('ws_jx_flag_image', $post_id);
-
-    $flag_attribution = get_field('ws_jx_flag_attribution', $post_id);
-
-    $head_label = get_field('ws_jx_head_label', $post_id);
-    $head_url = get_field('ws_jx_head_url', $post_id);
-
-    $legal_label = get_field('ws_jx_legal_label', $post_id);
-    $legal_url = get_field('ws_jx_legal_url', $post_id);
-
-    $leg_label = get_field('ws_jx_leg_label', $post_id);
-    $leg_url = get_field('ws_jx_leg_url', $post_id);
-
-
-    ob_start();
-    ?>
-
-    <header class="ws-jx-header">
-
-        <div class="ws-jx-header-main">
-
-            <?php if ($flag) : ?>
-
-                <div class="ws-jx-flag">
-
-                    <img src="<?php echo esc_url($flag['url']); ?>"
-                         alt="<?php echo esc_attr($title); ?> flag">
-
-                </div>
-
-            <?php endif; ?>
-
-
-            <div class="ws-jx-title-block">
-
-                <h1 class="ws-jx-title">
-                    <?php echo esc_html($title); ?>
-                </h1>
-
-                <?php if ($type) : ?>
-
-                    <div class="ws-jx-type">
-                        <?php echo esc_html($type); ?>
-                    </div>
-
-                <?php endif; ?>
-
+/**
+ * Render the Primary Jurisdiction Header
+ * Replaces the logic found in legacy [ws_jurisdiction_header]
+ *
+ * Render the Primary Jurisdiction Header
+ * Layout: H1 Title -> [Flag Section] [Leadership Box]
+ */
+function ws_render_jx_header($data) {
+    ob_start(); ?>
+    <header class="ws-jx-header-v2">
+        <h1 class="ws-jx-title"><?php echo esc_html($data['jx_name']); ?></h1>
+        <div class="ws-jx-header-split">
+            <div class="ws-jx-flag-column">
+                <?php echo ws_render_jx_flag($data['flag_data']); ?>
             </div>
-
-        </div>
-
-
-        <div class="ws-jx-authorities">
-
-            <?php if ($head_url) : ?>
-
-                <div class="ws-jx-authority">
-
-                    <strong><?php echo esc_html($head_label); ?>:</strong>
-
-                    <a href="<?php echo esc_url($head_url); ?>" target="_blank" rel="noopener">
-                        Official Website
-                    </a>
-
-                </div>
-
-            <?php endif; ?>
-
-
-            <?php if ($legal_url) : ?>
-
-                <div class="ws-jx-authority">
-
-                    <strong><?php echo esc_html($legal_label); ?>:</strong>
-
-                    <a href="<?php echo esc_url($legal_url); ?>" target="_blank" rel="noopener">
-                        Official Website
-                    </a>
-
-                </div>
-
-            <?php endif; ?>
-
-
-            <?php if ($leg_url) : ?>
-
-                <div class="ws-jx-authority">
-
-                    <strong><?php echo esc_html($leg_label); ?>:</strong>
-
-                    <a href="<?php echo esc_url($leg_url); ?>" target="_blank" rel="noopener">
-                        Legislature Website
-                    </a>
-
-                </div>
-
-            <?php endif; ?>
-
-        </div>
-
-
-        <?php if ($flag_attribution) : ?>
-
-            <div class="ws-jx-flag-attribution">
-
-                <?php echo wp_kses_post($flag_attribution); ?>
-
+            <div class="ws-jx-gov-column">
+                <?php echo ws_render_jx_gov_offices($data['gov_data']); ?>
             </div>
-
-        <?php endif; ?>
-
+        </div>
     </header>
-
     <?php
-
     return ob_get_clean();
+}
 
+/**
+ * Render individual Flag component
+ * With Attribution and License
+ */
+function ws_render_jx_flag($flag_data) {
+    if (empty($flag_data['url'])) return '';
+    ob_start(); ?>
+    <div class="ws-jx-flag-wrap">
+        <img src="<?php echo esc_url($flag_data['url']); ?>" class="ws-jx-flag-img">
+        <div class="ws-jx-attribution">
+            <a href="<?php echo esc_url($flag_data['source_url']); ?>" 
+               target="_blank" 
+               class="ws-term-highlight" 
+               data-tooltip="<?php echo esc_attr($flag_data['attr_str'] . ' — Click to open on Wikimedia Commons'); ?>">
+               Attribution
+            </a>
+            <?php if (!empty($flag_data['license'])) : ?>
+                <span> — <?php echo esc_html($flag_data['license']); ?></span>
+            <?php endif; ?>
+        </div>
+    </div>
+    <?php
+    return ob_get_clean();
+}
+
+/**
+ * Render the Leadership Offices Box
+ */
+function ws_render_jx_gov_offices($gov_data) {
+    if (empty($gov_data['links'])) return '';
+    ob_start(); ?>
+    <div class="ws-jx-gov-offices-box">
+        <h3><?php echo esc_html($gov_data['box_label']); ?></h3>
+        <div class="ws-gov-links-list">
+            <?php foreach ($gov_data['links'] as $link) : 
+                if (!empty($link['url'])) : ?>
+                    <div class="ws-gov-link-item">
+                        <a href="<?php echo esc_url($link['url']); ?>" target="_blank" rel="noopener">
+                            <?php echo esc_html($link['label']); ?>
+                        </a>
+                    </div>
+                <?php endif;
+            endforeach; ?>
+        </div>
+    </div>
+    <?php
+    return ob_get_clean();
+}
+/**
+ * Render the Filterable Jurisdiction Index with Conditional Tabs
+ */
+function ws_render_jurisdiction_index($data) {
+    $items  = $data['items'];
+    $counts = $data['counts'];
+
+    if (empty($items)) return '<p>No jurisdictions found.</p>';
+
+    $type_labels = [
+        'all'       => 'All',
+        'state'     => 'States',
+        'territory' => 'Territories',
+        'district'  => 'Districts',
+        'federal'   => 'Federal'
+    ];
+
+    ob_start(); ?>
+    <div class="ws-jx-index-container">
+        <nav class="ws-jx-filter-nav">
+            <?php foreach ($type_labels as $key => $label) : 
+                // Skip rendering the button if the count is zero
+                if (empty($counts[$key])) continue; 
+                ?>
+                <button class="ws-jx-filter-btn <?php echo $key === 'all' ? 'ws-active' : ''; ?>" 
+                        data-filter="<?php echo esc_attr($key); ?>">
+                    <?php echo esc_html($label); ?> 
+                    <span class="ws-jx-count">(<?php echo intval($counts[$key]); ?>)</span>
+                </button>
+            <?php endforeach; ?>
+        </nav>
+
+        <div class="ws-jx-grid" style="display: flex; flex-wrap: wrap; gap: 15px;">
+            <?php foreach ($items as $jx) : ?>
+                <a href="<?php echo esc_url($jx['url']); ?>" 
+                   class="ws-jx-card" 
+                   data-type="<?php echo esc_attr($jx['type']); ?>"
+                   style="display: flex; flex-direction: column; padding: 15px; border: 1px solid #ddd;">
+                    <span class="ws-jx-card-code" style="font-weight: bold;"><?php echo esc_html($jx['code']); ?></span>
+                    <span class="ws-jx-card-name"><?php echo esc_html($jx['name']); ?></span>
+                </a>
+            <?php endforeach; ?>
+        </div>
+    </div>
+
+    <script>
+    (function() {
+        const buttons = document.querySelectorAll('.ws-jx-filter-btn');
+        const cards = document.querySelectorAll('.ws-jx-card');
+
+        buttons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const filter = btn.dataset.filter;
+
+                buttons.forEach(b => b.classList.remove('ws-active'));
+                btn.classList.add('ws-active');
+
+                cards.forEach(card => {
+                    const match = (filter === 'all' || card.dataset.type === filter);
+                    card.style.display = match ? 'flex' : 'none';
+                });
+            });
+        });
+    })();
+    </script>
+    <?php
+    return ob_get_clean();
+}
+/**
+ * [NEW] Render a single Jurisdiction Card for the Index
+ */
+function ws_render_jx_index_card($name, $code, $url, $type) {
+    ob_start(); ?>
+    <a href="<?php echo esc_url($url); ?>" class="ws-jx-card" data-type="<?php echo esc_attr($type); ?>">
+        <div class="ws-jx-card-inner">
+            <span class="ws-jx-card-code"><?php echo esc_html($code); ?></span>
+            <span class="ws-jx-card-name"><?php echo esc_html($name); ?></span>
+        </div>
+    </a>
+    <?php
+    return ob_get_clean();
+}
+
+/**
+ * [NEW] Render the Legal Review Status Badge
+ */
+function ws_render_jx_review_status($date) {
+    if (empty($date)) return '';
+    ob_start(); ?>
+    <div class="ws-review-status">
+        <span class="ws-review-label">Last Legal Review:</span>
+        <span class="ws-review-date"><?php echo esc_html($date); ?></span>
+    </div>
+    <?php
+    return ob_get_clean();
+}
+function ws_render_nla_disclaimer($text) {
+    return '<div class="ws-summary-notice"><strong>NOTICE:</strong> ' . wp_kses_post($text) . '</div>';
+}
+
+
+/**
+ * Render the Summary Content Wrapper
+ */
+function ws_render_jx_summary_section($content, $review_html = '') {
+    ob_start(); ?>
+    <section class="ws-jx-summary-container">
+        <div class="ws-jx-summary-content">
+            <?php echo $content; // Already passed through the_content ?>
+        </div>
+        <?php if ($review_html) : ?>
+            <footer class="ws-jx-summary-footer">
+                <?php echo $review_html; ?>
+            </footer>
+        <?php endif; ?>
+    </section>
+    <?php
+    return ob_get_clean();
 }

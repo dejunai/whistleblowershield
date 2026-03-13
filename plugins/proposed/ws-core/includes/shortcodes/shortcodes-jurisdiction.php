@@ -57,7 +57,10 @@
  * -------
  * 2.1.0  Refactored shortcode layer
  */
-
+/**
+ * File: shortcodes-jurisdiction.php
+ * Updated: 2.1.3
+ */
 if (!defined('ABSPATH')) {
     exit;
 }
@@ -67,56 +70,71 @@ if (!defined('ABSPATH')) {
 ---------------------------------------------------------
 Jurisdiction Header
 ---------------------------------------------------------
-*/
+/**
+ * [ws_jx_header]
+ * Main Jurisdiction Header Shortcode
+ * [ws_jx_header jx="CA"]
+ */
+add_shortcode('ws_jx_header', function($atts) {
+    $atts = shortcode_atts(['jx' => ''], $atts);
+    $jx_data = ws_get_jurisdiction_data($atts['jx']);
+    
+    if (!$jx_data) return '';
 
-add_shortcode('ws_jx_header', 'ws_shortcode_jx_header');
+    // Determine Box Label based on Type
+    $labels = [
+        'state'     => 'State Leadership Offices',
+        'territory' => 'Territory Leadership Offices',
+        'district'  => 'District Leadership Offices',
+        'federal'   => 'Federal Offices'
+    ];
+    $box_label = $labels[$jx_data['type']] ?? 'Official Offices';
 
-function ws_shortcode_jx_header()
-{
+    // Build the render array
+    $render_data = [
+        'jx_name'   => $jx_data['name'],
+        'flag_data' => [
+            'jx_name'    => $jx_data['name'],
+            'url'        => $jx_data['flag']['url'],
+            'source_url' => $jx_data['flag']['source_url'],
+            'attr_str'   => $jx_data['flag']['attr_str'],
+            'license'    => $jx_data['flag']['license'],
+        ],
+        'gov_data' => [
+            'box_label' => $box_label,
+            'links'     => [
+                ['url' => $jx_data['gov']['portal_url'],       'label' => $jx_data['gov']['portal_label'] ?: 'Government Portal'],
+                ['url' => $jx_data['gov']['head_gov_url'],     'label' => $jx_data['gov']['head_gov_label'] ?: 'Head of Government'],
+                ['url' => $jx_data['gov']['legal_auth_url'],   'label' => $jx_data['gov']['legal_auth_label'] ?: 'Attorney General'],
+                ['url' => $jx_data['gov']['legislature_url'],  'label' => $jx_data['gov']['legislature_label'] ?: 'Legislature'],
+            ]
+        ]
+    ];
 
-    global $post;
-
-    if (!$post) {
-        return '';
-    }
-
-    return ws_render_jx_header($post->ID);
-
-}
-
-
-
+    return ws_render_jx_header($render_data);
+});
 /*
 ---------------------------------------------------------
 Summary
 ---------------------------------------------------------
+*
+* [ws_jx_summary]
+* Renders the content of the linked Summary CPT.
 */
-
-add_shortcode('ws_jx_summary', 'ws_shortcode_jx_summary');
-
-function ws_shortcode_jx_summary()
-{
-
+add_shortcode('ws_jx_summary', function() {
     global $post;
+    $summary_post = ws_get_jx_summary($post->ID);
 
-    if (!$post) {
-        return '';
-    }
+    if (!$summary_post) return '';
 
-    $summary = ws_get_jx_summary($post->ID);
+    // Process content (runs other shortcodes/filters inside the summary)
+    $content = apply_filters('the_content', $summary_post->post_content);
+    
+    // Get the review status via the existing shortcode logic
+    $review_html = do_shortcode('[ws_jx_review_status]');
 
-    if (!$summary) {
-        return '';
-    }
-
-    $content = apply_filters('the_content', $summary->post_content);
-
-    return ws_render_section(
-        'Summary',
-        $content
-    );
-
-}
+    return ws_render_jx_summary_section($content, $review_html);
+});
 
 
 
@@ -219,3 +237,46 @@ function ws_shortcode_jx_resources()
     );
 
 }
+
+/**
+ * [ws_jurisdiction_index]
+ * Renders the alphabetical grid with JS filtering tabs.
+ */
+add_shortcode('ws_jurisdiction_index', function() {
+    $data = ws_get_jurisdiction_index_data();
+    return ws_render_jurisdiction_index($data);
+});
+
+/**
+ * [ws_jx_review_status]
+ * Displays the "Last Reviewed" date from the Summary addendum.
+ */
+add_shortcode('ws_jx_review_status', function() {
+    global $post;
+    $summary = ws_get_jx_summary($post->ID);
+    
+    if (!$summary) return '';
+
+    $last_review = get_field('ws_summary_last_review', $summary->ID);
+    
+    if (!$last_review) return '';
+
+    return '<div class="ws-review-status">Last Legal Review: ' . esc_html($last_review) . '</div>';
+});
+/**
+ * Standalone Flag Shortcode
+ */
+add_shortcode('ws_jx_flag', function($atts) {
+    global $post;
+    if (!$post) return '';
+
+    $data = [
+        'jx_name'    => get_the_title($post->ID),
+        'url'        => get_field('ws_jx_flag_image', $post->ID),
+        'source_url' => get_field('ws_jx_flag_source_url', $post->ID),
+        'attr_str'   => get_field('ws_jx_flag_attribution', $post->ID),
+        'license'    => get_field('ws_jx_flag_license', $post->ID),
+    ];
+
+    return ws_render_jx_flag($data);
+});

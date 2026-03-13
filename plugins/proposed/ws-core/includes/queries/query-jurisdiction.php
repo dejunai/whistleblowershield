@@ -75,7 +75,69 @@ function ws_get_jurisdiction_by_code($jx_code)
     return null;
 }
 
+/**
+ * Find a Jurisdiction ID by its Postal Code (e.g., 'CA', 'TX')
+ */
+function ws_get_id_by_code($jx_code) {
+    if (empty($jx_code)) return false;
+    
+    $jx_code = strtoupper(sanitize_text_field($jx_code));
+    $cache_key = 'ws_id_for_' . $jx_code;
+    $post_id = get_transient($cache_key);
 
+    if (false === $post_id) {
+        $query = new WP_Query([
+            'post_type'      => 'jurisdiction',
+            'meta_key'       => 'jx_code',
+            'meta_value'     => $jx_code,
+            'posts_per_page' => 1,
+            'fields'         => 'ids',
+            'no_found_rows'  => true,
+        ]);
+        
+        $post_id = !empty($query->posts) ? $query->posts[0] : 0;
+        set_transient($cache_key, $post_id, DAY_IN_SECONDS);
+    }
+
+    return $post_id ?: false;
+}
+
+/**
+ * Master Data Fetcher
+ */
+function ws_get_jurisdiction_data($input = null) {
+    if (!$input) {
+        global $post;
+        $post_id = $post->ID ?? 0;
+    } else {
+        $post_id = is_numeric($input) ? $input : ws_get_id_by_code($input);
+    }
+
+    if (!$post_id || get_post_type($post_id) !== 'jurisdiction') return false;
+
+    return [
+        'id'   => $post_id,
+        'name' => get_the_title($post_id),
+        'type' => get_field('ws_jurisdiction_type', $post_id),
+        'code' => get_field('jx_code', $post_id),
+        'flag' => [
+            'url'        => get_field('ws_jx_flag_image', $post_id),
+            'source_url' => get_field('ws_jx_flag_source_url', $post_id),
+            'attr_str'   => get_field('ws_jx_flag_attribution', $post_id),
+            'license'    => get_field('ws_jx_flag_license', $post_id),
+        ],
+        'gov' => [
+            'portal_url'       => get_field('ws_gov_portal_url', $post_id),
+            'portal_label'     => get_field('ws_gov_portal_label', $post_id),
+            'head_gov_url'     => get_field('ws_head_of_government_url', $post_id),
+            'head_gov_label'   => get_field('ws_head_of_government_label', $post_id),
+            'legal_auth_url'   => get_field('ws_legal_authority_url', $post_id),
+            'legal_auth_label' => get_field('ws_legal_authority_label', $post_id),
+            'legislature_url'  => get_field('ws_legislature_url', $post_id),
+            'legislature_label'=> get_field('ws_legislature_label', $post_id), // UPDATED KEY
+        ]
+    ];
+}
 /*
 ---------------------------------------------------------
 Get Summary Dataset
@@ -138,16 +200,87 @@ Get All Jurisdictions
 ---------------------------------------------------------
 */
 
-function ws_get_all_jurisdictions()
-{
+function ws_get_all_jurisdictions() {
+    $cache_key = 'ws_all_jurisdictions_cache';
+    $jurisdictions = get_transient($cache_key);
 
-    $query = new WP_Query(array(
-        'post_type' => 'jurisdiction',
-        'posts_per_page' => -1,
-        'orderby' => 'title',
-        'order' => 'ASC'
-    ));
+    if (false === $jurisdictions) {
+        $query = new WP_Query([
+            'post_type'      => 'jurisdiction',
+            'posts_per_page' => -1,
+            'orderby'        => 'title',
+            'order'          => 'ASC',
+            'no_found_rows'  => true, // Performance boost: skip counting total rows
+        ]);
+        $jurisdictions = $query->posts;
+        
+        // Cache for 12 hours
+        set_transient($cache_key, $jurisdictions, 12 * HOUR_IN_SECONDS);
+    }
 
-    return $query->posts;
+    return $jurisdictions;
+}
 
+// Add this to clear cache when a Jurisdiction is updated
+add_action('save_post_jurisdiction', function() {
+    delete_transient('ws_all_jurisdictions_cache');
+});
+/**
+ * Retrieve a list of all jurisdictions for the index.
+ * Returns an array of data objects.
+ */
+/**
+ * Retrieve a list of all jurisdictions and their counts by type.
+ */
+function ws_get_jurisdiction_index_data() {
+    $cache_key = 'ws_jx_index_cache';
+    $cached = get_transient($cache_key);
+
+    if (false === $cached) {
+        $query = new WP_Query([
+            'post_type'      => 'jurisdiction',
+            'posts_per_page' => -1,
+            'orderby'        => 'title',
+            'order'          => 'ASC',
+            'no_found_rows'  => true,
+        ]);
+
+        $index_items = [];
+        $counts = [
+            'all'       => 0,
+            'state'     => 0,
+            'territory' => 0,
+            'district'  => 0,
+            'federal'   => 0
+        ];
+
+        if ($query->have_posts()) {
+            foreach ($query->posts as $post) {
+                $type = get_field('ws_jurisdiction_type', $post->ID) ?: 'state';
+                $code = get_field('jx_code', $post->ID);
+                
+                $index_items[] = [
+                    'name' => get_the_title($post->ID),
+                    'code' => $code,
+                    'type' => $type,
+                    'url'  => get_permalink($post->ID)
+                ];
+
+                // Increment Counts
+                $counts['all']++;
+                if (isset($counts[$type])) {
+                    $counts[$type]++;
+                }
+            }
+        }
+
+        $cached = [
+            'items'  => $index_items,
+            'counts' => $counts
+        ];
+
+        set_transient($cache_key, $cached, DAY_IN_SECONDS);
+    }
+
+    return $cached;
 }

@@ -96,7 +96,7 @@ function ws_register_acf_jurisdiction_fields() {
                 'label' => 'Jurisdiction Code',
                 'name' => 'jx_code',
                 'type' => 'text',
-                'instructions' => 'Two-letter jurisdiction identifier (example: CA, TX, NY, US).',
+                'instructions' => 'Use Two-Letter Postal code (example: CA, TX, NY, US).',
                 'required' => 1,
                 'maxlength' => 2,
                 'wrapper' => array(
@@ -107,7 +107,7 @@ function ws_register_acf_jurisdiction_fields() {
             array(
                 'key' => 'field_ws_jx_type',
                 'label' => 'Jurisdiction Type',
-                'name' => 'ws_jx_type',
+                'name' => 'ws_jurisdiction_type',
                 'type' => 'select',
                 'choices' => array(
                     'state' => 'U.S. State',
@@ -115,6 +115,7 @@ function ws_register_acf_jurisdiction_fields() {
                     'district' => 'District',
                     'territory' => 'U.S. Territory'
                 ),
+                'default_value' => 'state',
                 'required' => 1,
                 'wrapper' => array(
                     'width' => '30'
@@ -133,7 +134,7 @@ function ws_register_acf_jurisdiction_fields() {
                 'name' => 'ws_jx_flag',
                 'type' => 'image',
                 'return_format' => 'array',
-                'preview_size' => 'medium',
+                'preview_size' => 'thumbnail',
                 'library' => 'all'
             ),
 
@@ -145,9 +146,9 @@ function ws_register_acf_jurisdiction_fields() {
             ),
 
             array(
-                'key' => 'field_ws_jx_flag_source',
-                'label' => 'Flag Source URL',
-                'name' => 'ws_jx_flag_source',
+                'key' => 'field_ws_jx_flag_attribution_url',
+                'label' => 'Flag Attribution URL',
+                'name' => 'ws_jx_flag_attribution_url',
                 'type' => 'url'
             ),
 
@@ -156,6 +157,7 @@ function ws_register_acf_jurisdiction_fields() {
                 'label' => 'Flag License',
                 'name' => 'ws_jx_flag_license',
                 'type' => 'text'
+				'default_value' => 'Public Domain',
             ),
 
             /*
@@ -176,7 +178,7 @@ function ws_register_acf_jurisdiction_fields() {
                 'label' => 'Government Portal Label',
                 'name' => 'ws_gov_portal_label',
                 'type' => 'text',
-                'placeholder' => 'Official Government Website'
+                'default' => 'Official Government Portal'
             ),
 
             /*
@@ -188,16 +190,20 @@ function ws_register_acf_jurisdiction_fields() {
             array(
                 'key' => 'field_ws_head_url',
                 'label' => 'Head of Government URL',
-                'name' => 'ws_head_url',
+                'name' => 'ws_head_of_government_url',
                 'type' => 'url'
             ),
 
             array(
                 'key' => 'field_ws_head_label',
                 'label' => 'Head of Government Label',
-                'name' => 'ws_head_label',
-                'type' => 'text',
-                'placeholder' => 'Governor / Mayor'
+                'name' => 'ws_head_of_government_label',
+                'type' => 'select',
+                'choices'      => [
+					'governor' => 'Office of the Governor',
+					'mayor'    => 'Office of the Mayor',
+				],
+				'default_value' => 'governor',
             ),
 
             /*
@@ -217,8 +223,14 @@ function ws_register_acf_jurisdiction_fields() {
                 'key' => 'field_ws_legal_authority_label',
                 'label' => 'Legal Authority Label',
                 'name' => 'ws_legal_authority_label',
-                'type' => 'text',
-                'placeholder' => 'Attorney General / Secretary of Justice'
+                'type' => 'select',
+                'choices'      => [
+					'attorney'   => 'Office of the Attorney General',
+					'inspector'  => 'D.C. Office of the Inspector General',
+					'secretary'  => 'Office of the Secretary of Justice',
+					'special'    => 'U.S. Office of Special Counsel',
+				],
+				'default_value' => 'attorney',
             ),
 
             /*
@@ -238,8 +250,18 @@ function ws_register_acf_jurisdiction_fields() {
                 'key' => 'field_ws_legislature_label',
                 'label' => 'Legislature Label',
                 'name' => 'ws_legislature_label',
-                'type' => 'text',
-                'placeholder' => 'State Legislature'
+                'type' => 'select',
+                'choices'      => [
+					'state'   => 'State Legislature',
+					'federal'  => 'United States Congress',
+					'district'  => 'Council of the District of Columbia',
+					'guam'    => 'Guam Legislature',
+					'puerto-rico'   => 'Legislative Assembly',
+					'usvi'  => 'Legislature of the Virgin Islands',
+					'asamoa'  => 'American Samoa Fono',
+					'nmic'    => 'Northern Mariana Islands Commonwealth Legislature',
+				],
+				'default_value' => 'state',
             ),
 
             /*

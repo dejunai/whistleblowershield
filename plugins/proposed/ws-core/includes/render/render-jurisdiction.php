@@ -96,7 +96,12 @@
  * -------
  * 2.1.0  Jurisdiction auto-render architecture introduced
  */
-
+/**
+ * File: render-jurisdiction.php
+ * Updated: 2.1.2
+ * Added: is_main_query() and in_the_loop() safeguards.
+ */
+ 
 if (!defined('ABSPATH')) {
     exit;
 }
@@ -120,93 +125,85 @@ Main Jurisdiction Renderer
 ---------------------------------------------------------
 */
 
-add_filter('the_content', 'ws_render_jurisdiction_content');
+add_filter( 'the_content', 'ws_handle_jurisdiction_render' );
 
-function ws_render_jurisdiction_content($content)
-{
-
-    /*
-    Ensure this only runs on Jurisdiction pages
-    */
-
-    if (!is_singular('jurisdiction')) {
-        return $content;
-    }
-
+function ws_handle_jurisdiction_render( $content ) {
     global $post;
+    
+    // Guard against infinite loops
+    static $is_rendering = false;
 
-    if (!$post) {
+    /**
+     * Safeguard: Only assemble for the main page content.
+     * This prevents the plugin from running inside widgets, sidebars, or footers.
+     */
+    if ( ! is_main_query() || ! in_the_loop() ) {
         return $content;
     }
 
-    $output = '';
-
-
-    /*
-    -----------------------------------------------------
-    Jurisdiction Header
-    -----------------------------------------------------
-    */
-
-    $output .= do_shortcode('[ws_jx_header]');
-
-
-    /*
-    -----------------------------------------------------
-    Summary Section
-    -----------------------------------------------------
-    */
-
-    $summary = ws_get_jx_summary($post->ID);
-
-    if (ws_is_published($summary)) {
-        $output .= do_shortcode('[ws_jx_summary]');
+    if ( $post->post_type !== 'jurisdiction' || $is_rendering ) {
+        return $content;
     }
 
+    $is_rendering = true; 
 
-    /*
-    -----------------------------------------------------
-    Procedures Section
-    -----------------------------------------------------
-    */
+    // Build the page structure
+    $output = do_shortcode('[ws_jx_header]');
 
-    $procedures = ws_get_jx_procedures($post->ID);
+    $sections = [
+        'summary'    => '[ws_jx_summary]',
+        'procedures' => '[ws_jx_procedures]',
+        'statutes'   => '[ws_jx_statutes]',
+        'resources'  => '[ws_jx_resources]'
+    ];
 
-    if (ws_is_published($procedures)) {
-        $output .= do_shortcode('[ws_jx_procedures]');
+    foreach ( $sections as $key => $shortcode ) {
+        $get_func = "ws_get_jx_{$key}";
+        $related  = $get_func($post->ID);
+
+        // check if addendum exists, is published, and has content
+        if ( $related && $related->post_status === 'publish' ) {
+            if ( ! empty( trim( $related->post_content ) ) ) {
+                $output .= do_shortcode($shortcode);
+            }
+        }
     }
 
-
-    /*
-    -----------------------------------------------------
-    Statutes Section
-    -----------------------------------------------------
-    */
-
-    $statutes = ws_get_jx_statutes($post->ID);
-
-    if (ws_is_published($statutes)) {
-        $output .= do_shortcode('[ws_jx_statutes]');
-    }
-
-
-    /*
-    -----------------------------------------------------
-    Resources Section
-    -----------------------------------------------------
-    */
-
-    $resources = ws_get_jx_resources($post->ID);
-
-    if (ws_is_published($resources)) {
-        $output .= do_shortcode('[ws_jx_resources]');
-    }
-
-
-    /*
-    Return Fully Assembled Page
-    */
-
+    $is_rendering = false; 
     return $output;
-
 }
+/**
+ * [ws_jurisdiction_index] 
+ * Cleaned up version of your original alphabetical grid.
+ */
+add_shortcode('ws_jurisdiction_index', function() {
+    $jurisdictions = ws_get_all_jurisdictions();
+    if (empty($jurisdictions)) return '';
+
+    $output = '<div class="ws-jx-index-grid">';
+    foreach ($jurisdictions as $jx) {
+        $code = get_field('jx_code', $jx->ID);
+        $type = get_field('ws_jurisdiction_type', $jx->ID); // State, Territory, etc.
+        $url  = get_permalink($jx->ID);
+        
+        // Call the Renderer instead of writing HTML here
+        $output .= ws_render_jx_index_card($jx->post_title, $code, $url, $type);
+    }
+    $output .= '</div>';
+    
+    return $output;
+});
+
+/**
+ * [ws_jx_review_status]
+ * Simplified to pull from the Summary addendum.
+ */
+add_shortcode('ws_jx_review_status', function() {
+    global $post;
+    $summary = ws_get_jx_summary($post->ID);
+    
+    if (!$summary) return '';
+
+    $date = get_field('ws_summary_last_review', $summary->ID);
+    return ws_render_jx_review_status($date);
+});

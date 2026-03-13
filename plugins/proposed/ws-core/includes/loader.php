@@ -1,4 +1,5 @@
 <?php
+<?php
 /**
  * File: loader.php
  *
@@ -56,81 +57,68 @@
  * -------
  * 2.1.0  Modular loader introduced
  */
+/**
+ * File: loader.php
+ * Updated: 2.1.3
+ * * Optimized for Exclusive Automatic Assembly & Advanced Admin UX.
+ */
 
-if (!defined('ABSPATH')) {
-    exit;
+if ( ! defined( 'ABSPATH' ) ) exit;
+
+/*
+---------------------------------------------------------
+1. UNIVERSAL LAYER (Necessary for Permalinks & API)
+---------------------------------------------------------
+*/
+// CPT Layer: Must load everywhere so WordPress understands the URLs
+$cpt_files = [
+    'cpt-jurisdiction', 'cpt-jx-summary', 'cpt-jx-procedures', 
+    'cpt-jx-statutes', 'cpt-jx-resources', 'cpt-legal-update'
+];
+foreach ( $cpt_files as $file ) {
+    require_once WS_CORE_PATH . "includes/cpt/{$file}.php";
+}
+
+// Query Layer: The "Data API" for both Admin and Frontend
+require_once WS_CORE_PATH . 'includes/queries/query-jurisdiction.php';
+
+
+/*
+---------------------------------------------------------
+2. ADMIN LAYER (Only for Editor/Dashboard)
+---------------------------------------------------------
+*/
+if ( is_admin() ) {
+    // ACF Layer: Huge memory save by keeping these out of the frontend
+    $acf_files = [
+        'acf-jurisdiction', 'acf-jx-summary', 'acf-jx-procedures', 
+        'acf-jx-statutes', 'acf-jx-resources', 'acf-legal-update'
+    ];
+    foreach ( $acf_files as $file ) {
+        require_once WS_CORE_PATH . "includes/acf/{$file}.php";
+    }
+
+    // Admin Tools & Workflow Improvements
+    require_once WS_CORE_PATH . 'includes/admin/admin-navigation.php';
+    require_once WS_CORE_PATH . 'includes/admin/admin-columns.php';
+    require_once WS_CORE_PATH . 'includes/admin/admin-hooks.php';
+    require_once WS_CORE_PATH . 'includes/admin/jurisdiction-dashboard.php';
 }
 
 
 /*
 ---------------------------------------------------------
-CPT Layer
+3. ASSEMBLY LAYER (Only for Public Display)
 ---------------------------------------------------------
 */
-
-require_once WS_CORE_PATH . 'includes/cpt/cpt-jurisdiction.php';
-
-require_once WS_CORE_PATH . 'includes/cpt/cpt-jx-summary.php';
-require_once WS_CORE_PATH . 'includes/cpt/cpt-jx-procedures.php';
-require_once WS_CORE_PATH . 'includes/cpt/cpt-jx-statutes.php';
-require_once WS_CORE_PATH . 'includes/cpt/cpt-jx-resources.php';
-require_once WS_CORE_PATH . 'includes/cpt/cpt-legal-update.php';
-
-
-
-/*
----------------------------------------------------------
-ACF Field Definitions
----------------------------------------------------------
-*/
-
-require_once WS_CORE_PATH . 'includes/acf/acf-jurisdiction.php';
-
-require_once WS_CORE_PATH . 'includes/acf/acf-jx-summary.php';
-require_once WS_CORE_PATH . 'includes/acf/acf-jx-procedures.php';
-require_once WS_CORE_PATH . 'includes/acf/acf-jx-statutes.php';
-require_once WS_CORE_PATH . 'includes/acf/acf-jx-resources.php';
-require_once WS_CORE_PATH . 'includes/acf/acf-legal-update.php';
-
-
-
-/*
----------------------------------------------------------
-Query Layer
----------------------------------------------------------
-*/
-
-require_once WS_CORE_PATH . 'includes/queries/query-jurisdiction.php';
-
-
-
-/*
----------------------------------------------------------
-Rendering Layer
----------------------------------------------------------
-*/
-
-require_once WS_CORE_PATH . 'includes/render/section-renderer.php';
-require_once WS_CORE_PATH . 'includes/render/render-jurisdiction.php';
-
-
-
-/*
----------------------------------------------------------
-Shortcodes
----------------------------------------------------------
-*/
-
-require_once WS_CORE_PATH . 'includes/shortcodes/shortcodes-jurisdiction.php';
-
-
-
-/*
----------------------------------------------------------
-Admin Tools
----------------------------------------------------------
-*/
-
-require_once WS_CORE_PATH . 'includes/admin/admin-navigation.php';
-require_once WS_CORE_PATH . 'includes/admin/admin-columns.php';
-require_once WS_CORE_PATH . 'includes/admin/jurisdiction-dashboard.php';
+if ( ! is_admin() ) {
+    // The HTML Templates
+    require_once WS_CORE_PATH . 'includes/render/section-renderer.php';
+    
+    // The "Automatic Assembler" (The the_content filter)
+    require_once WS_CORE_PATH . 'includes/render/render-jurisdiction.php';
+    
+    // Shortcodes (Used internally by the Assembler)
+    require_once WS_CORE_PATH . 'includes/shortcodes/shortcodes-jurisdiction.php';
+    require_once WS_CORE_PATH . 'includes/shortcodes/shortcodes-general.php';
+}

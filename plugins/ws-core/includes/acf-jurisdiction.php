@@ -95,9 +95,9 @@ function ws_register_acf_jurisdiction_fields() {
                 'instructions' => 'Full attribution string from Wikimedia Commons — e.g., "File:Flag of California.svg by Wikimedia Commons contributors"',
             ],
             [
-                'key'          => 'field_ws_jx_flag_attribution_url',
-                'label'        => 'Flag Attribution URL',
-                'name'         => 'ws_jx_flag_attribution_url',
+                'key'          => 'field_ws_jx_flag_source_url',
+                'label'        => 'Flag Source URL',
+                'name'         => 'ws_jx_flag_source_url',
                 'type'         => 'url',
                 'instructions' => 'Direct link to the Wikimedia Commons file page for this flag.',
             ],
