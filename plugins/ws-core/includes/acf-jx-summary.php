@@ -294,7 +294,7 @@ function ws_cleanup_metabox_remnants() {
         }
     }
 
-    update_option( 'ws_metabox_cleanup_v3', true );
+    update_option( 'ws_metabox_cleanup_v4', true );
 
     if ( $total_deleted > 0 && is_admin() ) {
         add_action( 'admin_notices', function() use ( $total_deleted, $results ) {

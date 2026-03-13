@@ -1,15 +1,17 @@
 <!-- ============================================================
      WhistleblowerShield.org — Editorial Policy Page
-     Revised: March 2026 (v2)
-     Changes from v1:
-       - Added "Who Maintains This Site" section
-       - Fixed "strong or weak" neutrality contradiction
-       - Added "Writing Standards" section
-       - Tightened AI policy language
-       - Flattened all <p> tags to single lines
-       - Preserved ws-term-highlight tooltip on "inspectors general"
-       - editorial@ contact preserved (forwards to admin; role address
-         reserved for future editorial team expansion)
+     Revised: March 2026 (v4)
+     Changes from v3:
+       - Restored explicit "strong" or "weak" prohibition, now
+         integrated into the third paragraph of Nonpartisan and
+         Neutral Language Standards. Framed as a consistency and
+         editorial-opinion concern, which is the more accurate
+         reason for the rule.
+     Changes from v2:
+       - Revised "On describing the scope of protections" paragraph.
+         Replaced comparative framing with specific, factual
+         description of coverage and mechanism.
+     All other sections unchanged from v2.
      ============================================================ -->
 
 <!-- PASTE INTO WORDPRESS BLOCK EDITOR > CODE EDITOR VIEW -->
@@ -34,8 +36,8 @@
 <h2 class="wp-block-heading">Nonpartisan and Neutral Language Standards</h2>
 <p>We do not publish political commentary or partisan messaging.</p>
 <p>Our content describes what the law does — not what it means politically. We use neutral, descriptive language: <em>provides, prohibits, defines, requires, permits, establishes.</em></p>
-<p>We do not characterize legal outcomes as political victories or defeats, describe officials or agencies as allies or opponents, or use persuasion-driven or opinion-driven framing. Where the law is ambiguous or subject to differing court interpretations, we note the ambiguity rather than attempt to resolve it editorially.</p>
-<p><strong>On describing the scope and strength of protections:</strong> We do accurately characterize the relative coverage, breadth, and strength of whistleblower protections as a factual matter — because this is what our users need. Stating that one jurisdiction has broader anti-retaliation coverage than another, or that a statute applies specifically to financial sector employees, is a factual legal observation, not political commentary. Users deciding whether they are protected deserve direct, clear answers. The line we draw is this: we describe what the law does — including how broad or narrow that is — based on the text of the statute and how courts have interpreted it. We do not editorialize about whether the law is good policy or whether protections are sufficient.</p>
+<p>We do not characterize legal outcomes as political victories or defeats, describe officials or agencies as allies or opponents, or use persuasion-driven or opinion-driven framing. We do not describe protections as "strong" or "weak" — these are comparative judgments that are difficult to apply consistently and can read as editorial opinion rather than factual description. Where the law is ambiguous or subject to differing court interpretations, we note the ambiguity rather than attempt to resolve it editorially.</p>
+<p><strong>On describing the scope of protections:</strong> Our summaries describe what a jurisdiction's law specifically does — who it covers, what disclosures it protects, what remedies it provides, and what it does not cover. We state these facts directly and concretely, because users deciding whether they are protected deserve clear answers. For example: noting that a statute covers independent contractors as well as employees, or that a law applies only to public sector workers, or that a filing deadline is 180 days rather than one year — these are the factual details that matter most to our users. We describe what the law does. We do not editorialize about whether it is good policy or whether its protections are sufficient.</p>
 
 <h2 class="wp-block-heading">Writing Standards</h2>
 <p>All public-facing content is written to be readable by someone without legal training. We target a 9th to 10th grade reading level for summary content. Legal terms are explained on first use. Jurisdiction summaries are structured to answer the most important question first: does this jurisdiction protect whistleblowers, and what does that mean in practice?</p>

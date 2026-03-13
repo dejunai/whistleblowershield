@@ -1,11 +1,6 @@
 <?php
 /**
  * Plugin Name: WhistleblowerShield Core
- * Description: Core architecture for the WhistleblowerShield legal reference platform.
- * Version: 2.1.0
- */
-/**
- * Plugin Name: WhistleblowerShield Core
  * Description: Core architecture for WhistleblowerShield. Optimized for automatic assembly of 57 jurisdictions.
  * Version: 2.1.2
  */

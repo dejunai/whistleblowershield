@@ -121,7 +121,7 @@ function ws_get_jurisdiction_data($input = null) {
         'type' => get_field('ws_jurisdiction_type', $post_id),
         'code' => get_field('jx_code', $post_id),
         'flag' => [
-            'url'        => get_field('ws_jx_flag_image', $post_id),
+            'url'        => ( ( $flag = get_field('ws_jurisdiction_flag', $post_id) ) && is_array( $flag ) ) ? $flag['url'] : '',
             'source_url' => get_field('ws_jx_flag_source_url', $post_id),
             'attr_str'   => get_field('ws_jx_flag_attribution', $post_id),
             'license'    => get_field('ws_jx_flag_license', $post_id),

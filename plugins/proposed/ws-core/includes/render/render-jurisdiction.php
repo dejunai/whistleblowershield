@@ -23,10 +23,10 @@
  * ------------
  *
  * jurisdiction (public CPT)
- *      ├── jx_summary
- *      ├── jx_procedures
- *      ├── jx_statutes
- *      └── jx_resources
+ *      ├── jx-summary
+ *      ├── jx-procedures
+ *      ├── jx-statutes
+ *      └── jx-resources
  *
  * Each dataset is stored as a separate Custom Post Type and linked
  * to the jurisdiction using ACF relationship fields defined in:
@@ -43,7 +43,7 @@
  *            ↓
  *      this file intercepts via "the_content" filter
  *            ↓
- *      plugin checks for published datasets
+ *      plugin checks for published datasets via query layer
  *            ↓
  *      plugin renders sections using shortcodes
  *
@@ -51,60 +51,48 @@
  * CONDITIONAL RENDERING
  * ---------------------
  *
- * Sections are only displayed when their corresponding dataset:
+ * Sections are only displayed when their corresponding dataset
+ * exists and is published. Draft or unpublished datasets will
+ * never appear on the public site.
  *
- *      1) exists
- *      2) is published
- *
- * Draft or unpublished datasets will never appear on the public site.
+ * NOTE: Addendum CPTs (jx-summary, jx-procedures, etc.) store
+ * their content in ACF fields, not post_content. The published
+ * status of the addendum post is the correct gate — the section
+ * shortcode is responsible for reading and rendering field content.
  *
  *
  * WORKFLOW BENEFIT
  * ----------------
  *
  * Editors do NOT need to manually insert shortcodes.
- *
- * Creating and publishing a dataset automatically updates the
- * jurisdiction page.
+ * Creating and publishing a dataset automatically adds that
+ * section to the jurisdiction page.
  *
  *
  * FILE RESPONSIBILITIES
  * ---------------------
  *
  * This file ONLY:
- *
  *      • detects jurisdiction pages
- *      • retrieves dataset relationships
- *      • verifies publish status
+ *      • retrieves dataset relationships via query layer
+ *      • verifies published status
  *      • triggers shortcode rendering
  *
  * It does NOT:
- *
- *      • perform database queries
- *      • contain HTML templates
- *
- * Queries are handled in:
- *
- *      /includes/queries/query-jurisdiction.php
- *
- * Rendering is handled in:
- *
- *      /includes/shortcodes/shortcodes-jurisdiction.php
+ *      • perform database queries (handled by query-jurisdiction.php)
+ *      • contain HTML templates (handled by section-renderer.php)
+ *      • register shortcodes (handled by shortcodes-jurisdiction.php)
  *
  *
  * VERSION
  * -------
- * 2.1.0  Jurisdiction auto-render architecture introduced
+ * 2.1.0  Auto-render architecture introduced
+ * 2.1.2  Added is_main_query() and in_the_loop() safeguards
+ * 2.1.3  Removed post_content gate — addendum content lives in ACF
+ *         fields, not post_content. Published status is the correct gate.
  */
-/**
- * File: render-jurisdiction.php
- * Updated: 2.1.2
- * Added: is_main_query() and in_the_loop() safeguards.
- */
- 
-if (!defined('ABSPATH')) {
-    exit;
-}
+
+if ( ! defined( 'ABSPATH' ) ) exit;
 
 
 /*
@@ -113,9 +101,8 @@ Helper: Verify Published State
 ---------------------------------------------------------
 */
 
-function ws_is_published($post)
-{
-    return ($post && $post->post_status === 'publish');
+function ws_is_published( $post ) {
+    return ( $post && $post->post_status === 'publish' );
 }
 
 
@@ -129,81 +116,48 @@ add_filter( 'the_content', 'ws_handle_jurisdiction_render' );
 
 function ws_handle_jurisdiction_render( $content ) {
     global $post;
-    
-    // Guard against infinite loops
+
+    // Guard against infinite loops from nested do_shortcode calls
     static $is_rendering = false;
 
-    /**
-     * Safeguard: Only assemble for the main page content.
-     * This prevents the plugin from running inside widgets, sidebars, or footers.
-     */
+    // Only run on the main query loop — not widgets, sidebars, or REST calls
     if ( ! is_main_query() || ! in_the_loop() ) {
         return $content;
     }
 
-    if ( $post->post_type !== 'jurisdiction' || $is_rendering ) {
+    if ( ! $post || $post->post_type !== 'jurisdiction' || $is_rendering ) {
         return $content;
     }
 
-    $is_rendering = true; 
+    $is_rendering = true;
 
-    // Build the page structure
-    $output = do_shortcode('[ws_jx_header]');
+    // Always render the header
+    $output = do_shortcode( '[ws_jx_header]' );
 
+    // Render disclaimer notice below header, before summary content
+    $output .= do_shortcode( '[ws_nla_disclaimer_notice]' );
+
+    // Each section renders only if its addendum post exists and is published.
+    // Post_content is NOT checked — content lives in ACF fields.
     $sections = [
         'summary'    => '[ws_jx_summary]',
         'procedures' => '[ws_jx_procedures]',
         'statutes'   => '[ws_jx_statutes]',
-        'resources'  => '[ws_jx_resources]'
+        'resources'  => '[ws_jx_resources]',
     ];
 
     foreach ( $sections as $key => $shortcode ) {
-        $get_func = "ws_get_jx_{$key}";
-        $related  = $get_func($post->ID);
+        $get_func = 'ws_get_jx_' . $key;
+        $related  = $get_func( $post->ID );
 
-        // check if addendum exists, is published, and has content
-        if ( $related && $related->post_status === 'publish' ) {
-            if ( ! empty( trim( $related->post_content ) ) ) {
-                $output .= do_shortcode($shortcode);
-            }
+        if ( ws_is_published( $related ) ) {
+            $output .= do_shortcode( $shortcode );
         }
     }
 
-    $is_rendering = false; 
+    // Legal updates — always attempt; shortcode returns empty if none exist
+    $output .= do_shortcode( '[ws_legal_updates jurisdiction="' . esc_attr( $post->post_name ) . '" count="5"]' );
+
+    $is_rendering = false;
     return $output;
 }
-/**
- * [ws_jurisdiction_index] 
- * Cleaned up version of your original alphabetical grid.
- */
-add_shortcode('ws_jurisdiction_index', function() {
-    $jurisdictions = ws_get_all_jurisdictions();
-    if (empty($jurisdictions)) return '';
-
-    $output = '<div class="ws-jx-index-grid">';
-    foreach ($jurisdictions as $jx) {
-        $code = get_field('jx_code', $jx->ID);
-        $type = get_field('ws_jurisdiction_type', $jx->ID); // State, Territory, etc.
-        $url  = get_permalink($jx->ID);
-        
-        // Call the Renderer instead of writing HTML here
-        $output .= ws_render_jx_index_card($jx->post_title, $code, $url, $type);
-    }
-    $output .= '</div>';
-    
-    return $output;
-});
-
-/**
- * [ws_jx_review_status]
- * Simplified to pull from the Summary addendum.
- */
-add_shortcode('ws_jx_review_status', function() {
-    global $post;
-    $summary = ws_get_jx_summary($post->ID);
-    
-    if (!$summary) return '';
-
-    $date = get_field('ws_summary_last_review', $summary->ID);
-    return ws_render_jx_review_status($date);
-});

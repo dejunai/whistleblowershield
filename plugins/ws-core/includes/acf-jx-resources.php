@@ -172,7 +172,7 @@ function ws_register_acf_resource_fields() {
 // ── Auto-fill: ws_resource_post_author (current user, new posts only) ───────────────────────
 
 add_filter( 'acf/load_value/name=ws_resource_post_author', 'ws_autofill_resource_post_author', 10, 3 );
-function ws_autofill_resourcee_post_author( $value, $post_id, $field ) {
+function ws_autofill_resource_post_author( $value, $post_id, $field ) {
     if ( empty( $value ) ) {
         $value = get_current_user_id();
     }

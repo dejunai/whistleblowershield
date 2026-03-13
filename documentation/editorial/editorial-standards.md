@@ -58,14 +58,17 @@ Answer the most important question first:
 
 State this clearly. A person who reads only the first two sentences
 should know whether this jurisdiction has meaningful whistleblower
-protections or not.
+protections or not. Describe what the law specifically does — who it
+covers and in what circumstances — rather than characterizing it
+comparatively. Let the facts speak.
 
-Example of a strong opening:
-"California provides some of the strongest whistleblower protections
-in the United States, covering both private and public sector employees
-under multiple state statutes."
+Example of an effective opening:
+"California protects both private and public sector employees —
+including independent contractors — under multiple state statutes,
+with anti-retaliation provisions covering disclosures to government
+agencies, law enforcement, and internal supervisors."
 
-Example of a weak opening:
+Example of an ineffective opening:
 "California Labor Code Section 1102.5 was enacted in 1984 and has
 been amended several times..."
 
@@ -117,21 +120,73 @@ any financial recovery."
 
 After the first explanation, the term can be used on its own.
 
-### Use the .ws-term-highlight class for inline definitions
-For legal terms that appear in rendered HTML content, the
-ws-term-highlight CSS class and data-tooltip attribute can be used
-to provide hover definitions without breaking reading flow.
+### Inline definitions: tooltips and parentheticals
 
-Example usage in a summary:
+Two tools are available for defining legal terms within summary content.
+They serve different purposes and should be chosen deliberately.
+
+**Tooltips — the `.ws-term-highlight` class**
+
+The `ws-term-highlight` CSS class and `data-tooltip` attribute render a
+hover definition without interrupting reading flow. Use tooltips for
+legal terms or phrases that a non-lawyer is genuinely unlikely to know,
+where the definition itself does not need to be read to understand the
+surrounding sentence.
+
+Example usage:
 ```html
 <span class="ws-term-highlight"
-      data-tooltip="A lawsuit filed by a private citizen on behalf of the government, allowing the filer to share in any recovery.">
+      data-tooltip="A lawsuit filed by a private citizen on behalf of the government, allowing the filer to share in any financial recovery.">
   qui tam lawsuit
 </span>
 ```
 
-Use this sparingly — for terms a non-lawyer is unlikely to know,
-not for every piece of legal terminology.
+Tooltips are a functional accessibility tool, not a design feature. Do
+not use them as decoration, as a way to signal that a term is legal, or
+as a substitute for writing plainly. A page dense with tooltips is a
+page that needed to be rewritten.
+
+Ask before adding a tooltip: would a reader who never hovers still
+understand the sentence? If yes, the tooltip is optional context. If the
+definition is something the reader actually needs to follow the sentence,
+it belongs in the text — not hidden behind a hover.
+
+**Parentheticals**
+
+When a legal term needs a brief clarification that the reader genuinely
+needs — not optional context but necessary meaning — put it in a
+parenthetical inline. Parentheticals are visible to every reader on
+every device without any interaction required.
+
+Use a parenthetical when:
+- the clarification is short (one phrase or clause)
+- the reader needs it to understand what follows, not just to learn
+  a definition
+- concrete examples serve the reader better than a definition
+
+Examples:
+```
+...file a complaint with the DLSE (Division of Labor Standards Enforcement)...
+...compensatory damages (money to cover your actual losses)...
+...a violation of a state or federal statute (such as laws against
+   discrimination, wage theft, or environmental violations)...
+```
+
+**Choosing between them**
+
+If the term is unfamiliar and the definition is optional context
+→ tooltip.
+
+If the term needs a brief clarification the reader actually needs
+to follow the sentence → parenthetical.
+
+If the term requires more than a sentence to explain, or the
+explanation is important enough to stand on its own → write it
+into the body text.
+
+When in doubt, write it out. A tooltip no one hovers is invisible.
+A parenthetical no one needed is a minor distraction. Neither is
+as harmful as a sentence a reader cannot follow.
 
 ---
 
@@ -146,8 +201,13 @@ The summary should feel like information written for a reader,
 not metadata about a jurisdiction.
 
 ### Be direct about protections
-When a jurisdiction has strong protections, say so clearly.
-When protections are limited or narrow, say that clearly too.
+Describe what a jurisdiction's law specifically does — who it covers,
+what disclosures it protects, what remedies it provides, and what it
+does not cover. State these facts concretely. Do not characterize
+protections as "strong" or "weak" — these are comparative judgments
+that are difficult to sustain consistently across 57 jurisdictions and
+can read as editorial opinion rather than factual description.
+Specific facts serve the reader better than relative characterizations.
 
 Hedging every statement for legal caution is understandable but
 ultimately harmful to the user — it defeats the purpose of the resource.
