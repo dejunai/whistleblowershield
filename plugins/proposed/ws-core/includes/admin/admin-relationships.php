@@ -59,6 +59,16 @@
  * entirely from the update side via ws_update_jurisdictions. No
  * back-sync to individual jurisdiction records is needed.
  *
+ * NOTE: jx-citation is NOT included here. Citations do not use an
+ * ACF relationship field to identify their parent jurisdiction — they
+ * store the jurisdiction's ws_jx_code string in a plain text field
+ * (ws_jx_code). The parent Jurisdiction record holds no corresponding
+ * relationship field for citations; the count is derived at runtime
+ * by querying ws_jx_code + ws_jx_cite_attach (see
+ * ws_get_attached_citation_count() in admin-navigation.php).
+ * There is no bidirectional field link to maintain, so no sync hook
+ * is needed and jx-citation must not be added to this map.
+ *
  * @package    WhistleblowerShield
  * @since      2.1.0
  * @author     Whistleblower Shield
@@ -68,8 +78,10 @@
  * VERSION
  * -------
  * 2.1.0  Extracted from admin-audit-trail.php (formerly audit-trail.php).
- *         Back-reference field (ws_jurisdiction) defined on all jx-*
- *         ACF field groups. Sync hook activated.
+ *        Back-reference field (ws_jurisdiction) defined on all jx-*
+ *        ACF field groups. Sync hook activated.
+ * 2.3.1  Added jx-citation exclusion note explaining the ws_jx_code
+ *        string-key architecture and why no sync is needed.
  */
 
 defined( 'ABSPATH' ) || exit;

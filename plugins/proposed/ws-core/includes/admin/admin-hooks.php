@@ -12,49 +12,69 @@
  *   ws_parent_id   — the parent jurisdiction post ID
  *   post_title     — a pre-filled title (e.g. "California Summary")
  *
- * This file intercepts the new post screen and pre-populates:
- *   1) The jurisdiction relationship field on the new addendum post
- *   2) The post title
+ * When an editor clicks "Add Citation", the link passes:
  *
- * FIELD NAMES (ACF relationship field on each addendum CPT):
+ *   ws_jx_code     — the jurisdiction USPS code (e.g. "CA")
  *
- *   jx-summary      → ws_jx_sum_jurisdiction
- *   jx-procedures   → ws_procedure_jurisdiction
- *   jx-statutes     → ws_statute_jurisdiction
- *   jx-resources    → ws_resource_jurisdiction
+ * This file pre-populates ACF fields on new-post screens so editors
+ * do not have to locate and set the relationship manually.
+ *
+ *
+ * FIELD NAMES
+ * -----------
+ * All four addendum CPTs (jx-summary, jx-procedures, jx-statutes,
+ * jx-resources) share the same ACF field name for their jurisdiction
+ * back-reference:
+ *
+ *   ws_jurisdiction   — post_object field on all four addendum CPTs
+ *
+ * A single acf/load_field filter covers all four CPTs.
+ *
+ * jx-citation uses a text field instead of a relationship:
+ *
+ *   ws_jx_code        — text field pre-populated from the query arg
+ *
  *
  * VERSION
  * -------
  * 2.1.0  Initial implementation
  * 2.1.3  Fixed field name references to match actual ACF field names
+ * 2.3.1  Corrected all four field names to ws_jurisdiction (they were
+ *        wrong: ws_jx_sum_jurisdiction, ws_procedure_jurisdiction, etc.
+ *        — none of these fields exist; pre-population was silently
+ *        broken for all four CPTs).
+ *        Collapsed four separate filters into one (same field name).
+ *        Added ws_jx_code pre-population for new jx-citation screens.
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit;
 
 
-// ── Pre-populate jurisdiction relationship fields on new addendum screens ─────
+// ── Pre-populate jurisdiction relationship on new addendum screens ─────────────
 //
-// Each addendum CPT has its own field name for the jurisdiction relationship.
-// We register a filter for each one individually.
+// All four addendum CPTs use the same field name: ws_jurisdiction.
+// One filter covers jx-summary, jx-procedures, jx-statutes, jx-resources.
 
-$ws_jx_relationship_fields = [
-    'ws_jx_sum_jurisdiction',   // jx-summary
-    'ws_procedure_jurisdiction', // jx-procedures
-    'ws_statute_jurisdiction',   // jx-statutes
-    'ws_resource_jurisdiction',  // jx-resources
-];
+add_filter( 'acf/load_field/name=ws_jurisdiction', function( $field ) {
+    if ( isset( $_GET['ws_parent_id'] ) && is_numeric( $_GET['ws_parent_id'] ) ) {
+        $field['default_value'] = intval( $_GET['ws_parent_id'] );
+    }
+    return $field;
+} );
 
-foreach ( $ws_jx_relationship_fields as $field_name ) {
-    add_filter(
-        'acf/load_field/name=' . $field_name,
-        function( $field ) {
-            if ( isset( $_GET['ws_parent_id'] ) && is_numeric( $_GET['ws_parent_id'] ) ) {
-                $field['default_value'] = [ intval( $_GET['ws_parent_id'] ) ];
-            }
-            return $field;
-        }
-    );
-}
+
+// ── Pre-populate ws_jx_code on new jx-citation screens ───────────────────────
+//
+// The "Add Citation" button in admin-navigation.php passes ws_jx_code as a
+// query arg. Pre-populate the matching ACF text field so editors can confirm
+// and save without manually entering the code.
+
+add_filter( 'acf/load_field/name=ws_jx_code', function( $field ) {
+    if ( isset( $_GET['ws_jx_code'] ) ) {
+        $field['default_value'] = sanitize_text_field( $_GET['ws_jx_code'] );
+    }
+    return $field;
+} );
 
 
 // ── Pre-populate post title if passed via URL ─────────────────────────────────

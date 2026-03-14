@@ -1,5 +1,4 @@
 <?php
-<?php
 /**
  * File: loader.php
  *
@@ -25,6 +24,7 @@
  *      Rendering Layer  → builds jurisdiction pages
  *      Shortcode Layer  → renders individual sections
  *      Admin Layer      → improves editorial workflow
+ *		Taxonomies       → allows labeling data objects by category
  *
  *
  * DIRECTORY STRUCTURE
@@ -38,6 +38,7 @@
  *      queries/
  *      render/
  *      shortcodes/
+ *		taxonomies/
  *
  *
  * LOADING STRATEGY
@@ -50,17 +51,18 @@
  *      3) query layer
  *      4) rendering helpers
  *      5) shortcodes
- *      6) admin tools
+ *      6) taxonomies
+ *      7) admin tools
  *
  *
  * VERSION
  * -------
  * 2.1.0  Modular loader introduced
- */
-/**
- * File: loader.php
- * Updated: 2.1.3
- * * Optimized for Exclusive Automatic Assembly & Advanced Admin UX.
+ * 2.1.3  Optimized for exclusive automatic assembly and advanced admin UX
+ * 2.1.4  Added taxonomy layer
+ * 2.3.1  Moved taxonomy loading to Universal Layer so ws_disclosure_cat
+ *        and ws_process_type are registered on both frontend and admin.
+ *        Removed duplicate stale docblock.
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit;
@@ -73,7 +75,8 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 // CPT Layer: Must load everywhere so WordPress understands the URLs
 $cpt_files = [
     'cpt-jurisdiction', 'cpt-jx-summary', 'cpt-jx-procedures', 
-    'cpt-jx-statutes', 'cpt-jx-resources', 'cpt-legal-update'
+    'cpt-jx-statutes', 'cpt-jx-resources', 'cpt-legal-update',
+	'cpt-jx-citations', 'cpt-agencies',
 ];
 foreach ( $cpt_files as $file ) {
     require_once WS_CORE_PATH . "includes/cpt/{$file}.php";
@@ -81,6 +84,11 @@ foreach ( $cpt_files as $file ) {
 
 // Query Layer: The "Data API" for both Admin and Frontend
 require_once WS_CORE_PATH . 'includes/queries/query-jurisdiction.php';
+
+// Taxonomy Layer: Must load everywhere — registers CPT taxonomy associations
+// for URL rewriting, REST API, and frontend queries. Seeding functions inside
+// this file run only on admin_init and are self-gating.
+require_once WS_CORE_PATH . 'includes/taxonomies/register-taxonomies.php';
 
 
 /*
@@ -92,14 +100,15 @@ if ( is_admin() ) {
     // ACF Layer: Huge memory save by keeping these out of the frontend
     $acf_files = [
         'acf-jurisdiction', 'acf-jx-summary', 'acf-jx-procedures', 
-        'acf-jx-statutes', 'acf-jx-resources', 'acf-legal-update'
+        'acf-jx-statutes', 'acf-jx-resources', 'acf-legal-update',
+		'acf-jx-citations', 'acf-agencies',
     ];
     foreach ( $acf_files as $file ) {
         require_once WS_CORE_PATH . "includes/acf/{$file}.php";
     }
 
     // Admin Tools & Workflow Improvements
-    require_once WS_CORE_PATH . 'includes/admin/admin-navigation.php';
+    require_once WS_CORE_PATH . 'includes/admin/admin-navigation.php'; // Must load first.
     require_once WS_CORE_PATH . 'includes/admin/admin-columns.php';
     require_once WS_CORE_PATH . 'includes/admin/admin-hooks.php';
     require_once WS_CORE_PATH . 'includes/admin/admin-audit-trail.php';

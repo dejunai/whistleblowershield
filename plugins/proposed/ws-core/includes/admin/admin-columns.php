@@ -11,7 +11,10 @@
  * -------
  * 2.1.0  Initial implementation
  * 2.1.3  Added column header registration (was missing)
- *         Visual status icons via dashicons
+ *        Visual status icons via dashicons
+ * 2.3.1  Added Citations column. Uses ws_get_attached_citation_count()
+ *        (defined in admin-navigation.php, which loads first).
+ *        Badge shows count with red/orange/green thresholds (0/1-2/3+).
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit;
@@ -30,6 +33,7 @@ function ws_add_jx_status_columns( $columns ) {
             $new['procedures'] = 'Procedures';
             $new['statutes']   = 'Statutes';
             $new['resources']  = 'Resources';
+            $new['citations']  = 'Citations';
         }
     }
     return $new;
@@ -47,6 +51,19 @@ function ws_render_jx_status_column( $column, $post_id ) {
         'statutes'   => 'ws_related_statutes',
         'resources'  => 'ws_related_resources',
     ];
+
+    // Citations column uses count-based display, not an ACF relationship field.
+    if ( $column === 'citations' ) {
+        $count = ws_get_attached_citation_count( $post_id );
+        if ( $count === 0 ) {
+            echo '<span style="color:#dc3232; font-weight:600;">0</span>';
+        } elseif ( $count <= 2 ) {
+            echo '<span style="color:#ffa500; font-weight:600;">' . $count . '</span>';
+        } else {
+            echo '<span style="color:#46b450; font-weight:600;">' . $count . '</span>';
+        }
+        return;
+    }
 
     if ( ! isset( $map[ $column ] ) ) return;
 

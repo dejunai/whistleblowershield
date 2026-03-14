@@ -29,7 +29,7 @@
  *
  * INTERNAL IDENTIFIER
  * -------------------
- * jx_code is the canonical two-letter machine identifier
+ * ws_jx_code is the canonical two-letter machine identifier
  * used across the plugin.
  *
  * Examples:
@@ -53,16 +53,19 @@
  *
  * DATASET RETURN FORMAT
  * ---------------------
- * All dataset functions (summary, procedures, statutes, resources)
- * return a consistent base array:
+ * All dataset functions (summary, procedures, resources) return a
+ * consistent base array:
  *
  *      [
- *          'id'     => int,
- *          'title'  => string,
- *          'url'    => string,
- *          'status' => string,
- *          'content' => string,
+ *          'id'      => int,
+ *          'title'   => string,
+ *          'url'     => string,
+ *          'status'  => string,
+ *          'content' => string,  // raw post_content — apply the_content in render layer
  *      ]
+ *
+ * ws_get_jx_statutes() returns an array-of-arrays using the same shape,
+ * plus an 'is_fed' boolean key. May contain two entries (state + federal).
  *
  * NOTE: Audit trail data (_ws_last_edited_by, _ws_edit_history) is stored
  * in wp_postmeta as private hidden keys and is NOT retrieved through this
@@ -84,8 +87,13 @@
  *         in favor of ws_get_id_by_code. Updated field names to match
  *         acf-jurisdiction.php v2.1.0. Added record management fields to
  *         ws_get_jurisdiction_data. Updated dataset stubs to return consistent
- *         base arrays and accept jx_code as input. Consolidated cache
+ *         base arrays and accept ws_jx_code as input. Consolidated cache
  *         invalidation on save_post.
+ * 2.1.1   ws_get_jx_statutes() now returns with Federal Statutes append to
+ *         Statutes of the specified Jurisdiction when !US is called.
+ * 2.3.1   All content keys normalized to raw get_post_field('post_content').
+ *         Render layer applies the_content filters. ws_get_jx_statutes()
+ *         returns array-of-arrays; shape documented above.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -94,7 +102,7 @@ defined( 'ABSPATH' ) || exit;
 // ════════════════════════════════════════════════════════════════════════════
 // Jurisdiction ID Lookup
 //
-// Retrieves the post ID for a jurisdiction by its two-letter jx_code.
+// Retrieves the post ID for a jurisdiction by its two-letter ws_jx_code.
 // Result is cached in a transient for 24 hours to avoid repeated meta queries.
 // Returns false if no matching jurisdiction is found.
 // ════════════════════════════════════════════════════════════════════════════
@@ -113,7 +121,7 @@ function ws_get_id_by_code( $jx_code ) {
 
         $query = new WP_Query( [
             'post_type'      => 'jurisdiction',
-            'meta_key'       => 'jx_code',
+            'meta_key'       => 'ws_jx_code',
             'meta_value'     => $jx_code,
             'posts_per_page' => 1,
             'fields'         => 'ids',
@@ -131,7 +139,7 @@ function ws_get_id_by_code( $jx_code ) {
 // ════════════════════════════════════════════════════════════════════════════
 // Master Jurisdiction Data Fetcher
 //
-// Accepts either a numeric post ID or a two-letter jx_code string.
+// Accepts either a numeric post ID or a two-letter ws_jx_code string.
 // Falls back to the global $post if no input is provided.
 //
 // Returns a structured array of all jurisdiction metadata, or false
@@ -146,7 +154,7 @@ function ws_get_id_by_code( $jx_code ) {
 
 function ws_get_jurisdiction_data( $input = null ) {
 
-    // Resolve post ID from input, current post, or jx_code
+    // Resolve post ID from input, current post, or ws_jx_code
     if ( ! $input ) {
         global $post;
         $post_id = $post->ID ?? 0;
@@ -168,7 +176,7 @@ function ws_get_jurisdiction_data( $input = null ) {
         'id'   => $post_id,
         'name' => get_the_title( $post_id ),
         'type' => get_field( 'ws_jurisdiction_type', $post_id ),
-        'code' => get_field( 'jx_code', $post_id ),
+        'code' => get_field( 'ws_jx_code', $post_id ),
 
         // ── Flag ─────────────────────────────────────────────────────────────
         'flag' => [
@@ -210,7 +218,7 @@ function ws_get_jurisdiction_data( $input = null ) {
 // Dataset: Summary
 //
 // Retrieves the related jx-summary post for the given jurisdiction.
-// Accepts a numeric post ID or a two-letter jx_code string.
+// Accepts a numeric post ID or a two-letter ws_jx_code string.
 // Returns a base array of post data, or false if not found.
 //
 // @todo - Update array as jx-summary CPT fields are defined.
@@ -230,13 +238,15 @@ function ws_get_jx_summary( $input ) {
         return false;
     }
 
-    // @todo - Update array as jx-summary CPT fields are defined.
+    // @todo - Update array as jx-summary ACF fields are expanded.
+    // Note: summary content is stored in ACF fields, not post_content.
+    // The shortcode layer reads ACF fields directly from $data['id'].
     return [
         'id'      => $related->ID,
         'title'   => get_the_title( $related->ID ),
         'url'     => get_permalink( $related->ID ),
         'status'  => get_post_status( $related->ID ),
-        'content' => get_the_content( null, false, $related->ID ),
+        'content' => get_post_field( 'post_content', $related->ID ),
     ];
 }
 
@@ -245,7 +255,7 @@ function ws_get_jx_summary( $input ) {
 // Dataset: Procedures
 //
 // Retrieves the related jx-procedures post for the given jurisdiction.
-// Accepts a numeric post ID or a two-letter jx_code string.
+// Accepts a numeric post ID or a two-letter ws_jx_code string.
 // Returns a base array of post data, or false if not found.
 //
 // @todo - Update array as jx-procedures CPT fields are defined.
@@ -271,7 +281,7 @@ function ws_get_jx_procedures( $input ) {
         'title'   => get_the_title( $related->ID ),
         'url'     => get_permalink( $related->ID ),
         'status'  => get_post_status( $related->ID ),
-        'content' => get_the_content( null, false, $related->ID ),
+        'content' => get_post_field( 'post_content', $related->ID ),
     ];
 }
 
@@ -280,42 +290,73 @@ function ws_get_jx_procedures( $input ) {
 // Dataset: Statutes
 //
 // Retrieves the related jx-statutes post for the given jurisdiction.
-// Accepts a numeric post ID or a two-letter jx_code string.
-// Returns a base array of post data, or false if not found.
+// If the jurisdiction is NOT 'US', it automatically merges the Federal 
+// statutes into the return array to ensure comprehensive coverage.
 //
-// @todo - Update array as jx-statutes CPT fields are defined.
+// Returns an array of statute data arrays, or false if none found.
 // ════════════════════════════════════════════════════════════════════════════
 
 function ws_get_jx_statutes( $input ) {
 
+    // 1. Resolve the primary requested Jurisdiction ID
     $post_id = is_numeric( $input ) ? (int) $input : ws_get_id_by_code( $input );
+    $jx_code = is_numeric( $input ) ? get_post_meta( $post_id, 'ws_jx_code', true ) : strtoupper($input);
 
     if ( ! $post_id ) {
         return false;
     }
 
-    $related = get_field( 'ws_related_statutes', $post_id );
+    // Each entry: [ 'post' => WP_Post, 'is_fed' => bool ]
+    // is_fed is set at collection time — jx-statutes posts do not carry
+    // ws_jx_code on their own meta, so it cannot be derived from the
+    // statute post itself after the fact.
+    $statutes_to_process = [];
 
-    if ( ! $related ) {
+    // 2. Fetch the primary (State/Territory) related statute
+    $primary_related = get_field( 'ws_related_statutes', $post_id );
+    if ( $primary_related ) {
+        $statutes_to_process[] = [ 'post' => $primary_related, 'is_fed' => false ];
+    }
+
+    // 3. Logic: If NOT 'US', fetch the Federal 'US' statute record as well
+    if ( $jx_code !== 'US' ) {
+        $fed_id = ws_get_id_by_code( 'US' );
+        if ( $fed_id ) {
+            $fed_related = get_field( 'ws_related_statutes', $fed_id );
+            if ( $fed_related ) {
+                $statutes_to_process[] = [ 'post' => $fed_related, 'is_fed' => true ];
+            }
+        }
+    }
+
+    if ( empty( $statutes_to_process ) ) {
         return false;
     }
 
-    // @todo - Update array as jx-statutes CPT fields are defined.
-    return [
-        'id'      => $related->ID,
-        'title'   => get_the_title( $related->ID ),
-        'url'     => get_permalink( $related->ID ),
-        'status'  => get_post_status( $related->ID ),
-        'content' => get_the_content( null, false, $related->ID ),
-    ];
-}
+    $output = [];
 
+    // 4. Transform all identified records into the dataset format.
+    // is_fed was set at collection time above — do not re-derive here.
+    foreach ( $statutes_to_process as $item ) {
+        $statute_post = $item['post'];
+        $output[] = [
+            'id'      => $statute_post->ID,
+            'title'   => get_the_title( $statute_post->ID ),
+            'url'     => get_permalink( $statute_post->ID ),
+            'status'  => get_post_status( $statute_post->ID ),
+            'content' => get_post_field( 'post_content', $statute_post->ID ),
+            'is_fed'  => $item['is_fed'],
+        ];
+    }
+
+    return $output;
+}
 
 // ════════════════════════════════════════════════════════════════════════════
 // Dataset: Resources
 //
 // Retrieves the related jx-resources post for the given jurisdiction.
-// Accepts a numeric post ID or a two-letter jx_code string.
+// Accepts a numeric post ID or a two-letter ws_jx_code string.
 // Returns a base array of post data, or false if not found.
 //
 // @todo - Update array as jx-resources CPT fields are defined.
@@ -341,7 +382,7 @@ function ws_get_jx_resources( $input ) {
         'title'   => get_the_title( $related->ID ),
         'url'     => get_permalink( $related->ID ),
         'status'  => get_post_status( $related->ID ),
-        'content' => get_the_content( null, false, $related->ID ),
+        'content' => get_post_field( 'post_content', $related->ID ),
     ];
 }
 
@@ -366,6 +407,7 @@ function ws_get_all_jurisdictions() {
 
         $query = new WP_Query( [
             'post_type'      => 'jurisdiction',
+            'post_status'    => 'publish',
             'posts_per_page' => -1,
             'orderby'        => 'title',
             'order'          => 'ASC',
@@ -426,7 +468,7 @@ function ws_get_jurisdiction_index_data() {
             foreach ( $query->posts as $post ) {
 
                 $type = get_field( 'ws_jurisdiction_type', $post->ID ) ?: 'state';
-                $code = get_field( 'jx_code', $post->ID );
+                $code = get_field( 'ws_jx_code', $post->ID );
 
                 $index_items[] = [
                     'name' => get_the_title( $post->ID ),
@@ -464,7 +506,7 @@ function ws_get_jurisdiction_index_data() {
 // them consistent with each other.
 //
 // Also clears the per-code transient for the saved post so that
-// ws_get_id_by_code() immediately reflects any jx_code changes.
+// ws_get_id_by_code() immediately reflects any ws_jx_code changes.
 // ════════════════════════════════════════════════════════════════════════════
 
 add_action( 'save_post_jurisdiction', function( $post_id ) {
@@ -474,7 +516,7 @@ add_action( 'save_post_jurisdiction', function( $post_id ) {
     delete_transient( 'ws_jx_index_cache' );
 
     // Clear the per-code transient for this specific jurisdiction
-    $jx_code = get_field( 'jx_code', $post_id );
+    $jx_code = get_field( 'ws_jx_code', $post_id );
     if ( $jx_code ) {
         delete_transient( 'ws_id_for_' . strtoupper( $jx_code ) );
     }

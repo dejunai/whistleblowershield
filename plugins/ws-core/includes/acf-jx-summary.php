@@ -114,9 +114,9 @@ function ws_register_acf_jurisdiction_summary_fields() {
                 'first_day'      => 0,
             ],
             [
-                'key'          => 'field_ws_jx_last_reviewed',
+                'key'          => 'field_ws_jx_sum_last_reviewed',
                 'label'        => 'Last Reviewed',
-                'name'         => 'ws_last_reviewed',
+                'name'         => 'ws_jx_sum_last_reviewed',
                 'type'         => 'date_picker',
                 'instructions' => 'Update this date each time the summary content is meaningfully revised. This date is displayed publicly on the jurisdiction page.',
                 'display_format' => 'F j, Y',

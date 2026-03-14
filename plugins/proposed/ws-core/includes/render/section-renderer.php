@@ -248,40 +248,20 @@ function ws_render_jurisdiction_index($data) {
             <?php endforeach; ?>
         </nav>
 
-        <div class="ws-jx-grid" style="display: flex; flex-wrap: wrap; gap: 15px;">
+        <div class="ws-jx-grid">
             <?php foreach ($items as $jx) : ?>
-                <a href="<?php echo esc_url($jx['url']); ?>" 
-                   class="ws-jx-card" 
-                   data-type="<?php echo esc_attr($jx['type']); ?>"
-                   style="display: flex; flex-direction: column; padding: 15px; border: 1px solid #ddd;">
-                    <span class="ws-jx-card-code" style="font-weight: bold;"><?php echo esc_html($jx['code']); ?></span>
+                <a href="<?php echo esc_url($jx['url']); ?>"
+                   class="ws-jx-card"
+                   data-type="<?php echo esc_attr($jx['type']); ?>">
+                    <span class="ws-jx-card-code"><?php echo esc_html($jx['code']); ?></span>
                     <span class="ws-jx-card-name"><?php echo esc_html($jx['name']); ?></span>
                 </a>
             <?php endforeach; ?>
         </div>
     </div>
-
-    <script>
-    (function() {
-        const buttons = document.querySelectorAll('.ws-jx-filter-btn');
-        const cards = document.querySelectorAll('.ws-jx-card');
-
-        buttons.forEach(btn => {
-            btn.addEventListener('click', () => {
-                const filter = btn.dataset.filter;
-
-                buttons.forEach(b => b.classList.remove('ws-active'));
-                btn.classList.add('ws-active');
-
-                cards.forEach(card => {
-                    const match = (filter === 'all' || card.dataset.type === filter);
-                    card.style.display = match ? 'flex' : 'none';
-                });
-            });
-        });
-    })();
-    </script>
     <?php
+    // Filter tab behavior is handled by ws-core-front.js (enqueued in ws-core.php).
+    // Cards are hidden/shown via card.style.display in that script.
     return ob_get_clean();
 }
 /**

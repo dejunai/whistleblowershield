@@ -45,6 +45,19 @@
  *       Renders human-reviewed and legal-review status badges.
  *       Reads from the linked jx-summary post.
  *
+ *   [ws_jx_case_law]
+ *       Renders the ws-case-law section for the current jurisdiction.
+ *       Queries published jx-citation records where ws_jx_code matches
+ *       the current jurisdiction and ws_jx_cite_attach is true.
+ *       Records are ordered by ws_jx_cite_position (ascending).
+ *       Outputs citation body content, footnote anchors, and Unicode
+ *       return links. Returns empty string if no attached citations exist.
+ *
+ *   [ws_jx_limitations]
+ *       Renders the ws-limitations section for the current jurisdiction.
+ *       Reads ws_jx_limitations wysiwyg from the linked jx-summary post.
+ *       Returns empty string if the field is empty.
+ *
  *   [ws_jurisdiction_index]
  *       Renders the full filterable jurisdiction index with type
  *       filter tabs and alphabetical grid.
@@ -72,6 +85,20 @@
  *   ws_jx_sum_legal_review_completed — true/false toggle
  *   ws_jx_sum_legal_reviewer     — conditional text field
  *
+ * Case law content comes from published jx-citation records:
+ *
+ *   ws_jx_code               — jurisdiction code (query key)
+ *   ws_jx_cite_attach        — attach toggle (true = render)
+ *   ws_jx_cite_position      — display order (numeric, ascending)
+ *   ws_jx_cite_type          — citation type
+ *   ws_jx_cite_label         — display label
+ *   ws_jx_cite_url           — source URL
+ *   ws_jx_cite_is_pdf        — PDF toggle (appends "(PDF)" to link)
+ *
+ * Limitations content comes from the jx-summary ACF field:
+ *
+ *   ws_jx_limitations        — wysiwyg content
+ *
  * Procedures, statutes, and resources content comes from the
  * post_content field of their respective addendum CPTs, processed
  * through the_content filters.
@@ -84,6 +111,18 @@
  *         Fixed [ws_jx_review_status] field names
  *         Fixed [ws_jx_flag] to use correct ACF field names
  *         Added full summary footer: author, dates, badges, sources
+ * 2.3.0  Added [ws_jx_case_law] and [ws_jx_limitations] shortcodes.
+ *         Case law section moved out of ws_jurisdiction_summary wysiwyg
+ *         and into jx-citation CPT records rendered via [ws_jx_case_law].
+ *         Limitations section moved out of wysiwyg into ws_jx_limitations
+ *         ACF field on jx-summary, rendered via [ws_jx_limitations].
+ * 2.3.1  Fixed all shortcodes to use query layer array access instead of
+ *         post object property access. Fixed field name ws_last_reviewed →
+ *         ws_jx_sum_last_reviewed. Fixed author lookup to use
+ *         ws_jx_sum_create_author stamp (ws_jx_sum_author is not a
+ *         registered ACF field). Rewrote [ws_jx_statutes] to handle the
+ *         array-of-arrays return from ws_get_jx_statutes() including the
+ *         state + federal merge with per-record is_fed labeling.
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit;
@@ -125,8 +164,8 @@ add_shortcode( 'ws_jx_header', function( $atts ) {
         'jx_name'   => $jx_data['name'],
         'flag_data' => [
             'url'        => $jx_data['flag']['url'],
-            'source_url' => $jx_data['flag']['source_url'],
-            'attr_str'   => $jx_data['flag']['attr_str'],
+            'source_url' => $jx_data['flag']['attribution_url'], // fixed: was ['source_url']
+            'attr_str'   => $jx_data['flag']['attribution'],     // fixed: was ['attr_str']
             'license'    => $jx_data['flag']['license'],
         ],
         'gov_data' => [
@@ -156,7 +195,8 @@ add_shortcode( 'ws_jx_summary', function() {
 
     if ( ! $summary_post ) return '';
 
-    $sid = $summary_post->ID;
+    // Query layer returns an array — use array key access, not object property.
+    $sid = $summary_post['id'];
 
     // Content fields
     $summary_content = get_field( 'ws_jurisdiction_summary', $sid );
@@ -165,17 +205,18 @@ add_shortcode( 'ws_jx_summary', function() {
     if ( ! $summary_content ) return '';
 
     // Date fields
-    $date_created  = get_field( 'ws_jx_sum_date_created', $sid );
-    $last_reviewed = get_field( 'ws_last_reviewed',        $sid );
+    $date_created  = get_field( 'ws_jx_sum_date_created',  $sid );
+    $last_reviewed = get_field( 'ws_jx_sum_last_reviewed', $sid ); // fixed: was ws_last_reviewed
 
-    // Author field
-    $author_data = get_field( 'ws_jx_sum_author', $sid );
-    $author_name = '';
-    if ( is_array( $author_data ) && ! empty( $author_data['display_name'] ) ) {
-        $author_name = esc_html( $author_data['display_name'] );
-    } elseif ( is_numeric( $author_data ) ) {
-        $user = get_userdata( (int) $author_data );
-        if ( $user ) $author_name = esc_html( $user->display_name );
+    // Author: ws_jx_sum_author is not a registered ACF field.
+    // Use the ws_jx_sum_create_author stamp written on first save.
+    $author_name     = '';
+    $create_author_id = get_post_meta( $sid, 'ws_jx_sum_create_author', true );
+    if ( $create_author_id ) {
+        $user = get_userdata( (int) $create_author_id );
+        if ( $user ) {
+            $author_name = esc_html( $user->display_name );
+        }
     }
 
     // Review status fields
@@ -256,12 +297,22 @@ function ws_shortcode_jx_procedures() {
     $procedures = ws_get_jx_procedures( $post->ID );
     if ( ! $procedures ) return '';
 
-    $content = apply_filters( 'the_content', $procedures->post_content );
+    $content = apply_filters( 'the_content', $procedures['content'] );
     return ws_render_section( 'Reporting Procedures', $content );
 }
 
 
 // ── [ws_jx_statutes] ─────────────────────────────────────────────────────────
+//
+// ws_get_jx_statutes() returns an array-of-arrays. For any non-federal
+// jurisdiction this contains up to two entries: the jurisdiction's own
+// statutes record and the federal (US) statutes record. The 'is_fed' key
+// distinguishes them so each can be labeled appropriately.
+//
+// State/territory record:  labeled 'Relevant Statutes'
+// Federal record:          labeled 'Federal Statutes'
+//
+// Each entry is rendered as its own ws-jx-section block via ws_render_section().
 
 add_shortcode( 'ws_jx_statutes', 'ws_shortcode_jx_statutes' );
 function ws_shortcode_jx_statutes() {
@@ -269,11 +320,25 @@ function ws_shortcode_jx_statutes() {
     global $post;
     if ( ! $post ) return '';
 
+    // Returns array-of-arrays or false.
     $statutes = ws_get_jx_statutes( $post->ID );
     if ( ! $statutes ) return '';
 
-    $content = apply_filters( 'the_content', $statutes->post_content );
-    return ws_render_section( 'Relevant Statutes', $content );
+    $output = '';
+
+    foreach ( $statutes as $statute ) {
+
+        $content = apply_filters( 'the_content', $statute['content'] );
+        if ( ! $content ) continue;
+
+        // Federal record gets its own heading so it's visually distinct
+        // from the jurisdiction-specific statutes block above it.
+        $section_title = $statute['is_fed'] ? 'Federal Statutes' : 'Relevant Statutes';
+
+        $output .= ws_render_section( $section_title, $content );
+    }
+
+    return $output;
 }
 
 
@@ -288,7 +353,7 @@ function ws_shortcode_jx_resources() {
     $resources = ws_get_jx_resources( $post->ID );
     if ( ! $resources ) return '';
 
-    $content = apply_filters( 'the_content', $resources->post_content );
+    $content = apply_filters( 'the_content', $resources['content'] );
     return ws_render_section( 'Resources', $content );
 }
 
@@ -308,7 +373,13 @@ add_shortcode( 'ws_jx_flag', function( $atts ) {
 
     if ( ! $jx_data ) return '';
 
-    return ws_render_jx_flag( $jx_data['flag_data'] );
+    // Map query layer 'flag' array to the keys ws_render_jx_flag() expects.
+    return ws_render_jx_flag( [
+        'url'        => $jx_data['flag']['url'],
+        'source_url' => $jx_data['flag']['attribution_url'],
+        'attr_str'   => $jx_data['flag']['attribution'],
+        'license'    => $jx_data['flag']['license'],
+    ] );
 
 } );
 
@@ -323,11 +394,11 @@ add_shortcode( 'ws_jx_review_status', function() {
     $summary = ws_get_jx_summary( $post->ID );
     if ( ! $summary ) return '';
 
-    $sid            = $summary->ID;
+    $sid            = $summary['id']; // query layer returns array
     $human_reviewed = get_field( 'ws_jx_sum_human_reviewed',         $sid );
     $legal_reviewed = get_field( 'ws_jx_sum_legal_review_completed', $sid );
     $legal_reviewer = get_field( 'ws_jx_sum_legal_reviewer',         $sid );
-    $last_reviewed  = get_field( 'ws_last_reviewed',                 $sid );
+    $last_reviewed  = get_field( 'ws_jx_sum_last_reviewed',          $sid ); // fixed: was ws_last_reviewed
     $fmt_reviewed   = $last_reviewed ? date( 'F j, Y', strtotime( $last_reviewed ) ) : '';
 
     ob_start();
@@ -364,6 +435,128 @@ add_shortcode( 'ws_jx_review_status', function() {
     return ob_get_clean();
 
 } );
+
+
+// ── [ws_jx_case_law] ─────────────────────────────────────────────────────────
+//
+// Queries published jx-citation records for the current jurisdiction
+// where ws_jx_cite_attach is true, ordered by ws_jx_cite_position.
+// Renders the full ws-case-law section: footnote anchors in the body
+// and a footnote list with Unicode return links (&#x21a9;) at the foot.
+//
+// Returns empty string silently if no attached citations exist.
+// A warning notice on the jx-summary edit screen covers that gap
+// — see ws_jx_cite_no_citations_notice() in acf-jx-citations.php.
+//
+// Unicode return character: ↩ (U+21A9) replaces the PNG workaround.
+// Controlled via .ws-footnote-return in ws-core-front.css.
+
+add_shortcode( 'ws_jx_case_law', 'ws_shortcode_jx_case_law' );
+function ws_shortcode_jx_case_law() {
+
+    global $post;
+    if ( ! $post ) return '';
+
+    // Resolve jurisdiction code from the current jurisdiction post.
+    $jx_code = get_post_meta( $post->ID, 'ws_jx_code', true );
+    if ( ! $jx_code ) return '';
+
+    // Query attached citations ordered by display position.
+    $citations = get_posts( [
+        'post_type'      => 'jx-citation',
+        'post_status'    => 'publish',
+        'posts_per_page' => -1,
+        'orderby'        => 'meta_value_num',
+        'meta_key'       => 'ws_jx_cite_position',
+        'order'          => 'ASC',
+        'meta_query'     => [
+            'relation' => 'AND',
+            [
+                'key'   => 'ws_jx_code',
+                'value' => $jx_code,
+            ],
+            [
+                'key'   => 'ws_jx_cite_attach',
+                'value' => '1',
+            ],
+        ],
+    ] );
+
+    if ( empty( $citations ) ) return '';
+
+    // Build footnote anchors and footnote list in one pass.
+    $footnote_items = [];
+    $fn_index       = 1;
+
+    foreach ( $citations as $citation ) {
+        $cid    = $citation->ID;
+        $label  = get_post_meta( $cid, 'ws_jx_cite_label',  true );
+        $url    = get_post_meta( $cid, 'ws_jx_cite_url',    true );
+        $is_pdf = get_post_meta( $cid, 'ws_jx_cite_is_pdf', true );
+
+        $pdf_suffix = $is_pdf ? ' (PDF)' : '';
+        $fn_id      = 'fn-' . $fn_index;
+        $fn_ref_id  = 'fn-ref-' . $fn_index;
+
+        // Build the linked label for the footnote list entry.
+        if ( $url ) {
+            $linked_label = '<a href="' . esc_url( $url ) . '" target="_blank">'
+                          . esc_html( $label ) . esc_html( $pdf_suffix ) . '</a>';
+        } else {
+            $linked_label = esc_html( $label ) . esc_html( $pdf_suffix );
+        }
+
+        // Unicode return link: ↩ (U+21A9), styled via .ws-footnote-return.
+        // To switch to CSS ::before pseudo-element in the future, remove
+        // the <a> content here and target .ws-footnote-return::before.
+        $return_link = '<a href="#' . esc_attr( $fn_ref_id ) . '" '
+                     . 'class="ws-footnote-return" '
+                     . 'title="Return to text">&#x21a9;</a>';
+
+        $footnote_items[] = '<small id="' . esc_attr( $fn_id ) . '">'
+                          . $return_link . ' '
+                          . $fn_index . '. '
+                          . $linked_label
+                          . '</small>';
+
+        $fn_index++;
+    }
+
+    // Render the full section.
+    ob_start();
+    ?>
+    <section class="ws-case-law">
+        <hr style="margin: 10px 0;">
+        <?php foreach ( $footnote_items as $item ) : ?>
+            <?php echo $item; ?><br>
+        <?php endforeach; ?>
+    </section>
+    <?php
+    return ob_get_clean();
+}
+
+
+// ── [ws_jx_limitations] ──────────────────────────────────────────────────────
+//
+// Reads ws_jx_limitations wysiwyg from the linked jx-summary post.
+// Renders the ws-limitations section wrapper around that content.
+// Returns empty string silently if the field is empty or no summary
+// is linked to the current jurisdiction.
+
+add_shortcode( 'ws_jx_limitations', 'ws_shortcode_jx_limitations' );
+function ws_shortcode_jx_limitations() {
+
+    global $post;
+    if ( ! $post ) return '';
+
+    $summary_post = ws_get_jx_summary( $post->ID );
+    if ( ! $summary_post ) return '';
+
+    $limitations = get_field( 'ws_jx_limitations', $summary_post['id'] ); // fixed: was ->ID
+    if ( ! $limitations ) return '';
+
+    return '<section class="ws-limitations">' . wp_kses_post( $limitations ) . '</section>';
+}
 
 
 // ── [ws_jurisdiction_index] ───────────────────────────────────────────────────

@@ -90,6 +90,13 @@
  * 2.1.2  Added is_main_query() and in_the_loop() safeguards
  * 2.1.3  Removed post_content gate — addendum content lives in ACF
  *         fields, not post_content. Published status is the correct gate.
+ * 2.3.0  Added [ws_jx_case_law] and [ws_jx_limitations] to assembler.
+ *         Case law renders after summary, limitations renders after
+ *         case law. Both are conditional on content availability.
+ * 2.3.1  ws_is_published() updated to handle query layer array format.
+ *         All dataset functions return arrays with a 'status' key.
+ *         ws_get_jx_statutes() returns an array-of-arrays (state + federal
+ *         merge) — first entry's 'status' key is used for the gate check.
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit;
@@ -99,10 +106,35 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 ---------------------------------------------------------
 Helper: Verify Published State
 ---------------------------------------------------------
+Accepts the return value of any query layer dataset function.
+
+Query layer functions return arrays:
+  - Standard: [ 'id' => int, 'status' => string, ... ]
+  - Statutes:  [ [ 'id' => int, 'status' => string, ... ], ... ]
+
+Returns true only when the record (or first record for statutes)
+has post_status === 'publish'.
 */
 
-function ws_is_published( $post ) {
-    return ( $post && $post->post_status === 'publish' );
+function ws_is_published( $data ) {
+
+    if ( ! $data ) {
+        return false;
+    }
+
+    // Array-of-arrays: ws_get_jx_statutes() returns multiple records
+    // (state + federal merge). Check the first entry's status key.
+    if ( isset( $data[0] ) && is_array( $data[0] ) ) {
+        return ! empty( $data[0]['status'] ) && $data[0]['status'] === 'publish';
+    }
+
+    // Standard dataset array returned by query layer functions.
+    if ( is_array( $data ) ) {
+        return ! empty( $data['status'] ) && $data['status'] === 'publish';
+    }
+
+    // Fallback: legacy WP_Post object (not expected in normal flow).
+    return isset( $data->post_status ) && $data->post_status === 'publish';
 }
 
 
@@ -137,16 +169,30 @@ function ws_handle_jurisdiction_render( $content ) {
     // Render disclaimer notice below header, before summary content
     $output .= do_shortcode( '[ws_nla_disclaimer_notice]' );
 
-    // Each section renders only if its addendum post exists and is published.
+    // Each section renders only if its addendum post exists and is published
+    // (for CPT-backed sections), or if content exists (for field-backed sections).
     // Post_content is NOT checked — content lives in ACF fields.
-    $sections = [
-        'summary'    => '[ws_jx_summary]',
+
+    // Render summary first.
+    $related_summary = ws_get_jx_summary( $post->ID );
+    if ( ws_is_published( $related_summary ) ) {
+        $output .= do_shortcode( '[ws_jx_summary]' );
+    }
+
+    // Render case law citations — [ws_jx_case_law] returns empty if none attached.
+    $output .= do_shortcode( '[ws_jx_case_law]' );
+
+    // Render limitations — [ws_jx_limitations] returns empty if field is empty.
+    $output .= do_shortcode( '[ws_jx_limitations]' );
+
+    // Render remaining CPT-backed sections conditionally.
+    $cpt_sections = [
         'procedures' => '[ws_jx_procedures]',
         'statutes'   => '[ws_jx_statutes]',
         'resources'  => '[ws_jx_resources]',
     ];
 
-    foreach ( $sections as $key => $shortcode ) {
+    foreach ( $cpt_sections as $key => $shortcode ) {
         $get_func = 'ws_get_jx_' . $key;
         $related  = $get_func( $post->ID );
 

@@ -27,7 +27,7 @@
  *   legal_update
  *
  * Internal Identifier:
- *   jx_code (2-letter USPS style code)
+ *   ws_jx_code (2-letter USPS style code)
  *
  * Examples:
  *   CA = California

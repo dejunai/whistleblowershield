@@ -53,7 +53,10 @@
  *   jx-resources
  *   jx-procedures
  *   jx-statutes
+ *   jx-citation
  *   ws-legal-update
+ *   ws-agencies
+ *   ws-statutes
  *
  * RETRIEVAL
  * ---------
@@ -86,6 +89,7 @@
  * 2.1.0  Refactored for ws-core architecture. Renamed from audit-trail.php
  *         to admin-audit-trail.php. Relationship sync logic moved to
  *         admin-relationships.php. Header and inline comments added.
+ * 2.3.1  Added jx-citation and ws-agencies to audited post types.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -105,7 +109,10 @@ function ws_audited_post_types() {
         'jx-resources',
         'jx-procedures',
         'jx-statutes',
+        'jx-citation',
         'ws-legal-update',
+        'ws-agencies',
+		'ws-statues',
     ];
 }
 

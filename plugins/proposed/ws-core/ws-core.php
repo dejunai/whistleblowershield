@@ -3,7 +3,7 @@
  * Plugin Name: WhistleblowerShield Core
  * Description: Core architecture for WhistleblowerShield. Optimized for
  *              automatic assembly of 57 jurisdictions.
- * Version:     2.1.3
+ * Version:     2.3.1
  * Author:      Whistleblower Shield
  * Author URI:  https://whistleblowershield.org
  */
@@ -12,7 +12,7 @@ defined( 'ABSPATH' ) || exit;
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
-define( 'WS_CORE_VERSION', '2.1.3' );
+define( 'WS_CORE_VERSION', '2.3.1' );
 define( 'WS_CORE_PATH',    plugin_dir_path( __FILE__ ) );
 define( 'WS_CORE_URL',     plugin_dir_url( __FILE__ ) );
 
@@ -43,7 +43,8 @@ function ws_core_init() {
 
 // ── Frontend Assets ───────────────────────────────────────────────────────────
 //
-// ws-core-front.css is loaded globally on all public-facing pages.
+// ws-core-front.css and ws-core-front.js are loaded globally on all
+// public-facing pages.
 //
 // @todo - Revisit before launch. Narrow to specific page types once
 //         shortcode usage across page templates has been fully audited.
@@ -53,10 +54,19 @@ function ws_core_init() {
 add_action( 'wp_enqueue_scripts', 'ws_core_enqueue_assets' );
 
 function ws_core_enqueue_assets() {
+
     wp_enqueue_style(
         'ws-core-front',
         WS_CORE_URL . 'ws-core-front.css',
         [],
         WS_CORE_VERSION
+    );
+
+    wp_enqueue_script(
+        'ws-core-front',
+        WS_CORE_URL . 'ws-core-front.js',
+        [],             // No dependencies
+        WS_CORE_VERSION,
+        true            // Load in footer
     );
 }

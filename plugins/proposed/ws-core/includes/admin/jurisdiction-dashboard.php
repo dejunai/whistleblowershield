@@ -4,10 +4,14 @@
  *
  * Provides a simple overview dashboard for all jurisdictions.
  * Purpose: Completion Tracker for the 57 Jurisdictions
- */
-/**
- * File: jurisdiction-dashboard.php
- * Updated: 2.1.3 (Integrated Menu & Health Tracker)
+ *
+ * VERSION
+ * -------
+ * 2.1.0  Initial implementation
+ * 2.1.3  Integrated menu & health tracker
+ * 2.3.1  Fixed status checks: query layer returns arrays, not WP_Post objects.
+ *        Added Citations column using ws_get_attached_citation_count()
+ *        (defined in admin-navigation.php, which loads first).
  */
 
 if (!defined('ABSPATH')) {
@@ -51,11 +55,12 @@ function ws_render_jurisdiction_dashboard() {
 
     echo '<table class="wp-list-table widefat fixed striped" style="margin-top: 20px;">';
     echo '<thead><tr>
-            <th style="width: 20%;">Jurisdiction</th>
+            <th style="width: 18%;">Jurisdiction</th>
             <th>Summary</th>
             <th>Procedures</th>
             <th>Statutes</th>
             <th>Resources</th>
+            <th>Citations</th>
           </tr></thead>';
     echo '<tbody>';
 
@@ -63,20 +68,44 @@ function ws_render_jurisdiction_dashboard() {
         echo '<tr>';
         echo '<td><strong>' . esc_html($jx->post_title) . '</strong></td>';
 
-        // Check each addendum type
+        // Check each addendum type.
+        // Query layer returns arrays (['id', 'status', 'content']), not WP_Post objects.
+        // ws_get_jx_statutes() returns array-of-arrays — check $related[0]['status'].
         $types = ['summary', 'procedures', 'statutes', 'resources'];
         foreach ($types as $type) {
             $get_func = "ws_get_jx_{$type}";
-            $related = $get_func($jx->ID);
-            
-            if ($related && $related->post_status === 'publish') {
+            $related  = $get_func( $jx->ID );
+
+            // Extract status from query layer result.
+            $status = null;
+            if ( $related ) {
+                if ( isset( $related[0] ) && is_array( $related[0] ) ) {
+                    // Array-of-arrays (statutes merge): use the first record.
+                    $status = $related[0]['status'] ?? null;
+                } elseif ( is_array( $related ) ) {
+                    $status = $related['status'] ?? null;
+                }
+            }
+
+            if ( $status === 'publish' ) {
                 echo '<td style="color: #46b450;">✔ Published</td>';
-            } elseif ($related) {
-                echo '<td style="color: #ffa500;">? Draft</td>';
+            } elseif ( $status ) {
+                echo '<td style="color: #ffa500;">⚠ ' . esc_html( ucfirst( $status ) ) . '</td>';
             } else {
                 echo '<td style="color: #dc3232;">✘ Missing</td>';
             }
         }
+
+        // Citations column: count with color threshold.
+        $cite_count = ws_get_attached_citation_count( $jx->ID );
+        if ( $cite_count === 0 ) {
+            echo '<td style="color: #dc3232; font-weight:600;">0</td>';
+        } elseif ( $cite_count <= 2 ) {
+            echo '<td style="color: #ffa500; font-weight:600;">' . $cite_count . '</td>';
+        } else {
+            echo '<td style="color: #46b450; font-weight:600;">' . $cite_count . '</td>';
+        }
+
         echo '</tr>';
     }
 

@@ -32,9 +32,12 @@
  * -------
  * 1.0.0  Initial release.
  * 2.1.0  Refactored for ws-core architecture. CPT slug corrected
- *         to jx-statutes (hyphenated). Added ws_jurisdiction
- *         back-reference field to support two-way relationship
- *         sync via admin-relationships.php.
+ *        to jx-statutes (hyphenated). Added ws_jurisdiction
+ *        back-reference field to support two-way relationship
+ *        sync via admin-relationships.php.
+ * 2.3.1  Added ws_process_type taxonomy field. Statutes are the
+ *        authoritative source for which process types a
+ *        whistleblower can use under this law.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -84,6 +87,34 @@ function ws_register_acf_jx_statutes() {
                 'multiple'      => 0,
                 'return_format' => 'id',
                 'ui'            => 1,
+            ],
+
+            // ── Process Types ─────────────────────────────────────────────
+            //
+            // What legal actions does this statute grant?
+            // This is the authoritative source for process type — the
+            // statute is what creates the legal right to act.
+            //
+            // A single statute may grant multiple process types.
+            // Example: Dodd-Frank grants both regulatory-tip (SEC)
+            // and civil-lawsuit (federal court).
+            //
+            // save_terms/load_terms = 1 keeps WP term associations
+            // in sync alongside the ACF post meta value.
+
+            [
+                'key'           => 'field_ws_statutes_process_type',
+                'label'         => 'Process Types Available',
+                'name'          => 'ws_process_type',
+                'type'          => 'taxonomy',
+                'taxonomy'      => 'ws_process_type',
+                'instructions'  => 'Select all legal actions this statute grants to a whistleblower.',
+                'field_type'    => 'multi_select',
+                'add_term'      => 0,
+                'save_terms'    => 1,
+                'load_terms'    => 1,
+                'return_format' => 'id',
+                'allow_null'    => 1,
             ],
 
             // ── Legal Review ──────────────────────────────────────────────

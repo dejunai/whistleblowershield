@@ -25,14 +25,25 @@
  * ------------
  *
  * jurisdiction (core record)
- *      ├── jx_summary
- *      ├── jx_procedures
- *      ├── jx_statutes
- *      └── jx_resources
+ *      ├── jx-summary      (one-to-one, ACF relationship)
+ *      ├── jx-procedures   (one-to-one, ACF relationship)
+ *      ├── jx-statutes     (one-to-one, ACF relationship)
+ *      ├── jx-resources    (one-to-one, ACF relationship)
+ *      └── jx-citation     (many-to-one, queried by ws_jx_code)
  *
  * Relationship fields are defined in:
  *
  *      /includes/acf/acf-jurisdiction.php
+ *
+ *
+ * SHARED HELPER
+ * -------------
+ * ws_get_attached_citation_count( $post_id )
+ *
+ * Returns the number of published jx-citation records where
+ * ws_jx_code matches the given jurisdiction and ws_jx_cite_attach
+ * is true. Defined here and shared by admin-columns.php and
+ * jurisdiction-dashboard.php (both load after this file).
  *
  *
  * WORKFLOW BENEFIT
@@ -45,10 +56,10 @@
  * VERSION
  * -------
  * 2.1.0  Initial admin navigation implementation
- */
-/**
- * File: admin-navigation.php
- * Updated: 2.1.3 (Smart Creation Support)
+ * 2.1.3  Smart creation support (Create Now links)
+ * 2.3.1  Fixed CPT slug typos (jx_summary → jx-summary for all four).
+ *        Added ws_get_attached_citation_count() shared helper.
+ *        Added Citations row: count badge + Add Citation + View All.
  */
 if (!defined('ABSPATH')) {
     exit;
@@ -92,10 +103,12 @@ function ws_render_jx_navigation_box($post) {
 
     echo '<div class="ws-admin-nav-wrapper" style="line-height:1.6;">';
     
-    ws_render_admin_link('Summary',    $summary,    'jx_summary',    $post->ID);
-    ws_render_admin_link('Procedures', $procedures, 'jx_procedures', $post->ID);
-    ws_render_admin_link('Statutes',   $statutes,   'jx_statutes',   $post->ID);
-    ws_render_admin_link('Resources',  $resources,  'jx_resources',  $post->ID);
+    ws_render_admin_link('Summary',    $summary,    'jx-summary',    $post->ID);
+    ws_render_admin_link('Procedures', $procedures, 'jx-procedures', $post->ID);
+    ws_render_admin_link('Statutes',   $statutes,   'jx-statutes',   $post->ID);
+    ws_render_admin_link('Resources',  $resources,  'jx-resources',  $post->ID);
+
+    ws_render_citation_row( $post->ID );
 
     echo '</div>';
 }
@@ -128,5 +141,102 @@ function ws_render_admin_link($label, $related, $post_type, $parent_id) {
         echo '<span style="font-size: 11px; color: #dc3232;">● Not Created</span><br>';
         echo '<a class="button button-small button-primary" href="' . esc_url($create_url) . '">Create Now</a>';
     }
+    echo '</div>';
+}
+
+
+/*
+---------------------------------------------------------
+Shared Helper: Attached Citation Count
+---------------------------------------------------------
+Returns the number of published jx-citation records that
+are both matched to this jurisdiction (ws_jx_code) and
+have ws_jx_cite_attach set to true.
+
+Shared by:
+    admin-columns.php          — jurisdiction list table column
+    jurisdiction-dashboard.php — health matrix row
+---------------------------------------------------------
+*/
+
+function ws_get_attached_citation_count( $post_id ) {
+
+    $jx_code = get_post_meta( $post_id, 'ws_jx_code', true );
+
+    if ( ! $jx_code ) {
+        return 0;
+    }
+
+    $query = new WP_Query( [
+        'post_type'      => 'jx-citation',
+        'post_status'    => 'publish',
+        'posts_per_page' => -1,
+        'fields'         => 'ids',
+        'meta_query'     => [
+            'relation' => 'AND',
+            [
+                'key'     => 'ws_jx_code',
+                'value'   => $jx_code,
+                'compare' => '=',
+            ],
+            [
+                'key'     => 'ws_jx_cite_attach',
+                'value'   => '1',
+                'compare' => '=',
+            ],
+        ],
+    ] );
+
+    return (int) $query->found_posts;
+}
+
+
+/*
+---------------------------------------------------------
+Render: Citations Row
+---------------------------------------------------------
+Always rendered — shows attached count with color-coded
+threshold badge, plus Add Citation and View All buttons.
+
+    0 citations   → red badge
+    1–2 citations → orange badge
+    3+ citations  → green badge
+
+"Add Citation" pre-populates ws_jx_code on the new-post
+screen via query arg (handled by admin-hooks.php).
+"View All" filters the jx-citation list by ws_jx_code.
+---------------------------------------------------------
+*/
+
+function ws_render_citation_row( $post_id ) {
+
+    $jx_code = get_post_meta( $post_id, 'ws_jx_code', true );
+    $count   = ws_get_attached_citation_count( $post_id );
+
+    if ( $count === 0 ) {
+        $badge_color = '#dc3232'; // red
+    } elseif ( $count <= 2 ) {
+        $badge_color = '#ffa500'; // orange
+    } else {
+        $badge_color = '#46b450'; // green
+    }
+
+    $add_url = add_query_arg( [
+        'post_type'   => 'jx-citation',
+        'ws_jx_code'  => $jx_code,
+    ], admin_url( 'post-new.php' ) );
+
+    $all_url = add_query_arg( [
+        'post_type'   => 'jx-citation',
+        'ws_jx_code'  => $jx_code,
+    ], admin_url( 'edit.php' ) );
+
+    echo '<div style="margin-bottom: 12px; padding: 8px; border: 1px solid #ccd0d4; border-radius: 4px; background: #fff;">';
+    echo '<strong style="display: block; margin-bottom: 5px;">Citations</strong>';
+    echo '<span style="font-size: 11px; color: ' . esc_attr( $badge_color ) . ';">● ' . (int) $count . ' attached</span><br>';
+    echo '<div style="margin-top: 5px; display: flex; gap: 5px; flex-wrap: wrap;">';
+    echo '<a class="button button-small button-primary" href="' . esc_url( $add_url ) . '">Add Citation</a>';
+    echo '<a class="button button-small" href="' . esc_url( $all_url ) . '">View All</a>';
+    echo '</div>';
     echo '</div>';
 }

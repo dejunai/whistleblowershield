@@ -26,7 +26,7 @@
  * ---------------
  * 1. Jurisdiction Identity
  *      ws_jurisdiction_type
- *      jx_code
+ *      ws_jx_code
  *      ws_jurisdiction_name
  *
  * 2. Government Links
@@ -52,7 +52,7 @@
  *
  * INTERNAL IDENTIFIER
  * -------------------
- * jx_code is the canonical two-letter machine identifier used across the plugin.
+ * ws_jx_code is the canonical two-letter machine identifier used across the plugin.
  *
  * Examples:
  *      CA  = California
@@ -98,7 +98,7 @@
  * 1.8.0  Relationship field post_type filters updated from
  *             jurisdiction-summary/resources/procedures/statutes
  *         to  jx-summary/jx-resources/jx-procedures/jx-statutes
- * 2.1.0  Refactored for ws-core architecture. Added jx_code, legislature,
+ * 2.1.0  Refactored for ws-core architecture. Added ws_jx_code, legislature,
  *         record management fields (author, date created, date updated,
  *         last editor), tabs, inline field instructions throughout,
  *         auto-selection of Legal Authority Label and Legislature Label
@@ -137,7 +137,7 @@ function ws_register_acf_jurisdiction_fields() {
             // ────────────────────────────────────────────────────────────────
             // Tab: Identity
             //
-            // Core identifiers for each jurisdiction record. jx_code is the
+            // Core identifiers for each jurisdiction record. ws_jx_code is the
             // canonical machine identifier used across the plugin. All three
             // fields are required.
             // ────────────────────────────────────────────────────────────────
@@ -170,7 +170,7 @@ function ws_register_acf_jurisdiction_fields() {
             [
                 'key'          => 'field_ws_jx_code',
                 'label'        => 'Jurisdiction Code',
-                'name'         => 'jx_code',
+                'name'         => 'ws_jx_code',
                 'type'         => 'text',
                 'instructions' => 'Two-letter postal code used as the canonical machine identifier across the plugin. Examples: CA, TX, NY, US, DC, PR.',
                 'required'     => 1,

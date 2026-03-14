@@ -414,6 +414,71 @@
 /* ── Footnote Return Links ───────────────────────────────────────────────── */
 
 .ws-case-law .ws-footnote-return {
-    height: 12px;
-    width: auto;
+    font-size: 0.85rem;
+    text-decoration: none;
+    margin-right: 0.2rem;
+}
+
+
+/* ── Jurisdiction Index ──────────────────────────────────────────────────── */
+
+.ws-jx-index-container {
+    margin-top: 1rem;
+}
+
+.ws-jx-filter-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-bottom: 1.25rem;
+}
+
+.ws-jx-filter-btn {
+    padding: 0.3rem 0.8rem;
+    cursor: pointer;
+    border: 1px solid #ccc;
+    background: #f9f9f9;
+    border-radius: 3px;
+    font-size: 0.85rem;
+    line-height: 1.4;
+}
+
+.ws-jx-filter-btn.ws-active {
+    background: #2c5282;
+    color: #fff;
+    border-color: #2c5282;
+}
+
+.ws-jx-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.ws-jx-card {
+    display: flex;
+    flex-direction: column;
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    text-decoration: none;
+    color: inherit;
+    min-width: 70px;
+    transition: border-color 0.15s;
+}
+
+.ws-jx-card:hover {
+    border-color: #999;
+    text-decoration: none;
+}
+
+.ws-jx-card-code {
+    font-weight: 700;
+    font-size: 0.95rem;
+}
+
+.ws-jx-card-name {
+    font-size: 0.78rem;
+    color: #555;
+    margin-top: 0.15rem;
 }
