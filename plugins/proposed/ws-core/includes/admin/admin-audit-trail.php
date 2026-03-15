@@ -106,13 +106,12 @@ function ws_audited_post_types() {
     return [
         'jurisdiction',
         'jx-summary',
-        'jx-resources',
-        'jx-procedures',
-        'jx-statutes',
+        'jx-resource',
+        'jx-procedure',
+        'jx-statute',
         'jx-citation',
         'ws-legal-update',
-        'ws-agencies',
-		'ws-statues',
+        'ws-agency',
     ];
 }
 

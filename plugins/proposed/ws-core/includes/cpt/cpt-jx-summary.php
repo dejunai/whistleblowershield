@@ -70,6 +70,7 @@ function ws_register_cpt_jx_summary() {
         'search_items'       => 'Search Summaries',
         'not_found'          => 'No summaries found',
         'not_found_in_trash' => 'No summaries found in trash',
+        'all_items'          => 'All Summaries',
     ];
 
     $args = [
@@ -97,8 +98,13 @@ function ws_register_cpt_jx_summary() {
 
         // ── Admin Menu ────────────────────────────────────────────────────
 
-        'menu_icon'           => 'dashicons-media-text',
-        'menu_position'       => 26,
+        'menu_icon'       => 'dashicons-media-text',
+        'menu_position'   => 26,
+
+        // ── Capabilities ──────────────────────────────────────────────────
+
+        'capability_type' => 'post',
+        'rewrite'         => false,
 
     ];
 

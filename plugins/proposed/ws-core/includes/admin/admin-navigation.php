@@ -104,9 +104,9 @@ function ws_render_jx_navigation_box($post) {
     echo '<div class="ws-admin-nav-wrapper" style="line-height:1.6;">';
     
     ws_render_admin_link('Summary',    $summary,    'jx-summary',    $post->ID);
-    ws_render_admin_link('Procedures', $procedures, 'jx-procedures', $post->ID);
-    ws_render_admin_link('Statutes',   $statutes,   'jx-statutes',   $post->ID);
-    ws_render_admin_link('Resources',  $resources,  'jx-resources',  $post->ID);
+    ws_render_admin_link('Procedures', $procedures, 'jx-procedure', $post->ID);
+    ws_render_admin_link('Statutes',   $statutes,   'jx-statute',   $post->ID);
+    ws_render_admin_link('Resources',  $resources,  'jx-resource',  $post->ID);
 
     ws_render_citation_row( $post->ID );
 
@@ -130,13 +130,15 @@ function ws_render_admin_link($label, $related, $post_type, $parent_id) {
         echo '<span style="font-size: 11px; color: ' . $color . ';">● ' . ucfirst($status) . '</span><br>';
         echo '<a class="button button-small" href="' . get_edit_post_link($related->ID) . '">Edit Record</a>';
     } else {
-        // Build the Smart Link
-        $parent_name = get_the_title($parent_id);
-        $create_url = add_query_arg([
-            'post_type'    => $post_type,
-            'ws_parent_id' => $parent_id,
-            'post_title'   => "{$parent_name} {$label}"
-        ], admin_url('post-new.php'));
+        // Build the Smart Link — passes ws_jx_code so the new-post screen
+        // pre-populates the Jurisdiction Code field via admin-hooks.php.
+        $parent_name = get_the_title( $parent_id );
+        $jx_code     = get_post_meta( $parent_id, 'ws_jx_code', true );
+        $create_url  = add_query_arg( [
+            'post_type'  => $post_type,
+            'ws_jx_code' => $jx_code,
+            'post_title' => "{$parent_name} {$label}",
+        ], admin_url( 'post-new.php' ) );
 
         echo '<span style="font-size: 11px; color: #dc3232;">● Not Created</span><br>';
         echo '<a class="button button-small button-primary" href="' . esc_url($create_url) . '">Create Now</a>';

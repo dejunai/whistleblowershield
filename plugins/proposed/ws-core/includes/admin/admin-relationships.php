@@ -99,9 +99,9 @@ defined( 'ABSPATH' ) || exit;
 function ws_addendum_relationship_map() {
     return [
         'jx-summary'    => 'ws_related_summary',
-        'jx-statutes'   => 'ws_related_statutes',
-        'jx-procedures' => 'ws_related_procedures',
-        'jx-resources'  => 'ws_related_resources',
+        'jx-statute'    => 'ws_related_statutes',
+        'jx-procedure'  => 'ws_related_procedures',
+        'jx-resource'   => 'ws_related_resources',
     ];
 }
 
@@ -134,19 +134,21 @@ function ws_sync_jurisdiction_relationships( $post_id ) {
         return;
     }
 
-    // Read the back-reference field pointing to the parent Jurisdiction.
-    // Defined as ws_jurisdiction (post_object, return_format: id) on each
-    // jx-* ACF field group in their respective acf-jx-*.php files.
-    $jurisdiction_id = get_field( 'ws_jurisdiction', $post_id );
+    // Read the canonical ws_jx_code string that identifies the parent Jurisdiction.
+    // All jx-* CPTs now use ws_jx_code (plain text) as their back-reference,
+    // consistent with jx-citation. The post ID is resolved via ws_get_id_by_code()
+    // which uses the cached transient lookup in query-jurisdiction.php.
+    $jx_code = get_field( 'ws_jx_code', $post_id );
 
-    if ( ! $jurisdiction_id ) {
-        // No parent jurisdiction selected — nothing to sync
+    if ( ! $jx_code ) {
+        // No code set — nothing to sync
         return;
     }
 
-    // Confirm the referenced post is actually a jurisdiction record
-    // to guard against stale or incorrect field values
-    if ( get_post_type( $jurisdiction_id ) !== 'jurisdiction' ) {
+    $jurisdiction_id = ws_get_id_by_code( $jx_code );
+
+    if ( ! $jurisdiction_id ) {
+        // Code doesn't resolve to a known jurisdiction
         return;
     }
 

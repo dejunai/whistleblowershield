@@ -53,42 +53,15 @@ add_shortcode( 'ws_nla_disclaimer_notice', function() {
 
 add_shortcode( 'ws_footer', function() {
 
-    $current_year = date( 'Y' );
-
-    $policy_links = [
-        'Privacy Policy'     => '/privacy-policy/',
-        'Disclaimer'         => '/disclaimer/',
-        'Corrections Policy' => '/corrections-policy/',
-        'Editorial Policy'   => '/editorial-policy/',
-    ];
-
-    ob_start();
-    ?>
-    <div class="ws-footer-block">
-
-        <p class="ws-footer-mission">
-            A nonpartisan educational reference of U.S. whistleblower protections &mdash; state by state and federal.
-        </p>
-
-        <nav class="ws-footer-policy-links" aria-label="Site policies">
-            <?php foreach ( $policy_links as $label => $slug ) : ?>
-                <a href="<?php echo esc_url( home_url( $slug ) ); ?>">
-                    <?php echo esc_html( $label ); ?>
-                </a>
-            <?php endforeach; ?>
-        </nav>
-
-        <p class="ws-footer-contact">
-            Contact: <a href="mailto:admin@whistleblowershield.org">admin@whistleblowershield.org</a>
-        </p>
-
-        <p class="ws-footer-copyright">
-            &copy; <?php echo esc_html( $current_year ); ?> WhistleblowerShield.org &mdash; All rights reserved.
-        </p>
-
-    </div>
-    <?php
-    return ob_get_clean();
+    return ws_render_footer( [
+        'year'         => date( 'Y' ),
+        'policy_links' => [
+            'Privacy Policy'     => '/privacy-policy/',
+            'Disclaimer'         => '/disclaimer/',
+            'Corrections Policy' => '/corrections-policy/',
+            'Editorial Policy'   => '/editorial-policy/',
+        ],
+    ] );
 
 } );
 
@@ -160,55 +133,19 @@ function ws_shortcode_legal_updates( $atts ) {
         return '';
     }
 
-    ob_start();
-    ?>
-    <div class="ws-legal-updates">
-        <?php foreach ( $updates as $update ) :
-            $law_name       = get_field( 'ws_legal_update_law_name',       $update->ID );
-            $effective_date = get_field( 'ws_legal_update_effective_date', $update->ID );
-            $source_url     = get_field( 'ws_legal_update_source_url',     $update->ID );
-            $summary_html   = get_field( 'ws_legal_update_summary',        $update->ID );
-            $fmt_effective  = $effective_date ? date( 'F j, Y', strtotime( $effective_date ) ) : '';
-            $post_date      = get_the_date( 'F j, Y', $update->ID );
-        ?>
-        <div class="ws-legal-update-item">
+    // Assemble data for each update item before passing to the render layer.
+    $items = [];
+    foreach ( $updates as $update ) {
+        $effective_date = get_field( 'ws_legal_update_effective_date', $update->ID );
+        $items[] = [
+            'title'         => get_the_title( $update->ID ),
+            'source_url'    => get_field( 'ws_legal_update_source_url', $update->ID ) ?: '',
+            'law_name'      => get_field( 'ws_legal_update_law_name',   $update->ID ) ?: '',
+            'fmt_effective' => $effective_date ? date( 'F j, Y', strtotime( $effective_date ) ) : '',
+            'post_date'     => get_the_date( 'F j, Y', $update->ID ),
+            'summary_html'  => wp_kses_post( get_field( 'ws_legal_update_summary', $update->ID ) ?: '' ),
+        ];
+    }
 
-            <h3 class="ws-legal-update-title">
-                <?php if ( $source_url ) : ?>
-                    <a href="<?php echo esc_url( $source_url ); ?>"
-                       target="_blank" rel="noopener noreferrer">
-                        <?php echo esc_html( get_the_title( $update->ID ) ); ?>
-                    </a>
-                <?php else : ?>
-                    <?php echo esc_html( get_the_title( $update->ID ) ); ?>
-                <?php endif; ?>
-            </h3>
-
-            <?php if ( $law_name ) : ?>
-            <p class="ws-legal-update-law">
-                <strong>Law / Statute:</strong> <?php echo esc_html( $law_name ); ?>
-            </p>
-            <?php endif; ?>
-
-            <?php if ( $fmt_effective ) : ?>
-            <p class="ws-legal-update-effective">
-                <strong>Effective:</strong> <?php echo esc_html( $fmt_effective ); ?>
-            </p>
-            <?php endif; ?>
-
-            <p class="ws-legal-update-posted">
-                <strong>Posted:</strong> <?php echo esc_html( $post_date ); ?>
-            </p>
-
-            <?php if ( $summary_html ) : ?>
-            <div class="ws-legal-update-summary">
-                <?php echo wp_kses_post( $summary_html ); ?>
-            </div>
-            <?php endif; ?>
-
-        </div>
-        <?php endforeach; ?>
-    </div>
-    <?php
-    return ob_get_clean();
+    return ws_render_legal_updates( $items );
 }

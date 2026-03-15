@@ -20,11 +20,11 @@
  *
  * Each jurisdiction record acts as the parent reference for:
  *
- *   jx_summary
- *   jx_statutes
- *   jx_procedures
- *   jx_resources
- *   legal_update
+ *   jx-summary
+ *   jx-statute
+ *   jx-procedure
+ *   jx-resource
+ *   ws-legal-update
  *
  * Internal Identifier:
  *   ws_jx_code (2-letter USPS style code)
@@ -35,17 +35,25 @@
  *   NY = New York
  *   US = Federal
  *
- * Version: 2.1.0
+ * @package    WhistleblowerShield
+ * @since      1.0.0
+ * @author     Whistleblower Shield
+ * @link       https://whistleblowershield.org
+ * @copyright  Copyright (c) Whistleblower Shield
+ *
+ * VERSION
+ * -------
+ * 1.0.0  Initial release.
+ * 2.1.0  Refactored for ws-core architecture.
  */
 
-if (!defined('ABSPATH')) {
-    exit;
-}
+defined( 'ABSPATH' ) || exit;
 
-function ws_register_cpt_jurisdiction()
-{
+add_action( 'init', 'ws_register_cpt_jurisdiction' );
 
-    $labels = array(
+function ws_register_cpt_jurisdiction() {
+
+    $labels = [
         'name'               => 'Jurisdictions',
         'singular_name'      => 'Jurisdiction',
         'menu_name'          => 'Jurisdictions',
@@ -58,46 +66,51 @@ function ws_register_cpt_jurisdiction()
         'all_items'          => 'All Jurisdictions',
         'search_items'       => 'Search Jurisdictions',
         'not_found'          => 'No jurisdictions found',
-        'not_found_in_trash' => 'No jurisdictions found in trash'
-    );
+        'not_found_in_trash' => 'No jurisdictions found in trash',
+    ];
 
-	$args = array(
+    $args = [
 
-		'labels' => $labels,
+        'labels' => $labels,
 
-		'public' => true,
+        // ── Visibility ────────────────────────────────────────────────────
+        // Public CPT — jurisdiction pages are the primary front-end output.
 
-		'publicly_queryable' => true,
+        'public'              => true,
+        'show_ui'             => true,
+        'publicly_queryable'  => true,
+        'exclude_from_search' => false,
+        'has_archive'         => false,
 
-		'exclude_from_search' => false,
+        // ── Editor ────────────────────────────────────────────────────────
+        // Title: jurisdiction name. Editor: optional notes — primary content
+        // served via ACF fields.
 
-		'has_archive' => false,
+        'supports' => [ 'title', 'editor', 'revisions' ],
 
-		'show_in_rest' => true,
+        // ── REST ──────────────────────────────────────────────────────────
 
-		'menu_icon' => 'dashicons-location-alt',
+        'show_in_rest' => true,
 
-		'supports' => array(
-			'title',
-			'editor',
-			'revisions'
-		),
+        // ── Capabilities ──────────────────────────────────────────────────
 
-		'rewrite' => array(
-			'slug' => 'jurisdiction'
-		),
+        'capability_type' => 'post',
 
-		'capability_type' => 'post',
+        // ── Admin Menu ────────────────────────────────────────────────────
 
-		'show_in_menu' => true,
+        'show_in_menu'  => true,
+        'hierarchical'  => false,
+        'menu_icon'     => 'dashicons-location-alt',
+        'menu_position' => 25,
 
-		'hierarchical' => false,
+        // ── Rewrite ───────────────────────────────────────────────────────
 
-		'menu_position' => 25
-	);
+        'rewrite' => [
+            'slug'       => 'jurisdiction',
+            'with_front' => false,
+        ],
 
-    register_post_type('jurisdiction', $args);
+    ];
 
+    register_post_type( 'jurisdiction', $args );
 }
-
-add_action('init', 'ws_register_cpt_jurisdiction');

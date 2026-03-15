@@ -7,7 +7,7 @@
  *
  * TAXONOMIES
  * ----------
- * ws_disclosure_cat  — Hierarchical. Classifies legal content by the
+ * ws_disclosure_type  — Hierarchical. Classifies legal content by the
  *                      nature of the misconduct (fraud, retaliation,
  *                      environmental, etc.). Applied to jx-statutes,
  *                      jx-procedures, jx-resources, jx-citations.
@@ -31,9 +31,9 @@
  *
  * VERSION
  * -------
- * 2.1.0  Initial: ws_disclosure_cat
+ * 2.1.0  Initial: ws_disclosure_type
  * 2.3.1  Added ws_process_type taxonomy and seed.
- *        Added ws-agencies to ws_disclosure_cat object types.
+ *        Added ws-agencies to ws_disclosure_type object types.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -50,8 +50,8 @@ function ws_register_taxonomies() {
     */
 
     register_taxonomy(
-        'ws_disclosure_cat',
-        [ 'jx-statutes', 'jx-procedures', 'jx-resources', 'jx-citations', 'ws-agencies' ],
+        'ws_disclosure_type',
+        [ 'jx-statute', 'jx-procedure', 'jx-resource', 'jx-citation', 'ws-agency' ],
         [
             'label'         => 'Disclosure Categories',
             'public'        => true,
@@ -94,7 +94,7 @@ function ws_register_taxonomies() {
 
     register_taxonomy(
         'ws_process_type',
-        [ 'jx-statutes', 'ws-agencies' ],
+        [ 'jx-statute', 'ws-agency' ],
         [
             'label'             => 'Process Types',
             'public'            => true,
@@ -123,8 +123,8 @@ function ws_register_taxonomies() {
     */
 
     register_taxonomy(
-        'ws_remedy',
-        ['ws-statute'],
+        'ws_remedy_type',
+        ['jx-statute'],
         [
             'label'         => 'Remedies',
             'public'        => false, // Admin-facing classification
@@ -145,7 +145,7 @@ add_action( 'init', 'ws_register_taxonomies' );
  * Programmatically seed the initial tree for Disclosure Categories.
  */
 function ws_seed_disclosure_taxonomy() {
-    $taxonomy = 'ws_disclosure_cat';
+    $taxonomy = 'ws_disclosure_type';
 
     // Define the full hierarchical structure: 'Parent Name' => [ 'slug' => 'Child Name' ]
     $structure = [
@@ -226,13 +226,13 @@ function ws_seed_disclosure_taxonomy() {
     // Mark this version as seeded so the function does not run on every
     // admin_init. Bump the version string in the gate (below) when the
     // taxonomy structure changes to trigger a re-seed.
-    update_option( 'ws_disclosure_cat_seeded', '1.0' );
+    update_option( 'ws_disclosure_type_seeded', '1.0' );
 }
 // Gate: only run when the seeded-version option is missing or outdated.
 // Bump the version string below whenever the taxonomy structure changes
 // to force a re-seed on the next admin load.
 add_action( 'admin_init', function() {
-    if ( get_option( 'ws_disclosure_cat_seeded' ) !== '1.0' ) {
+    if ( get_option( 'ws_disclosure_type_seeded' ) !== '1.0' ) {
         ws_seed_disclosure_taxonomy();
     }
 } );
@@ -293,14 +293,14 @@ add_action( 'admin_init', function() {
 */
 
 add_action( 'admin_init', function() {
-    if ( get_option( 'ws_remedy_seeded' ) !== '1.0' ) {
+    if ( get_option( 'ws_remedy_type_seeded' ) !== '1.0' ) {
         ws_seed_remedy_taxonomy();
-        update_option( 'ws_remedy_seeded', '1.0' );
+        update_option( 'ws_remedy_type_seeded', '1.0' );
     }
 } );
 
 function ws_seed_remedy_taxonomy() {
-    $taxonomy = 'ws_remedy';
+    $taxonomy = 'ws_remedy_type';
     $terms = [
         'Back Pay',
         'Front Pay',

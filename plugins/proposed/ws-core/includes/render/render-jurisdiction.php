@@ -24,9 +24,9 @@
  *
  * jurisdiction (public CPT)
  *      ├── jx-summary
- *      ├── jx-procedures
- *      ├── jx-statutes
- *      └── jx-resources
+ *      ├── jx-procedure
+ *      ├── jx-statute
+ *      └── jx-resource
  *
  * Each dataset is stored as a separate Custom Post Type and linked
  * to the jurisdiction using ACF relationship fields defined in:

@@ -124,6 +124,45 @@ function ws_register_acf_legal_update() {
                 'default_value' => 'statute',
                 'allow_null'    => 0,
                 'ui'            => 1,
+                'return_format' => 'value',
+            ],
+
+            // ── Tab: Authorship & Review ──────────────────────────────────
+
+            [
+                'key'   => 'field_ws_lu_tab_authorship',
+                'label' => 'Authorship & Review',
+                'type'  => 'tab',
+            ],
+            [
+                'key'           => 'field_ws_lu_last_edited_author',
+                'label'         => 'Last Edited By',
+                'name'          => 'ws_lu_last_edited_author',
+                'type'          => 'user',
+                'instructions'  => 'Stamped automatically on every save. Editable by administrators only.',
+                'role'          => [ 'author', 'editor', 'administrator' ],
+                'return_format' => 'array',
+                'wrapper'       => [ 'width' => '34' ],
+            ],
+            [
+                'key'          => 'field_ws_lu_date_created',
+                'label'        => 'Date Created',
+                'name'         => 'ws_lu_date_created',
+                'type'         => 'text',
+                'instructions' => 'Set automatically on first save. Read only.',
+                'readonly'     => 1,
+                'disabled'     => 1,
+                'wrapper'      => [ 'width' => '33' ],
+            ],
+            [
+                'key'          => 'field_ws_lu_last_edited',
+                'label'        => 'Last Edited',
+                'name'         => 'ws_lu_last_edited',
+                'type'         => 'text',
+                'instructions' => 'Stamped automatically on every save. Read only.',
+                'readonly'     => 1,
+                'disabled'     => 1,
+                'wrapper'      => [ 'width' => '33' ],
             ],
 
         ], // end fields

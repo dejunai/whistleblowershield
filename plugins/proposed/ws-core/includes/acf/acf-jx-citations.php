@@ -77,7 +77,7 @@ function ws_register_acf_jx_citations() {
 
     acf_add_local_field_group( [
 
-        'key'                   => 'group_ws_jx_citation',
+        'key'                   => 'group_jx_citation',
         'title'                 => 'Jurisdiction Citation',
         'menu_order'            => 0,
         'position'              => 'normal',
@@ -122,9 +122,9 @@ function ws_register_acf_jx_citations() {
 			[
 				'key'           => 'field_ws_jx_disclosure_cat',
 				'label'         => 'Disclosure Category',
-				'name'          => 'ws_disclosure_cat',
+				'name'          => 'ws_disclosure_type',
 				'type'          => 'taxonomy',
-				'taxonomy'      => 'ws_disclosure_cat',
+				'taxonomy'      => 'ws_disclosure_type',
 				'field_type'    => 'checkbox', // Use checkboxes for multiple categories
 				'add_term'      => 1,
 				'save_terms'    => 1,
@@ -199,6 +199,8 @@ function ws_register_acf_jx_citations() {
                 'type'         => 'text',
                 'required'     => 1,
                 'instructions' => 'Standard jurisdiction code used as the primary query key — e.g., CA, TX, federal, DC. Must match the code used on the parent Jurisdiction record.',
+                'maxlength'    => 2,
+                'placeholder'  => 'CA',
             ],
             [
                 'key'           => 'field_ws_jx_cite_jurisdiction',
@@ -208,8 +210,6 @@ function ws_register_acf_jx_citations() {
                 'instructions'  => 'Select the Jurisdiction this citation belongs to. Used for admin UI relationship display and two-way sync.',
                 'required'      => 1,
                 'post_type'     => [ 'jurisdiction' ],
-                'allow_null'    => 0,
-                'multiple'      => 0,
                 'return_format' => 'id',
                 'ui'            => 1,
             ],
@@ -228,17 +228,16 @@ function ws_register_acf_jx_citations() {
                 'type'          => 'user',
                 'instructions'  => 'Stamped automatically on every save. Editable by administrators only.',
                 'role'          => [ 'author', 'editor', 'administrator' ],
-                'allow_null'    => 0,
-                'multiple'      => 0,
                 'return_format' => 'array',
             ],
 
             // ── Dates (bottom of Authorship & Review) ─────────────────────
             //
             // Text fields for readonly display. ws_jx_cite_date_created
-            // is stamped once on first save. ws_jx_cite_last_reviewed
-            // is editable — update when citation content is meaningfully
-            // revised. GMT variants written server-side only, not shown.
+            // is stamped once on first save. ws_jx_cite_last_edited is
+            // stamped on every save. ws_jx_cite_last_reviewed is editable —
+            // update when citation content is meaningfully revised.
+            // GMT variants written server-side only, not shown.
 
             [
                 'key'          => 'field_ws_jx_cite_date_created',
@@ -247,6 +246,18 @@ function ws_register_acf_jx_citations() {
                 'type'         => 'text',
                 'instructions' => 'Set automatically on first save. Read only.',
                 'readonly'     => 1,
+                'disabled'     => 1,
+                'wrapper'      => [ 'width' => '50' ],
+            ],
+            [
+                'key'          => 'field_ws_jx_cite_last_edited',
+                'label'        => 'Last Edited',
+                'name'         => 'ws_jx_cite_last_edited',
+                'type'         => 'text',
+                'instructions' => 'Stamped automatically on every save. Read only.',
+                'readonly'     => 1,
+                'disabled'     => 1,
+                'wrapper'      => [ 'width' => '50' ],
             ],
             [
                 'key'          => 'field_ws_jx_cite_last_reviewed',
@@ -263,86 +274,9 @@ function ws_register_acf_jx_citations() {
 } // end ws_register_acf_jx_citations
 
 
-// ── Readonly: lock date_created for non-admins ────────────────────────────────
-
-add_filter( 'acf/load_field/name=ws_jx_cite_date_created', 'ws_jx_cite_lock_date_created' );
-function ws_jx_cite_lock_date_created( $field ) {
-    if ( ! current_user_can( 'manage_options' ) ) {
-        $field['readonly'] = 1;
-        $field['disabled'] = 1;
-    }
-    return $field;
-}
-
-
-// ── Readonly: lock last_edited_author for non-admins ─────────────────────────
-
-add_filter( 'acf/load_field/name=ws_jx_cite_last_edited_author', 'ws_jx_cite_lock_last_edited_author' );
-function ws_jx_cite_lock_last_edited_author( $field ) {
-    if ( ! current_user_can( 'manage_options' ) ) {
-        $field['readonly'] = 1;
-        $field['disabled'] = 1;
-    }
-    return $field;
-}
-
-
-// ── Auto-fill: ws_jx_cite_last_reviewed (new posts only) ─────────────────────
-
-add_filter( 'acf/load_value/name=ws_jx_cite_last_reviewed', 'ws_jx_cite_autofill_last_reviewed', 10, 3 );
-function ws_jx_cite_autofill_last_reviewed( $value, $post_id, $field ) {
-    if ( empty( $value ) ) {
-        $value = date( 'Y-m-d' );
-    }
-    return $value;
-}
-
-
-// ── Stamp fields: written via acf/save_post priority 20 ──────────────────────
-//
-// Runs after ACF commits its own fields at priority 10.
-//
-// Created stamps  — written once on first save (empty check).
-// Last-edited stamps — written on every save, no empty check.
-// GMT values use current_time( 'mysql', true ) which returns UTC.
-//
-// ws_jx_cite_last_edited_author: if an admin explicitly changed
-// the field via ACF this request, that value is already in post
-// meta at priority 20 and we leave it alone. For non-admins (whose
-// field is disabled and not submitted), we stamp current user.
-
-add_action( 'acf/save_post', 'ws_jx_cite_write_stamp_fields', 20 );
-function ws_jx_cite_write_stamp_fields( $post_id ) {
-
-    if ( get_post_type( $post_id ) !== 'jx-citation' ) {
-        return;
-    }
-
-    $now_local = current_time( 'Y-m-d' );
-    $now_gmt   = current_time( 'mysql', true );
-    $now_gmt_d = substr( $now_gmt, 0, 10 );
-    $user_id   = get_current_user_id();
-
-    // ── Created stamps (once only) ────────────────────────────────────────
-
-    if ( ! get_post_meta( $post_id, 'ws_jx_cite_date_created', true ) ) {
-        update_post_meta( $post_id, 'ws_jx_cite_date_created',     $now_local );
-        update_post_meta( $post_id, 'ws_jx_cite_date_created_gmt', $now_gmt_d );
-        update_post_meta( $post_id, 'ws_jx_cite_create_author',    $user_id );
-    }
-
-    // ── Last-edited stamps (every save) ───────────────────────────────────
-
-    update_post_meta( $post_id, 'ws_jx_cite_last_edited',     $now_local );
-    update_post_meta( $post_id, 'ws_jx_cite_last_edited_gmt', $now_gmt_d );
-
-    $submitted = isset( $_POST['acf'] ) &&
-                 isset( $_POST['acf']['field_ws_jx_cite_last_edited_author'] );
-
-    if ( ! $submitted ) {
-        update_post_meta( $post_id, 'ws_jx_cite_last_edited_author', $user_id );
-    }
-}
+// Field locking, auto-fill today, and stamp fields are handled centrally
+// in admin-hooks.php via ws_acf_lock_for_non_admins(), ws_acf_autofill_today(),
+// and ws_acf_write_stamp_fields().
 
 
 // ── Admin notice: zero attached citations ─────────────────────────────────────

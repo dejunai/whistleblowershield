@@ -66,13 +66,14 @@ function ws_register_cpt_jx_resources() {
 
     $labels = [
         'name'               => 'Jurisdiction Resources',
-        'singular_name'      => 'Jurisdiction Resources',
+        'singular_name'      => 'Jurisdiction Resource',
         'menu_name'          => 'JX Resources',
         'add_new'            => 'Add Resources',
-        'add_new_item'       => 'Add New Jurisdiction Resources',
-        'edit_item'          => 'Edit Jurisdiction Resources',
-        'new_item'           => 'New Jurisdiction Resources',
-        'view_item'          => 'View Resources',
+        'add_new_item'       => 'Add New Jurisdiction Resource',
+        'edit_item'          => 'Edit Jurisdiction Resource',
+        'new_item'           => 'New Jurisdiction Resource',
+        'view_item'          => 'View Resource',
+        'all_items'          => 'All Resources',
         'search_items'       => 'Search Resources',
         'not_found'          => 'No resources found',
         'not_found_in_trash' => 'No resources found in trash',
@@ -103,12 +104,17 @@ function ws_register_cpt_jx_resources() {
 
         // ── Admin Menu ────────────────────────────────────────────────────
 
-        'menu_icon'           => 'dashicons-admin-links',
-        'menu_position'       => 29,
+        'menu_icon'       => 'dashicons-admin-links',
+        'menu_position'   => 29,
+
+        // ── Capabilities ──────────────────────────────────────────────────
+
+        'capability_type' => 'post',
+        'rewrite'         => false,
 
     ];
 
     // Slug uses hyphen convention — must match ACF location rules
     // and relationship field post_type references throughout ws-core.
-    register_post_type( 'jx-resources', $args );
+    register_post_type( 'jx-resource', $args );
 }

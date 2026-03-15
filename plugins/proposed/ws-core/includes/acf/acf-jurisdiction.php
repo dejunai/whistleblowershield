@@ -164,6 +164,7 @@ function ws_register_acf_jurisdiction_fields() {
                 'default_value' => 'state',
                 'allow_null'    => 0,
                 'ui'            => 1,
+                'return_format' => 'value',
                 'wrapper'       => [ 'width' => '30' ],
             ],
 
@@ -254,6 +255,7 @@ function ws_register_acf_jurisdiction_fields() {
                 'default_value' => 'governor',
                 'allow_null'    => 0,
                 'ui'            => 1,
+                'return_format' => 'value',
             ],
 
             // Legal Authority
@@ -283,6 +285,7 @@ function ws_register_acf_jurisdiction_fields() {
                 'default_value' => 'attorney',
                 'allow_null'    => 0,
                 'ui'            => 1,
+                'return_format' => 'value',
             ],
 
             // Legislature
@@ -316,6 +319,7 @@ function ws_register_acf_jurisdiction_fields() {
                 'default_value' => 'state',
                 'allow_null'    => 0,
                 'ui'            => 1,
+                'return_format' => 'value',
             ],
 
             // ────────────────────────────────────────────────────────────────
@@ -394,8 +398,8 @@ function ws_register_acf_jurisdiction_fields() {
                 'name'         => 'ws_jx_author',
                 'type'         => 'text',
                 'instructions' => 'User ID of the WordPress user who created this record. Auto-populated on first save. Read-only.',
-                'required'     => 1,
                 'readonly'     => 1,
+                'disabled'     => 1,
             ],
 
             [
@@ -404,8 +408,8 @@ function ws_register_acf_jurisdiction_fields() {
                 'name'         => 'ws_jx_date_created',
                 'type'         => 'text',
                 'instructions' => 'Local date this record was first created (Y-m-d). Auto-populated on first save. Read-only.',
-                'required'     => 1,
                 'readonly'     => 1,
+                'disabled'     => 1,
             ],
 
             [
@@ -414,8 +418,8 @@ function ws_register_acf_jurisdiction_fields() {
                 'name'         => 'ws_jx_date_created_gmt',
                 'type'         => 'text',
                 'instructions' => 'UTC date this record was first created (Y-m-d). Auto-populated on first save. Read-only.',
-                'required'     => 1,
                 'readonly'     => 1,
+                'disabled'     => 1,
             ],
 
             [
@@ -424,8 +428,8 @@ function ws_register_acf_jurisdiction_fields() {
                 'name'         => 'ws_jx_date_updated',
                 'type'         => 'text',
                 'instructions' => 'Local date this record was last updated (Y-m-d). Refreshed on every save. Read-only.',
-                'required'     => 1,
                 'readonly'     => 1,
+                'disabled'     => 1,
             ],
 
             [
@@ -434,8 +438,8 @@ function ws_register_acf_jurisdiction_fields() {
                 'name'         => 'ws_jx_date_updated_gmt',
                 'type'         => 'text',
                 'instructions' => 'UTC date this record was last updated (Y-m-d). Refreshed on every save. Read-only.',
-                'required'     => 1,
                 'readonly'     => 1,
+                'disabled'     => 1,
             ],
 
             [
@@ -444,11 +448,8 @@ function ws_register_acf_jurisdiction_fields() {
                 'name'          => 'ws_jx_last_editor',
                 'type'          => 'user',
                 'instructions'  => 'WordPress user who last updated this record. Auto-populated on every save. Administrators may override to preserve attribution.',
-                'required'      => 1,
                 'role'          => [ 'author', 'editor', 'administrator' ],
-                'allow_null'    => 0,
-                'multiple'      => 0,
-                'return_format' => 'id',
+                'return_format' => 'array',
             ],
 
             // ────────────────────────────────────────────────────────────────
@@ -483,7 +484,7 @@ function ws_register_acf_jurisdiction_fields() {
                 'name'         => 'ws_related_procedures',
                 'type'         => 'relationship',
                 'instructions' => 'Link the Jurisdiction Procedures entry for this jurisdiction.',
-                'post_type'    => [ 'jx-procedures' ],
+                'post_type'    => [ 'jx-procedure' ],
                 'filters'      => [ 'search' ],
                 'max'          => 1,
                 'return_format' => 'object',
@@ -495,7 +496,7 @@ function ws_register_acf_jurisdiction_fields() {
                 'name'         => 'ws_related_statutes',
                 'type'         => 'relationship',
                 'instructions' => 'Link the Jurisdiction Statutes entry for this jurisdiction.',
-                'post_type'    => [ 'jx-statutes' ],
+                'post_type'    => [ 'jx-statute' ],
                 'filters'      => [ 'search' ],
                 'max'          => 1,
                 'return_format' => 'object',
@@ -507,7 +508,7 @@ function ws_register_acf_jurisdiction_fields() {
                 'name'         => 'ws_related_resources',
                 'type'         => 'relationship',
                 'instructions' => 'Link the Jurisdiction Resources entry for this jurisdiction.',
-                'post_type'    => [ 'jx-resources' ],
+                'post_type'    => [ 'jx-resource' ],
                 'filters'      => [ 'search' ],
                 'max'          => 1,
                 'return_format' => 'object',

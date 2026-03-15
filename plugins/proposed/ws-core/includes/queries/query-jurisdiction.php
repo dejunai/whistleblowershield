@@ -137,6 +137,22 @@ function ws_get_id_by_code( $jx_code ) {
 
 
 // ════════════════════════════════════════════════════════════════════════════
+// Input Resolver
+//
+// Resolves a mixed $input (numeric post ID or two-letter ws_jx_code string)
+// to a jurisdiction post ID integer. Used by all dataset retrieval functions
+// to eliminate the repeated is_numeric ternary.
+//
+// Returns 0 if input is empty or the code cannot be resolved.
+// ════════════════════════════════════════════════════════════════════════════
+
+function ws_resolve_jx_id( $input ) {
+    if ( ! $input ) return 0;
+    return is_numeric( $input ) ? (int) $input : (int) ws_get_id_by_code( (string) $input );
+}
+
+
+// ════════════════════════════════════════════════════════════════════════════
 // Master Jurisdiction Data Fetcher
 //
 // Accepts either a numeric post ID or a two-letter ws_jx_code string.
@@ -159,7 +175,7 @@ function ws_get_jurisdiction_data( $input = null ) {
         global $post;
         $post_id = $post->ID ?? 0;
     } else {
-        $post_id = is_numeric( $input ) ? (int) $input : ws_get_id_by_code( $input );
+        $post_id = ws_resolve_jx_id( $input );
     }
 
     // Bail if post ID is invalid or not a jurisdiction record
@@ -226,7 +242,7 @@ function ws_get_jurisdiction_data( $input = null ) {
 
 function ws_get_jx_summary( $input ) {
 
-    $post_id = is_numeric( $input ) ? (int) $input : ws_get_id_by_code( $input );
+    $post_id = ws_resolve_jx_id( $input );
 
     if ( ! $post_id ) {
         return false;
@@ -263,7 +279,7 @@ function ws_get_jx_summary( $input ) {
 
 function ws_get_jx_procedures( $input ) {
 
-    $post_id = is_numeric( $input ) ? (int) $input : ws_get_id_by_code( $input );
+    $post_id = ws_resolve_jx_id( $input );
 
     if ( ! $post_id ) {
         return false;
@@ -299,8 +315,8 @@ function ws_get_jx_procedures( $input ) {
 function ws_get_jx_statutes( $input ) {
 
     // 1. Resolve the primary requested Jurisdiction ID
-    $post_id = is_numeric( $input ) ? (int) $input : ws_get_id_by_code( $input );
-    $jx_code = is_numeric( $input ) ? get_post_meta( $post_id, 'ws_jx_code', true ) : strtoupper($input);
+    $post_id = ws_resolve_jx_id( $input );
+    $jx_code = is_numeric( $input ) ? get_field( 'ws_jx_code', $post_id ) : strtoupper( $input );
 
     if ( ! $post_id ) {
         return false;
@@ -364,7 +380,7 @@ function ws_get_jx_statutes( $input ) {
 
 function ws_get_jx_resources( $input ) {
 
-    $post_id = is_numeric( $input ) ? (int) $input : ws_get_id_by_code( $input );
+    $post_id = ws_resolve_jx_id( $input );
 
     if ( ! $post_id ) {
         return false;
@@ -449,6 +465,7 @@ function ws_get_jurisdiction_index_data() {
 
         $query = new WP_Query( [
             'post_type'      => 'jurisdiction',
+            'post_status'    => 'publish',
             'posts_per_page' => -1,
             'orderby'        => 'title',
             'order'          => 'ASC',

@@ -1,0 +1,262 @@
+**Project Context**
+
+We are developing a WordPress legal knowledge system called **WhistleblowerShield**.
+The system uses **custom post types (CPTs)**, **ACF field groups**, and a structured **admin layer**.
+
+The goal of this task is to perform a **normalization pass only**.
+Do **not redesign architecture**, **do not introduce new systems**, and **do not remove existing logic** unless it violates the normalization rules.
+
+Focus only on **repairing naming consistency, schema alignment, and structural integrity**.
+
+---
+
+# Normalization Rules
+
+## 1. Custom Post Type Slugs
+
+All jurisdictional legal entities use the `jx-` namespace.
+
+Examples:
+
+* `jx-statute`
+* `jx-interpretation`
+* `jx-procedure`
+
+Other system CPTs use the `ws-` namespace.
+
+Examples:
+
+* `ws-agency`
+* `ws-court`
+* `ws-authority`
+
+Post type slugs must always be **singular**.
+
+---
+
+# 2. ACF Field Naming
+
+All field **names** follow this structure:
+
+```
+ws_jx_<object>_<field>
+```
+
+Examples:
+
+```
+ws_jx_statute_official_name
+ws_jx_statute_jx_code
+ws_jx_statute_limit_value
+ws_jx_interp_court
+ws_jx_interp_summary
+```
+
+Field names must:
+
+* use lowercase
+* use underscores
+* include the object prefix
+
+---
+
+# 3. ACF Field Keys
+
+Field **keys** follow this structure:
+
+```
+field_jx_<object>_<field>
+```
+
+Examples:
+
+```
+field_jx_statute_official_name
+field_jx_statute_limit_value
+field_jx_interp_court
+```
+
+Keys must match the associated field name logically.
+
+---
+
+# 4. ACF Field Groups
+
+Field groups follow:
+
+```
+group_jx_<object>
+```
+
+Example:
+
+```
+group_jx_statute_details
+```
+
+---
+
+# 5. Taxonomy Naming
+
+Taxonomies follow:
+
+```
+ws_<concept>_type
+```
+
+Examples:
+
+```
+ws_disclosure_type
+ws_remedy_type
+ws_authority_type
+```
+
+Taxonomies must use **snake_case** and end with `_type`.
+
+---
+
+# 6. File Naming
+
+ACF schema files:
+
+```
+acf-jx-statutes.php
+acf-jx-interpretations.php
+acf-jx-procedures.php
+```
+
+Admin system files:
+
+```
+admin-hooks.php
+admin-scripts.php
+admin-ajax-handlers.php
+admin-dashboard.php
+```
+
+All files use **lowercase with hyphens**.
+
+---
+
+# 7. Loader Requirements
+
+`loader.php` must preserve **conditional loading**.
+
+Admin files must only load in the admin context.
+
+Example pattern:
+
+```
+if(is_admin()){
+    require_once 'includes/admin/admin-hooks.php';
+}
+```
+
+Do not remove conditional loading logic.
+
+---
+
+# 8. Interpretation Creation System
+
+Interpretations can be created **from the statute editor**.
+
+The statute editor contains a **secondary interpretation form**.
+
+Behavior:
+
+```
+Statute editor
+   ↓
+Add interpretation
+   ↓
+AJAX save
+   ↓
+Create jx-interpretation post
+```
+
+Interpretation posts must use:
+
+```
+post_type: jx-interpretation
+post_parent: statute
+```
+
+---
+
+# 9. Court Filter System
+
+Court dropdowns are dynamically filtered.
+
+Filtering variables include:
+
+```
+jx_id (jurisdiction code)
+ws_disclosure_type taxonomy
+court_level (future variable)
+```
+
+Court lists must be generated from a **court registry**, not hard-coded in ACF fields.
+
+ACF fields should define:
+
+```
+'type' => 'select'
+'choices' => []
+```
+
+Choices are populated through an `acf/load_field` filter.
+
+---
+
+# 10. Scope of Normalization
+
+Allowed changes:
+
+* fix syntax errors
+* repair broken arrays
+* normalize naming
+* correct CPT slugs
+* correct field keys
+* repair ACF field groups
+* reconnect filters or hooks
+
+Not allowed:
+
+* architectural redesign
+* new CPTs
+* new taxonomies
+* replacing systems already implemented
+
+---
+
+# Deliverables
+
+When performing normalization:
+
+1. Confirm **file count**
+2. Confirm **directory structure**
+3. Output **repaired files**
+4. Do not omit files
+5. Do not invent new files
+
+---
+
+# Special Note
+
+The file `acf-jx-statutes.php` contains a **conditional secondary interpretation form**.
+It must remain functional and integrated with the admin system.
+
+This form relies on:
+
+```
+field_jx_interp_jx_code
+field_jx_interp_court
+field_jx_interp_summary
+```
+
+The court field must use the **dynamic filter system**.
+
+---
+
+End of normalization rules.

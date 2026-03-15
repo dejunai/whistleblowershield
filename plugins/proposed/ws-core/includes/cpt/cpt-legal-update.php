@@ -72,6 +72,7 @@ function ws_register_cpt_legal_update() {
         'search_items'       => 'Search Legal Updates',
         'not_found'          => 'No legal updates found',
         'not_found_in_trash' => 'No legal updates found in Trash',
+        'all_items'          => 'All Legal Updates',
     ];
 
     $args = [
@@ -83,11 +84,13 @@ function ws_register_cpt_legal_update() {
         // Intended for admin and editorial use until front-end
         // publication features are defined.
 
-        'public'          => false,
-        'show_ui'         => true,
-        'show_in_menu'    => true,
-        'has_archive'     => false,
-        'rewrite'         => false,
+        'public'              => false,
+        'show_ui'             => true,
+        'show_in_menu'        => true,
+        'publicly_queryable'  => false,
+        'exclude_from_search' => true,
+        'has_archive'         => false,
+        'rewrite'             => false,
 
         // ── Editor ────────────────────────────────────────────────────────
 

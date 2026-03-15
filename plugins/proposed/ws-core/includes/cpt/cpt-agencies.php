@@ -6,17 +6,23 @@
  *
  * PURPOSE
  * -------
- * This CPT serves as the central directory for government and non-government 
+ * This CPT serves as the central directory for government and non-government
  * agencies responsible for whistleblower intake, oversight, and protection.
- * * ARCHITECTURE
+ *
+ * ARCHITECTURE
  * ------------
- * Unlike citations, agencies are a top-level directory. They are linked to 
- * jurisdictions via the ws_jx_code array (USPS codes) and classified by 
+ * Unlike citations, agencies are a top-level directory. They are linked to
+ * jurisdictions via the ws_jx_code array (USPS codes) and classified by
  * misconduct types via the ws_disclosure_cat taxonomy.
  *
  * @package    WhistleblowerShield
- * @author     Dejunai
+ * @since      1.0.0
+ * @author     Whistleblower Shield
+ * @link       https://whistleblowershield.org
+ * @copyright  Copyright (c) Whistleblower Shield
  */
+
+defined( 'ABSPATH' ) || exit;
 
 add_action( 'init', 'ws_register_cpt_agencies' );
 
@@ -27,7 +33,7 @@ function ws_register_cpt_agencies() {
         'singular_name'      => 'Agency',
         'menu_name'          => 'Agencies',
         'name_admin_bar'     => 'Agency',
-        'add_new'            => 'Add New Agency',
+        'add_new'            => 'Add New',
         'add_new_item'       => 'Add New Agency',
         'edit_item'          => 'Edit Agency',
         'new_item'           => 'New Agency',
@@ -57,7 +63,8 @@ function ws_register_cpt_agencies() {
         // Editor: General description/overview of the agency
         
         'supports'            => [ 'title', 'editor', 'thumbnail', 'revisions' ],
-        'rewrite'             => [ 'slug' => 'agency' ],
+        'rewrite'             => [ 'slug' => 'agency', 'with_front' => false ],
+        'capability_type'     => 'post',
 
         // -- REST ----------------------------------------------------------
         // Enabled for Block Editor and ACF AJAX support.
@@ -71,24 +78,24 @@ function ws_register_cpt_agencies() {
 
         // -- Taxonomies ----------------------------------------------------
         
-        'taxonomies'          => [ 'ws_disclosure_cat' ],
+        'taxonomies'          => [ 'ws_disclosure_type' ],
     ];
 
-    register_post_type( 'ws-agencies', $args );
+    register_post_type( 'ws-agency', $args );
 }
 
 /**
- * Optional: Customize the admin columns to show the Agency Code and 
+ * Optional: Customize the admin columns to show the Agency Code and
  * Jurisdiction codes for easier management.
  */
-add_filter( 'manage_ws-agencies_posts_columns', 'ws_agencies_columns' );
+add_filter( 'manage_ws-agency_posts_columns', 'ws_agencies_columns' );
 function ws_agencies_columns( $columns ) {
     $columns['ws_agency_code'] = 'Agency Code';
     $columns['ws_jx_code']     = 'Jurisdictions';
     return $columns;
 }
 
-add_action( 'manage_ws-agencies_posts_custom_column', 'ws_agencies_column_data', 10, 2 );
+add_action( 'manage_ws-agency_posts_custom_column', 'ws_agencies_column_data', 10, 2 );
 function ws_agencies_column_data( $column, $post_id ) {
     switch ( $column ) {
         case 'ws_agency_code':

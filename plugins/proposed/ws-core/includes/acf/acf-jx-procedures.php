@@ -49,7 +49,7 @@ function ws_register_acf_jx_procedures() {
 
     acf_add_local_field_group( [
 
-        'key'                   => 'group_ws_jx_procedures',
+        'key'                   => 'group_jx_procedure',
         'title'                 => 'Procedures Metadata',
         'menu_order'            => 0,
         'position'              => 'normal',
@@ -62,7 +62,7 @@ function ws_register_acf_jx_procedures() {
         'location' => [ [ [
             'param'    => 'post_type',
             'operator' => '==',
-            'value'    => 'jx-procedures',
+            'value'    => 'jx-procedure',
         ] ] ],
 
         'fields' => [
@@ -73,17 +73,14 @@ function ws_register_acf_jx_procedures() {
             // admin-relationships.php.
 
             [
-                'key'           => 'field_ws_procedures_jurisdiction',
-                'label'         => 'Parent Jurisdiction',
-                'name'          => 'ws_jurisdiction',
-                'type'          => 'post_object',
-                'instructions'  => 'Select the Jurisdiction these procedures belong to. Required for relationship sync.',
-                'required'      => 1,
-                'post_type'     => [ 'jurisdiction' ],
-                'allow_null'    => 0,
-                'multiple'      => 0,
-                'return_format' => 'id',
-                'ui'            => 1,
+                'key'          => 'field_ws_procedures_jx_code',
+                'label'        => 'Jurisdiction Code',
+                'name'         => 'ws_jx_code',
+                'type'         => 'text',
+                'instructions' => 'USPS code for the parent jurisdiction (e.g., CA, TX, US). Required for relationship sync. Pre-populated automatically when created via the Jurisdiction editor.',
+                'required'     => 1,
+                'maxlength'    => 2,
+                'placeholder'  => 'CA',
             ],
 
             // ── Legal Review ──────────────────────────────────────────────
@@ -99,8 +96,56 @@ function ws_register_acf_jx_procedures() {
                 'first_day'      => 1,
             ],
 
+            // ── Authorship & Review ───────────────────────────────────────
+            //
+            // Stamp fields are written server-side via ws_acf_write_stamp_fields()
+            // in admin-hooks.php. date_created and last_edited are readonly for
+            // everyone. last_edited_author is locked for non-admins; administrators
+            // may override it to preserve attribution.
+
+            [
+                'key'   => 'field_ws_jx_proc_tab_authorship',
+                'label' => 'Authorship & Review',
+                'type'  => 'tab',
+            ],
+
+            [
+                'key'           => 'field_ws_jx_proc_last_edited_author',
+                'label'         => 'Last Edited By',
+                'name'          => 'ws_jx_proc_last_edited_author',
+                'type'          => 'user',
+                'instructions'  => 'Stamped automatically on every save. Editable by administrators only.',
+                'role'          => [ 'author', 'editor', 'administrator' ],
+                'return_format' => 'array',
+                'wrapper'       => [ 'width' => '34' ],
+            ],
+
+            [
+                'key'          => 'field_ws_jx_proc_date_created',
+                'label'        => 'Date Created',
+                'name'         => 'ws_jx_proc_date_created',
+                'type'         => 'text',
+                'instructions' => 'Set automatically on first save. Read only.',
+                'readonly'     => 1,
+                'disabled'     => 1,
+                'wrapper'      => [ 'width' => '33' ],
+            ],
+
+            [
+                'key'          => 'field_ws_jx_proc_last_edited',
+                'label'        => 'Last Edited',
+                'name'         => 'ws_jx_proc_last_edited',
+                'type'         => 'text',
+                'instructions' => 'Stamped automatically on every save. Read only.',
+                'readonly'     => 1,
+                'disabled'     => 1,
+                'wrapper'      => [ 'width' => '33' ],
+            ],
+
         ], // end fields
 
     ] ); // end acf_add_local_field_group
 
 } // end ws_register_acf_jx_procedures
+
+

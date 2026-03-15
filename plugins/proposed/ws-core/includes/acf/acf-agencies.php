@@ -47,7 +47,7 @@ function ws_register_acf_agencies() {
 
     acf_add_local_field_group( [
 
-        'key'                   => 'group_ws_agencies',
+        'key'                   => 'group_ws_agency',
         'title'                 => 'Agency Details & Reporting Protocols',
         'menu_order'            => 0,
         'position'              => 'normal',
@@ -59,7 +59,7 @@ function ws_register_acf_agencies() {
         'location' => [ [ [
             'param'    => 'post_type',
             'operator' => '==',
-            'value'    => 'ws-agencies',
+            'value'    => 'ws-agency',
         ] ] ],
 
         'fields' => [
@@ -120,7 +120,6 @@ function ws_register_acf_agencies() {
                 'choices'       => [],  // Populated dynamically — see acf/load_field filter below
                 'multiple'      => 1,
                 'ui'            => 1,
-                'ajax'          => 0,  // Not needed — choices loaded server-side on field load
                 'return_format' => 'value',
                 'allow_null'    => 1,
             ],
@@ -129,7 +128,7 @@ function ws_register_acf_agencies() {
                 'label'      => 'Disclosure Categories',
                 'name'       => 'ws_agency_disclosure_type',
                 'type'       => 'taxonomy',
-                'taxonomy'   => 'ws_disclosure_cat',
+                'taxonomy'   => 'ws_disclosure_type',
                 'field_type' => 'multi_select',
                 'add_term'   => 0,
                 'save_terms' => 1,
@@ -200,7 +199,10 @@ function ws_register_acf_agencies() {
                 'label'         => 'Anonymous Reporting Allowed?',
                 'name'          => 'ws_agency_anonymous_allowed',
                 'type'          => 'true_false',
+                'instructions'  => 'Enable if this agency accepts reports without requiring the reporter to identify themselves.',
                 'ui'            => 1,
+                'ui_on_text'    => 'Yes',
+                'ui_off_text'   => 'No',
                 'default_value' => 0,
             ],
             [
@@ -208,7 +210,10 @@ function ws_register_acf_agencies() {
                 'label'         => 'Reward/Bounty Program Available?',
                 'name'          => 'ws_agency_reward_program',
                 'type'          => 'true_false',
+                'instructions'  => 'Enable if this agency offers financial rewards or bounties to whistleblowers.',
                 'ui'            => 1,
+                'ui_on_text'    => 'Yes',
+                'ui_off_text'   => 'No',
                 'default_value' => 0,
             ],
 
@@ -224,18 +229,40 @@ function ws_register_acf_agencies() {
                 'label'         => 'Last Edited By',
                 'name'          => 'ws_agency_last_edited_author',
                 'type'          => 'user',
-                'instructions'  => 'Stamped automatically on every save.',
-                'allow_null'    => 0,
-                'multiple'      => 0,
+                'instructions'  => 'Stamped automatically on every save. Editable by administrators only.',
+                'role'          => [ 'author', 'editor', 'administrator' ],
                 'return_format' => 'array',
+                'wrapper'       => [ 'width' => '34' ],
+            ],
+            [
+                'key'          => 'field_ws_agency_date_created',
+                'label'        => 'Date Created',
+                'name'         => 'ws_agency_date_created',
+                'type'         => 'text',
+                'instructions' => 'Set automatically on first save. Read only.',
+                'readonly'     => 1,
+                'disabled'     => 1,
+                'wrapper'      => [ 'width' => '33' ],
+            ],
+            [
+                'key'          => 'field_ws_agency_last_edited',
+                'label'        => 'Last Edited',
+                'name'         => 'ws_agency_last_edited',
+                'type'         => 'text',
+                'instructions' => 'Stamped automatically on every save. Read only.',
+                'readonly'     => 1,
+                'disabled'     => 1,
+                'wrapper'      => [ 'width' => '33' ],
             ],
             [
                 'key'            => 'field_ws_agency_last_reviewed',
                 'label'          => 'Last Verified Date',
                 'name'           => 'ws_agency_last_reviewed',
                 'type'           => 'date_picker',
-                'display_format' => 'm/d/Y',
-                'return_format'  => 'Ymd',
+                'instructions'   => 'Update this date each time the agency record is meaningfully revised.',
+                'display_format' => 'F j, Y',
+                'return_format'  => 'Y-m-d',
+                'first_day'      => 1,
             ],
 
         ], // end fields

@@ -79,7 +79,7 @@ function ws_register_acf_jx_summary() {
 
     acf_add_local_field_group( [
 
-        'key'                   => 'group_ws_jx_summary',
+        'key'                   => 'group_jx_summary',
         'title'                 => 'Jurisdiction Summary Metadata',
         'menu_order'            => 0,
         'position'              => 'normal',
@@ -118,6 +118,7 @@ function ws_register_acf_jx_summary() {
                 'default_value' => 'state',
                 'allow_null'    => 0,
                 'ui'            => 1,
+                'return_format' => 'value',
             ],
             [
                 'key'          => 'field_ws_jx_sum_jurisdiction',
@@ -161,7 +162,6 @@ function ws_register_acf_jx_summary() {
                 'name'         => 'ws_jx_limitations',
                 'type'         => 'wysiwyg',
                 'instructions' => 'Content for the Limitations and Ramifications section. Rendered automatically after the case law section on the jurisdiction page via [ws_jx_limitations]. Use the editor toolbar for all formatting — do NOT paste raw Markdown.',
-                'required'     => 0,
                 'tabs'         => 'all',
                 'toolbar'      => 'full',
                 'media_upload' => 0,
@@ -182,8 +182,6 @@ function ws_register_acf_jx_summary() {
                 'type'          => 'user',
                 'instructions'  => 'Stamped automatically on every save. Editable by administrators only.',
                 'role'          => [ 'author', 'editor', 'administrator' ],
-                'allow_null'    => 0,
-                'multiple'      => 0,
                 'return_format' => 'array',
             ],
             [
@@ -223,12 +221,12 @@ function ws_register_acf_jx_summary() {
 
             // ── Dates (bottom of Authorship & Review) ─────────────────────
             //
-            // Both fields are text type to support readonly rendering.
-            // ws_jx_sum_date_created is stamped once on first save and
-            // never overwritten. ws_jx_sum_last_reviewed auto-fills today
-            // on new posts and is updated manually on meaningful revisions.
-            // GMT variants and last_edited are written server-side only
-            // and do not appear in the form.
+            // All date fields are text type to support readonly rendering.
+            // ws_jx_sum_date_created is stamped once on first save.
+            // ws_jx_sum_last_edited is stamped on every save.
+            // ws_jx_sum_last_reviewed is editable — update manually on
+            // meaningful content revisions. GMT variants and create_author
+            // are written server-side only and do not appear in the form.
 
             [
                 'key'          => 'field_ws_jx_sum_date_created',
@@ -237,6 +235,18 @@ function ws_register_acf_jx_summary() {
                 'type'         => 'text',
                 'instructions' => 'Set automatically on first save. Read only.',
                 'readonly'     => 1,
+                'disabled'     => 1,
+                'wrapper'      => [ 'width' => '50' ],
+            ],
+            [
+                'key'          => 'field_ws_jx_sum_last_edited',
+                'label'        => 'Last Edited',
+                'name'         => 'ws_jx_sum_last_edited',
+                'type'         => 'text',
+                'instructions' => 'Stamped automatically on every save. Read only.',
+                'readonly'     => 1,
+                'disabled'     => 1,
+                'wrapper'      => [ 'width' => '50' ],
             ],
             [
                 'key'          => 'field_ws_jx_sum_last_reviewed',
@@ -254,17 +264,14 @@ function ws_register_acf_jx_summary() {
                 'type'  => 'tab',
             ],
             [
-                'key'           => 'field_ws_summary_jurisdiction',
-                'label'         => 'Parent Jurisdiction',
-                'name'          => 'ws_jurisdiction',
-                'type'          => 'post_object',
-                'instructions'  => 'Select the Jurisdiction this summary belongs to. Required for relationship sync.',
-                'required'      => 1,
-                'post_type'     => [ 'jurisdiction' ],
-                'allow_null'    => 0,
-                'multiple'      => 0,
-                'return_format' => 'id',
-                'ui'            => 1,
+                'key'          => 'field_ws_summary_jx_code',
+                'label'        => 'Jurisdiction Code',
+                'name'         => 'ws_jx_code',
+                'type'         => 'text',
+                'instructions' => 'USPS code for the parent jurisdiction (e.g., CA, TX, US). Required for relationship sync. Pre-populated automatically when created via the Jurisdiction editor.',
+                'required'     => 1,
+                'maxlength'    => 2,
+                'placeholder'  => 'CA',
             ],
 
         ], // end fields
@@ -274,160 +281,8 @@ function ws_register_acf_jx_summary() {
 } // end ws_register_acf_jx_summary
 
 
-// ── Readonly: lock date_created for non-admins ────────────────────────────────
-//
-// Both readonly and disabled are set to prevent the field from being
-// submitted with a changed value. ACF respects 'disabled' on save.
-
-add_filter( 'acf/load_field/name=ws_jx_sum_date_created', 'ws_jx_sum_lock_date_created' );
-function ws_jx_sum_lock_date_created( $field ) {
-    if ( ! current_user_can( 'manage_options' ) ) {
-        $field['readonly'] = 1;
-        $field['disabled'] = 1;
-    }
-    return $field;
-}
+// Field locking, auto-fill today, and stamp fields are handled centrally
+// in admin-hooks.php via ws_acf_lock_for_non_admins(), ws_acf_autofill_today(),
+// and ws_acf_write_stamp_fields().
 
 
-// ── Readonly: lock last_edited_author for non-admins ─────────────────────────
-
-add_filter( 'acf/load_field/name=ws_jx_sum_last_edited_author', 'ws_jx_sum_lock_last_edited_author' );
-function ws_jx_sum_lock_last_edited_author( $field ) {
-    if ( ! current_user_can( 'manage_options' ) ) {
-        $field['readonly'] = 1;
-        $field['disabled'] = 1;
-    }
-    return $field;
-}
-
-
-// ── Auto-fill: ws_jx_sum_author (new posts only) ──────────────────────────────
-
-add_filter( 'acf/load_value/name=ws_jx_sum_author', 'ws_jx_sum_autofill_author', 10, 3 );
-function ws_jx_sum_autofill_author( $value, $post_id, $field ) {
-    if ( empty( $value ) ) {
-        $value = get_current_user_id();
-    }
-    return $value;
-}
-
-
-// ── Auto-fill: ws_jx_sum_last_reviewed (new posts only) ──────────────────────
-
-add_filter( 'acf/load_value/name=ws_jx_sum_last_reviewed', 'ws_jx_sum_autofill_last_reviewed', 10, 3 );
-function ws_jx_sum_autofill_last_reviewed( $value, $post_id, $field ) {
-    if ( empty( $value ) ) {
-        $value = date( 'Y-m-d' );
-    }
-    return $value;
-}
-
-
-// ── Stamp fields: written via acf/save_post priority 20 ──────────────────────
-//
-// Runs after ACF commits its own fields at priority 10, ensuring
-// ACF-managed values are already in post meta before we read or
-// write anything here.
-//
-// Created stamps  — written once on first save (empty check).
-// Last-edited stamps — written on every save, no empty check.
-// GMT values use current_time( 'mysql', true ) which returns UTC.
-//
-// ws_jx_sum_last_edited_author: if an admin explicitly changed the
-// field via ACF this request, that value is already in post meta
-// at priority 20 and we leave it alone. For non-admins (whose field
-// is disabled and therefore not submitted), we stamp current user.
-
-add_action( 'acf/save_post', 'ws_jx_sum_write_stamp_fields', 20 );
-function ws_jx_sum_write_stamp_fields( $post_id ) {
-
-    if ( get_post_type( $post_id ) !== 'jx-summary' ) {
-        return;
-    }
-
-    $now_local = current_time( 'Y-m-d' );
-    $now_gmt   = current_time( 'mysql', true );
-    $now_gmt_d = substr( $now_gmt, 0, 10 );
-    $user_id   = get_current_user_id();
-
-    // ── Created stamps (once only) ────────────────────────────────────────
-
-    if ( ! get_post_meta( $post_id, 'ws_jx_sum_date_created', true ) ) {
-        update_post_meta( $post_id, 'ws_jx_sum_date_created',     $now_local );
-        update_post_meta( $post_id, 'ws_jx_sum_date_created_gmt', $now_gmt_d );
-        update_post_meta( $post_id, 'ws_jx_sum_create_author',    $user_id );
-    }
-
-    // ── Last-edited stamps (every save) ───────────────────────────────────
-
-    update_post_meta( $post_id, 'ws_jx_sum_last_edited',     $now_local );
-    update_post_meta( $post_id, 'ws_jx_sum_last_edited_gmt', $now_gmt_d );
-
-    // Stamp last_edited_author only if the field was not submitted
-    // (i.e. non-admin whose field is disabled). Admins who changed
-    // the field via ACF already have their chosen value in post meta.
-    $submitted = isset( $_POST['acf'] ) &&
-                 isset( $_POST['acf']['field_ws_jx_sum_last_edited_author'] );
-
-    if ( ! $submitted ) {
-        update_post_meta( $post_id, 'ws_jx_sum_last_edited_author', $user_id );
-    }
-}
-
-
-// ── Cleanup: retire deprecated meta keys ─────────────────────────────────────
-//
-// Runs once per site, gated by option flag ws_jx_summary_cleanup_v1.
-//
-// Keys retired in v2.2.0:
-//   ws_summary_last_review  — replaced by ws_jx_sum_last_reviewed
-//   ws_summary_notes        — replaced by ws_jx_summary_notes
-//
-// Once you confirm this has run on the live site (the admin notice
-// below will confirm), remove this function and its add_action call.
-
-add_action( 'admin_init', 'ws_jx_summary_cleanup_v1' );
-function ws_jx_summary_cleanup_v1() {
-
-    if ( get_option( 'ws_jx_summary_cleanup_v1' ) ) {
-        return;
-    }
-
-    global $wpdb;
-
-    $retired_keys = [
-        'ws_summary_last_review',
-        'ws_summary_notes',
-    ];
-
-    $total_deleted = 0;
-    $results       = [];
-
-    foreach ( $retired_keys as $key ) {
-        $deleted = $wpdb->delete(
-            $wpdb->postmeta,
-            [ 'meta_key' => $key ],
-            [ '%s' ]
-        );
-        if ( $deleted ) {
-            $results[ $key ] = $deleted;
-            $total_deleted  += $deleted;
-        }
-    }
-
-    update_option( 'ws_jx_summary_cleanup_v1', true );
-
-    if ( $total_deleted > 0 && is_admin() ) {
-        add_action( 'admin_notices', function() use ( $total_deleted, $results ) {
-            $detail = implode( ', ', array_map(
-                fn( $k, $v ) => "<code>{$k}</code> ({$v})",
-                array_keys( $results ),
-                $results
-            ) );
-            echo '<div class="notice notice-success is-dismissible"><p>';
-            echo '<strong>WhistleblowerShield:</strong> Removed ' . $total_deleted . ' retired meta ';
-            echo 'entries: ' . $detail . '.';
-            echo '</p></div>';
-        } );
-    }
-}

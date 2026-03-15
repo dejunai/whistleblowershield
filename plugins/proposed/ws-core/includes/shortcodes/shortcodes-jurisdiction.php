@@ -228,58 +228,15 @@ add_shortcode( 'ws_jx_summary', function() {
     $fmt_created  = $date_created  ? date( 'F j, Y', strtotime( $date_created ) )  : '';
     $fmt_reviewed = $last_reviewed ? date( 'F j, Y', strtotime( $last_reviewed ) ) : '';
 
-    // Build review HTML to pass to renderer
-    ob_start();
-    ?>
-    <div class="ws-jx-summary-footer">
-
-        <?php if ( $author_name ) : ?>
-        <p class="ws-jx-summary-author">
-            <strong>Author:</strong> <?php echo $author_name; ?>
-        </p>
-        <?php endif; ?>
-
-        <?php if ( $fmt_created ) : ?>
-        <p class="ws-jx-summary-date-created">
-            <strong>Date Created:</strong> <?php echo esc_html( $fmt_created ); ?>
-        </p>
-        <?php endif; ?>
-
-        <?php if ( $fmt_reviewed ) : ?>
-        <p class="ws-jx-summary-last-reviewed">
-            <strong>Last Reviewed:</strong> <?php echo esc_html( $fmt_reviewed ); ?>
-        </p>
-        <?php endif; ?>
-
-        <div class="ws-review-badges">
-            <?php if ( $human_reviewed ) : ?>
-                <span class="ws-badge ws-badge-reviewed">&#10003; Human Reviewed</span>
-            <?php else : ?>
-                <span class="ws-badge ws-badge-pending">&#9679; Pending Human Review</span>
-            <?php endif; ?>
-
-            <?php if ( $legal_reviewed ) : ?>
-                <span class="ws-badge ws-badge-legal-reviewed">
-                    &#10003; Legally Reviewed
-                    <?php if ( $legal_reviewer ) : ?>
-                        &mdash; <?php echo esc_html( $legal_reviewer ); ?>
-                    <?php endif; ?>
-                </span>
-            <?php else : ?>
-                <span class="ws-badge ws-badge-pending">&#9679; Pending Legal Review</span>
-            <?php endif; ?>
-        </div>
-
-        <?php if ( $sources ) : ?>
-        <div class="ws-jx-summary-sources">
-            <strong>Sources &amp; Citations:</strong>
-            <pre class="ws-jx-sources-text"><?php echo esc_html( $sources ); ?></pre>
-        </div>
-        <?php endif; ?>
-
-    </div>
-    <?php
-    $footer_html = ob_get_clean();
+    $footer_html = ws_render_jx_summary_footer( [
+        'author_name'    => $author_name,
+        'fmt_created'    => $fmt_created,
+        'fmt_reviewed'   => $fmt_reviewed,
+        'human_reviewed' => $human_reviewed,
+        'legal_reviewed' => $legal_reviewed,
+        'legal_reviewer' => $legal_reviewer ?: '',
+        'sources'        => $sources ?: '',
+    ] );
 
     return ws_render_jx_summary_section( wp_kses_post( $summary_content ), $footer_html );
 
@@ -401,38 +358,12 @@ add_shortcode( 'ws_jx_review_status', function() {
     $last_reviewed  = get_field( 'ws_jx_sum_last_reviewed',          $sid ); // fixed: was ws_last_reviewed
     $fmt_reviewed   = $last_reviewed ? date( 'F j, Y', strtotime( $last_reviewed ) ) : '';
 
-    ob_start();
-    ?>
-    <div class="ws-review-status">
-
-        <?php if ( $fmt_reviewed ) : ?>
-        <p class="ws-jx-summary-last-reviewed">
-            <strong>Last Reviewed:</strong> <?php echo esc_html( $fmt_reviewed ); ?>
-        </p>
-        <?php endif; ?>
-
-        <div class="ws-review-badges">
-            <?php if ( $human_reviewed ) : ?>
-                <span class="ws-badge ws-badge-reviewed">&#10003; Human Reviewed</span>
-            <?php else : ?>
-                <span class="ws-badge ws-badge-pending">&#9679; Pending Human Review</span>
-            <?php endif; ?>
-
-            <?php if ( $legal_reviewed ) : ?>
-                <span class="ws-badge ws-badge-legal-reviewed">
-                    &#10003; Legally Reviewed
-                    <?php if ( $legal_reviewer ) : ?>
-                        &mdash; <?php echo esc_html( $legal_reviewer ); ?>
-                    <?php endif; ?>
-                </span>
-            <?php else : ?>
-                <span class="ws-badge ws-badge-pending">&#9679; Pending Legal Review</span>
-            <?php endif; ?>
-        </div>
-
-    </div>
-    <?php
-    return ob_get_clean();
+    return ws_render_jx_review_status( [
+        'fmt_reviewed'   => $fmt_reviewed,
+        'human_reviewed' => $human_reviewed,
+        'legal_reviewed' => $legal_reviewed,
+        'legal_reviewer' => $legal_reviewer ?: '',
+    ] );
 
 } );
 
@@ -509,6 +440,11 @@ function ws_shortcode_jx_case_law() {
         // Unicode return link: ↩ (U+21A9), styled via .ws-footnote-return.
         // To switch to CSS ::before pseudo-element in the future, remove
         // the <a> content here and target .ws-footnote-return::before.
+        //
+        // @todo The return link href="#fn-ref-X" targets IDs that currently have
+        // no corresponding elements in the page — in-text superscript anchors
+        // (e.g. <sup id="fn-ref-1">) are not yet emitted by this shortcode.
+        // Until in-text anchors are implemented, these return links are dead.
         $return_link = '<a href="#' . esc_attr( $fn_ref_id ) . '" '
                      . 'class="ws-footnote-return" '
                      . 'title="Return to text">&#x21a9;</a>';
@@ -522,17 +458,7 @@ function ws_shortcode_jx_case_law() {
         $fn_index++;
     }
 
-    // Render the full section.
-    ob_start();
-    ?>
-    <section class="ws-case-law">
-        <hr style="margin: 10px 0;">
-        <?php foreach ( $footnote_items as $item ) : ?>
-            <?php echo $item; ?><br>
-        <?php endforeach; ?>
-    </section>
-    <?php
-    return ob_get_clean();
+    return ws_render_jx_case_law( $footnote_items );
 }
 
 
@@ -555,7 +481,7 @@ function ws_shortcode_jx_limitations() {
     $limitations = get_field( 'ws_jx_limitations', $summary_post['id'] ); // fixed: was ->ID
     if ( ! $limitations ) return '';
 
-    return '<section class="ws-limitations">' . wp_kses_post( $limitations ) . '</section>';
+    return ws_render_jx_limitations( wp_kses_post( $limitations ) );
 }
 
 

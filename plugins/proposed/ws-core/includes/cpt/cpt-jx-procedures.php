@@ -60,13 +60,14 @@ function ws_register_cpt_jx_procedures() {
 
     $labels = [
         'name'               => 'Jurisdiction Procedures',
-        'singular_name'      => 'Jurisdiction Procedures',
+        'singular_name'      => 'Jurisdiction Procedure',
         'menu_name'          => 'JX Procedures',
         'add_new'            => 'Add Procedures',
-        'add_new_item'       => 'Add New Jurisdiction Procedures',
-        'edit_item'          => 'Edit Jurisdiction Procedures',
-        'new_item'           => 'New Jurisdiction Procedures',
-        'view_item'          => 'View Procedures',
+        'add_new_item'       => 'Add New Jurisdiction Procedure',
+        'edit_item'          => 'Edit Jurisdiction Procedure',
+        'new_item'           => 'New Jurisdiction Procedure',
+        'view_item'          => 'View Procedure',
+        'all_items'          => 'All Procedures',
         'search_items'       => 'Search Procedures',
         'not_found'          => 'No procedures found',
         'not_found_in_trash' => 'No procedures found in trash',
@@ -97,12 +98,17 @@ function ws_register_cpt_jx_procedures() {
 
         // ── Admin Menu ────────────────────────────────────────────────────
 
-        'menu_icon'           => 'dashicons-list-view',
-        'menu_position'       => 27,
+        'menu_icon'       => 'dashicons-list-view',
+        'menu_position'   => 27,
+
+        // ── Capabilities ──────────────────────────────────────────────────
+
+        'capability_type' => 'post',
+        'rewrite'         => false,
 
     ];
 
     // Slug uses hyphen convention — must match ACF location rules
     // and relationship field post_type references throughout ws-core.
-    register_post_type( 'jx-procedures', $args );
+    register_post_type( 'jx-procedure', $args );
 }
