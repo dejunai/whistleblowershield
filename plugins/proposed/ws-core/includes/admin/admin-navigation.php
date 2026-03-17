@@ -13,7 +13,6 @@
  * menus to locate related records such as:
  *
  *      • Summary
- *      • Procedures
  *      • Statutes
  *      • Resources
  *
@@ -26,9 +25,8 @@
  *
  * jurisdiction (core record)
  *      ├── jx-summary      (one-to-one, ACF relationship)
- *      ├── jx-procedures   (one-to-one, ACF relationship)
  *      ├── jx-statutes     (one-to-one, ACF relationship)
- *      ├── jx-resources    (one-to-one, ACF relationship)
+ *      ├── s    (one-to-one, ACF relationship)
  *      └── jx-citation     (many-to-one, queried by ws_jx_code)
  *
  * Relationship fields are defined in:
@@ -96,17 +94,15 @@ Render Navigation Box
 */
 
 function ws_render_jx_navigation_box($post) {
-    $summary    = get_field('ws_related_summary', $post->ID);
-    $procedures = get_field('ws_related_procedures', $post->ID);
-    $statutes   = get_field('ws_related_statutes', $post->ID);
-    $resources  = get_field('ws_related_resources', $post->ID);
+    $summary  = get_field('ws_related_summary',  $post->ID);
+    $statutes = get_field('ws_related_statutes', $post->ID);
+    $resources = get_field('', $post->ID);
 
     echo '<div class="ws-admin-nav-wrapper" style="line-height:1.6;">';
-    
-    ws_render_admin_link('Summary',    $summary,    'jx-summary',    $post->ID);
-    ws_render_admin_link('Procedures', $procedures, 'jx-procedure', $post->ID);
-    ws_render_admin_link('Statutes',   $statutes,   'jx-statute',   $post->ID);
-    ws_render_admin_link('Resources',  $resources,  'jx-resource',  $post->ID);
+
+    ws_render_admin_link('Summary',   $summary,   'jx-summary',  $post->ID);
+    ws_render_admin_link('Statutes',  $statutes,  'jx-statute',  $post->ID);
+    ws_render_admin_link('Resources', $resources, '', $post->ID);
 
     ws_render_citation_row( $post->ID );
 

@@ -13,9 +13,9 @@
  * datasets such as:
  *
  *      • Summary
- *      • Procedures
  *      • Statutes
- *      • Resources
+ *      • Case Law Citations
+ *      
  *
  * By centralizing section layout here, the plugin avoids repeating
  * markup across multiple shortcode implementations.
@@ -161,8 +161,15 @@ function ws_render_jx_header($data) {
 }
 
 /**
- * Render individual Flag component
- * With Attribution and License
+ * Renders the jurisdiction flag image with attribution and license.
+ *
+ * @param  array $flag_data {
+ *     @type string $url            URL to the flag image.
+ *     @type string $source_url     URL to the attribution source.
+ *     @type string $attr_str       Attribution string (plain text).
+ *     @type string $license        License identifier (e.g., "Public Domain").
+ * }
+ * @return string  HTML output, or empty string if no flag URL is set.
  */
 function ws_render_jx_flag($flag_data) {
     if (empty($flag_data['url'])) return '';
@@ -186,7 +193,13 @@ function ws_render_jx_flag($flag_data) {
 }
 
 /**
- * Render the Leadership Offices Box
+ * Renders the jurisdiction leadership offices box.
+ *
+ * @param  array $gov_data {
+ *     @type string $box_label  Heading label for the offices box.
+ *     @type array  $links      Indexed array of office link arrays, each with 'url' and 'label'.
+ * }
+ * @return string  HTML output, or empty string if no links provided.
  */
 function ws_render_jx_gov_offices($gov_data) {
     if (empty($gov_data['links'])) return '';
@@ -209,7 +222,13 @@ function ws_render_jx_gov_offices($gov_data) {
     return ob_get_clean();
 }
 /**
- * Render the Filterable Jurisdiction Index with Conditional Tabs
+ * Renders the filterable jurisdiction index with type tabs and alphabetical grid.
+ *
+ * @param  array $data {
+ *     @type array $items   Indexed array of jurisdiction data arrays (from ws_get_all_jurisdictions()).
+ *     @type array $counts  Associative array of type → count for rendering filter tabs.
+ * }
+ * @return string  HTML output, or a "No jurisdictions found" paragraph.
  */
 function ws_render_jurisdiction_index($data) {
     $items  = $data['items'];
@@ -453,7 +472,7 @@ function ws_render_jx_case_law( $items ) {
     if ( empty( $items ) ) return '';
     ob_start(); ?>
     <section class="ws-case-law">
-        <hr style="margin: 10px 0;">
+        <hr class="ws-section-divider">
         <?php foreach ( $items as $item ) : ?>
             <?php echo $item; ?><br>
         <?php endforeach; ?>

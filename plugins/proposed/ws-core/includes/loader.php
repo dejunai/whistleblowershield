@@ -63,6 +63,7 @@
  * 2.3.1  Moved taxonomy loading to Universal Layer so ws_disclosure_cat
  *        and ws_process_type are registered on both frontend and admin.
  *        Removed duplicate stale docblock.
+ * 2.4.0  Added acf-jx-interpretations to ACF load list (Bug #6 fix).
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit;
@@ -74,9 +75,9 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 */
 // CPT Layer: Must load everywhere so WordPress understands the URLs
 $cpt_files = [
-    'cpt-jurisdiction', 'cpt-jx-summary', 'cpt-jx-procedures', 
-    'cpt-jx-statutes', 'cpt-jx-resources', 'cpt-legal-update',
-	'cpt-jx-citations', 'cpt-agencies',
+    'cpt-jurisdictions', 'cpt-jx-summary',    'cpt-jx-statutes', 'cpt-s', 'cpt-legal-update',
+    'cpt-jx-citations', 'cpt-agencies', 'cpt-assist-org',
+    'cpt-jx-interpretations',
 ];
 foreach ( $cpt_files as $file ) {
     require_once WS_CORE_PATH . "includes/cpt/{$file}.php";
@@ -99,9 +100,9 @@ require_once WS_CORE_PATH . 'includes/taxonomies/register-taxonomies.php';
 if ( is_admin() ) {
     // ACF Layer: Huge memory save by keeping these out of the frontend
     $acf_files = [
-        'acf-jurisdiction', 'acf-jx-summary', 'acf-jx-procedures', 
-        'acf-jx-statutes', 'acf-jx-resources', 'acf-legal-update',
-		'acf-jx-citations', 'acf-agencies',
+        'acf-jurisdictions', 'acf-jx-summary',        'acf-jx-statutes', 'acf-s', 'acf-legal-update',
+        'acf-jx-citations', 'acf-agencies', 'acf-assist-org',
+        'acf-jx-interpretations',
     ];
     foreach ( $acf_files as $file ) {
         require_once WS_CORE_PATH . "includes/acf/{$file}.php";
@@ -114,6 +115,8 @@ if ( is_admin() ) {
     require_once WS_CORE_PATH . 'includes/admin/admin-audit-trail.php';
     require_once WS_CORE_PATH . 'includes/admin/admin-relationships.php';
     require_once WS_CORE_PATH . 'includes/admin/jurisdiction-dashboard.php';
+    require_once WS_CORE_PATH . 'includes/admin/court-matrix.php';
+    require_once WS_CORE_PATH . 'includes/admin/admin-interpretation-metabox.php';
 }
 
 
@@ -125,10 +128,10 @@ if ( is_admin() ) {
 if ( ! is_admin() ) {
     // The HTML Templates
     require_once WS_CORE_PATH . 'includes/render/section-renderer.php';
-    
+
     // The "Automatic Assembler" (The the_content filter)
     require_once WS_CORE_PATH . 'includes/render/render-jurisdiction.php';
-    
+
     // Shortcodes (Used internally by the Assembler)
     require_once WS_CORE_PATH . 'includes/shortcodes/shortcodes-jurisdiction.php';
     require_once WS_CORE_PATH . 'includes/shortcodes/shortcodes-general.php';

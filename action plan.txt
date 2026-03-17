@@ -1,0 +1,589 @@
+Phase 0 — Global Architectural Rules
+
+These rules apply to all phases.
+
+Query Layer Boundary (Non-negotiable)
+
+Shortcodes are presentation only.
+
+They must never call:
+
+get_field()
+get_post_meta()
+WP_Query
+
+All data must come through:
+
+query-jurisdiction.php
+
+If a shortcode needs data not currently returned:
+
+Extend the relevant ws_get_*() function
+
+Then update the shortcode
+
+Never bypass the query layer.
+
+Matrix Seed Contract
+
+All matrix-seeded records must include:
+
+ws_matrix_source
+
+Editorial edits must trigger divergence tracking.
+
+Unified Option-Gate Method
+
+All matrix seeders and taxonomy seeders must use this exact pattern. No other gating format is permitted.
+Key format: ws_seeded_{seeder_slug}
+
+if ( get_option( 'ws_seeded_{seeder_slug}' ) !== '1.0.0' ) {
+    ws_{seeder_slug}_seed();
+    update_option( 'ws_seeded_{seeder_slug}', '1.0.0' );
+}
+
+Note: there is no live data to protect.
+
+Phase 1 — Post-Deletion Integrity Sweep
+
+jx-procedure and jx-resource are already removed, but legacy artifacts may remain.
+
+Perform a global audit sweep across the plugin.
+
+Scan for references to:
+
+jx-procedure
+cpt-jx-procedures
+ws_jx_proc_
+ws_jx_procedure_
+ws_related_procedures
+
+jx-resource
+cpt-jx-resources
+ws_jx_resource_
+ws_related_resources
+
+Remove or flag anything remaining.
+
+Files especially sensitive:
+
+loader.php
+admin-hooks.php
+admin-relationships.php
+query-jurisdiction.php
+render-jurisdiction.php
+shortcodes-jurisdiction.php
+section-renderer.php
+admin-audit-trail.php
+
+Goal:
+
+Zero runtime references to deleted systems
+Phase 2 — Taxonomy Architecture Audit
+
+The previous phantom taxonomy step is removed.
+
+Instead perform a taxonomy integrity audit.
+
+Audit all registered taxonomies for:
+
+1. Correct registration
+
+Verify:
+
+register-taxonomies.php
+
+contains all active taxonomies and only active taxonomies.
+
+2. Correct CPT attachment
+
+Verify taxonomy object types match real CPT slugs.
+
+3. Consistent naming scheme
+
+Naming pattern should follow:
+
+ws_[domain]_[purpose]
+
+Example:
+
+ws_languages
+ws_jurisdiction
+ws_process_type
+ws_disclosure_type
+4. Seed integrity
+
+Update version gate method to single method:
+
+Any existing gates using other formats must be updated to Unified Option-Gate Method.
+
+Verify all seed functions:
+
+use version gates
+
+avoid duplicate term creation
+
+match taxonomy definitions
+
+
+
+Phase 3 — Jurisdiction Architecture Refactor
+This is the largest structural change. It replaces the ws_jx_code meta join with the ws_jurisdiction taxonomy, updates the attach flag pattern on jx-citation to use the new taxonomy, and propagates the complete attach flag pattern to jx-statute and jx-interpretation.
+
+Phase 3.1 — Register ws_jurisdiction Taxonomy
+In register-taxonomies.php, register the new taxonomy:
+Properties:
+
+Slug: ws_jurisdiction
+Private, non-hierarchical
+Object types: jx-statute, jx-summary, jx-citation, jx-interpretation, ws-agency, ws-assist-org
+
+Seed terms from jurisdiction-matrix.php using the unified option-gate method:
+
+Key: ws_seeded_jurisdiction_taxonomy
+Initial value: 1.0.0
+
+
+Phase 3.2 — Retire ws_jx_code
+Remove ws_jx_code as the jurisdiction join mechanism across the plugin.
+Files to update:
+
+acf-jurisdiction.php — remove or archive the ws_jx_code field definition
+query-jurisdiction.php — replace all ws_jx_code meta queries with ws_jurisdiction taxonomy queries
+admin-relationships.php — remove any sync logic tied to ws_jx_code
+admin-hooks.php — remove any hooks writing or reading ws_jx_code
+
+Add ws_jx_code to the Phase 11.1 artifact scan list.
+
+Phase 3.3 — Update jx-citation Attach Flag Pattern
+jx-citation already has an attach_flag implementation but it currently references ws_jx_code. Update it to use ws_jurisdiction taxonomy.
+ACF field updates in acf-jx-citations.php:
+
+attach_flag — toggle, no change to field key
+order — integer, conditionally exposed when attach_flag is on, no change to field key
+Remove any field referencing ws_jx_code
+
+Query layer update in query-jurisdiction.php:
+ws_get_jx_citation_data() must:
+
+Accept a jurisdiction taxonomy term as its scope parameter, replacing ws_jx_code
+Filter by attach_flag set to true
+Filter by is_published — only return published posts
+Sort results by order ascending
+Return all plain language fields (per Phase 9 spec)
+
+Render integration:
+
+Confirm ws_render_section() calls ws_get_jx_citation_data() with the taxonomy term
+Citation list renders independently, sorted by order
+
+
+Phase 3.4 — Propagate Attach Flag Pattern to jx-statute
+Apply the complete updated pattern from Phase 3.3 to jx-statute.
+ACF field definitions in acf-jx-statutes.php:
+
+attach_flag — toggle
+order — integer, conditionally exposed when attach_flag is on
+
+Query layer in query-jurisdiction.php:
+ws_get_jx_statute_data() must:
+
+Accept a jurisdiction taxonomy term as its scope parameter
+Filter by attach_flag set to true
+Filter by is_published — only return published posts
+Sort results by order ascending
+Return all plain language fields (per Phase 9 spec)
+
+Render integration:
+
+ws_render_section() calls ws_get_jx_statute_data() with the taxonomy term
+Statute list renders independently, sorted by order
+
+
+Phase 3.5 — Propagate Attach Flag Pattern to jx-interpretation
+Apply the complete updated pattern from Phase 3.3 to jx-interpretation.
+ACF field definitions in acf-jx-interpretations.php:
+
+attach_flag — toggle
+order — integer, conditionally exposed when attach_flag is on
+
+Query layer in query-jurisdiction.php:
+ws_get_jx_interpretation_data() must:
+
+Accept a jurisdiction taxonomy term as its scope parameter
+Filter by attach_flag set to true
+Filter by is_published — only return published posts
+Sort results by order ascending
+Return all plain language fields (per Phase 9 spec)
+
+Render integration:
+
+ws_render_section() calls ws_get_jx_interpretation_data() with the taxonomy term
+Interpretation list renders independently, sorted by order
+
+
+Phase 3.6 — Relationship Reality
+With ws_jurisdiction taxonomy in place and the attach flag pattern propagated to all three addendum CPTs, drop ws_jx_related_[content] entirely.
+
+Review admin-relationships.php for remaining purpose — if sync logic is fully obsolete, flag for removal
+
+
+
+Files Affected — Phase 3 Summary
+File		Change
+register-taxonomies.php	Register ws_jurisdiction taxonomy
+jurisdiction-matrix.php	Seed ws_jurisdiction terms via option gate
+acf-jurisdiction.php	Remove ws_jx_code field
+acf-jx-citations.php	Update attach flag to taxonomy scope
+acf-jx-statutes.php		Add attach flag + order fields
+acf-jx-interpretations.php		Add attach flag + order fields
+query-jurisdiction.php		Replace all ws_jx_code queries; update/add query functions
+admin-relationships.php		Remove ws_jx_code sync; review for obsolescence
+admin-hooks.php		Remove ws_jx_code hooks
+
+Phases 4 and 5 removed by refinement
+Phase 6 — Core Data Seeding Systems
+
+Four matrix systems seed canonical records.
+
+6.1 Jurisdiction Matrix
+
+Verify or implement:
+
+jurisdiction-matrix.php
+
+Seeds:
+
+57 jurisdiction CPT posts
+
+Key fields:  (use new taxonomy)
+
+ws_jurisdiction
+
+Meta:
+
+ws_matrix_source = jurisdiction-matrix
+
+Gate:
+
+use Unified Option-Gate Method
+6.2 Agency Matrix
+
+Create:
+
+includes/admin/agency-matrix.php
+
+Seeds federal whistleblower enforcement agencies.
+
+Example agencies:
+
+SEC
+
+OSHA
+
+OSC
+
+NLRB
+
+EPA
+
+IRS Whistleblower Office
+
+Meta:
+
+ws_matrix_source = agency-matrix
+Gate:
+
+use Unified Option-Gate Method
+6.3 Federal Statutes Matrix
+
+Create:
+
+includes/admin/fed-statutes-matrix.php
+
+Seeds major federal statutes such as:
+
+Sarbanes-Oxley
+
+Dodd-Frank
+
+False Claims Act
+
+Whistleblower Protection Act
+
+Jurisdiction term:
+
+US
+
+Meta:
+
+ws_matrix_source = fed-statutes-matrix
+Gate:
+
+use Unified Option-Gate Method
+6.4 Assist-Org Matrix
+
+Create:
+
+includes/admin/assist-org-matrix.php
+
+Seeds national whistleblower advocacy organizations.
+
+Examples:
+
+Government Accountability Project
+
+National Whistleblower Center
+
+Project On Government Oversight
+
+Meta:
+
+ws_matrix_source = assist-org-matrix
+Gate:
+
+use Unified Option-Gate Method
+Phase 7 — Matrix Divergence Monitoring
+
+Create:
+
+includes/admin/admin-matrix-watch.php
+
+Behavior:
+
+save_post hook
+
+If seeded record edited:
+
+Set:
+
+ws_matrix_divergence
+ws_matrix_divergence_editor
+
+Resolution flag:
+
+ws_matrix_divergence_resolved
+
+Admin dashboard widget lists unresolved divergences.
+
+Phase 8 — Languages Taxonomy Fix
+
+Correct registration of:
+
+ws_languages
+
+Object types:
+
+ws-agency
+ws-assist-org
+
+Seed terms:
+
+english
+spanish
+mandarin
+cantonese
+french
+portuguese
+vietnamese
+tagalog
+korean
+arabic
+hindi
+russian
+haitian-creole
+polish
+japanese
+additional
+
+Version bump:
+
+Update version through unified method
+
+Additional Language Fields
+
+Add ACF text fields:
+
+ws_agency_additional_languages
+ws_ao_additional_languages
+
+Admin hook:
+
+Auto-assign taxonomy term:
+
+additional
+
+when text exists.
+when text does not exist auto-unassign.
+
+Phase 9 — Plain Language + Trust Badge System
+Note: jx-summary has a legacy plain language implementation that predates this spec. It is treated the same as all other CPTs in this phase — legacy code is removed and replaced with the canonical implementation below. There is no live data to migrate.
+
+Applies to:
+jx-summary, jx-statute, jx-interpretation, jx-citation, ws-agency, ws-assist-org
+
+Plain Language Fields
+Each CPT receives the following ACF fields:
+has_plain_english, plain_english, plain_reviewed, summarized_by, summarized_date
+Behavior:
+
+Toggle gates dependent fields
+Summary required when toggle is on
+Summary content preserved when toggle is turned off
+summarized_by and summarized_date auto-stamped on save
+
+
+Legacy Cleanup — jx-summary Only
+Before adding canonical fields to jx-summary, remove all legacy plain language field definitions, render logic, and CSS classes from:
+
+acf-jx-summary.php
+query-jurisdiction.php
+render-jurisdiction.php
+shortcodes-jurisdiction.php
+ws-core-front.css
+
+Add any legacy class names discovered to the Phase 11 artifact scan list.
+
+Query Layer
+
+Rename:
+
+ws_get_jx_statutes() to ws_get_jx_statute_data()
+ws_get_jx_summaries() to ws_get_jx_summary_data()
+
+Review and update for downstream impact:
+
+render-jurisdiction.php
+shortcodes-jurisdiction.php
+section-renderer.php
+
+Extend:
+
+Extend ws_get_jx_summary_data() to return all five canonical fields.
+Extend ws_get_jx_statute_data() to include plain language fields
+
+Extend functions to:
+
+ws_get_jx_interpretation_data()
+ws_get_jx_citation_data()
+
+Add functions:
+ws_get_agency_data()
+ws_get_assist_org_data()
+
+All plain language values returned through the query layer only.
+
+Render Behavior
+Plain language sections rendered using ws_render_section() with args:
+
+trust_tier
+reviewed
+
+Tier logic:
+
+1 = normal
+2 = plain-language badge
+
+
+Trust Badge CSS
+Add to ws-core-front.css:
+
+.ws-trust-badge
+.ws-trust-badge--reviewed
+.ws-trust-badge--draft
+
+Badge must be small, muted, inline, and non-alarming.
+Phase 10 — Jurisdiction Page Fallback
+
+Prevent empty jurisdiction pages.
+
+If no content sections exist:
+
+Render placeholder:
+
+Content for this jurisdiction is currently being prepared.
+
+Wrapper class:
+
+.ws-section--placeholder
+
+Do not render per-section placeholders.
+
+Only trigger when entire page would otherwise be empty.
+
+Phase 11 — Final System Audit
+
+After all phases complete, run a full structural audit.
+
+11.1 Legacy Artifact Scan
+
+Search for:
+
+ws_jx_code
+jx-procedure
+jx-resource
+ws_related_
+ws_jx_related_
+old taxonomy names
+old meta join logic
+11.2 Query Layer Compliance
+
+Verify no shortcode directly calls:
+
+get_field()
+get_post_meta()
+WP_Query
+11.3 Taxonomy Integrity
+
+Confirm:
+
+all active taxonomies registered
+correct CPT attachment
+correct seed terms
+11.4 Matrix Integrity
+
+Verify:
+
+seed gates function
+
+no duplicate seeded posts
+
+divergence system works
+
+
+
+Final Execution Order
+1️⃣ Post-Deletion Artifact Sweep (Phase 1)
+Scan and remove all legacy references to jx-procedure and jx-resource across the plugin. Goal: zero runtime references.
+2️⃣ Taxonomy Architecture Audit (Phase 2)
+Audit all registered taxonomies for correct registration, CPT attachment, and naming. Update all existing gates to the Unified Option-Gate Method — this standard governs all subsequent seeding work.
+3️⃣ Register ws_jurisdiction Taxonomy (Phase 3.1)
+Register taxonomy in register-taxonomies.php. Seed terms from jurisdiction-matrix.php via unified gate (ws_seeded_jurisdiction_taxonomy / 1.0.0).
+4️⃣ Retire ws_jx_code (Phase 3.2)
+Remove ws_jx_code as the jurisdiction join from ACF definitions, query layer, admin hooks, and relationship sync. Add to Phase 11.1 scan list.
+5️⃣ Update jx-citation Attach Flag (Phase 3.3)
+Update existing attach flag implementation to use ws_jurisdiction taxonomy. Update ws_get_jx_citation_data() — taxonomy scope, attach flag filter, is_published check, order sort.
+6️⃣ Propagate Attach Flag to jx-statute (Phase 3.4)
+Add attach_flag and conditional order fields to acf-jx-statutes.php. Implement ws_get_jx_statute_data() with full pattern.
+7️⃣ Propagate Attach Flag to jx-interpretation (Phase 3.5)
+Add attach_flag and conditional order fields to acf-jx-interpretations.php. Implement ws_get_jx_interpretation_data() with full pattern.
+8️⃣ Drop Relationship Fields (Phase 3.6)
+Remove ws_jx_related_[content] fields entirely. Review admin-relationships.php for obsolescence. Add ws_jx_related_ and ws_related_ to Phase 11.1 scan list.
+9️⃣ Jurisdiction Matrix (Phase 6.1)
+Verify or implement jurisdiction-matrix.php. Seeds 57 jurisdiction CPT posts with ws_jurisdiction taxonomy term and ws_matrix_source meta via unified gate.
+🔟 Agency Matrix (Phase 6.2)
+Create agency-matrix.php. Seeds federal whistleblower enforcement agencies with ws_matrix_source meta via unified gate.
+1️⃣1️⃣ Federal Statutes Matrix (Phase 6.3)
+Create fed-statutes-matrix.php. Seeds major federal statutes assigned to the US jurisdiction term with ws_matrix_source meta via unified gate.
+1️⃣2️⃣ Assist-Org Matrix (Phase 6.4)
+Create assist-org-matrix.php. Seeds national whistleblower advocacy organizations with ws_matrix_source meta via unified gate.
+1️⃣3️⃣ Matrix Divergence Monitoring (Phase 7)
+Create admin-matrix-watch.php. Hooks into save_post to detect and flag edits to seeded records. Admin dashboard widget surfaces unresolved divergences.
+1️⃣4️⃣ Languages Taxonomy Fix (Phase 8)
+Correct ws_languages registration and CPT attachment. Seed all terms via unified gate. Add ws_agency_additional_languages and ws_ao_additional_languages ACF fields with auto-assign hook.
+1️⃣5️⃣ Plain Language + Trust Badge System (Phase 9)
+Remove legacy plain language implementation from jx-summary. Apply canonical plain language fields to all six CPTs. Rename ws_get_jx_statutes() and ws_get_jx_summaries(), extend all query functions for plain language fields, add ws_get_agency_data() and ws_get_assist_org_data(). Implement trust badge render behavior and CSS.
+1️⃣6️⃣ Jurisdiction Page Fallback (Phase 10)
+Implement empty-page detection and placeholder render using .ws-section--placeholder wrapper.
+1️⃣7️⃣ Final System Audit (Phase 11)
+Full structural audit: legacy artifact scan, query layer compliance, taxonomy integrity, and matrix integrity.

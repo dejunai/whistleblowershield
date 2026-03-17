@@ -127,6 +127,42 @@ function ws_register_acf_legal_update() {
                 'return_format' => 'value',
             ],
 
+            // ── Law / Statute Name ────────────────────────────────────────
+
+            [
+                'key'          => 'field_ws_legal_update_law_name',
+                'label'        => 'Law / Statute Name',
+                'name'         => 'ws_legal_update_law_name',
+                'type'         => 'text',
+                'instructions' => 'The name of the law or statute affected by this update.',
+            ],
+
+            // ── Summary ───────────────────────────────────────────────────
+
+            [
+                'key'          => 'field_ws_legal_update_summary',
+                'label'        => 'Summary',
+                'name'         => 'ws_legal_update_summary',
+                'type'         => 'wysiwyg',
+                'instructions' => 'Brief summary of the legal change and its significance for whistleblowers.',
+                'tabs'         => 'all',
+                'toolbar'      => 'basic',
+                'media_upload' => 0,
+            ],
+
+            // ── Effective Date ────────────────────────────────────────────
+
+            [
+                'key'            => 'field_ws_legal_update_effective_date',
+                'label'          => 'Effective Date',
+                'name'           => 'ws_legal_update_effective_date',
+                'type'           => 'date_picker',
+                'instructions'   => 'When does this change take effect? Leave blank if not yet determined.',
+                'display_format' => 'F j, Y',
+                'return_format'  => 'Y-m-d',
+                'first_day'      => 1,
+            ],
+
             // ── Tab: Authorship & Review ──────────────────────────────────
 
             [

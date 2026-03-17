@@ -27,14 +27,11 @@
  *       linked jx-summary post, plus review badges, author, dates,
  *       and sources & citations.
  *
- *   [ws_jx_procedures]
- *       Renders procedures content from the linked jx-procedures post.
- *
  *   [ws_jx_statutes]
  *       Renders statutes content from the linked jx-statutes post.
  *
  *   [ws_jx_resources]
- *       Renders resources content from the linked jx-resources post.
+ *       Renders resources content from the linked s post.
  *
  *   [ws_jx_flag jx="CA"]
  *       Standalone flag shortcode. Renders flag + attribution only.
@@ -99,9 +96,8 @@
  *
  *   ws_jx_limitations        — wysiwyg content
  *
- * Procedures, statutes, and resources content comes from the
- * post_content field of their respective addendum CPTs, processed
- * through the_content filters.
+ * Statutes and resources content comes from the post_content field of
+ * their respective addendum CPTs, processed through the_content filters.
  *
  *
  * VERSION
@@ -145,20 +141,20 @@ add_shortcode( 'ws_jx_header', function( $atts ) {
     ];
     $box_label = $labels[ $jx_data['type'] ] ?? 'Official Offices';
 
-    // Resolve label strings from select field keys
-    $gov_choices = [
+    // Map jurisdiction matrix keys to display labels.
+    $gov_label_map = [
         'governor' => 'Office of the Governor',
         'mayor'    => 'Office of the Mayor',
     ];
-    $legal_choices = [
+    $legal_label_map = [
         'attorney'  => 'Office of the Attorney General',
         'inspector' => 'D.C. Office of the Inspector General',
         'secretary' => 'Office of the Secretary of Justice',
         'special'   => 'U.S. Office of Special Counsel',
     ];
 
-    $head_label  = $gov_choices[ $jx_data['gov']['head_gov_label'] ]   ?? 'Office of the Governor';
-    $legal_label = $legal_choices[ $jx_data['gov']['legal_auth_label'] ] ?? 'Office of the Attorney General';
+    $head_label  = $gov_label_map[ $jx_data['gov']['head_gov_label'] ]   ?? 'Office of the Governor';
+    $legal_label = $legal_label_map[ $jx_data['gov']['legal_auth_label'] ] ?? 'Office of the Attorney General';
 
     $render_data = [
         'jx_name'   => $jx_data['name'],
@@ -228,6 +224,7 @@ add_shortcode( 'ws_jx_summary', function() {
     $fmt_created  = $date_created  ? date( 'F j, Y', strtotime( $date_created ) )  : '';
     $fmt_reviewed = $last_reviewed ? date( 'F j, Y', strtotime( $last_reviewed ) ) : '';
 
+    // Defined in render/section-renderer.php
     $footer_html = ws_render_jx_summary_footer( [
         'author_name'    => $author_name,
         'fmt_created'    => $fmt_created,
@@ -241,22 +238,6 @@ add_shortcode( 'ws_jx_summary', function() {
     return ws_render_jx_summary_section( wp_kses_post( $summary_content ), $footer_html );
 
 } );
-
-
-// ── [ws_jx_procedures] ────────────────────────────────────────────────────────
-
-add_shortcode( 'ws_jx_procedures', 'ws_shortcode_jx_procedures' );
-function ws_shortcode_jx_procedures() {
-
-    global $post;
-    if ( ! $post ) return '';
-
-    $procedures = ws_get_jx_procedures( $post->ID );
-    if ( ! $procedures ) return '';
-
-    $content = apply_filters( 'the_content', $procedures['content'] );
-    return ws_render_section( 'Reporting Procedures', $content );
-}
 
 
 // ── [ws_jx_statutes] ─────────────────────────────────────────────────────────

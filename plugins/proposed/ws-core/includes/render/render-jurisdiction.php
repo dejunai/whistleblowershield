@@ -24,9 +24,9 @@
  *
  * jurisdiction (public CPT)
  *      ├── jx-summary
- *      ├── jx-procedure
  *      ├── jx-statute
- *      └── jx-resource
+ *      ├── jx-citation
+ *      └── 
  *
  * Each dataset is stored as a separate Custom Post Type and linked
  * to the jurisdiction using ACF relationship fields defined in:
@@ -55,7 +55,7 @@
  * exists and is published. Draft or unpublished datasets will
  * never appear on the public site.
  *
- * NOTE: Addendum CPTs (jx-summary, jx-procedures, etc.) store
+ * NOTE: Addendum CPTs (jx-summary, s, etc.) store
  * their content in ACF fields, not post_content. The published
  * status of the addendum post is the correct gate — the section
  * shortcode is responsible for reading and rendering field content.
@@ -102,20 +102,21 @@
 if ( ! defined( 'ABSPATH' ) ) exit;
 
 
-/*
----------------------------------------------------------
-Helper: Verify Published State
----------------------------------------------------------
-Accepts the return value of any query layer dataset function.
-
-Query layer functions return arrays:
-  - Standard: [ 'id' => int, 'status' => string, ... ]
-  - Statutes:  [ [ 'id' => int, 'status' => string, ... ], ... ]
-
-Returns true only when the record (or first record for statutes)
-has post_status === 'publish'.
-*/
-
+/**
+ * Checks whether a query layer dataset result represents a published record.
+ *
+ * Accepts the return value of any ws_get_jx_*() query layer function.
+ * Query layer functions return arrays in two shapes:
+ *
+ *   Standard:  [ 'id' => int, 'status' => string, ... ]
+ *   Statutes:  [ [ 'id' => int, 'status' => string, ... ], ... ]  (array-of-arrays)
+ *
+ * For the array-of-arrays format (ws_get_jx_statutes), the first entry is
+ * checked — the state record always appears before the merged federal record.
+ *
+ * @param  array|WP_Post|false $data  Return value from a query layer function.
+ * @return bool  True only when the record has post_status === 'publish'.
+ */
 function ws_is_published( $data ) {
 
     if ( ! $data ) {
@@ -173,10 +174,17 @@ function ws_handle_jurisdiction_render( $content ) {
     // (for CPT-backed sections), or if content exists (for field-backed sections).
     // Post_content is NOT checked — content lives in ACF fields.
 
-    // Render summary first.
+    // Render summary.
     $related_summary = ws_get_jx_summary( $post->ID );
     if ( ws_is_published( $related_summary ) ) {
         $output .= do_shortcode( '[ws_jx_summary]' );
+    }
+
+    // Render statutes — shown before case law so users see what protects
+    // them before seeing how courts have interpreted those protections.
+    $related_statutes = ws_get_jx_statutes( $post->ID );
+    if ( ws_is_published( $related_statutes ) ) {
+        $output .= do_shortcode( '[ws_jx_statutes]' );
     }
 
     // Render case law citations — [ws_jx_case_law] returns empty if none attached.
@@ -185,20 +193,10 @@ function ws_handle_jurisdiction_render( $content ) {
     // Render limitations — [ws_jx_limitations] returns empty if field is empty.
     $output .= do_shortcode( '[ws_jx_limitations]' );
 
-    // Render remaining CPT-backed sections conditionally.
-    $cpt_sections = [
-        'procedures' => '[ws_jx_procedures]',
-        'statutes'   => '[ws_jx_statutes]',
-        'resources'  => '[ws_jx_resources]',
-    ];
-
-    foreach ( $cpt_sections as $key => $shortcode ) {
-        $get_func = 'ws_get_jx_' . $key;
-        $related  = $get_func( $post->ID );
-
-        if ( ws_is_published( $related ) ) {
-            $output .= do_shortcode( $shortcode );
-        }
+    // Render resources.
+    $related_resources = ws_get_jx_resources( $post->ID );
+    if ( ws_is_published( $related_resources ) ) {
+        $output .= do_shortcode( '[ws_jx_resources]' );
     }
 
     // Legal updates — always attempt; shortcode returns empty if none exist

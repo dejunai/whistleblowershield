@@ -29,7 +29,7 @@
  *
  * FIELD NAMES
  * -----------
- * All jx-* CPTs (jx-summary, jx-procedure, jx-resource, jx-statute,
+ * All jx-* CPTs (jx-summary, , , jx-statute,
  * jx-citation) use the same ACF field name for their jurisdiction
  * back-reference:
  *
@@ -49,7 +49,7 @@
  *        filters into a single ws_jx_code filter covering all CPTs.
  * 2.5.0  Consolidated field-lock, auto-fill, and stamp-field hooks from
  *        individual ACF files into this shared file.
- * 2.5.1  Added jx-procedure and jx-resource to stamp config. Fixed admin
+ * 2.5.1  Added  and  to stamp config. Fixed admin
  *        stamp behaviour: last_edited_author now always stamps the current
  *        user unless an admin explicitly selects a different user for
  *        attribution. Added auto-fill-editor filter so the field pre-fills
@@ -62,7 +62,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 
 // ── Pre-populate ws_jx_code on new addendum and citation screens ──────────────
 //
-// All jx-* CPTs (jx-summary, jx-procedure, jx-resource, jx-statute,
+// All jx-* CPTs (jx-summary, , , jx-statute,
 // jx-citation) now use ws_jx_code as their shared Jurisdiction Code field.
 // The "Create Now" links in admin-navigation.php pass ws_jx_code as a query
 // arg, as does the "Add Citation" button. One filter covers all CPTs.
@@ -101,29 +101,32 @@ $ws_lock_field_names = [
     'ws_jx_sum_date_created',
     'ws_jx_cite_date_created',
     'ws_jx_statute_date_created',
-    'ws_jx_proc_date_created',
-    'ws_jx_res_date_created',
+    'date_created',
+    'date_created',
     'ws_agency_date_created',
     'ws_lu_date_created',
     'ws_ao_date_created',
+    'ws_interp_date_created',
     // last_edited — stamped on every save, never editable
     'ws_jx_sum_last_edited',
     'ws_jx_cite_last_edited',
     'ws_jx_statute_last_edited',
-    'ws_jx_proc_last_edited',
-    'ws_jx_res_last_edited',
+    'last_edited',
+    'last_edited',
     'ws_agency_last_edited',
     'ws_lu_last_edited',
     'ws_ao_last_edited',
+    'ws_interp_last_edited',
     // last_edited_author — auto-stamped, admin-overridable only
     'ws_jx_sum_last_edited_author',
     'ws_jx_cite_last_edited_author',
     'ws_jx_statute_last_edited_author',
-    'ws_jx_proc_last_edited_author',
-    'ws_jx_res_last_edited_author',
+    'last_edited_author',
+    'last_edited_author',
     'ws_agency_last_edited_author',
     'ws_lu_last_edited_author',
     'ws_ao_last_edited_author',
+    'ws_interp_last_edited_author',
 ];
 
 foreach ( $ws_lock_field_names as $_ws_field_name ) {
@@ -163,6 +166,7 @@ $ws_autofill_today_fields = [
     'ws_jx_statute_last_reviewed',
     'ws_agency_last_reviewed',
     'ws_ao_last_reviewed',
+    'ws_interp_last_reviewed',
 ];
 
 foreach ( $ws_autofill_today_fields as $_ws_field_name ) {
@@ -201,11 +205,12 @@ $ws_autofill_editor_fields = [
     'ws_jx_sum_last_edited_author',
     'ws_jx_cite_last_edited_author',
     'ws_jx_statute_last_edited_author',
-    'ws_jx_proc_last_edited_author',
-    'ws_jx_res_last_edited_author',
+    'last_edited_author',
+    'last_edited_author',
     'ws_agency_last_edited_author',
     'ws_lu_last_edited_author',
     'ws_ao_last_edited_author',
+    'ws_interp_last_edited_author',
 ];
 
 foreach ( $ws_autofill_editor_fields as $_ws_field_name ) {
@@ -256,14 +261,15 @@ function ws_acf_autofill_current_editor( $value, $post_id, $field ) {
 // To add stamp support to a new CPT, add one entry to $ws_stamp_cpts.
 
 $ws_stamp_cpts = [
-    'jx-summary'     => [ 'meta_prefix' => 'ws_jx_sum',     'author_acf_key' => 'field_ws_jx_sum_last_edited_author'    ],
-    'jx-citation'    => [ 'meta_prefix' => 'ws_jx_cite',    'author_acf_key' => 'field_ws_jx_cite_last_edited_author'   ],
-    'jx-statute'     => [ 'meta_prefix' => 'ws_jx_statute', 'author_acf_key' => 'field_jx_statute_last_edited_author'   ],
-    'jx-procedure'   => [ 'meta_prefix' => 'ws_jx_proc',    'author_acf_key' => 'field_ws_jx_proc_last_edited_author'   ],
-    'jx-resource'    => [ 'meta_prefix' => 'ws_jx_res',     'author_acf_key' => 'field_ws_jx_res_last_edited_author'    ],
-    'ws-agency'      => [ 'meta_prefix' => 'ws_agency',     'author_acf_key' => 'field_ws_agency_last_edited_author'    ],
-    'ws-legal-update' => [ 'meta_prefix' => 'ws_lu',        'author_acf_key' => 'field_ws_lu_last_edited_author'        ],
-    'ws-assist-org'   => [ 'meta_prefix' => 'ws_ao',        'author_acf_key' => 'field_ws_ao_last_edited_author'        ],
+    'jx-summary'        => [ 'meta_prefix' => 'ws_jx_sum',     'author_acf_key' => 'field_ws_jx_sum_last_edited_author'    ],
+    'jx-citation'       => [ 'meta_prefix' => 'ws_jx_cite',    'author_acf_key' => 'field_ws_jx_cite_last_edited_author'   ],
+    'jx-statute'        => [ 'meta_prefix' => 'ws_jx_statute', 'author_acf_key' => 'field_jx_statute_last_edited_author'   ],
+    ''      => [ 'meta_prefix' => 'ws_jx_proc',    'author_acf_key' => 'field_last_edited_author'   ],
+    ''       => [ 'meta_prefix' => 'ws_jx_res',     'author_acf_key' => 'field_last_edited_author'    ],
+    'jx-interpretation' => [ 'meta_prefix' => 'ws_interp',     'author_acf_key' => 'field_ws_interp_last_edited_author'    ],
+    'ws-agency'         => [ 'meta_prefix' => 'ws_agency',     'author_acf_key' => 'field_ws_agency_last_edited_author'    ],
+    'ws-legal-update'   => [ 'meta_prefix' => 'ws_lu',         'author_acf_key' => 'field_ws_lu_last_edited_author'        ],
+    'ws-assist-org'     => [ 'meta_prefix' => 'ws_ao',         'author_acf_key' => 'field_ws_ao_last_edited_author'        ],
 ];
 
 add_action( 'acf/save_post', 'ws_acf_write_stamp_fields', 20 );

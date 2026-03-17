@@ -72,7 +72,8 @@ function ws_register_cpt_statutes() {
         // ── Editor ────────────────────────────────────────────────────────
         // Title: official statutory name. All structured metadata via ACF.
 
-        'supports' => [ 'title', 'editor', 'revisions' ],
+        'supports'   => [ 'title', 'editor', 'revisions' ],
+        'taxonomies' => [ 'ws_disclosure_type', 'ws_process_type', 'ws_remedy_type', 'ws_coverage_scope', 'ws_retaliation_forms' ],
 
         // ── REST ──────────────────────────────────────────────────────────
 

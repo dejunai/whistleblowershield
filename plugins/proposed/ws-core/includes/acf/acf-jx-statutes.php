@@ -194,6 +194,24 @@ function ws_register_acf_jx_statutes() {
             ],
 
             [
+                'key'           => 'field_jx_statute_burden_of_proof',
+                'label'         => 'Burden of Proof',
+                'name'          => 'ws_statute_burden_of_proof',
+                'type'          => 'select',
+                'instructions'  => 'What standard must the whistleblower meet to succeed? "Contributing Factor" is the most employee-friendly; "But-For" is employer-friendly.',
+                'choices'       => [
+                    'contributing_factor' => 'Contributing Factor (employee-friendly)',
+                    'motivating_factor'   => 'Motivating Factor',
+                    'but_for'             => 'But-For Causation (employer-friendly)',
+                    'preponderance'       => 'Preponderance of Evidence',
+                    'varies'              => 'Varies by Claim Type',
+                ],
+                'allow_null'    => 1,
+                'ui'            => 1,
+                'return_format' => 'value',
+            ],
+
+            [
                 'key'           => 'field_jx_statute_remedies',
                 'label'         => 'Available Remedies',
                 'name'          => 'ws_jx_statute_remedies',

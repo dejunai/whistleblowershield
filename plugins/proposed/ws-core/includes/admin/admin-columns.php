@@ -4,8 +4,8 @@
  *
  * Adds dataset status columns to the Jurisdiction list table
  * in the WordPress admin. Each column shows a visual indicator
- * for whether the corresponding addendum (summary, procedures,
- * statutes, resources) exists and is published.
+ * for whether the corresponding addendum (summary, statutes,
+ * resources) exists and is published.
  *
  * VERSION
  * -------
@@ -29,11 +29,10 @@ function ws_add_jx_status_columns( $columns ) {
     foreach ( $columns as $key => $label ) {
         $new[ $key ] = $label;
         if ( $key === 'title' ) {
-            $new['summary']    = 'Summary';
-            $new['procedures'] = 'Procedures';
-            $new['statutes']   = 'Statutes';
-            $new['resources']  = 'Resources';
-            $new['citations']  = 'Citations';
+            $new['summary']   = 'Summary';
+            $new['statutes']  = 'Statutes';
+            $new['resources'] = 'Resources';
+            $new['citations'] = 'Citations';
         }
     }
     return $new;
@@ -46,10 +45,9 @@ add_action( 'manage_jurisdiction_posts_custom_column', 'ws_render_jx_status_colu
 function ws_render_jx_status_column( $column, $post_id ) {
 
     $map = [
-        'summary'    => 'ws_related_summary',
-        'procedures' => 'ws_related_procedures',
-        'statutes'   => 'ws_related_statutes',
-        'resources'  => 'ws_related_resources',
+        'summary'  => 'ws_related_summary',
+        'statutes' => 'ws_related_statutes',
+        'resources' => '',
     ];
 
     // Citations column uses count-based display, not an ACF relationship field.

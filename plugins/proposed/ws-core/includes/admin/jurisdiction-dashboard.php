@@ -57,7 +57,6 @@ function ws_render_jurisdiction_dashboard() {
     echo '<thead><tr>
             <th style="width: 18%;">Jurisdiction</th>
             <th>Summary</th>
-            <th>Procedures</th>
             <th>Statutes</th>
             <th>Resources</th>
             <th>Citations</th>
@@ -71,7 +70,7 @@ function ws_render_jurisdiction_dashboard() {
         // Check each addendum type.
         // Query layer returns arrays (['id', 'status', 'content']), not WP_Post objects.
         // ws_get_jx_statutes() returns array-of-arrays — check $related[0]['status'].
-        $types = ['summary', 'procedures', 'statutes', 'resources'];
+        $types = ['summary', 'statutes', 'resources'];
         foreach ($types as $type) {
             $get_func = "ws_get_jx_{$type}";
             $related  = $get_func( $jx->ID );

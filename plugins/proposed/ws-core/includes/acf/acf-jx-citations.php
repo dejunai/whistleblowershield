@@ -126,7 +126,7 @@ function ws_register_acf_jx_citations() {
 				'type'          => 'taxonomy',
 				'taxonomy'      => 'ws_disclosure_type',
 				'field_type'    => 'checkbox', // Use checkboxes for multiple categories
-				'add_term'      => 1,
+				'add_term'      => 0,
 				'save_terms'    => 1,
 				'load_terms'    => 1,
 				'return_format' => 'id',

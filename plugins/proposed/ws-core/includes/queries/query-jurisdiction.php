@@ -20,9 +20,9 @@
  *
  * jurisdiction (public CPT)
  *      ├── jx-summary
- *      ├── jx-procedures
+ *      ├── s
  *      ├── jx-statutes
- *      └── jx-resources
+ *      └── s
  *
  * Each dataset is connected to the jurisdiction record via
  * ACF relationship fields defined in acf-jurisdiction.php.
@@ -270,11 +270,11 @@ function ws_get_jx_summary( $input ) {
 // ════════════════════════════════════════════════════════════════════════════
 // Dataset: Procedures
 //
-// Retrieves the related jx-procedures post for the given jurisdiction.
+// Retrieves the related s post for the given jurisdiction.
 // Accepts a numeric post ID or a two-letter ws_jx_code string.
 // Returns a base array of post data, or false if not found.
 //
-// @todo - Update array as jx-procedures CPT fields are defined.
+// @todo - Update array as s CPT fields are defined.
 // ════════════════════════════════════════════════════════════════════════════
 
 function ws_get_jx_procedures( $input ) {
@@ -291,7 +291,7 @@ function ws_get_jx_procedures( $input ) {
         return false;
     }
 
-    // @todo - Update array as jx-procedures CPT fields are defined.
+    // @todo - Update array as s CPT fields are defined.
     return [
         'id'      => $related->ID,
         'title'   => get_the_title( $related->ID ),
@@ -371,11 +371,11 @@ function ws_get_jx_statutes( $input ) {
 // ════════════════════════════════════════════════════════════════════════════
 // Dataset: Resources
 //
-// Retrieves the related jx-resources post for the given jurisdiction.
+// Retrieves the related s post for the given jurisdiction.
 // Accepts a numeric post ID or a two-letter ws_jx_code string.
 // Returns a base array of post data, or false if not found.
 //
-// @todo - Update array as jx-resources CPT fields are defined.
+// @todo - Update array as s CPT fields are defined.
 // ════════════════════════════════════════════════════════════════════════════
 
 function ws_get_jx_resources( $input ) {
@@ -386,13 +386,13 @@ function ws_get_jx_resources( $input ) {
         return false;
     }
 
-    $related = get_field( 'ws_related_resources', $post_id );
+    $related = get_field( '', $post_id );
 
     if ( ! $related ) {
         return false;
     }
 
-    // @todo - Update array as jx-resources CPT fields are defined.
+    // @todo - Update array as s CPT fields are defined.
     return [
         'id'      => $related->ID,
         'title'   => get_the_title( $related->ID ),

@@ -28,6 +28,10 @@
  * requirements, and cost model — enabling informed outreach
  * without requiring legal knowledge.
  *
+ * MENU POSITION
+ * -------------
+ * Citations 27 → Agencies 28 → Interpretations 29 → Assist Orgs 30
+ *
  * @package    WhistleblowerShield
  * @since      1.0.0
  * @author     Whistleblower Shield
@@ -37,6 +41,9 @@
  * VERSION
  * -------
  * 1.0.0  Initial release.
+ * 1.0.1  Bug #10 fix: menu_position corrected from 31 to 30 to align
+ *         with the agreed admin menu order:
+ *         Citations 27 → Agencies 28 → Interpretations 29 → Assist Orgs 30.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -93,9 +100,10 @@ function ws_register_cpt_assist_org() {
         'capability_type' => 'post',
 
         // ── Admin Menu ────────────────────────────────────────────────────
+        // Citations 27 → Agencies 28 → Interpretations 29 → Assist Orgs 30
 
         'menu_icon'     => 'dashicons-groups',
-        'menu_position' => 31,
+        'menu_position' => 30,
 
         // ── Rewrite ───────────────────────────────────────────────────────
 

@@ -8,7 +8,7 @@
  * -------
  * Maintains bidirectional consistency between Jurisdiction records
  * and their associated addendum CPTs (jx-summary, jx-statutes,
- * jx-procedures, jx-resources).
+ * s).
  *
  * This file is backend-only. It produces no front-end output.
  *
@@ -51,8 +51,7 @@
  * ────────────────────────────────────────────────
  * jx-summary      → ws_related_summary
  * jx-statutes     → ws_related_statutes
- * jx-procedures   → ws_related_procedures
- * jx-resources    → ws_related_resources
+ * s    → 
  *
  * NOTE: ws-legal-update is NOT included here. Legal Updates use a
  * many-to-many relationship (one update → many jurisdictions) managed
@@ -98,10 +97,9 @@ defined( 'ABSPATH' ) || exit;
 
 function ws_addendum_relationship_map() {
     return [
-        'jx-summary'    => 'ws_related_summary',
-        'jx-statute'    => 'ws_related_statutes',
-        'jx-procedure'  => 'ws_related_procedures',
-        'jx-resource'   => 'ws_related_resources',
+        'jx-summary'  => 'ws_related_summary',
+        'jx-statute'  => 'ws_related_statutes',
+        '' => '',
     ];
 }
 

@@ -50,8 +50,8 @@
  *
  *   jurisdiction
  *   jx-summary
- *   jx-resources
- *   jx-procedures
+ *   s
+ *   s
  *   jx-statutes
  *   jx-citation
  *   ws-legal-update
@@ -106,8 +106,8 @@ function ws_audited_post_types() {
     return [
         'jurisdiction',
         'jx-summary',
-        'jx-resource',
-        'jx-procedure',
+        '',
+        '',
         'jx-statute',
         'jx-citation',
         'ws-legal-update',

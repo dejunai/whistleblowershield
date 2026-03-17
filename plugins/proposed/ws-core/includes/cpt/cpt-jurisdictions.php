@@ -22,8 +22,8 @@
  *
  *   jx-summary
  *   jx-statute
- *   jx-procedure
- *   jx-resource
+ *   
+ *   
  *   ws-legal-update
  *
  * Internal Identifier:

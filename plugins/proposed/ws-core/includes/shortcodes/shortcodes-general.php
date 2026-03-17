@@ -106,6 +106,8 @@ function ws_shortcode_legal_updates( $atts ) {
         }
 
         if ( $jx_id ) {
+            // ACF relationship fields store post IDs as serialized arrays.
+            // LIKE with a quoted ID matches within the serialized string.
             $meta_query = [ [
                 'key'     => 'ws_legal_update_jurisdiction',
                 'value'   => '"' . $jx_id . '"',
