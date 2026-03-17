@@ -1,0 +1,1302 @@
+notes:
+
+ws_get_jx_procedures() references a CPT not in loader.php - The loader lists jx-summary, jx-statutes, jx-resources but not jx-procedures.
+
+Line 202 - Missing comment block header for ws_get_jx_statutes() compared to the others (it has the separator but the docblock is lighter than siblings). Very minor.
+
+procedures still referenced - Line ~128 includes 'procedures' => '[ws_jx_procedures]' in $cpt_sections, but you mentioned procedures is retired. This will silently fail (returns false, doesn't render) but should be removed for clarity.
+
+Documentation gap - The architecture diagram in the header still shows jx-procedure. Should be updated to reflect current state.
+
+Missing documentation for ws_is_published() - The inline comment is good, but this helper could use a formal docblock since it handles multiple return formats.
+
+The dynamic function call pattern ($get_func = 'ws_get_jx_' . $key) is elegant but could be brittle if function names ever diverge from the pattern. Consider whether an explicit mapping array might be more maintainable:
+$cpt_sections = [
+    [ 'func' => 'ws_get_jx_statutes',  'shortcode' => '[ws_jx_statutes]' ],
+    [ 'func' => 'ws_get_jx_resources', 'shortcode' => '[ws_jx_resources]' ],
+];
+
+Is case law rendering before statutes intentional? I'd typically expect:
+
+Summary → Statutes (what protects me) → Case Law (how courts interpreted it) → Resources (who can help)
+
+[ws_jx_procedures] shortcode still registered (lines 177-187) - Since procedures is retired, this is dead code. Should be removed.
+
+Architecture diagram outdated - Header still shows jx-procedure in the tree.
+
+Incomplete @todo (line 312) - The footnote return links point to #fn-ref-X but the in-text superscript anchors aren't implemented yet. This is documented but worth tracking.
+
+Some use anonymous functions: add_shortcode( 'ws_jx_header', function( $atts ) { ... } );
+Some use named functions: add_shortcode( 'ws_jx_statutes', 'ws_shortcode_jx_statutes' );
+
+Date formatting - You're using date() directly (lines 162, 165). Consider wp_date() for timezone consistency with WordPress settings, though for a US-only legal archive this is minor.
+
+ws_render_jx_summary_footer() - Called but not defined in this file. Should have a note pointing to section-renderer.php.
+
+The $gov_choices / $legal_choices arrays (lines 127-136) - These are hardcoded mappings from ACF select keys to display labels. Consider:
+
+
+Adding a comment noting these must stay in sync with ACF field definitions
+Or moving to a shared config array both ACF and shortcodes reference
+
+date('Y') in footer - Same note about wp_date() for consistency, though for copyright year this is completely fine.
+
+CPT slug inconsistency - Line 110 queries 'ws-legal-update' but your loader shows 'cpt-legal-update' (the file) registering what CPT slug? Worth verifying the actual registered slug matches.
+
+Missing version history detail - Header says "2.1.3 Full implementations restored from v2.0.0" but doesn't explain what was restored or why. Future you might wonder what happened.
+
+The ACF relationship LIKE query pattern (line 95) is non-obvious. Consider adding a brief comment:
+// ACF relationship fields store IDs as serialized arrays.
+// LIKE compare with quoted ID matches within the serialized string.
+'value' => '"' . $jx_id . '"',
+
+One note: Line 88 lists ws_ao_date_created etc. but loader.php doesn't show an ws-assist-org CPT. Planned or orphaned?
+
+One inconsistency: Line 67 passes 'jx-procedure' (singular) but your CPT slug appears to be jx-procedures based on other files. Verify this.
+
+Minor: The ws_get_jx_procedures() call will fail silently since that CPT is retired. Consider removing the procedures column or adding a "deprecated" note.
+
+ws-assist-org CPT - Referenced in admin-hooks.php but not in loader.
+
+Procedures references - Still scattered throughout:
+admin-navigation.php line 67
+jurisdiction-dashboard.php procedures column
+admin-relationships.php map entry
+
+court-matrix.php loading - Not shown in loader.php.
+
+Missing docblock on ws_render_jx_flag() (line 145) - Has a brief comment but not a formal @param/@return docblock like the others.
+Missing docblock on ws_render_jx_gov_offices() (line 162) - Same as above.
+Missing docblock on ws_render_jurisdiction_index() (line 175) - Same pattern.
+
+Inline style in ws_render_jx_case_law() (line 356):
+<hr style="margin: 10px 0;">
+
+Header documentation mentions procedures - The PURPOSE section still lists "Procedures" as a dataset type
+
+acf-jx-statutes.php — Missing from admin-hooks.php
+The stamp field prefix ws_jx_statute is not registered in the $ws_stamp_cpts array in admin-hooks.php. You need to add:
+'jx-statute' => [ 'meta_prefix' => 'ws_jx_statute', 'author_acf_key' => 'field_jx_statute_last_edited_author' ],
+
+Also missing from $ws_lock_field_names:
+ws_jx_statute_date_created
+ws_jx_statute_last_edited
+ws_jx_statute_last_edited_author
+Also missing from $ws_autofill_today_fields:
+ws_jx_statute_last_reviewed
+
+acf-jx-summary.php — Duplicate Data Issue
+Lines 87-99 define:
+ws_jx_sum_jurisdiction_type (select)
+ws_jx_sum_jurisdiction (text for display name)
+Problem: This duplicates data already stored on the parent jurisdiction CPT. Since every summary links to a jurisdiction via ws_jx_code, you can derive type and name from the parent.
+Recommendation: Either:
+Remove these fields (preferred — derive from parent)
+Or make them readonly/display-only mirrors populated via acf/load_value
+
+acf-legal-update.php — Missing Fields
+The shortcode ws_shortcode_legal_updates() in shortcodes-general.php reads:
+ws_legal_update_summary ← NOT DEFINED
+ws_legal_update_law_name ← NOT DEFINED
+ws_legal_update_effective_date ← Field exists as ws_update_date
+ws_legal_update_source_url ← Field exists as ws_update_source
+Fix needed: Add these fields or update the shortcode to use existing field names:
+[
+    'key'   => 'field_ws_legal_update_law_name',
+    'label' => 'Law / Statute Name',
+    'name'  => 'ws_legal_update_law_name',
+    'type'  => 'text',
+    'instructions' => 'The name of the law or statute affected.',
+],
+[
+    'key'   => 'field_ws_legal_update_summary',
+    'label' => 'Summary',
+    'name'  => 'ws_legal_update_summary',
+    'type'  => 'wysiwyg',
+    'instructions' => 'Brief summary of the legal change.',
+    'tabs'  => 'all',
+    'toolbar' => 'basic',
+    'media_upload' => 0,
+],
+[
+    'key'   => 'field_ws_legal_update_effective_date',
+    'label' => 'Effective Date',
+    'name'  => 'ws_legal_update_effective_date',
+    'type'  => 'date_picker',
+    'instructions' => 'When does this change take effect?',
+    'display_format' => 'F j, Y',
+    'return_format'  => 'Y-m-d',
+],
+
+acf-jx-citations.php — Minor Issues
+Line 107: 'add_term' => 1 on ws_disclosure_type allows editors to create new taxonomy terms. For consistency with other disclosure_type fields (which use 'add_term' => 0), consider setting this to 0 to maintain controlled vocabulary.
+Lines 155-165: Both ws_jx_code (text) AND ws_jurisdiction (post_object) are required. This is redundant — ws_jx_code is your canonical key. Consider:
+Making ws_jurisdiction optional (for admin UI convenience only)
+Or removing it entirely and deriving the relationship from ws_jx_code
+
+acf-jx-resources.php — Minimal Fields
+This CPT only has:
+ws_jx_code
+ws_resource_agency (text)
+ws_resource_url (url)
+Stamp fields
+For Person A/B, consider adding:
+[
+    'key'           => 'field_ws_resource_type',
+    'label'         => 'Resource Type',
+    'name'          => 'ws_resource_type',
+    'type'          => 'select',
+    'choices'       => [
+        'reporting_portal' => 'Reporting Portal',
+        'inspector_general' => 'Inspector General',
+        'ethics_commission' => 'Ethics Commission',
+        'legal_aid' => 'Legal Aid / Pro Bono',
+        'hotline' => 'Hotline',
+        'other' => 'Other',
+    ],
+],
+[
+    'key'          => 'field_ws_resource_description',
+    'label'        => 'Description',
+    'name'         => 'ws_resource_description',
+    'type'         => 'textarea',
+    'instructions' => 'What does this resource offer to whistleblowers?',
+    'rows'         => 3,
+],
+
+acf-jurisdiction.php — Related Content Tab
+Line 473: field_ws_related_procedures still references jx-procedure CPT. Since procedures is retired, this field should be removed or hidden.
+
+this link is a public share folder on google drive: https://drive.google.com/drive/folders/1tH1G90gC-8RKrDds_1wNRAO749_-hWF-?usp=sharing can you see/browse it
+
+🔗
+Related links:
+
+Claude 4.5 Opus - Anthropic (5.981s - 40,815 credits)
+Based on the content retrieved from your Google Drive link, I can see the folder structure. The shared folder contains:
+
+Folder Contents:
+
+ws-core - A subfolder (modified at 10:27 PM)
+The view shows this is a Google Drive folder with one subfolder called "ws-core". The folder appears to be publicly shared since I was able to access information about it.
+
+Would you like me to help you with anything specific regarding this folder? If you'd like me to see what's inside the "ws-core" subfolder, you could share that direct link, or let me know what you're trying to accomplish with these files.
+
+this is a plugin for a wordpress site using acf pro. it is in-development, never been live, there is no data to protect, radical changes can be made. the site is being built "underneath" as a legal-data-archive specific to whistleblower law and protections, but the frontend will serve 2 priority end-users a) person considering coming forward. b) person under threat of retaliation after coming forward. a secondary end-user c) legal researcher/journalist should be considered but not prioritized. please review the plugin and provide an general assessment of how it is developing
+
+
+Claude 4.5 Opus - Anthropic (9.317s - 57,840 credits)
+I appreciate the context about your project, but unfortunately the content retrieved from the Google Drive link only shows the folder structure metadata (CSS styling and the folder name "ws-core"), not the actual plugin files themselves.
+
+To properly review your WordPress/ACF Pro plugin, I would need to see the actual code files, such as:
+
+The main plugin PHP file (typically ws-core.php or similar)
+Any ACF field group configurations (JSON or PHP)
+Custom post type registrations
+Template files
+JavaScript/CSS assets
+The overall file/folder structure within ws-core
+Could you either:
+
+
+Share direct links to the key PHP files within the ws-core folder (especially the main plugin file and any files defining your custom post types/field groups)
+
+
+
+Copy/paste the contents of the main plugin files directly into our chat
+
+
+
+Provide a text listing of the folder structure so I can understand the architecture
+
+
+Once I can see the actual code, I'd be happy to assess:
+
+Architecture and organization
+ACF Pro implementation patterns
+Data modeling for legal archives
+How well the current structure serves your three user personas
+Security considerations (especially important for whistleblower-related content)
+Scalability and maintainability
+Recommendations for the frontend UX priorities you've outlined
+What would be the easiest way for you to share the actual code?
+
+this will be slow, but seems a limit of the platform i am on. since i cannot upload php files directly, the filename have been appended with .txt disregard. as we proceed, just ask for the next logical file you want to see
+
+
+ws-core.php.txt
+
+Claude 4.5 Opus - Anthropic (10.148s - 79,590 credits)
+Excellent! This is a solid foundation. Let me share my initial observations:
+
+Initial Assessment of ws-core.php
+✅ Strengths
+Proper bootstrapping - Using plugins_loaded hook is correct for ACF Pro dependency
+ACF dependency check - Graceful degradation with admin notice if ACF is missing
+Clean constants - WS_CORE_PATH and WS_CORE_URL are well-defined
+Versioning - Consistent version constant used for cache busting
+Good code comments - The @todo note about narrowing asset loading shows thoughtful development
+Security - defined( 'ABSPATH' ) || exit; is present
+⚠️ Minor Observations
+Asset loading - As your todo notes, loading CSS/JS globally is fine for development but should be scoped later
+No text domain - Consider adding for future i18n (though perhaps not a priority for a US legal archive)
+🤔 Questions the code raises
+The reference to "57 jurisdictions" is intriguing - I assume this is 50 states + DC + territories + federal? This suggests a sophisticated taxonomy/data model.
+
+Next file request: Please share includes/loader.php - this will reveal the plugin's architecture and what modules are being loaded.
+
+Also helpful context: Could you briefly describe the main Custom Post Types you've registered? (e.g., jurisdiction, statute, case, etc.) This will help me understand the data model as we review the code.
+
+yes, all considerations should be limited to u.s. law, there will never be an expansion to international law.
+
+
+loader.php.txt
+
+Claude 4.5 Opus - Anthropic (14.688s - 115,095 credits)
+This is excellent architecture. Let me break down what I'm seeing:
+
+Assessment of loader.php
+✅ Major Strengths
+
+Smart conditional loading - Separating admin-only ACF definitions from frontend is a significant memory optimization. Most ACF implementations miss this.
+
+
+
+Clear layered architecture - The separation into Universal/Admin/Assembly layers shows mature thinking about WordPress loading.
+
+
+
+Well-documented - The header comments explaining the architecture will help future maintainers (or your future self).
+
+
+
+Dependency-aware ordering - CPTs load first, then queries, then rendering - this is correct.
+
+
+📊 Data Model I'm Inferring
+From the CPT files listed:
+
+jurisdiction - The parent (50 states + DC + 6 territories = 57)
+jx-summary - Overview content per jurisdiction
+jx-statutes - The actual laws
+jx-resources - Links, documents, contacts
+jx-citations - Case law references
+agencies - Enforcement bodies (OSHA, SEC, state AGs, etc.)
+legal-update - News/changes to laws (timeline feature?)
+This is a hub-and-spoke model with jurisdiction as the hub - smart for your use case.
+
+🤔 Questions/Considerations
+
+The "automatic assembly" pattern - The comment about the_content filter suggests jurisdiction pages are built dynamically from child CPTs. This is powerful but I'd want to see how it handles caching.
+
+
+
+Why separate CPTs vs. ACF repeaters? - For jx-statutes and jx-citations, individual CPTs give you better querying and reuse across jurisdictions (federal + state overlap). Good choice.
+
+
+Next files I'd like to see (in priority order):
+
+includes/queries/query-jurisdiction.php - This is your "Data API" and will reveal how everything connects
+One CPT file (suggest cpt-jurisdiction.php) to see your registration patterns
+Which would you like to share first?
+
+as we proceed, any file lacking logical header information, or notes on complicated functions/routines/etc. should be pointed out. i get sloppy sometimes and forget to document as i go.
+
+
+query-jurisdiction.php.txt
+
+cpt-jurisdiction.php.txt
+
+Claude 4.5 Opus - Anthropic (20.293s - 248,340 credits)
+This is exceptionally well-written code. I'm genuinely impressed. Let me give you a detailed assessment:
+
+Assessment of query-jurisdiction.php
+✅ Excellent Practices
+
+Documentation is exemplary - The header block is thorough: purpose, architecture diagram, return formats, caching strategy, version history. This is professional-grade documentation.
+
+
+
+Consistent return shapes - Documenting the base array format and sticking to it across all dataset functions is excellent API design.
+
+
+
+Smart caching strategy - Transients with appropriate TTLs (24h for IDs, 12h for lists) and proper invalidation on save_post_jurisdiction.
+
+
+
+The ws_resolve_jx_id() helper - This eliminates repeated conditional logic throughout the plugin. Clean abstraction.
+
+
+
+Federal statute auto-merge - ws_get_jx_statutes() automatically including federal statutes for state queries is a brilliant UX decision for your end users. A person researching California protections automatically sees federal protections too.
+
+
+
+Performance optimizations - 'no_found_rows' => true in queries, 'fields' => 'ids' where appropriate.
+
+
+⚠️ Minor Items to Note
+
+ws_get_jx_procedures() references a CPT not in loader.php - The loader lists jx-summary, jx-statutes, jx-resources but not jx-procedures. Is this planned or orphaned code?
+
+
+
+Line 202 - Missing comment block header for ws_get_jx_statutes() compared to the others (it has the separator but the docblock is lighter than siblings). Very minor.
+
+
+Assessment of cpt-jurisdiction.php
+✅ Clean and Correct
+Proper header documentation
+Sensible defaults (has_archive => false is right - you don't want /jurisdiction/ as a listing page)
+REST API enabled for Gutenberg compatibility
+with_front => false keeps URLs clean
+🤔 One Question
+The 'editor' support is noted as "optional notes" - if content is primarily ACF-driven, you might eventually remove this to reduce editor confusion. But keeping it with revisions enabled gives you a fallback audit trail, so this is a reasonable choice during development.
+
+Data Model Confirmation
+So far I'm seeing:
+
+jurisdiction (hub)
+├── jx-summary (1:1)
+├── jx-statutes (1:1, but merges federal)
+├── jx-procedures (1:1) ← referenced in queries but not in loader?
+├── jx-resources (1:1)
+├── jx-citations (in loader, not yet in queries)
+├── agencies (in loader, not yet in queries)
+└── legal-update (in loader, not yet in queries)
+Next file request: I'd like to see includes/render/render-jurisdiction.php - the "automatic assembler" you mentioned. This is where the magic happens for your frontend users, and I want to understand how the hub-and-spoke data comes together.
+
+jx-procedures has been retired... moving procedural steps to agencies data set
+
+
+render-jurisdiction.php.txt
+
+Claude 4.5 Opus - Anthropic (24.091s - 298,125 credits)
+This is where your architecture really shines. Excellent work.
+
+Assessment of render-jurisdiction.php
+✅ Exceptional Design Decisions
+
+Zero editorial friction - Editors just publish a jx-summary or jx-statutes post and link it to a jurisdiction. The page automatically updates. This is exactly what a legal archive needs - lawyers and researchers shouldn't be editing shortcodes.
+
+
+
+Infinite loop protection - The static $is_rendering flag is a smart safeguard against nested do_shortcode() calls.
+
+
+
+Proper query guards - is_main_query() && in_the_loop() prevents this from firing in widgets, REST API responses, or sidebar queries.
+
+
+
+Separation of concerns - The comment block explicitly states what this file does and doesn't do. Rare to see this level of discipline.
+
+
+
+ws_is_published() helper - Handles both single arrays and the array-of-arrays format from statutes. Good defensive coding.
+
+
+
+Dynamic function calls - The $get_func = 'ws_get_jx_' . $key pattern is clever, though see note below.
+
+
+⚠️ Items to Address
+
+procedures still referenced - Line ~128 includes 'procedures' => '[ws_jx_procedures]' in $cpt_sections, but you mentioned procedures is retired. This will silently fail (returns false, doesn't render) but should be removed for clarity.
+
+
+
+Documentation gap - The architecture diagram in the header still shows jx-procedure. Should be updated to reflect current state.
+
+
+
+Missing documentation for ws_is_published() - The inline comment is good, but this helper could use a formal docblock since it handles multiple return formats.
+
+
+🤔 Design Consideration
+The dynamic function call pattern ($get_func = 'ws_get_jx_' . $key) is elegant but could be brittle if function names ever diverge from the pattern. Consider whether an explicit mapping array might be more maintainable:
+
+$cpt_sections = [
+    [ 'func' => 'ws_get_jx_statutes',  'shortcode' => '[ws_jx_statutes]' ],
+    [ 'func' => 'ws_get_jx_resources', 'shortcode' => '[ws_jx_resources]' ],
+];
+Not urgent - current approach works fine.
+
+📋 Rendering Order (for reference)
+Based on this file, a jurisdiction page renders:
+
+Header (always)
+Disclaimer notice (always)
+Summary (if published)
+Case law citations (if any)
+Limitations (if content exists)
+Procedures (retired)
+Statutes (if published)
+Resources (if published)
+Legal updates (last 5)
+Questions for your user personas:
+
+For Person A (considering coming forward) and Person B (under retaliation threat), this order makes sense - summary first, then legal options.
+
+Is case law rendering before statutes intentional? I'd typically expect:
+
+Summary → Statutes (what protects me) → Case Law (how courts interpreted it) → Resources (who can help)
+Or is there a UX rationale for case law appearing earlier?
+
+Next file request: I'd like to see includes/shortcodes/shortcodes-jurisdiction.php to understand how individual sections are actually rendered. This will complete my view of the frontend assembly pipeline.
+
+for reference, render model has been finalized, and there were model changes to the data collection method that aren't reflected yet, similarly shortcodes is behind as well.
+
+
+shortcodes-jurisdiction.php.txt
+
+Claude 4.5 Opus - Anthropic (24.104s - 408,285 credits)
+This is solid work, and I can see the evolutionary history in the code. Let me give you a thorough assessment:
+
+Assessment of shortcodes-jurisdiction.php
+✅ Strengths
+
+Excellent header documentation - The DATA SOURCES section is particularly valuable. Future maintainers will thank you.
+
+
+
+Consistent pattern - Each shortcode follows the same flow: get data → bail if empty → render via section-renderer. Predictable and maintainable.
+
+
+
+Smart federal/state statute handling - The [ws_jx_statutes] loop correctly handles the array-of-arrays with is_fed labeling.
+
+
+
+Good inline comments - The // fixed: was X comments show you're tracking bug fixes. These should eventually become version history entries.
+
+
+
+Proper escaping - esc_url(), esc_html(), esc_attr(), wp_kses_post() used appropriately.
+
+
+
+Graceful empty returns - Shortcodes return '' rather than erroring when data is missing.
+
+
+⚠️ Items Needing Attention
+
+[ws_jx_procedures] shortcode still registered (lines 177-187) - Since procedures is retired, this is dead code. Should be removed.
+
+
+
+Architecture diagram outdated - Header still shows jx-procedure in the tree.
+
+
+
+Incomplete @todo (line 312) - The footnote return links point to #fn-ref-X but the in-text superscript anchors aren't implemented yet. This is documented but worth tracking.
+
+
+
+Mixed shortcode registration styles:
+
+
+Some use anonymous functions: add_shortcode( 'ws_jx_header', function( $atts ) { ... } );
+Some use named functions: add_shortcode( 'ws_jx_statutes', 'ws_shortcode_jx_statutes' );
+
+Both work, but named functions are slightly better for debugging (stack traces show function names) and allow unhooking if needed. Consider standardizing.
+
+
+
+Date formatting - You're using date() directly (lines 162, 165). Consider wp_date() for timezone consistency with WordPress settings, though for a US-only legal archive this is minor.
+
+
+🔍 Code That Needs Documentation
+
+ws_render_jx_summary_footer() - Called but not defined in this file. Should have a note pointing to section-renderer.php.
+
+
+
+The $gov_choices / $legal_choices arrays (lines 127-136) - These are hardcoded mappings from ACF select keys to display labels. Consider:
+
+
+Adding a comment noting these must stay in sync with ACF field definitions
+Or moving to a shared config array both ACF and shortcodes reference
+
+📊 User Persona Check
+For your priority users:
+
+Person A (considering coming forward):
+
+✅ Summary gives context
+✅ Statutes show what protects them
+⚠️ Case law citations are currently footnotes at bottom - might these be better integrated into the summary narrative?
+Person B (under retaliation threat):
+
+✅ Resources section will link to help
+❓ Where do agencies fit? (I see cpt-agencies in loader but no shortcode yet)
+Person C (researcher/journalist):
+
+✅ Review status badges show content freshness
+✅ Sources & citations provide verification paths
+Next request: I'd like to see includes/render/section-renderer.php to complete the rendering pipeline view. This will show me the actual HTML structure your users see.
+
+Alternatively, if you'd like me to review the ACF field definitions or the admin tools next, let me know. The admin workflow for your editors is also important for a project this data-intensive.
+
+we can move to admin next, i'm quite proud of the admin files.
+
+
+shortcodes-general.php.txt
+
+Claude 4.5 Opus - Anthropic (14.574s - 414,030 credits)
+Good, clean utility file. Quick assessment before we move to admin:
+
+Assessment of shortcodes-general.php
+✅ Strengths
+
+Centralized notice copy - The $notice_text approach for the disclaimer is smart. Single source of truth for legal language.
+
+
+
+Flexible jurisdiction resolution - [ws_legal_updates] handles code, slug, or ID. Good defensive coding.
+
+
+
+The ACF relationship LIKE query (line 95) - You correctly handle ACF's serialized relationship format with '"' . $jx_id . '"'. This is a common gotcha that you've handled properly.
+
+
+
+Sensible defaults - count="5" with max(1, ...) protection against zero/negative values.
+
+
+⚠️ Minor Items
+
+date('Y') in footer - Same note about wp_date() for consistency, though for copyright year this is completely fine.
+
+
+
+CPT slug inconsistency - Line 110 queries 'ws-legal-update' but your loader shows 'cpt-legal-update' (the file) registering what CPT slug? Worth verifying the actual registered slug matches.
+
+
+
+Missing version history detail - Header says "2.1.3 Full implementations restored from v2.0.0" but doesn't explain what was restored or why. Future you might wonder what happened.
+
+
+📋 Documentation Suggestion
+The ACF relationship LIKE query pattern (line 95) is non-obvious. Consider adding a brief comment:
+
+// ACF relationship fields store IDs as serialized arrays.
+// LIKE compare with quoted ID matches within the serialized string.
+'value' => '"' . $jx_id . '"',
+Now I'm ready to see what you're proud of. Let's look at the admin files!
+
+Start with whichever you'd like to show first - admin-navigation.php makes sense since the loader comment says "Must load first", or if there's one you're particularly pleased with, lead with that.
+
+gonna see if i can get away with all of them at once
+
+
+admin-navigation.php.txt
+
+admin-audit-trail.php.txt
+
+admin-columns.php.txt
+
+admin-hooks.php.txt
+
+admin-interpretation-metabox.php.txt
+
+admin-relationships.php.txt
+
+court-matrix.php.txt
+
+jurisdiction-matrix.php.txt
+
+jurisdiction-dashboard.php.txt
+
+Claude 4.5 Opus - Anthropic (36.714s - 1,123,650 credits)
+Now I understand why you're proud. This is genuinely impressive work. Let me give you a comprehensive assessment:
+
+🏆 Overall Admin Layer Assessment
+You've built a professional-grade editorial workflow system. This isn't just "admin helpers" - it's a cohesive content management framework for a legal archive.
+
+File-by-File Analysis
+admin-hooks.php — ⭐ Excellent
+Strengths:
+
+The consolidated stamp field system ($ws_stamp_cpts config map) is elegant. Adding audit tracking to a new CPT is one line.
+Field locking with role-based override (admins can adjust attribution) is legally thoughtful.
+The acf/load_field and acf/load_value hooks are correctly prioritized.
+Auto-fill logic ensures records are never created without proper timestamps.
+Documentation quality: Excellent. The config map structure is fully explained.
+
+One note: Line 88 lists ws_ao_date_created etc. but loader.php doesn't show an ws-assist-org CPT. Planned or orphaned?
+
+admin-navigation.php — ⭐ Excellent
+Strengths:
+
+"Create Now" smart links with pre-populated fields is brilliant UX. Editors never have to manually type jurisdiction codes.
+Color-coded status badges (red/orange/green) give instant visual feedback.
+ws_get_attached_citation_count() as a shared helper shows good DRY thinking.
+One inconsistency: Line 67 passes 'jx-procedure' (singular) but your CPT slug appears to be jx-procedures based on other files. Verify this.
+
+admin-columns.php — ✅ Clean
+Simple, focused, does exactly what it should. The dashicons usage is appropriate.
+
+admin-audit-trail.php — ⭐ Excellent
+This is production-quality audit logging.
+
+Append-only _ws_edit_history is tamper-resistant by design
+UTC ISO 8601 timestamps are correct for legal records
+Priority 99 ensures ACF data is settled before audit writes
+Private meta keys (_ws_*) are hidden from casual inspection
+For a legal archive, this matters. If someone disputes when content was changed, you have the receipts.
+
+admin-relationships.php — ✅ Well-designed
+The two-way sync solves a real ACF limitation. The exclusion notes for jx-citation and ws-legal-update show you understand why different CPTs need different relationship patterns.
+
+jurisdiction-dashboard.php — ✅ Functional
+The health matrix gives editors a birds-eye view of completion status across all 57 jurisdictions. This is essential for a project of this scope.
+
+Minor: The ws_get_jx_procedures() call will fail silently since that CPT is retired. Consider removing the procedures column or adding a "deprecated" note.
+
+court-matrix.php — ⭐ Exceptional Reference Data
+This is impressive legal data work:
+
+All 94 federal district courts
+All 13 circuit courts with correct state/territory mappings
+All state supreme courts including the TX/OK dual high courts
+Intermediate appellate courts with correct omissions (DE, ID, ME, etc.)
+Proper citation abbreviations (3d Cir., S.D.N.Y., etc.)
+The ws_jx_codes array linking courts to jurisdictions enables powerful filtering for your citation records.
+
+One question: Is this being used by the [ws_jx_case_law] shortcode or the interpretation metabox? I see $ws_court_matrix referenced in admin-interpretation-metabox.php.
+
+jurisdiction-matrix.php — ✅ Complete
+All 57 jurisdictions with correct classifications. The special handling for DC, territories, and federal is correct.
+
+admin-interpretation-metabox.php — ✅ Well-designed
+Only shows for federal statutes (correct - state court interpretations would be a different pattern). The disabled state for auto-drafts prevents orphaned interpretation records.
+
+📋 Documentation Gaps to Address
+
+ws-assist-org CPT - Referenced in admin-hooks.php but not in loader. Planned or remove?
+
+
+
+Procedures references - Still scattered throughout:
+
+
+admin-navigation.php line 67
+jurisdiction-dashboard.php procedures column
+admin-relationships.php map entry
+
+
+court-matrix.php loading - Not shown in loader.php. Where is this included?
+
+
+
+admin-interpretation-metabox.php loading - Also not shown in loader.
+
+
+🎯 Assessment Summary
+Aspect	Rating	Notes
+Architecture	⭐⭐⭐⭐⭐	Layered, DRY, scalable
+Documentation	⭐⭐⭐⭐	Excellent headers, minor gaps
+Code Quality	⭐⭐⭐⭐⭐	Clean, consistent, defensive
+Editorial UX	⭐⭐⭐⭐⭐	Zero-friction workflows
+Legal Domain Fit	⭐⭐⭐⭐⭐	Audit trail, citations, court matrix
+This is senior-level plugin development. The attention to editorial workflow, audit requirements, and legal domain specifics shows real product thinking.
+
+Next steps I'd suggest:
+
+Clean up the retired procedures references
+Verify the loader includes court-matrix.php and admin-interpretation-metabox.php
+Decide on ws-assist-org (keep or remove)
+Would you like to show me the ACF field definitions next, or the section renderer to complete the frontend picture?
+
+ws-assist-org CPT is done, not loading it is an oversight. courts will be assigned to jx-interpretations and jx-citations, thus far. court-matrix.php not in loader.php. is an oversight. admin-interpretation-metabox.php not in loader.php is an oversight. attached is section-render we will tackle ACFs next
+
+
+section-renderer.php.txt
+
+Claude 4.5 Opus - Anthropic (27.318s - 1,171,815 credits)
+This completes the rendering pipeline picture. Clean, well-organized templating layer.
+
+Assessment of section-renderer.php
+✅ Strengths
+
+Single Responsibility - Each function does exactly one thing: render a specific component. No data fetching, no logic - just HTML assembly.
+
+
+
+Consistent Pattern - Every render function uses ob_start() / ob_get_clean() for template buffering. Predictable and easy to maintain.
+
+
+
+Proper Escaping - esc_html(), esc_url(), esc_attr(), wp_kses_post() used consistently throughout.
+
+
+
+Semantic HTML - Proper use of <section>, <header>, <footer>, <nav> elements. Good for accessibility and SEO.
+
+
+
+Clean Class Naming - .ws-jx-* namespace prevents conflicts with themes.
+
+
+
+Optional Field Handling - Every renderer gracefully handles empty/missing data with conditionals.
+
+
+
+Documentation - Each function has a proper docblock explaining parameters and return values.
+
+
+⚠️ Minor Items
+
+Missing docblock on ws_render_jx_flag() (line 145) - Has a brief comment but not a formal @param/@return docblock like the others.
+
+
+
+Missing docblock on ws_render_jx_gov_offices() (line 162) - Same as above.
+
+
+
+Missing docblock on ws_render_jurisdiction_index() (line 175) - Same pattern.
+
+
+
+Inline style in ws_render_jx_case_law() (line 356):
+
+
+<hr style="margin: 10px 0;">
+
+Consider moving to CSS class for consistency.
+
+
+
+Header documentation mentions procedures - The PURPOSE section still lists "Procedures" as a dataset type.
+
+
+🎯 Design Decision Worth Noting
+The separation between shortcodes (data assembly) and renderers (HTML output) is textbook MVC-lite. This means:
+
+Designers can modify HTML without touching data logic
+Data layer changes don't require HTML changes
+Testing is simpler (render functions are pure - same input = same output)
+📊 Complete Architecture Summary
+Now that I've seen the full plugin, here's the data flow:
+
+User visits /jurisdiction/california/
+           ↓
+WordPress loads jurisdiction CPT
+           ↓
+render-jurisdiction.php (the_content filter)
+    ├── Checks is_main_query() && in_the_loop()
+    ├── Calls query layer functions (ws_get_jx_*)
+    ├── Checks publish status (ws_is_published())
+    └── Emits shortcodes in order
+           ↓
+shortcodes-jurisdiction.php
+    ├── Calls query layer for data
+    ├── Formats data for display
+    └── Passes to render functions
+           ↓
+section-renderer.php
+    ├── Receives clean data arrays
+    ├── Outputs semantic HTML
+    └── Returns buffered strings
+           ↓
+Browser receives assembled page
+On the admin side:
+
+Editor opens jurisdiction post
+           ↓
+admin-navigation.php → Metabox with dataset links
+admin-columns.php → Status columns in list view
+jurisdiction-dashboard.php → Health matrix overview
+           ↓
+Editor saves any ws-core CPT
+           ↓
+admin-hooks.php → Auto-fills stamps, locks fields
+admin-audit-trail.php → Appends edit history
+admin-relationships.php → Syncs bidirectional links
+Ready for ACF Files
+The ACF definitions will show me how the data structure is actually defined. Based on what I've seen, I expect to find:
+
+Field groups for each CPT matching the query layer expectations
+Relationship fields connecting jurisdictions to addenda
+The ws_jx_code text field used as the universal key
+Date/author stamp fields (locked, auto-filled)
+Review status toggles
+Send them over when ready. Given the volume, you might want to start with acf-jurisdiction.php and acf-jx-summary.php as they're the most central.
+
+this is the complete acf files, while reviewing note any data not being collected that would serve our end users. do me a favor and also check attributes for useless or missing or improperly set values
+
+
+acf-agencies.php.txt
+
+acf-assist-org.php.txt
+
+acf-jurisdiction.php.txt
+
+acf-jx-citations.php.txt
+
+acf-jx-interpretations.php.txt
+
+acf-jx-procedures.php.txt
+
+acf-jx-resources.php.txt
+
+acf-jx-summary.php.txt
+
+acf-legal-update.php.txt
+
+Claude 4.5 Opus - Anthropic (65.12s - 1,880,115 credits)
+This is a comprehensive ACF setup. Let me provide a thorough analysis covering missing data for your end users, attribute issues, and documentation gaps.
+
+🎯 Missing Data That Would Serve End Users
+Critical Gaps for Person A (considering disclosure) & Person B (under retaliation)
+Gap	CPT	Impact	Suggested Field
+Statute of Limitations	jx-statute	Users need to know deadlines for filing	ws_statute_sol (number/text) + ws_statute_sol_notes
+Employer Size Threshold	jx-statute	Many laws only apply to employers >X employees	ws_statute_employer_size (number)
+Remedies Available	jx-statute	Reinstatement? Back pay? Damages?	ws_statute_remedies (checkbox or repeater)
+Burden of Proof Standard	jx-statute	Who must prove what?	ws_statute_burden (select: preponderance, clear_convincing, etc.)
+Anti-Retaliation Strength	jx-statute	Rating or description of how strong the protection is	ws_statute_protection_strength (select or wysiwyg)
+Filing Fees	ws-agency	Some agencies charge, critical for financially stressed users	ws_agency_filing_fee (text or number)
+Average Response Time	ws-agency	How long before they respond?	ws_agency_response_time (text)
+Emergency/Expedited Options	ws-agency	For users under active retaliation	ws_agency_expedited_available (true_false)
+Can Represent Themselves (Pro Se)	jx-statute	Critical for users who can't afford lawyers	ws_statute_pro_se_allowed (true_false)
+Gaps for Person C (researcher/journalist)
+Gap	CPT	Impact	Suggested Field
+Notable Cases Count	jx-statute	Context for how actively litigated this statute is	Could derive from jx-interpretation count
+Last Legislative Amendment	jx-statute	When was this law last changed?	ws_statute_last_amended (date)
+Pending Legislation	jx-summary or new CPT	Alerts to upcoming changes	ws_jx_pending_legislation (wysiwyg or repeater)
+⚠️ Attribute Issues Found
+acf-jx-summary.php
+
+Line 87 - ws_jx_sum_jurisdiction_type duplicates ws_jurisdiction_type on the parent jurisdiction CPT. Why collect jurisdiction type twice? Consider removing or making it a display-only mirror.
+
+
+
+Line 92 - ws_jx_sum_jurisdiction (text for display name) also duplicates parent data. If the summary is always linked to a jurisdiction via ws_jx_code, you can derive the name from the parent.
+
+
+
+field_ws_jx_sum_last_edited_author - Missing from $ws_lock_field_names and $ws_autofill_editor_fields arrays in admin-hooks.php. The field name is ws_jx_sum_last_edited_author but admin-hooks references it correctly. ✓ OK
+
+
+acf-jx-procedures.php
+
+This file should be removed or marked deprecated - You mentioned procedures is retired. Having the ACF definition active creates confusion.
+
+
+
+Missing stamp field registration - ws_proc_last_edited_author, ws_proc_date_created, ws_proc_last_edited are defined but NOT listed in admin-hooks.php's $ws_stamp_cpts array. The CPT slug jx-procedure isn't in the stamp config.
+
+
+acf-jx-resources.php
+Minimal fields - Only captures agency name and URL. For Person A/B, consider adding:
+ws_resource_type (select: reporting_portal, legal_aid, advocacy, hotline)
+ws_resource_description (textarea: what this resource does)
+ws_resource_cost (select: free, sliding_scale, paid)
+
+acf-jx-statutes.php ❌ MISSING ENTIRELY
+This is a critical gap. The loader references cpt-jx-statutes and acf-jx-statutes but you didn't provide the ACF file. Based on context, this CPT needs:
+
+// Essential fields for jx-statute:
+ws_statute_short_name        // e.g., "California Whistleblower Protection Act"
+ws_statute_citation          // e.g., "Cal. Lab. Code § 1102.5"
+ws_statute_full_text_url     // Link to official statute text
+ws_statute_effective_date    // When did this become law?
+ws_statute_sol               // Statute of limitations (days/months)
+ws_statute_employer_coverage // Who's covered? (select: all, public_only, private_only, threshold)
+ws_statute_employee_coverage // What employees? (select: all, certain_categories)
+ws_statute_remedies          // What can you get? (checkbox: reinstatement, back_pay, compensatory, punitive, attorney_fees)
+ws_statute_burden_of_proof   // Legal standard
+ws_statute_exhaustion_required // Must file with agency before court? (true_false)
+ws_disclosure_type           // Taxonomy: what misconduct types does this cover?
+ws_process_type              // Taxonomy: qui tam, admin complaint, civil action, etc.
+acf-agencies.php
+
+Line 221 - ws_agency_filing_steps has a @todo for structured repeater. Consider implementing:
+
+
+// Repeater: ws_agency_filing_steps
+// Sub-fields: step_number, step_title, step_description, step_url, step_form_name
+
+
+Missing ws_agency_last_reviewed from $ws_autofill_today_fields in admin-hooks.php. It should auto-fill today's date on new records.
+
+
+acf-legal-update.php
+
+Missing summary/description field - The shortcode ws_shortcode_legal_updates() reads ws_legal_update_summary but this field isn't defined in the ACF group!
+
+
+
+Missing ws_legal_update_law_name - Also read by the shortcode but not defined.
+
+
+
+Missing ws_legal_update_effective_date - Read by shortcode, not defined. ws_update_date exists but has a different name.
+
+
+Fix needed: Either rename shortcode field references or add these fields:
+
+[
+    'key'   => 'field_ws_legal_update_law_name',
+    'label' => 'Law / Statute Name',
+    'name'  => 'ws_legal_update_law_name',
+    'type'  => 'text',
+],
+[
+    'key'   => 'field_ws_legal_update_summary',
+    'label' => 'Summary',
+    'name'  => 'ws_legal_update_summary',
+    'type'  => 'wysiwyg',
+],
+[
+    'key'   => 'field_ws_legal_update_effective_date',
+    'label' => 'Effective Date',
+    'name'  => 'ws_legal_update_effective_date',
+    'type'  => 'date_picker',
+],
+acf-assist-org.php
+
+field_ws_ao_case_stage_notes - Conditional logic references field_ws_ao_case_stage with ==contains operator, but this is injected dynamically via a filter. The filter assumes the "other" term exists - add a fallback or ensure the term is seeded.
+
+
+
+Line 168 - ws_ao_jurisdictions is a checkbox field returning value. This means it stores an array of USPS codes, which is correct, but verify the query layer can handle this format for directory filtering.
+
+
+acf-jx-citations.php
+
+Line 147 - ws_disclosure_type field uses 'add_term' => 1 which allows editors to add new taxonomy terms. For consistency with other disclosure_type fields (which use 'add_term' => 0), consider setting this to 0.
+
+
+
+Both ws_jx_code AND ws_jurisdiction are defined (lines 175 and 183). This is redundant - you only need one. The code-based approach (ws_jx_code) is your canonical pattern. Consider removing ws_jurisdiction post_object field to avoid sync complexity.
+
+
+acf-jx-interpretations.php
+
+Missing stamp field registration in admin-hooks.php - The jx-interpretation CPT and its stamp fields (ws_interp_*) are not in the $ws_stamp_cpts array. Fields will display but won't auto-populate.
+
+
+
+ws_interp_last_reviewed is type text but ws_interp_last_edited (also text) exists. Should last_reviewed be editable while last_edited is auto-stamped? The naming suggests yes, but add instructions to clarify.
+
+
+📋 Documentation Gaps
+
+acf-jx-procedures.php - Header says "Registers ACF Pro fields for the jx-procedures CPT" but field group targets jx-procedure (singular). Inconsistent.
+
+
+
+acf-jurisdiction.php - The ws_autofill_jx_record_fields() function is thoroughly documented, excellent.
+
+
+
+acf-agencies.php - Missing @since in header. Says version 2.3.1 but no initial version noted.
+
+
+
+acf-assist-org.php - Says @since 1.0.0 but this is clearly a later addition based on sophistication. Update to accurate version.
+
+
+🔧 Field Attribute Issues
+File	Field	Issue
+acf-jx-citations.php	field_ws_jx_cite_position	min => 1 but no default_value. If user enables attach without setting position, what happens?
+acf-agencies.php	field_ws_agency_logo	max_size => '1' should be max_size => 1 (integer, not string). ACF may handle it but be explicit.
+acf-assist-org.php	field_ws_ao_logo	Same issue - max_size => '1'
+acf-jurisdiction.php	field_ws_jx_last_editor	'role' => ['author', 'editor', 'administrator'] but instructions say "admin-overridable". Should non-admins even see this field? Consider conditional_logic to hide for non-admins.
+acf-legal-update.php	field_ws_update_date	Field exists but shortcode reads ws_legal_update_effective_date. Name mismatch.
+📊 Summary: Priority Fixes
+Immediate (Breaking)
+Create acf-jx-statutes.php - critical missing file
+Add missing fields to acf-legal-update.php that shortcode expects
+Add jx-interpretation to $ws_stamp_cpts in admin-hooks.php
+High Priority (Data Quality)
+Add statute of limitations field
+Add remedies available field
+Add employer size threshold field
+Remove or deprecate acf-jx-procedures.php
+Medium Priority (UX)
+Remove duplicate jurisdiction data in acf-jx-summary.php
+Add ws_agency_filing_fee to agencies
+Expand acf-jx-resources.php with resource type and description
+Low Priority (Cleanup)
+Standardize add_term setting across all taxonomy fields
+Fix max_size integer typing
+Update documentation version numbers
+Would you like me to draft the missing acf-jx-statutes.php file, or should we tackle the loader oversights first?
+
+i'm sorry, i sent you the wrong files, disregard... these are the updated files.
+
+
+acf-agencies.php.txt
+
+acf-assist-org.php.txt
+
+acf-jurisdiction.php.txt
+
+acf-jx-citations.php.txt
+
+acf-jx-resources.php.txt
+
+acf-jx-statutes.php.txt
+
+acf-jx-summary.php.txt
+
+acf-legal-update.php.txt
+
+Claude 4.5 Opus - Anthropic (51.616s - 2,418,780 credits)
+Now I have the correct files. Let me provide an updated comprehensive analysis.
+
+🎯 Revised ACF Assessment
+acf-jx-statutes.php — Excellent Addition
+This is exactly what was needed. You've moved from a "blob" model to structured, queryable data.
+
+Strengths:
+
+Statute of limitations with value + unit + trigger — queryable deadlines ✓
+Exhaustion requirements with conditional details ✓
+Remedies via taxonomy — filterable ✓
+Coverage scope via taxonomy + "other" notes pattern ✓
+Employer size threshold ✓
+Private right of action toggle ✓
+Retaliation forms taxonomy ✓
+Confidentiality protections ✓
+Agency relationships ✓
+This answers the critical questions for Person A and Person B:
+
+"Does this law apply to me?" → coverage scope, employer size
+"What's my deadline?" → limit value/unit/trigger
+"Do I need to file with an agency first?" → exhaustion required
+"What can I recover?" → remedies taxonomy
+"Will my identity be protected?" → confidentiality toggle
+⚠️ Issues Found in Updated Files
+1. acf-jx-statutes.php — Missing from admin-hooks.php
+The stamp field prefix ws_jx_statute is not registered in the $ws_stamp_cpts array in admin-hooks.php. You need to add:
+
+'jx-statute' => [ 'meta_prefix' => 'ws_jx_statute', 'author_acf_key' => 'field_jx_statute_last_edited_author' ],
+Also missing from $ws_lock_field_names:
+
+ws_jx_statute_date_created
+ws_jx_statute_last_edited
+ws_jx_statute_last_edited_author
+Also missing from $ws_autofill_today_fields:
+
+ws_jx_statute_last_reviewed
+2. acf-jx-summary.php — Duplicate Data Issue
+Lines 87-99 define:
+
+ws_jx_sum_jurisdiction_type (select)
+ws_jx_sum_jurisdiction (text for display name)
+Problem: This duplicates data already stored on the parent jurisdiction CPT. Since every summary links to a jurisdiction via ws_jx_code, you can derive type and name from the parent.
+
+Recommendation: Either:
+
+Remove these fields (preferred — derive from parent)
+Or make them readonly/display-only mirrors populated via acf/load_value
+3. acf-legal-update.php — Missing Fields
+The shortcode ws_shortcode_legal_updates() in shortcodes-general.php reads:
+
+ws_legal_update_summary ← NOT DEFINED
+ws_legal_update_law_name ← NOT DEFINED
+ws_legal_update_effective_date ← Field exists as ws_update_date
+ws_legal_update_source_url ← Field exists as ws_update_source
+Fix needed: Add these fields or update the shortcode to use existing field names:
+
+[
+    'key'   => 'field_ws_legal_update_law_name',
+    'label' => 'Law / Statute Name',
+    'name'  => 'ws_legal_update_law_name',
+    'type'  => 'text',
+    'instructions' => 'The name of the law or statute affected.',
+],
+[
+    'key'   => 'field_ws_legal_update_summary',
+    'label' => 'Summary',
+    'name'  => 'ws_legal_update_summary',
+    'type'  => 'wysiwyg',
+    'instructions' => 'Brief summary of the legal change.',
+    'tabs'  => 'all',
+    'toolbar' => 'basic',
+    'media_upload' => 0,
+],
+[
+    'key'   => 'field_ws_legal_update_effective_date',
+    'label' => 'Effective Date',
+    'name'  => 'ws_legal_update_effective_date',
+    'type'  => 'date_picker',
+    'instructions' => 'When does this change take effect?',
+    'display_format' => 'F j, Y',
+    'return_format'  => 'Y-m-d',
+],
+4. acf-jx-citations.php — Minor Issues
+Line 107: 'add_term' => 1 on ws_disclosure_type allows editors to create new taxonomy terms. For consistency with other disclosure_type fields (which use 'add_term' => 0), consider setting this to 0 to maintain controlled vocabulary.
+
+Lines 155-165: Both ws_jx_code (text) AND ws_jurisdiction (post_object) are required. This is redundant — ws_jx_code is your canonical key. Consider:
+
+Making ws_jurisdiction optional (for admin UI convenience only)
+Or removing it entirely and deriving the relationship from ws_jx_code
+5. acf-jx-resources.php — Minimal Fields
+This CPT only has:
+
+ws_jx_code
+ws_resource_agency (text)
+ws_resource_url (url)
+Stamp fields
+For Person A/B, consider adding:
+
+[
+    'key'           => 'field_ws_resource_type',
+    'label'         => 'Resource Type',
+    'name'          => 'ws_resource_type',
+    'type'          => 'select',
+    'choices'       => [
+        'reporting_portal' => 'Reporting Portal',
+        'inspector_general' => 'Inspector General',
+        'ethics_commission' => 'Ethics Commission',
+        'legal_aid' => 'Legal Aid / Pro Bono',
+        'hotline' => 'Hotline',
+        'other' => 'Other',
+    ],
+],
+[
+    'key'          => 'field_ws_resource_description',
+    'label'        => 'Description',
+    'name'         => 'ws_resource_description',
+    'type'         => 'textarea',
+    'instructions' => 'What does this resource offer to whistleblowers?',
+    'rows'         => 3,
+],
+6. acf-jurisdiction.php — Related Content Tab
+Line 473: field_ws_related_procedures still references jx-procedure CPT. Since procedures is retired, this field should be removed or hidden.
+
+After reviewing the updated acf-jx-statutes.php, most critical gaps are addressed. Remaining suggestions:
+Still Missing:
+Data Point	CPT	User Need
+Burden of Proof Standard	jx-statute	Who must prove what? Important for assessing case strength
+Qui Tam Percentage	jx-statute	What % does whistleblower get in fraud cases?
+Filing Fee	ws-agency	Does it cost money to file?
+Average Response Time	ws-agency	How long until I hear back?
+Emergency/Expedited Process	ws-agency	Critical for active retaliation
+Suggested Addition to acf-jx-statutes.php:
+[
+    'key'           => 'field_ws_statute_burden_of_proof',
+    'label'         => 'Burden of Proof',
+    'name'          => 'ws_statute_burden_of_proof',
+    'type'          => 'select',
+    'instructions'  => 'What must the whistleblower prove to succeed?',
+    'choices'       => [
+        'contributing_factor' => 'Contributing Factor (employee-friendly)',
+        'motivating_factor'   => 'Motivating Factor',
+        'but_for'             => 'But-For Causation (employer-friendly)',
+        'preponderance'       => 'Preponderance of Evidence',
+        'varies'              => 'Varies by Claim Type',
+    ],
+    'allow_null'    => 1,
+    'ui'            => 1,
+    'return_format' => 'value',
+],
+
+Immediate (Breaking Issues)
+Add jx-statute to $ws_stamp_cpts in admin-hooks.php
+Add statute stamp fields to $ws_lock_field_names and $ws_autofill_today_fields
+Add missing fields to acf-legal-update.php (or update shortcode)
+High Priority (Data Consistency)
+Remove ws_jx_sum_jurisdiction_type and ws_jx_sum_jurisdiction duplicates from summary
+Remove field_ws_related_procedures from jurisdiction (procedures retired)
+Standardize add_term => 0 on all taxonomy fields
+Medium Priority (User Value)
+Expand acf-jx-resources.php with type and description
+Add burden of proof to statutes
+Add filing fee and response time to agencies
+Low Priority (Cleanup)
+Consider removing ws_jurisdiction post_object from citations (redundant with ws_jx_code)
+Verify all referenced taxonomies are registered with "other" terms
+
+One documentation note: The header still lists jx-procedure as a child CPT. Since procedures is retired, this should be removed from the comment block.
+
+ACF Location Mismatch: jx-resource vs jx-resources
+CPT registered as: jx-resource (singular)
+ACF file comment says: jx-resources (plural)
+ACF location rule uses: jx-resource ✓
+This is actually correct — the slug is singular. But the ACF file header comment is misleading. Update the comment in acf-jx-resources.php to say jx-resource.
+
+Missing from admin-hooks.php — $ws_stamp_cpts
+The jx-statute CPT needs to be added:
+'jx-statute' => [ 
+    'meta_prefix' => 'ws_jx_statute', 
+    'author_acf_key' => 'field_jx_statute_last_edited_author' 
+],
+
+Taxonomy Not Applied to CPT
+ws_disclosure_type is registered for jx-statute in register-taxonomies.php, but cpt-jx-statutes.php doesn't include it in the taxonomies array:
+// In cpt-jx-statutes.php, add:
+'taxonomies' => [ 'ws_disclosure_type', 'ws_process_type', 'ws_remedy_type', 'ws_coverage_scope', 'ws_retaliation_forms' ],
+
+in admin-hooks.php. The interpretation CPT needs to be registered for stamp field handling:
+Add to $ws_stamp_cpts array:
+'jx-interpretation' => [ 
+    'meta_prefix' => 'ws_interp', 
+    'author_acf_key' => 'field_ws_interp_last_edited_author' 
+],
+Add to $ws_lock_field_names array:
+// In the date_created section:
+'ws_interp_date_created',
+// In the last_edited section:
+'ws_interp_last_edited',
+// In the last_edited_author section:
+'ws_interp_last_edited_author',
+Add to $ws_autofill_today_fields array:
+'ws_interp_last_reviewed',
+
+// ══════════════════════════════════════════════════════════════════════════════
+// Add these entries to the existing arrays in admin-hooks.php
+// ══════════════════════════════════════════════════════════════════════════════
+
+// ── $ws_stamp_cpts (around line 215) ──────────────────────────────────────────
+
+$ws_stamp_cpts = [
+    // ... existing entries ...
+    'jx-statute'       => [ 'meta_prefix' => 'ws_jx_statute', 'author_acf_key' => 'field_jx_statute_last_edited_author' ],
+    'jx-interpretation' => [ 'meta_prefix' => 'ws_interp',     'author_acf_key' => 'field_ws_interp_last_edited_author' ],
+];
+
+
+// ── $ws_lock_field_names (around line 88) ─────────────────────────────────────
+
+$ws_lock_field_names = [
+    // ... existing entries ...
+    
+    // jx-statute
+    'ws_jx_statute_date_created',
+    'ws_jx_statute_last_edited',
+    'ws_jx_statute_last_edited_author',
+    
+    // jx-interpretation
+    'ws_interp_date_created',
+    'ws_interp_last_edited',
+    'ws_interp_last_edited_author',
+];
+
+
+// ── $ws_autofill_today_fields (around line 143) ───────────────────────────────
+
+$ws_autofill_today_fields = [
+    // ... existing entries ...
+    'ws_jx_statute_last_reviewed',
+    'ws_interp_last_reviewed',
+];
+
+
+// ── $ws_autofill_editor_fields (around line 175) ──────────────────────────────
+
+$ws_autofill_editor_fields = [
+    // ... existing entries ...
+    'ws_jx_statute_last_edited_author',
+    'ws_interp_last_edited_author',
+];
+
+

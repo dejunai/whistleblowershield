@@ -52,10 +52,17 @@
  *          whistleblower offices (FL, IL, MA, NJ, NY, OH, PA, TX, VA).
  *        - Updated ws_jx_legislature_label for all 50 states to official
  * 2.3.4  Inclusion of URLs and Official Government Portals
- *
+ * 3.0.0  Architecture refactor (Phase 6.1):
+ *        - Converted from a bare return-array data file to a seeder file.
+ *        - Added ws_seed_jurisdiction_matrix() function and admin_init gate.
+ *        - Seeder: seeds ws_jurisdiction taxonomy terms, creates jurisdiction
+ *          posts, assigns terms, writes ws_jx_term_id post meta, writes
+ *          ws_us_term_id option, and sets ws_matrix_source post meta.
  */
 
-return [
+defined( 'ABSPATH' ) || exit;
+
+$_ws_jx_matrix = [
 
     'US' => [
         'title'                    => 'United States',
@@ -1537,4 +1544,124 @@ return [
         'ws_jx_executive_label'    => 'Office of the Governor',
     ],
 
-]; // end $ws_jurisdiction_matrix
+]; // end $_ws_jx_matrix
+
+
+// ════════════════════════════════════════════════════════════════════════════
+// Seeder: ws_seed_jurisdiction_matrix
+//
+// Creates or updates all 57 jurisdiction CPT posts from $_ws_jx_matrix.
+//
+// Seeder order:
+//   1. Seed ws_jurisdiction taxonomy terms (slugs = lowercase USPS codes).
+//   2. Write ws_us_term_id option for the US term (used by query layer).
+//   3. Create/update jurisdiction CPT posts.
+//   4. Assign taxonomy term to each post via wp_set_object_terms().
+//   5. Write ws_jx_term_id post meta on each post.
+//   6. Write ws_matrix_source = 'jurisdiction-matrix' on each post.
+//
+// Gate: ws_seeded_jurisdiction_matrix / 1.0.0 (Unified Option-Gate Method).
+// ════════════════════════════════════════════════════════════════════════════
+
+function ws_seed_jurisdiction_matrix() {
+    global $_ws_jx_matrix;
+
+    // ── Step 1: Seed taxonomy terms ───────────────────────────────────────
+
+    $term_map = []; // slug → term_id
+
+    foreach ( $_ws_jx_matrix as $code => $jx ) {
+
+        $slug = strtolower( $code );
+        $name = $jx['title'];
+
+        $existing = term_exists( $slug, 'ws_jurisdiction' );
+
+        if ( $existing ) {
+            $term_id = is_array( $existing ) ? (int) $existing['term_id'] : (int) $existing;
+        } else {
+            $result = wp_insert_term( $name, 'ws_jurisdiction', [ 'slug' => $slug ] );
+            if ( is_wp_error( $result ) ) {
+                continue;
+            }
+            $term_id = (int) $result['term_id'];
+        }
+
+        $term_map[ $slug ] = $term_id;
+
+        // Write the US term ID option used by ws_get_us_term_id() in the query layer.
+        if ( $slug === 'us' ) {
+            update_option( 'ws_us_term_id', $term_id );
+        }
+    }
+
+    // ── Step 2: Create/update jurisdiction posts ──────────────────────────
+
+    foreach ( $_ws_jx_matrix as $code => $jx ) {
+
+        $slug    = strtolower( $code );
+        $term_id = $term_map[ $slug ] ?? 0;
+
+        // Find existing post by slug.
+        $existing_post = get_page_by_path( $jx['slug'], OBJECT, 'jurisdiction' );
+
+        if ( $existing_post ) {
+            $post_id = $existing_post->ID;
+            wp_update_post( [
+                'ID'         => $post_id,
+                'post_title' => $jx['title'],
+                'post_name'  => $jx['slug'],
+            ] );
+        } else {
+            $post_id = wp_insert_post( [
+                'post_title'  => $jx['title'],
+                'post_name'   => $jx['slug'],
+                'post_type'   => 'jurisdiction',
+                'post_status' => 'publish',
+            ] );
+        }
+
+        if ( is_wp_error( $post_id ) || ! $post_id ) {
+            continue;
+        }
+
+        // Write ACF / meta fields from the matrix entry.
+        $meta_fields = [
+            'ws_jurisdiction_class'    => $jx['ws_jurisdiction_class']    ?? '',
+            'ws_jurisdiction_name'     => $jx['ws_jurisdiction_name']     ?? $jx['title'],
+            'ws_jx_gov_portal_url'     => $jx['ws_jx_gov_portal_url']     ?? '',
+            'ws_jx_gov_portal_label'   => $jx['ws_jx_gov_portal_label']   ?? '',
+            'ws_jx_wb_authority_url'   => $jx['ws_jx_wb_authority_url']   ?? '',
+            'ws_jx_wb_authority_label' => $jx['ws_jx_wb_authority_label'] ?? '',
+            'ws_jx_legislature_url'    => $jx['ws_jx_legislature_url']    ?? '',
+            'ws_jx_legislature_label'  => $jx['ws_jx_legislature_label']  ?? '',
+            'ws_jx_executive_url'      => $jx['ws_jx_executive_url']      ?? '',
+            'ws_jx_executive_label'    => $jx['ws_jx_executive_label']    ?? '',
+        ];
+
+        foreach ( $meta_fields as $key => $value ) {
+            if ( $value !== '' && $value !== null ) {
+                update_post_meta( $post_id, $key, $value );
+            }
+        }
+
+        // Assign ws_jurisdiction taxonomy term and write ws_jx_term_id meta.
+        if ( $term_id ) {
+            wp_set_object_terms( $post_id, $term_id, 'ws_jurisdiction' );
+            update_post_meta( $post_id, 'ws_jx_term_id', $term_id );
+        }
+
+        // Mark as seeded.
+        update_post_meta( $post_id, 'ws_matrix_source', 'jurisdiction-matrix' );
+    }
+}
+
+
+// ── Gate: Unified Option-Gate Method ─────────────────────────────────────────
+
+add_action( 'admin_init', function() {
+    if ( get_option( 'ws_seeded_jurisdiction_matrix' ) !== '1.0.0' ) {
+        ws_seed_jurisdiction_matrix();
+        update_option( 'ws_seeded_jurisdiction_matrix', '1.0.0' );
+    }
+} );

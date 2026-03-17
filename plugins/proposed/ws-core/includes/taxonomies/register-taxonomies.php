@@ -25,6 +25,16 @@
  *          fixed (Bug #1 — was a fatal PHP parse error).
  *        - ws_seed_remedy_taxonomy() now calls update_option() so the gate
  *          check does not re-run on every admin_init (Bug #3).
+ * 3.0.0  ARCHITECTURE REFACTOR (Phase 2 + 3.1):
+ *        - Empty string removed from ws_disclosure_type object types array.
+ *        - Registered ws_jurisdiction taxonomy (private, non-hierarchical) —
+ *          replaces ws_jx_code meta as the jurisdiction join mechanism.
+ *        - All seed gates migrated to Unified Option-Gate Method (key prefix
+ *          ws_seeded_*, version string '1.0.0').
+ *        - Grouped ws_v240_taxonomies_seeded gate split into four individual
+ *          gates: ws_seeded_coverage_scope, ws_seeded_retaliation_forms,
+ *          ws_seeded_languages_taxonomy, ws_seeded_case_stage.
+ *        - ws_seed_v240_taxonomies() replaced by four dedicated functions.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -42,7 +52,7 @@ function ws_register_taxonomies() {
     if ( ! taxonomy_exists( 'ws_disclosure_type' ) ) {
         register_taxonomy(
             'ws_disclosure_type',
-            [ 'jx-statute', '', 'jx-citation', 'ws-agency', 'ws-assist-org' ],
+            [ 'jx-statute', 'jx-citation', 'ws-agency', 'ws-assist-org' ],
             [
                 'label'             => 'Disclosure Categories',
                 'labels'            => [
@@ -241,6 +251,39 @@ function ws_register_taxonomies() {
             ]
         );
     }
+
+    // ── 8. Jurisdiction ───────────────────────────────────────────────────
+    //
+    // Replaces ws_jx_code post meta as the jurisdiction join mechanism.
+    // Private taxonomy — terms are canonical USPS-code slugs (e.g. 'us', 'ca', 'tx').
+    // Terms are seeded in jurisdiction-matrix.php via ws_seeded_jurisdiction_taxonomy gate.
+
+    if ( ! taxonomy_exists( 'ws_jurisdiction' ) ) {
+        register_taxonomy(
+            'ws_jurisdiction',
+            [ 'jx-statute', 'jx-summary', 'jx-citation', 'jx-interpretation', 'ws-agency', 'ws-assist-org' ],
+            [
+                'label'             => 'Jurisdictions',
+                'labels'            => [
+                    'name'              => 'Jurisdictions',
+                    'singular_name'     => 'Jurisdiction',
+                    'search_items'      => 'Search Jurisdictions',
+                    'all_items'         => 'All Jurisdictions',
+                    'edit_item'         => 'Edit Jurisdiction',
+                    'update_item'       => 'Update Jurisdiction',
+                    'add_new_item'      => 'Add New Jurisdiction',
+                    'new_item_name'     => 'New Jurisdiction Name',
+                    'menu_name'         => 'Jurisdictions',
+                ],
+                'public'            => false,
+                'hierarchical'      => false,
+                'show_ui'           => true,
+                'show_in_rest'      => true,
+                'show_admin_column' => true,
+                'capabilities'      => ws_get_taxonomy_caps(),
+            ]
+        );
+    }
 }
 add_action( 'init', 'ws_register_taxonomies' );
 
@@ -261,16 +304,38 @@ function ws_get_taxonomy_caps() {
 
 // ── Seeding execution gates ───────────────────────────────────────────────────
 //
-// Each seeding function runs once — gated by a versioned option flag.
-// The v240 gate covers all four new taxonomies introduced in 2.4.0.
+// Each seeder is individually gated using the Unified Option-Gate Method.
+// Key format: ws_seeded_{seeder_slug} / version: '1.0.0'
+// No grouped gates — each taxonomy has its own independent gate.
 
 add_action( 'admin_init', function() {
-    if ( get_option( 'ws_disclosure_type_seeded' ) !== '1.0' ) { ws_seed_disclosure_taxonomy(); }
-    if ( get_option( 'ws_process_type_seeded' ) !== '1.0' )    { ws_seed_process_type_taxonomy(); }
-    if ( get_option( 'ws_remedy_type_seeded' ) !== '1.0' )     { ws_seed_remedy_taxonomy(); }
-    if ( get_option( 'ws_v240_taxonomies_seeded' ) !== '1.0' ) {
-        ws_seed_v240_taxonomies();
-        update_option( 'ws_v240_taxonomies_seeded', '1.0' );
+    if ( get_option( 'ws_seeded_disclosure_type' ) !== '1.0.0' ) {
+        ws_seed_disclosure_taxonomy();
+        update_option( 'ws_seeded_disclosure_type', '1.0.0' );
+    }
+    if ( get_option( 'ws_seeded_process_type' ) !== '1.0.0' ) {
+        ws_seed_process_type_taxonomy();
+        update_option( 'ws_seeded_process_type', '1.0.0' );
+    }
+    if ( get_option( 'ws_seeded_remedy_type' ) !== '1.0.0' ) {
+        ws_seed_remedy_taxonomy();
+        update_option( 'ws_seeded_remedy_type', '1.0.0' );
+    }
+    if ( get_option( 'ws_seeded_coverage_scope' ) !== '1.0.0' ) {
+        ws_seed_coverage_scope_taxonomy();
+        update_option( 'ws_seeded_coverage_scope', '1.0.0' );
+    }
+    if ( get_option( 'ws_seeded_retaliation_forms' ) !== '1.0.0' ) {
+        ws_seed_retaliation_forms_taxonomy();
+        update_option( 'ws_seeded_retaliation_forms', '1.0.0' );
+    }
+    if ( get_option( 'ws_seeded_languages_taxonomy' ) !== '1.0.0' ) {
+        ws_seed_languages_taxonomy();
+        update_option( 'ws_seeded_languages_taxonomy', '1.0.0' );
+    }
+    if ( get_option( 'ws_seeded_case_stage' ) !== '1.0.0' ) {
+        ws_seed_case_stage_taxonomy();
+        update_option( 'ws_seeded_case_stage', '1.0.0' );
     }
 } );
 
@@ -353,8 +418,6 @@ function ws_seed_disclosure_taxonomy() {
             }
         }
     }
-
-    update_option( 'ws_disclosure_type_seeded', '1.0' );
 }
 
 /**
@@ -378,8 +441,6 @@ function ws_seed_process_type_taxonomy() {
             wp_insert_term( $name, $taxonomy, [ 'slug' => $slug ] );
         }
     }
-
-    update_option( 'ws_process_type_seeded', '1.0' );
 }
 
 /**
@@ -407,72 +468,98 @@ function ws_seed_remedy_taxonomy() {
             wp_insert_term( $term, $taxonomy );
         }
     }
-
-    update_option( 'ws_remedy_type_seeded', '1.0' ); // Bug #3 fix
 }
 
 /**
- * Seeds terms for all 2.4.0 taxonomies: ws_coverage_scope, ws_retaliation_forms,
- * ws_languages, and ws_case_stage.
- *
- * Bug #1 fix: missing comma after ws_languages entry in $seeds array corrected
- * (was a fatal PHP parse error on activation).
+ * Seeds ws_coverage_scope terms.
  */
-function ws_seed_v240_taxonomies() {
-    $seeds = [
-        'ws_coverage_scope' => [
-            'federal-employees',
-            'private-sector-employees',
-            'contractors',
-            'state-employees',
-            'local-government-employees',
-            'nonprofit-employees',
-            'other',
-        ],
-        'ws_retaliation_forms' => [
-            'termination',
-            'demotion',
-            'disciplinary-action',
-            'transfer',
-            'schedule-change',
-            'harassment',
-            'blacklisting',
-            'security-clearance-action',
-            'other',
-        ],
-        'ws_languages' => [
-            'english',
-            'spanish',
-            'mandarin',
-            'cantonese',
-            'french',
-            'portuguese',
-            'vietnamese',
-            'tagalog',
-            'korean',
-            'arabic',
-            'hindi',
-            'russian',
-            'haitian-creole',
-            'polish',
-            'japanese',
-            'additional',   // Functional flag — triggers meta field query
-        ],                  // Bug #1 fix: comma was missing here
-        'ws_case_stage' => [
-            'pre-report',
-            'post-report',
-            'retaliation-active',
-            'litigation',
-            'other',
-        ],
+function ws_seed_coverage_scope_taxonomy() {
+    $taxonomy = 'ws_coverage_scope';
+    $terms    = [
+        'federal-employees',
+        'private-sector-employees',
+        'contractors',
+        'state-employees',
+        'local-government-employees',
+        'nonprofit-employees',
+        'other',
     ];
+    foreach ( $terms as $slug ) {
+        if ( ! term_exists( $slug, $taxonomy ) ) {
+            wp_insert_term( ucwords( str_replace( '-', ' ', $slug ) ), $taxonomy, [ 'slug' => $slug ] );
+        }
+    }
+}
 
-    foreach ( $seeds as $tax => $terms ) {
-        foreach ( $terms as $slug ) {
-            if ( ! term_exists( $slug, $tax ) ) {
-                $label = ucwords( str_replace( '-', ' ', $slug ) );
-                wp_insert_term( $label, $tax, [ 'slug' => $slug ] );
-            }
+/**
+ * Seeds ws_retaliation_forms terms.
+ */
+function ws_seed_retaliation_forms_taxonomy() {
+    $taxonomy = 'ws_retaliation_forms';
+    $terms    = [
+        'termination',
+        'demotion',
+        'disciplinary-action',
+        'transfer',
+        'schedule-change',
+        'harassment',
+        'blacklisting',
+        'security-clearance-action',
+        'other',
+    ];
+    foreach ( $terms as $slug ) {
+        if ( ! term_exists( $slug, $taxonomy ) ) {
+            wp_insert_term( ucwords( str_replace( '-', ' ', $slug ) ), $taxonomy, [ 'slug' => $slug ] );
+        }
+    }
+}
+
+/**
+ * Seeds ws_languages terms.
+ * 'additional' is a functional flag — auto-assigned when additional_languages text exists.
+ */
+function ws_seed_languages_taxonomy() {
+    $taxonomy = 'ws_languages';
+    $terms    = [
+        'english',
+        'spanish',
+        'mandarin',
+        'cantonese',
+        'french',
+        'portuguese',
+        'vietnamese',
+        'tagalog',
+        'korean',
+        'arabic',
+        'hindi',
+        'russian',
+        'haitian-creole',
+        'polish',
+        'japanese',
+        'additional',
+    ];
+    foreach ( $terms as $slug ) {
+        if ( ! term_exists( $slug, $taxonomy ) ) {
+            wp_insert_term( ucwords( str_replace( '-', ' ', $slug ) ), $taxonomy, [ 'slug' => $slug ] );
+        }
+    }
+}
+
+/**
+ * Seeds ws_case_stage terms.
+ */
+function ws_seed_case_stage_taxonomy() {
+    $taxonomy = 'ws_case_stage';
+    $terms    = [
+        'pre-report',
+        'post-report',
+        'retaliation-active',
+        'litigation',
+        'other',
+    ];
+    foreach ( $terms as $slug ) {
+        if ( ! term_exists( $slug, $taxonomy ) ) {
+            wp_insert_term( ucwords( str_replace( '-', ' ', $slug ) ), $taxonomy, [ 'slug' => $slug ] );
         }
     }
 }

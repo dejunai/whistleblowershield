@@ -1,0 +1,4 @@
+Data completeness signaling
+The jurisdiction dashboard shows what exists, but does it clearly communicate what's missing? A contributor opening the dashboard for California should immediately see not just what records exist but what the expected complete dataset looks like and what percentage is done. Something like a per-jurisdiction completion score — summary ✓, statutes 2/3, citations missing, agencies ✓. Without this, contributors don't know when a jurisdiction is actually done.
+Import pathway
+For the federal dataset especially — statutes, agencies, court data — some of this exists in structured public sources. Has any thought been given to a CSV or JSON import pathway for bulk seeding beyond the matrix files? Not essential now but worth naming as a future consideration before the data entry burden falls entirely on manual input.

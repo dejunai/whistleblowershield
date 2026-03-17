@@ -10,11 +10,9 @@
  *
  * JURISDICTION FIELD
  * ------------------
- * ws_jx_code is stored as a multi-select of USPS codes (e.g. ['CA','TX','US']).
- * Choices are populated dynamically via the acf/load_field filter so the list
- * always reflects published jurisdiction records without manual maintenance.
- * Field key: field_ws_agencies_jx_codes (unique — avoids conflict with
- * field_ws_jx_code defined on the jurisdiction CPT in acf-jurisdiction.php).
+ * Scoped via the ws_jurisdiction taxonomy (field_ws_agency_jurisdiction).
+ * ACF saves/loads terms natively — no dynamic choice filter needed.
+ * Replaces the retired ws_jx_code meta select (Phase 3.2 / 12.1).
  *
  * HOOK
  * ----
@@ -30,6 +28,8 @@
  *        Added ws_process_type taxonomy field (Process Types Handled).
  *        ws-agencies added to ws_disclosure_cat object types in
  *        register-taxonomies.php so save_terms functions correctly.
+ * 3.0.0  Phase 8: ws_jx_code multi-select replaced by ws_jurisdiction taxonomy
+ *        field. Dynamic choice filter removed. Plain Language tab added (9.2).
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -104,23 +104,23 @@ function ws_register_acf_agencies() {
             // ── Jurisdiction(s) ───────────────────────────────────────────
             //
             // Agencies may have authority over multiple jurisdictions.
-            // Choices are populated dynamically from published jurisdiction
-            // records via the acf/load_field filter below — no manual
-            // maintenance of this list is required.
-            //
-            // Field key is field_ws_agencies_jx_codes (not field_ws_jx_code)
-            // to avoid collision with the jurisdiction CPT's own code field.
+            // Scoped via the ws_jurisdiction taxonomy — assign terms to
+            // control which jurisdiction pages surface this agency.
+            // save_terms=1 writes term assignments directly; load_terms=1
+            // reflects current taxonomy state in the admin UI.
 
             [
-                'key'           => 'field_ws_agencies_jx_codes',
+                'key'           => 'field_ws_agency_jurisdiction',
                 'label'         => 'Jurisdiction(s)',
-                'name'          => 'ws_jx_code',
-                'type'          => 'select',
-                'instructions'  => 'Select all USPS codes this agency has authority over.',
-                'choices'       => [],  // Populated dynamically — see acf/load_field filter below
-                'multiple'      => 1,
-                'ui'            => 1,
-                'return_format' => 'value',
+                'name'          => 'ws_jurisdiction',
+                'type'          => 'taxonomy',
+                'taxonomy'      => 'ws_jurisdiction',
+                'field_type'    => 'multi_select',
+                'instructions'  => 'Assign all jurisdictions this agency has authority over. Use US for federal/nationwide agencies.',
+                'add_term'      => 0,
+                'save_terms'    => 1,
+                'load_terms'    => 1,
+                'return_format' => 'id',
                 'allow_null'    => 1,
             ],
             [
@@ -217,6 +217,30 @@ function ws_register_acf_agencies() {
                 'default_value' => 0,
             ],
 
+            // ── Languages ─────────────────────────────────────────────
+
+            [
+                'key'           => 'field_ws_agency_languages',
+                'label'         => 'Languages Served',
+                'name'          => 'ws_languages',
+                'type'          => 'taxonomy',
+                'taxonomy'      => 'ws_languages',
+                'field_type'    => 'checkbox',
+                'instructions'  => 'Select languages this agency can serve. Check "Additional" if other languages are available — then specify them below.',
+                'add_term'      => 0,
+                'save_terms'    => 1,
+                'load_terms'    => 1,
+                'return_format' => 'id',
+            ],
+
+            [
+                'key'          => 'field_ws_agency_additional_languages',
+                'label'        => 'Additional Languages',
+                'name'         => 'ws_agency_additional_languages',
+                'type'         => 'text',
+                'instructions' => 'List additional languages not in the checkbox list above (comma-separated). Saving a non-empty value here automatically assigns the "Additional" language term.',
+            ],
+
             // ── Tab: Authorship & Review ──────────────────────────────────
 
             [
@@ -265,6 +289,71 @@ function ws_register_acf_agencies() {
                 'first_day'      => 1,
             ],
 
+            // ── Tab: Plain Language (Phase 9.2) ───────────────────────────
+
+            [
+                'key'   => 'tab_ws_agency_plain_language',
+                'label' => 'Plain Language',
+                'type'  => 'tab',
+            ],
+            [
+                'key'           => 'field_ws_agency_has_plain_english',
+                'label'         => 'Has Plain Language Version',
+                'name'          => 'has_plain_english',
+                'type'          => 'true_false',
+                'instructions'  => 'Enable when a plain-language description of this agency has been written below.',
+                'ui'            => 1,
+                'ui_on_text'    => 'Yes',
+                'ui_off_text'   => 'No',
+                'default_value' => 0,
+            ],
+            [
+                'key'               => 'field_ws_agency_plain_english',
+                'label'             => 'Plain Language Content',
+                'name'              => 'plain_english',
+                'type'              => 'wysiwyg',
+                'instructions'      => 'Plain-language description of this agency for non-experts.',
+                'tabs'              => 'all',
+                'toolbar'           => 'full',
+                'media_upload'      => 0,
+                'conditional_logic' => [ [ [
+                    'field'    => 'field_ws_agency_has_plain_english',
+                    'operator' => '==',
+                    'value'    => '1',
+                ] ] ],
+            ],
+            [
+                'key'           => 'field_ws_agency_plain_reviewed',
+                'label'         => 'Plain Language Reviewed',
+                'name'          => 'plain_reviewed',
+                'type'          => 'true_false',
+                'instructions'  => 'Check when a human has reviewed and approved the plain-language content.',
+                'ui'            => 1,
+                'ui_on_text'    => 'Reviewed',
+                'ui_off_text'   => 'Pending',
+                'default_value' => 0,
+            ],
+            [
+                'key'           => 'field_ws_agency_summarized_by',
+                'label'         => 'Summarized By',
+                'name'          => 'summarized_by',
+                'type'          => 'user',
+                'instructions'  => 'Auto-stamped on first save after plain language content is created.',
+                'role'          => [ 'author', 'editor', 'administrator' ],
+                'return_format' => 'id',
+                'readonly'      => 1,
+                'disabled'      => 1,
+            ],
+            [
+                'key'          => 'field_ws_agency_summarized_date',
+                'label'        => 'Summarized Date',
+                'name'         => 'summarized_date',
+                'type'         => 'text',
+                'instructions' => 'Auto-stamped on first save after plain language content is created. Read only.',
+                'readonly'     => 1,
+                'disabled'     => 1,
+            ],
+
         ], // end fields
 
     ] ); // end acf_add_local_field_group
@@ -272,35 +361,5 @@ function ws_register_acf_agencies() {
 } // end ws_register_acf_agencies
 
 
-// ── Dynamic jurisdiction choices ──────────────────────────────────────────────
-//
-// Populates the ws_jx_code select with all published jurisdiction records
-// each time an agency edit screen loads. Sorted alphabetically by label.
-// Keyed by USPS code ("CA"), labeled as "California (CA)".
-
-add_filter( 'acf/load_field/key=field_ws_agencies_jx_codes', 'ws_agencies_load_jx_choices' );
-
-function ws_agencies_load_jx_choices( $field ) {
-
-    $jurisdictions = ws_get_all_jurisdictions();
-
-    if ( empty( $jurisdictions ) ) {
-        return $field;
-    }
-
-    $choices = [];
-
-    foreach ( $jurisdictions as $jx ) {
-        $code = get_post_meta( $jx->ID, 'ws_jx_code', true );
-        if ( $code ) {
-            $choices[ $code ] = get_the_title( $jx->ID ) . ' (' . $code . ')';
-        }
-    }
-
-    // Alphabetical by label so the list is easy to scan in the admin UI.
-    asort( $choices );
-
-    $field['choices'] = $choices;
-
-    return $field;
-}
+// Dynamic choice filter removed (Phase 3.2 / 12.1).
+// ws_jurisdiction is now a taxonomy field — ACF loads terms natively.

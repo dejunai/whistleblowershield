@@ -19,26 +19,20 @@
  * ------------
  *
  * jurisdiction (public CPT)
- *      ├── jx-summary
- *      ├── s
- *      ├── jx-statutes
- *      └── s
+ *      ├── jx-summary       (attach via ws_jurisdiction taxonomy)
+ *      ├── jx-statute       (attach_flag + order, ws_jurisdiction taxonomy scope)
+ *      ├── jx-citation      (attach_flag + order, ws_jurisdiction taxonomy scope)
+ *      └── jx-interpretation (attach_flag + order, ws_jurisdiction taxonomy scope)
  *
- * Each dataset is connected to the jurisdiction record via
- * ACF relationship fields defined in acf-jurisdiction.php.
+ * JURISDICTION IDENTITY
+ * ---------------------
+ * The canonical two-letter code for each jurisdiction is the slug of its
+ * assigned ws_jurisdiction taxonomy term (e.g., 'ca', 'tx', 'us').
+ * ws_jx_code meta has been retired. All lookups use taxonomy queries.
  *
- * INTERNAL IDENTIFIER
- * -------------------
- * ws_jx_code is the canonical two-letter machine identifier
- * used across the plugin.
- *
- * Examples:
- *      CA  = California
- *      TX  = Texas
- *      NY  = New York
- *      US  = Federal Government
- *      DC  = District of Columbia
- *      PR  = Puerto Rico
+ * ws_jx_term_id post meta is written on each jurisdiction post (by the seeder
+ * and the save_post_jurisdiction hook) as a convenience for direct term→post
+ * lookups without a get_term_by() call.
  *
  * CACHING
  * -------
@@ -47,14 +41,13 @@
  * for the jurisdiction CPT.
  *
  * Transient keys:
- *      ws_id_for_{JX_CODE}         — post ID lookup by code
+ *      ws_id_for_term_{term_id}    — post ID lookup by taxonomy term ID
  *      ws_all_jurisdictions_cache  — full post object list
  *      ws_jx_index_cache           — index data with counts
  *
  * DATASET RETURN FORMAT
  * ---------------------
- * All dataset functions (summary, procedures, resources) return a
- * consistent base array:
+ * All dataset functions return a consistent base array:
  *
  *      [
  *          'id'      => int,
@@ -64,8 +57,8 @@
  *          'content' => string,  // raw post_content — apply the_content in render layer
  *      ]
  *
- * ws_get_jx_statutes() returns an array-of-arrays using the same shape,
- * plus an 'is_fed' boolean key. May contain two entries (state + federal).
+ * ws_get_jx_statute_data() returns an array-of-arrays using the same shape,
+ * plus an 'is_fed' boolean key. May contain two groups (state + federal).
  *
  * NOTE: Audit trail data (_ws_last_edited_by, _ws_edit_history) is stored
  * in wp_postmeta as private hidden keys and is NOT retrieved through this
@@ -94,6 +87,13 @@
  * 2.3.1   All content keys normalized to raw get_post_field('post_content').
  *         Render layer applies the_content filters. ws_get_jx_statutes()
  *         returns array-of-arrays; shape documented above.
+ * 3.0.0   Architecture refactor (Phase 3.1+3.2):
+ *         ws_jx_code meta retired as join mechanism. All jurisdiction lookups
+ *         now use the ws_jurisdiction taxonomy. ws_get_id_by_code() migrated
+ *         to taxonomy query; transient cache rekeyed to ws_id_for_term_{term_id}.
+ *         ws_get_jurisdiction_data() and ws_get_jurisdiction_index_data() read
+ *         jurisdiction code from taxonomy term slug. save_post_jurisdiction hook
+ *         updated to clear per-term transient.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -102,9 +102,12 @@ defined( 'ABSPATH' ) || exit;
 // ════════════════════════════════════════════════════════════════════════════
 // Jurisdiction ID Lookup
 //
-// Retrieves the post ID for a jurisdiction by its two-letter ws_jx_code.
-// Result is cached in a transient for 24 hours to avoid repeated meta queries.
-// Returns false if no matching jurisdiction is found.
+// Retrieves the post ID for a jurisdiction by its two-letter USPS code.
+// Uses the ws_jurisdiction taxonomy term (slug = lowercase USPS code) to
+// locate the jurisdiction post via tax_query. Retired ws_jx_code meta query.
+//
+// Result is cached in a transient keyed by taxonomy term ID for 24 hours.
+// Returns false if the term or jurisdiction post cannot be resolved.
 // ════════════════════════════════════════════════════════════════════════════
 
 function ws_get_id_by_code( $jx_code ) {
@@ -113,22 +116,32 @@ function ws_get_id_by_code( $jx_code ) {
         return false;
     }
 
-    $jx_code   = strtoupper( sanitize_text_field( $jx_code ) );
-    $cache_key = 'ws_id_for_' . $jx_code;
+    $slug = strtolower( sanitize_text_field( $jx_code ) );
+    $term = get_term_by( 'slug', $slug, 'ws_jurisdiction' );
+
+    if ( ! $term || is_wp_error( $term ) ) {
+        return false;
+    }
+
+    $term_id   = $term->term_id;
+    $cache_key = 'ws_id_for_term_' . $term_id;
     $post_id   = get_transient( $cache_key );
 
     if ( false === $post_id ) {
 
         $query = new WP_Query( [
             'post_type'      => 'jurisdiction',
-            'meta_key'       => 'ws_jx_code',
-            'meta_value'     => $jx_code,
             'posts_per_page' => 1,
             'fields'         => 'ids',
-            'no_found_rows'  => true, // Skip total row count for performance
+            'no_found_rows'  => true,
+            'tax_query'      => [ [
+                'taxonomy' => 'ws_jurisdiction',
+                'field'    => 'term_id',
+                'terms'    => $term_id,
+            ] ],
         ] );
 
-        $post_id = ! empty( $query->posts ) ? $query->posts[0] : 0;
+        $post_id = ! empty( $query->posts ) ? (int) $query->posts[0] : 0;
         set_transient( $cache_key, $post_id, DAY_IN_SECONDS );
     }
 
@@ -186,13 +199,17 @@ function ws_get_jurisdiction_data( $input = null ) {
     // Retrieve flag as array — field return_format is set to 'array' in ACF
     $flag = get_field( 'ws_jx_flag', $post_id );
 
+    // Derive jurisdiction code from the assigned ws_jurisdiction taxonomy term slug
+    $jx_terms = wp_get_post_terms( $post_id, 'ws_jurisdiction', [ 'fields' => 'slugs' ] );
+    $jx_code  = ( ! is_wp_error( $jx_terms ) && ! empty( $jx_terms ) ) ? strtoupper( $jx_terms[0] ) : '';
+
     return [
 
         // ── Identity ─────────────────────────────────────────────────────────
         'id'   => $post_id,
         'name' => get_the_title( $post_id ),
         'type' => get_field( 'ws_jurisdiction_type', $post_id ),
-        'code' => get_field( 'ws_jx_code', $post_id ),
+        'code' => $jx_code,
 
         // ── Flag ─────────────────────────────────────────────────────────────
         'flag' => [
@@ -233,36 +250,76 @@ function ws_get_jurisdiction_data( $input = null ) {
 // ════════════════════════════════════════════════════════════════════════════
 // Dataset: Summary
 //
-// Retrieves the related jx-summary post for the given jurisdiction.
-// Accepts a numeric post ID or a two-letter ws_jx_code string.
-// Returns a base array of post data, or false if not found.
+// Retrieves the jx-summary post assigned to the given ws_jurisdiction term
+// and returns a fully-hydrated data array.
 //
-// @todo - Update array as jx-summary CPT fields are defined.
+// Phase 9.1 refactor:
+//   - Renamed ws_get_jx_summary($input) → ws_get_jx_summary_data($jx_term_id).
+//   - Accepts taxonomy term ID directly (same pattern as statute/citation/interp).
+//   - Replaced get_field('ws_related_summary') relationship lookup with
+//     get_posts() taxonomy query (ws_related_summary was removed in Phase 3.6).
+//   - Returns all content and review fields needed by the shortcode layer so
+//     shortcodes make zero direct get_field() / get_post_meta() calls.
+//
+// Returns false if no published jx-summary is found for the term.
 // ════════════════════════════════════════════════════════════════════════════
 
-function ws_get_jx_summary( $input ) {
+function ws_get_jx_summary_data( $jx_term_id ) {
 
-    $post_id = ws_resolve_jx_id( $input );
-
-    if ( ! $post_id ) {
+    $term_id = (int) $jx_term_id;
+    if ( ! $term_id ) {
         return false;
     }
 
-    $related = get_field( 'ws_related_summary', $post_id );
+    $ids = get_posts( [
+        'post_type'      => 'jx-summary',
+        'post_status'    => [ 'publish', 'draft', 'pending' ],
+        'posts_per_page' => 1,
+        'fields'         => 'ids',
+        'no_found_rows'  => true,
+        'tax_query'      => [ [
+            'taxonomy' => 'ws_jurisdiction',
+            'field'    => 'term_id',
+            'terms'    => $term_id,
+        ] ],
+    ] );
 
-    if ( ! $related ) {
+    if ( empty( $ids ) ) {
         return false;
     }
 
-    // @todo - Update array as jx-summary ACF fields are expanded.
-    // Note: summary content is stored in ACF fields, not post_content.
-    // The shortcode layer reads ACF fields directly from $data['id'].
+    $sid = (int) $ids[0];
+
+    // Author lookup: read the ws_jx_sum_create_author stamp written on first save.
+    $create_author_id = (int) get_post_meta( $sid, 'ws_jx_sum_create_author', true );
+    $author_name      = '';
+    if ( $create_author_id ) {
+        $user        = get_userdata( $create_author_id );
+        $author_name = $user ? $user->display_name : '';
+    }
+
+    $date_created  = get_post_meta( $sid, 'ws_jx_sum_date_created',  true );
+    $last_reviewed = get_post_meta( $sid, 'ws_jx_sum_last_reviewed', true );
+
     return [
-        'id'      => $related->ID,
-        'title'   => get_the_title( $related->ID ),
-        'url'     => get_permalink( $related->ID ),
-        'status'  => get_post_status( $related->ID ),
-        'content' => get_post_field( 'post_content', $related->ID ),
+        'id'             => $sid,
+        'title'          => get_the_title( $sid ),
+        'url'            => get_permalink( $sid ),
+        'status'         => get_post_status( $sid ),
+        // Content fields (stored in ACF postmeta)
+        'content'        => get_post_meta( $sid, 'ws_jurisdiction_summary', true ),
+        'sources'        => get_post_meta( $sid, 'ws_jx_summary_sources', true ),
+        'limitations'    => get_post_meta( $sid, 'ws_jx_limitations', true ),
+        // Authorship & dates
+        'author_name'    => $author_name,
+        'date_created'   => $date_created,
+        'last_reviewed'  => $last_reviewed,
+        'fmt_created'    => $date_created  ? date( 'F j, Y', strtotime( $date_created ) )  : '',
+        'fmt_reviewed'   => $last_reviewed ? date( 'F j, Y', strtotime( $last_reviewed ) ) : '',
+        // Plain language review fields (Phase 9.1)
+        'plain_reviewed'   => (bool) get_post_meta( $sid, 'plain_reviewed', true ),
+        'summarized_by'    => (int)  get_post_meta( $sid, 'ws_jx_sum_summarized_by', true ),
+        'summarized_date'  => get_post_meta( $sid, 'ws_jx_sum_summarized_date', true ),
     ];
 }
 
@@ -277,129 +334,442 @@ function ws_get_jx_summary( $input ) {
 // @todo - Update array as s CPT fields are defined.
 // ════════════════════════════════════════════════════════════════════════════
 
-function ws_get_jx_procedures( $input ) {
-
-    $post_id = ws_resolve_jx_id( $input );
-
-    if ( ! $post_id ) {
-        return false;
-    }
-
-    $related = get_field( 'ws_related_procedures', $post_id );
-
-    if ( ! $related ) {
-        return false;
-    }
-
-    // @todo - Update array as s CPT fields are defined.
-    return [
-        'id'      => $related->ID,
-        'title'   => get_the_title( $related->ID ),
-        'url'     => get_permalink( $related->ID ),
-        'status'  => get_post_status( $related->ID ),
-        'content' => get_post_field( 'post_content', $related->ID ),
-    ];
-}
 
 
 // ════════════════════════════════════════════════════════════════════════════
 // Dataset: Statutes
 //
-// Retrieves the related jx-statutes post for the given jurisdiction.
-// If the jurisdiction is NOT 'US', it automatically merges the Federal 
-// statutes into the return array to ensure comprehensive coverage.
+// Returns all published jx-statute records assigned to the given
+// ws_jurisdiction taxonomy term that have attach_flag = true,
+// sorted by order ASC.
 //
-// Returns an array of statute data arrays, or false if none found.
+// Accepts a taxonomy term ID integer as scope ($jx_term_id).
+// Returns an array of statute data arrays, or empty array if none found.
+//
+// Plain language fields are stubbed as false/empty; they will be
+// extended in Phase 9 once ACF fields are registered.
+//
+// Federal append logic (is_fed flag) is implemented in Phase 3.5.2.
 // ════════════════════════════════════════════════════════════════════════════
 
-function ws_get_jx_statutes( $input ) {
+function ws_get_jx_statute_data( $jx_term_id ) {
 
-    // 1. Resolve the primary requested Jurisdiction ID
-    $post_id = ws_resolve_jx_id( $input );
-    $jx_code = is_numeric( $input ) ? get_field( 'ws_jx_code', $post_id ) : strtoupper( $input );
-
-    if ( ! $post_id ) {
-        return false;
+    $term_id    = (int) $jx_term_id;
+    $us_term_id = ws_get_us_term_id();
+    if ( ! $term_id ) {
+        return [];
     }
 
-    // Each entry: [ 'post' => WP_Post, 'is_fed' => bool ]
-    // is_fed is set at collection time — jx-statutes posts do not carry
-    // ws_jx_code on their own meta, so it cannot be derived from the
-    // statute post itself after the fact.
-    $statutes_to_process = [];
-
-    // 2. Fetch the primary (State/Territory) related statute
-    $primary_related = get_field( 'ws_related_statutes', $post_id );
-    if ( $primary_related ) {
-        $statutes_to_process[] = [ 'post' => $primary_related, 'is_fed' => false ];
-    }
-
-    // 3. Logic: If NOT 'US', fetch the Federal 'US' statute record as well
-    if ( $jx_code !== 'US' ) {
-        $fed_id = ws_get_id_by_code( 'US' );
-        if ( $fed_id ) {
-            $fed_related = get_field( 'ws_related_statutes', $fed_id );
-            if ( $fed_related ) {
-                $statutes_to_process[] = [ 'post' => $fed_related, 'is_fed' => true ];
-            }
+    // Helper to query statutes for a given term and is_fed value.
+    $fetch = function( $tid, $is_fed ) {
+        $q = new WP_Query( [
+            'post_type'      => 'jx-statute',
+            'post_status'    => 'publish',
+            'posts_per_page' => -1,
+            'orderby'        => 'meta_value_num',
+            'meta_key'       => 'order',
+            'order'          => 'ASC',
+            'no_found_rows'  => true,
+            'meta_query'     => [ [
+                'key'     => 'attach_flag',
+                'value'   => '1',
+                'compare' => '=',
+            ] ],
+            'tax_query'      => [ [
+                'taxonomy' => 'ws_jurisdiction',
+                'field'    => 'term_id',
+                'terms'    => $tid,
+            ] ],
+        ] );
+        $rows = [];
+        foreach ( $q->posts as $statute ) {
+            $sid    = $statute->ID;
+            $rows[] = [
+                'id'      => $sid,
+                'title'   => get_the_title( $sid ),
+                'url'     => get_permalink( $sid ),
+                'status'  => get_post_status( $sid ),
+                'content' => get_post_field( 'post_content', $sid ),
+                'order'   => (int) get_post_meta( $sid, 'order', true ),
+                'is_fed'  => $is_fed,
+                // Statute-specific structured fields
+                'official_name'       => get_post_meta( $sid, 'ws_jx_statute_official_name', true ),
+                'limit_value'         => get_post_meta( $sid, 'ws_jx_statute_limit_value', true ),
+                'limit_unit'          => get_post_meta( $sid, 'ws_jx_statute_limit_unit', true ),
+                'trigger'             => get_post_meta( $sid, 'ws_jx_statute_trigger', true ),
+                'tolling_notes'       => get_post_meta( $sid, 'ws_jx_statute_tolling_notes', true ),
+                'exhaustion_required' => (bool) get_post_meta( $sid, 'ws_jx_statute_exhaustion_required', true ),
+                'exhaustion_details'  => get_post_meta( $sid, 'ws_jx_statute_exhaustion_details', true ),
+                'burden_of_proof'     => get_post_meta( $sid, 'ws_statute_burden_of_proof', true ),
+                // Plain language fields (Phase 9.2)
+                'has_plain_english' => (bool) get_post_meta( $sid, 'has_plain_english', true ),
+                'plain_english'     => get_post_meta( $sid, 'plain_english',     true ),
+                'plain_reviewed'    => (bool) get_post_meta( $sid, 'plain_reviewed',    true ),
+                'summarized_by'     => (int)  get_post_meta( $sid, 'summarized_by',     true ),
+                'summarized_date'   => get_post_meta( $sid, 'summarized_date',   true ),
+            ];
         }
+        return $rows;
+    };
+
+    // State/territory records — always fetch.
+    $results = $fetch( $term_id, false );
+
+    // Federal append: if this is not the US jurisdiction, also fetch US-scoped records.
+    if ( $us_term_id && $term_id !== $us_term_id ) {
+        $fed = $fetch( $us_term_id, true );
+        $results = array_merge( $results, $fed );
     }
 
-    if ( empty( $statutes_to_process ) ) {
-        return false;
+    return $results;
+}
+
+
+// ════════════════════════════════════════════════════════════════════════════
+// Jurisdiction Term ID Helper
+//
+// Returns the ws_jurisdiction taxonomy term ID assigned to a jurisdiction
+// post. Used by shortcodes to resolve the term_id before calling data
+// functions without making taxonomy calls inside the shortcode itself.
+//
+// Returns 0 if the post has no term assigned.
+// ════════════════════════════════════════════════════════════════════════════
+
+function ws_get_jx_term_id( $post_id ) {
+    $terms = wp_get_post_terms( $post_id, 'ws_jurisdiction' );
+    if ( empty( $terms ) || is_wp_error( $terms ) ) {
+        return 0;
+    }
+    return (int) $terms[0]->term_id;
+}
+
+
+// ════════════════════════════════════════════════════════════════════════════
+// US Term ID Helper
+//
+// Returns the ws_jurisdiction taxonomy term ID for the 'us' term.
+// Result is cached in a static variable — one DB read per request.
+//
+// Reads the ws_us_term_id option written during taxonomy seeding in
+// Phase 6.1. Falls back to a get_term_by() lookup if the option is not
+// yet set (pre-seed or test environments).
+//
+// Used by data functions to determine whether federal append logic applies.
+// ════════════════════════════════════════════════════════════════════════════
+
+function ws_get_us_term_id() {
+    static $us_term_id = null;
+    if ( $us_term_id !== null ) {
+        return $us_term_id;
     }
 
-    $output = [];
+    $stored = (int) get_option( 'ws_us_term_id', 0 );
+    if ( $stored ) {
+        $us_term_id = $stored;
+        return $us_term_id;
+    }
 
-    // 4. Transform all identified records into the dataset format.
-    // is_fed was set at collection time above — do not re-derive here.
-    foreach ( $statutes_to_process as $item ) {
-        $statute_post = $item['post'];
-        $output[] = [
-            'id'      => $statute_post->ID,
-            'title'   => get_the_title( $statute_post->ID ),
-            'url'     => get_permalink( $statute_post->ID ),
-            'status'  => get_post_status( $statute_post->ID ),
-            'content' => get_post_field( 'post_content', $statute_post->ID ),
-            'is_fed'  => $item['is_fed'],
+    // Fallback: resolve by slug (pre-seed environments).
+    $term = get_term_by( 'slug', 'us', 'ws_jurisdiction' );
+    $us_term_id = ( $term && ! is_wp_error( $term ) ) ? (int) $term->term_id : 0;
+    return $us_term_id;
+}
+
+
+// ════════════════════════════════════════════════════════════════════════════
+// Dataset: Citations
+//
+// Returns all published jx-citation records assigned to the given
+// ws_jurisdiction taxonomy term that have attach_flag = true,
+// sorted by order ASC.
+//
+// Accepts a taxonomy term ID integer as scope ($jx_term_id).
+// Returns an array of citation arrays, or empty array if none found.
+//
+// Plain language fields are stubbed as false/empty; they will be
+// extended in Phase 9 once ACF fields are registered.
+// ════════════════════════════════════════════════════════════════════════════
+
+function ws_get_jx_citation_data( $jx_term_id ) {
+
+    $term_id    = (int) $jx_term_id;
+    $us_term_id = ws_get_us_term_id();
+    if ( ! $term_id ) {
+        return [];
+    }
+
+    // Helper to query citations for a given term and is_fed value.
+    $fetch = function( $tid, $is_fed ) {
+        $q = new WP_Query( [
+            'post_type'      => 'jx-citation',
+            'post_status'    => 'publish',
+            'posts_per_page' => -1,
+            'orderby'        => 'meta_value_num',
+            'meta_key'       => 'order',
+            'order'          => 'ASC',
+            'no_found_rows'  => true,
+            'meta_query'     => [ [
+                'key'     => 'attach_flag',
+                'value'   => '1',
+                'compare' => '=',
+            ] ],
+            'tax_query'      => [ [
+                'taxonomy' => 'ws_jurisdiction',
+                'field'    => 'term_id',
+                'terms'    => $tid,
+            ] ],
+        ] );
+        $rows = [];
+        foreach ( $q->posts as $citation ) {
+            $cid    = $citation->ID;
+            $rows[] = [
+                'id'      => $cid,
+                'title'   => get_the_title( $cid ),
+                'url'     => get_permalink( $cid ),
+                'status'  => get_post_status( $cid ),
+                'content' => get_post_field( 'post_content', $cid ),
+                'is_fed'  => $is_fed,
+                // Citation-specific fields
+                'type'     => get_post_meta( $cid, 'ws_jx_cite_type',   true ),
+                'label'    => get_post_meta( $cid, 'ws_jx_cite_label',  true ),
+                'cite_url' => get_post_meta( $cid, 'ws_jx_cite_url',    true ),
+                'is_pdf'   => (bool) get_post_meta( $cid, 'ws_jx_cite_is_pdf', true ),
+                'order'    => (int)  get_post_meta( $cid, 'order',             true ),
+                // Plain language fields (Phase 9.2)
+                'has_plain_english' => (bool) get_post_meta( $cid, 'has_plain_english', true ),
+                'plain_english'     => get_post_meta( $cid, 'plain_english',     true ),
+                'plain_reviewed'    => (bool) get_post_meta( $cid, 'plain_reviewed',    true ),
+                'summarized_by'     => (int)  get_post_meta( $cid, 'summarized_by',     true ),
+                'summarized_date'   => get_post_meta( $cid, 'summarized_date',   true ),
+            ];
+        }
+        return $rows;
+    };
+
+    // State/territory citations — always fetch.
+    $results = $fetch( $term_id, false );
+
+    // Federal append: if this is not the US jurisdiction, also fetch US-scoped citations.
+    if ( $us_term_id && $term_id !== $us_term_id ) {
+        $fed = $fetch( $us_term_id, true );
+        $results = array_merge( $results, $fed );
+    }
+
+    return $results;
+}
+
+
+// ════════════════════════════════════════════════════════════════════════════
+// Dataset: Interpretations
+//
+// Returns all published jx-interpretation records assigned to the given
+// ws_jurisdiction taxonomy term that have attach_flag = true,
+// sorted by order ASC.
+//
+// Accepts a taxonomy term ID integer as scope ($jx_term_id).
+// Returns an array of interpretation data arrays, or empty array if none found.
+//
+// Plain language fields are stubbed as false/empty; they will be
+// extended in Phase 9 once ACF fields are registered.
+//
+// Federal append logic (is_fed flag) is implemented in Phase 3.5.2.
+// ════════════════════════════════════════════════════════════════════════════
+
+function ws_get_jx_interpretation_data( $jx_term_id ) {
+
+    $term_id    = (int) $jx_term_id;
+    $us_term_id = ws_get_us_term_id();
+    if ( ! $term_id ) {
+        return [];
+    }
+
+    // Helper to query interpretations for a given term and is_fed value.
+    $fetch = function( $tid, $is_fed ) {
+        $q = new WP_Query( [
+            'post_type'      => 'jx-interpretation',
+            'post_status'    => 'publish',
+            'posts_per_page' => -1,
+            'orderby'        => 'meta_value_num',
+            'meta_key'       => 'order',
+            'order'          => 'ASC',
+            'no_found_rows'  => true,
+            'meta_query'     => [ [
+                'key'     => 'attach_flag',
+                'value'   => '1',
+                'compare' => '=',
+            ] ],
+            'tax_query'      => [ [
+                'taxonomy' => 'ws_jurisdiction',
+                'field'    => 'term_id',
+                'terms'    => $tid,
+            ] ],
+        ] );
+        $rows = [];
+        foreach ( $q->posts as $interp ) {
+            $iid    = $interp->ID;
+            $rows[] = [
+                'id'      => $iid,
+                'title'   => get_the_title( $iid ),
+                'url'     => get_permalink( $iid ),
+                'status'  => get_post_status( $iid ),
+                'content' => get_post_field( 'post_content', $iid ),
+                'order'   => (int) get_post_meta( $iid, 'order', true ),
+                'is_fed'  => $is_fed,
+                // Interpretation-specific fields
+                'case_name'   => get_post_meta( $iid, 'ws_interp_case_name', true ),
+                'citation'    => get_post_meta( $iid, 'ws_interp_citation',  true ),
+                'opinion_url' => get_post_meta( $iid, 'ws_interp_url',       true ),
+                'court'       => get_post_meta( $iid, 'ws_interp_court',     true ),
+                'year'        => get_post_meta( $iid, 'ws_interp_year',      true ),
+                'favorable'   => (bool) get_post_meta( $iid, 'ws_interp_favorable', true ),
+                'summary'     => get_post_meta( $iid, 'ws_interp_summary',   true ),
+                'statute_id'  => (int) get_post_meta( $iid, 'ws_statute_id', true ),
+                // Plain language fields (Phase 9.2)
+                'has_plain_english' => (bool) get_post_meta( $iid, 'has_plain_english', true ),
+                'plain_english'     => get_post_meta( $iid, 'plain_english',     true ),
+                'plain_reviewed'    => (bool) get_post_meta( $iid, 'plain_reviewed',    true ),
+                'summarized_by'     => (int)  get_post_meta( $iid, 'summarized_by',     true ),
+                'summarized_date'   => get_post_meta( $iid, 'summarized_date',   true ),
+            ];
+        }
+        return $rows;
+    };
+
+    // Local (US-only) records — always fetch.
+    // Note: interpretations are always US-scoped (federal court decisions).
+    // If term is not US, local fetch returns empty; federal append adds US records.
+    $results = $fetch( $term_id, false );
+
+    // Federal append: if this is not the US jurisdiction, also fetch US-scoped records.
+    if ( $us_term_id && $term_id !== $us_term_id ) {
+        $fed = $fetch( $us_term_id, true );
+        $results = array_merge( $results, $fed );
+    }
+
+    return $results;
+}
+
+
+// ════════════════════════════════════════════════════════════════════════════
+// Dataset: Agencies (Phase 9.2)
+//
+// Returns all published ws-agency records assigned to the given
+// ws_jurisdiction taxonomy term, ordered alphabetically.
+//
+// For jurisdiction pages, pass the US term ID to surface nationwide agencies.
+// Records without the term assigned are excluded.
+// Returns an array of agency data arrays, or empty array if none found.
+// ════════════════════════════════════════════════════════════════════════════
+
+function ws_get_agency_data( $jx_term_id ) {
+
+    $term_id = (int) $jx_term_id;
+    if ( ! $term_id ) {
+        return [];
+    }
+
+    $q = new WP_Query( [
+        'post_type'      => 'ws-agency',
+        'post_status'    => 'publish',
+        'posts_per_page' => -1,
+        'orderby'        => 'title',
+        'order'          => 'ASC',
+        'no_found_rows'  => true,
+        'tax_query'      => [ [
+            'taxonomy' => 'ws_jurisdiction',
+            'field'    => 'term_id',
+            'terms'    => $term_id,
+        ] ],
+    ] );
+
+    $rows = [];
+    foreach ( $q->posts as $agency ) {
+        $aid    = $agency->ID;
+        $rows[] = [
+            'id'             => $aid,
+            'title'          => get_the_title( $aid ),
+            'url'            => get_permalink( $aid ),
+            'status'         => get_post_status( $aid ),
+            // Agency fields
+            'agency_code'    => get_post_meta( $aid, 'ws_agency_code',           true ),
+            'agency_name'    => get_post_meta( $aid, 'ws_agency_name',           true ),
+            'agency_url'     => get_post_meta( $aid, 'ws_agency_url',            true ),
+            'reporting_url'  => get_post_meta( $aid, 'ws_agency_reporting_url',  true ),
+            'phone'          => get_post_meta( $aid, 'ws_agency_phone',          true ),
+            'anonymous'      => (bool) get_post_meta( $aid, 'ws_agency_anonymous_allowed', true ),
+            'reward'         => (bool) get_post_meta( $aid, 'ws_agency_reward_program',    true ),
+            // Plain language fields (Phase 9.2)
+            'has_plain_english' => (bool) get_post_meta( $aid, 'has_plain_english', true ),
+            'plain_english'     => get_post_meta( $aid, 'plain_english',     true ),
+            'plain_reviewed'    => (bool) get_post_meta( $aid, 'plain_reviewed',    true ),
+            'summarized_by'     => (int)  get_post_meta( $aid, 'summarized_by',     true ),
+            'summarized_date'   => get_post_meta( $aid, 'summarized_date',   true ),
         ];
     }
 
-    return $output;
+    return $rows;
 }
 
+
 // ════════════════════════════════════════════════════════════════════════════
-// Dataset: Resources
+// Dataset: Assist Organizations (Phase 9.2)
 //
-// Retrieves the related s post for the given jurisdiction.
-// Accepts a numeric post ID or a two-letter ws_jx_code string.
-// Returns a base array of post data, or false if not found.
+// Returns all published ws-assist-org records assigned to the given
+// ws_jurisdiction taxonomy term, ordered alphabetically.
 //
-// @todo - Update array as s CPT fields are defined.
+// For jurisdiction pages, pass the US term ID to surface nationwide orgs.
+// Records without the term assigned are excluded.
+// Returns an array of assist-org data arrays, or empty array if none found.
 // ════════════════════════════════════════════════════════════════════════════
 
-function ws_get_jx_resources( $input ) {
+function ws_get_assist_org_data( $jx_term_id ) {
 
-    $post_id = ws_resolve_jx_id( $input );
-
-    if ( ! $post_id ) {
-        return false;
+    $term_id = (int) $jx_term_id;
+    if ( ! $term_id ) {
+        return [];
     }
 
-    $related = get_field( '', $post_id );
+    $q = new WP_Query( [
+        'post_type'      => 'ws-assist-org',
+        'post_status'    => 'publish',
+        'posts_per_page' => -1,
+        'orderby'        => 'title',
+        'order'          => 'ASC',
+        'no_found_rows'  => true,
+        'tax_query'      => [ [
+            'taxonomy' => 'ws_jurisdiction',
+            'field'    => 'term_id',
+            'terms'    => $term_id,
+        ] ],
+    ] );
 
-    if ( ! $related ) {
-        return false;
+    $rows = [];
+    foreach ( $q->posts as $org ) {
+        $oid    = $org->ID;
+        $rows[] = [
+            'id'             => $oid,
+            'title'          => get_the_title( $oid ),
+            'url'            => get_permalink( $oid ),
+            'status'         => get_post_status( $oid ),
+            // Assist-org fields
+            'ao_name'        => get_post_meta( $oid, 'ws_ao_name',         true ),
+            'ao_url'         => get_post_meta( $oid, 'ws_ao_website_url',  true ),
+            'ao_intake_url'  => get_post_meta( $oid, 'ws_ao_intake_url',   true ),
+            'ao_phone'       => get_post_meta( $oid, 'ws_ao_phone',        true ),
+            'ao_mission'     => get_post_meta( $oid, 'ws_ao_mission',      true ),
+            'ao_provides'    => get_post_meta( $oid, 'ws_ao_provides',     true ),
+            'ao_cost_model'  => get_post_meta( $oid, 'ws_ao_cost_model',   true ),
+            'ao_anonymous'   => (bool) get_post_meta( $oid, 'ws_ao_accepts_anonymous', true ),
+            // Plain language fields (Phase 9.2)
+            'has_plain_english' => (bool) get_post_meta( $oid, 'has_plain_english', true ),
+            'plain_english'     => get_post_meta( $oid, 'plain_english',     true ),
+            'plain_reviewed'    => (bool) get_post_meta( $oid, 'plain_reviewed',    true ),
+            'summarized_by'     => (int)  get_post_meta( $oid, 'summarized_by',     true ),
+            'summarized_date'   => get_post_meta( $oid, 'summarized_date',   true ),
+        ];
     }
 
-    // @todo - Update array as s CPT fields are defined.
-    return [
-        'id'      => $related->ID,
-        'title'   => get_the_title( $related->ID ),
-        'url'     => get_permalink( $related->ID ),
-        'status'  => get_post_status( $related->ID ),
-        'content' => get_post_field( 'post_content', $related->ID ),
-    ];
+    return $rows;
 }
 
 
@@ -484,8 +854,9 @@ function ws_get_jurisdiction_index_data() {
         if ( $query->have_posts() ) {
             foreach ( $query->posts as $post ) {
 
-                $type = get_field( 'ws_jurisdiction_type', $post->ID ) ?: 'state';
-                $code = get_field( 'ws_jx_code', $post->ID );
+                $type     = get_field( 'ws_jurisdiction_type', $post->ID ) ?: 'state';
+                $jx_slugs = wp_get_post_terms( $post->ID, 'ws_jurisdiction', [ 'fields' => 'slugs' ] );
+                $code     = ( ! is_wp_error( $jx_slugs ) && ! empty( $jx_slugs ) ) ? strtoupper( $jx_slugs[0] ) : '';
 
                 $index_items[] = [
                     'name' => get_the_title( $post->ID ),
@@ -516,14 +887,69 @@ function ws_get_jurisdiction_index_data() {
 
 
 // ════════════════════════════════════════════════════════════════════════════
+// Legal Updates Query
+//
+// Centralises all ws-legal-update field reads so the shortcode layer
+// never calls get_field() or get_post_meta() directly.
+//
+// @param int $jx_id  Jurisdiction post ID to scope results. 0 = site-wide.
+// @param int $count  Maximum number of records to return.
+// @return array      Array of data items ready for the render layer.
+// ════════════════════════════════════════════════════════════════════════════
+
+function ws_get_legal_updates_data( $jx_id = 0, $count = 5 ) {
+
+    $query_args = [
+        'post_type'      => 'ws-legal-update',
+        'post_status'    => 'publish',
+        'posts_per_page' => max( 1, (int) $count ),
+        'orderby'        => 'date',
+        'order'          => 'DESC',
+        'no_found_rows'  => true,
+    ];
+
+    if ( $jx_id ) {
+        // ws_legal_update_jurisdiction is an ACF relationship field that
+        // serialises post IDs — LIKE with a quoted ID matches within it.
+        $query_args['meta_query'] = [ [
+            'key'     => 'ws_legal_update_jurisdiction',
+            'value'   => '"' . (int) $jx_id . '"',
+            'compare' => 'LIKE',
+        ] ];
+    }
+
+    $updates = get_posts( $query_args );
+
+    if ( empty( $updates ) ) {
+        return [];
+    }
+
+    $items = [];
+    foreach ( $updates as $update ) {
+        $effective_raw = get_post_meta( $update->ID, 'ws_legal_update_effective_date', true );
+        $items[] = [
+            'title'         => get_the_title( $update->ID ),
+            'source_url'    => get_post_meta( $update->ID, 'ws_legal_update_source_url', true ) ?: '',
+            'law_name'      => get_post_meta( $update->ID, 'ws_legal_update_law_name',   true ) ?: '',
+            'fmt_effective' => $effective_raw ? date( 'F j, Y', strtotime( $effective_raw ) ) : '',
+            'post_date'     => get_the_date( 'F j, Y', $update->ID ),
+            'summary_html'  => wp_kses_post( get_post_meta( $update->ID, 'ws_legal_update_summary', true ) ?: '' ),
+        ];
+    }
+
+    return $items;
+}
+
+
+// ════════════════════════════════════════════════════════════════════════════
 // Cache Invalidation
 //
 // Clears all jurisdiction transients whenever a jurisdiction post is saved.
 // Covers both the full post list cache and the index data cache, keeping
 // them consistent with each other.
 //
-// Also clears the per-code transient for the saved post so that
-// ws_get_id_by_code() immediately reflects any ws_jx_code changes.
+// Also clears the per-term transient for this jurisdiction so that
+// ws_get_id_by_code() immediately reflects taxonomy reassignments.
 // ════════════════════════════════════════════════════════════════════════════
 
 add_action( 'save_post_jurisdiction', function( $post_id ) {
@@ -532,10 +958,10 @@ add_action( 'save_post_jurisdiction', function( $post_id ) {
     delete_transient( 'ws_all_jurisdictions_cache' );
     delete_transient( 'ws_jx_index_cache' );
 
-    // Clear the per-code transient for this specific jurisdiction
-    $jx_code = get_field( 'ws_jx_code', $post_id );
-    if ( $jx_code ) {
-        delete_transient( 'ws_id_for_' . strtoupper( $jx_code ) );
+    // Clear the per-term transient for this jurisdiction
+    $terms = wp_get_post_terms( $post_id, 'ws_jurisdiction' );
+    if ( ! empty( $terms ) && ! is_wp_error( $terms ) ) {
+        delete_transient( 'ws_id_for_term_' . $terms[0]->term_id );
     }
 
 } );

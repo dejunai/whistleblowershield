@@ -90,8 +90,8 @@ function ws_register_cpt_agencies() {
  */
 add_filter( 'manage_ws-agency_posts_columns', 'ws_agencies_columns' );
 function ws_agencies_columns( $columns ) {
-    $columns['ws_agency_code'] = 'Agency Code';
-    $columns['ws_jx_code']     = 'Jurisdictions';
+    $columns['ws_agency_code']      = 'Agency Code';
+    $columns['ws_jurisdiction_col'] = 'Jurisdictions';
     return $columns;
 }
 
@@ -101,12 +101,10 @@ function ws_agencies_column_data( $column, $post_id ) {
         case 'ws_agency_code':
             echo esc_html( get_post_meta( $post_id, 'ws_agency_code', true ) );
             break;
-        case 'ws_jx_code':
-            $jx = get_post_meta( $post_id, 'ws_jx_code', true );
-            if ( is_array( $jx ) ) {
-                echo esc_html( implode( ', ', $jx ) );
-            } else {
-                echo esc_html( $jx );
+        case 'ws_jurisdiction_col':
+            $terms = wp_get_post_terms( $post_id, 'ws_jurisdiction', [ 'fields' => 'slugs' ] );
+            if ( ! is_wp_error( $terms ) && ! empty( $terms ) ) {
+                echo esc_html( implode( ', ', array_map( 'strtoupper', $terms ) ) );
             }
             break;
     }

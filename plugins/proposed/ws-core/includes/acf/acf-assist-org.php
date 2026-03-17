@@ -21,18 +21,19 @@
  *
  * Scope of Service tab:
  *   ws_ao_serves_nationwide    Serves all U.S. jurisdictions (true_false)
- *   ws_ao_jurisdictions        Jurisdictions served (checkbox, dynamic)
+ *   ws_jurisdiction            Jurisdictions served (ws_jurisdiction taxonomy, checkbox)
  *   ws_ao_disclosure_type      Misconduct categories handled (taxonomy)
  *   ws_ao_services             Services offered (checkbox)
  *   ws_ao_employment_sectors   Employment sectors served (checkbox)
  *
  * Contact & Intake tab:
- *   ws_ao_website_url          Official website (url, required)
- *   ws_ao_intake_url           Intake / contact form URL (url)
- *   ws_ao_phone                Phone number (text)
- *   ws_ao_email                Contact email (email)
- *   ws_ao_mailing_address      Mailing address (textarea)
- *   ws_ao_languages            Languages supported (text)
+ *   ws_ao_website_url              Official website (url, required)
+ *   ws_ao_intake_url               Intake / contact form URL (url)
+ *   ws_ao_phone                    Phone number (text)
+ *   ws_ao_email                    Contact email (email)
+ *   ws_ao_mailing_address          Mailing address (textarea)
+ *   ws_languages                   Languages served (taxonomy checkbox)
+ *   ws_ao_additional_languages     Additional languages not in taxonomy list (text)
  *
  * Eligibility & Cost tab:
  *   ws_ao_cost_model           Cost structure (select, required)
@@ -67,6 +68,12 @@
  * VERSION
  * -------
  * 1.0.0  Initial release.
+ * 3.0.0  Phase 8: Replaced ws_ao_languages plain-text field with ws_languages
+ *         taxonomy checkbox field + ws_ao_additional_languages text field.
+ *         Auto-assign of "additional" term handled in admin-hooks.php.
+ *         Phase 12.1: Replaced ws_ao_jurisdictions checkbox (dynamic choices via
+ *         ws_jx_code meta) with ws_jurisdiction taxonomy field. Dynamic choice
+ *         filter removed. Plain Language tab added (Phase 9.2).
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -183,18 +190,19 @@ function ws_register_acf_assist_org() {
             ],
 
             [
-                'key'          => 'field_ws_ao_jurisdictions',
-                'label'        => 'Jurisdictions Served',
-                'name'         => 'ws_ao_jurisdictions',
-                'type'         => 'checkbox',
-                'instructions' => 'Select every jurisdiction where this organization can provide assistance. If nationwide, enable the toggle above and leave this blank.',
-                'required'     => 0,
-                'choices'      => [], // Populated dynamically — see acf/load_field filter below
-                'layout'       => 'vertical',
-                'toggle'       => 1,
-                'return_format' => 'value',
-                'allow_custom' => 0,
-                'save_custom'  => 0,
+                'key'           => 'field_ws_ao_jurisdiction',
+                'label'         => 'Jurisdictions Served',
+                'name'          => 'ws_jurisdiction',
+                'type'          => 'taxonomy',
+                'taxonomy'      => 'ws_jurisdiction',
+                'field_type'    => 'checkbox',
+                'instructions'  => 'Select every jurisdiction where this organization can provide assistance. If nationwide, enable the toggle above and leave this blank.',
+                'required'      => 0,
+                'add_term'      => 0,
+                'save_terms'    => 1,
+                'load_terms'    => 1,
+                'return_format' => 'id',
+                'allow_null'    => 1,
             ],
 
             [
@@ -311,12 +319,25 @@ function ws_register_acf_assist_org() {
             ],
 
             [
-                'key'          => 'field_ws_ao_languages',
-                'label'        => 'Languages Supported',
-                'name'         => 'ws_ao_languages',
+                'key'           => 'field_ws_ao_languages',
+                'label'         => 'Languages Served',
+                'name'          => 'ws_languages',
+                'type'          => 'taxonomy',
+                'taxonomy'      => 'ws_languages',
+                'field_type'    => 'checkbox',
+                'instructions'  => 'Select languages this organization can serve. Check "Additional" if other languages are available — then specify them below.',
+                'add_term'      => 0,
+                'save_terms'    => 1,
+                'load_terms'    => 1,
+                'return_format' => 'id',
+            ],
+
+            [
+                'key'          => 'field_ws_ao_additional_languages',
+                'label'        => 'Additional Languages',
+                'name'         => 'ws_ao_additional_languages',
                 'type'         => 'text',
-                'instructions' => 'Comma-separated list of languages this organization can provide assistance in — e.g., "English, Spanish, Tagalog".',
-                'placeholder'  => 'English',
+                'instructions' => 'List additional languages not in the checkbox list above (comma-separated). Saving a non-empty value here automatically assigns the "Additional" language term.',
             ],
 
             // ────────────────────────────────────────────────────────────────
@@ -506,6 +527,71 @@ function ws_register_acf_assist_org() {
                 'first_day'      => 1,
             ],
 
+            // ── Tab: Plain Language (Phase 9.2) ───────────────────────────
+
+            [
+                'key'   => 'tab_ws_ao_plain_language',
+                'label' => 'Plain Language',
+                'type'  => 'tab',
+            ],
+            [
+                'key'           => 'field_ws_ao_has_plain_english',
+                'label'         => 'Has Plain Language Version',
+                'name'          => 'has_plain_english',
+                'type'          => 'true_false',
+                'instructions'  => 'Enable when a plain-language description of this organization has been written below.',
+                'ui'            => 1,
+                'ui_on_text'    => 'Yes',
+                'ui_off_text'   => 'No',
+                'default_value' => 0,
+            ],
+            [
+                'key'               => 'field_ws_ao_plain_english',
+                'label'             => 'Plain Language Content',
+                'name'              => 'plain_english',
+                'type'              => 'wysiwyg',
+                'instructions'      => 'Plain-language description of this organization for non-experts.',
+                'tabs'              => 'all',
+                'toolbar'           => 'full',
+                'media_upload'      => 0,
+                'conditional_logic' => [ [ [
+                    'field'    => 'field_ws_ao_has_plain_english',
+                    'operator' => '==',
+                    'value'    => '1',
+                ] ] ],
+            ],
+            [
+                'key'           => 'field_ws_ao_plain_reviewed',
+                'label'         => 'Plain Language Reviewed',
+                'name'          => 'plain_reviewed',
+                'type'          => 'true_false',
+                'instructions'  => 'Check when a human has reviewed and approved the plain-language content.',
+                'ui'            => 1,
+                'ui_on_text'    => 'Reviewed',
+                'ui_off_text'   => 'Pending',
+                'default_value' => 0,
+            ],
+            [
+                'key'           => 'field_ws_ao_summarized_by',
+                'label'         => 'Summarized By',
+                'name'          => 'summarized_by',
+                'type'          => 'user',
+                'instructions'  => 'Auto-stamped on first save after plain language content is created.',
+                'role'          => [ 'author', 'editor', 'administrator' ],
+                'return_format' => 'id',
+                'readonly'      => 1,
+                'disabled'      => 1,
+            ],
+            [
+                'key'          => 'field_ws_ao_summarized_date',
+                'label'        => 'Summarized Date',
+                'name'         => 'summarized_date',
+                'type'         => 'text',
+                'instructions' => 'Auto-stamped on first save after plain language content is created. Read only.',
+                'readonly'     => 1,
+                'disabled'     => 1,
+            ],
+
         ], // end fields
 
     ] ); // end acf_add_local_field_group
@@ -513,34 +599,5 @@ function ws_register_acf_assist_org() {
 } // end ws_register_acf_assist_org
 
 
-// ── Dynamic jurisdiction choices ──────────────────────────────────────────────
-//
-// Populates ws_ao_jurisdictions with all published jurisdiction records
-// each time an assist-org edit screen loads. Keyed by USPS code ("CA"),
-// labeled as "California (CA)". Sorted alphabetically.
-
-add_filter( 'acf/load_field/key=field_ws_ao_jurisdictions', 'ws_ao_load_jurisdiction_choices' );
-
-function ws_ao_load_jurisdiction_choices( $field ) {
-
-    $jurisdictions = ws_get_all_jurisdictions();
-
-    if ( empty( $jurisdictions ) ) {
-        return $field;
-    }
-
-    $choices = [];
-
-    foreach ( $jurisdictions as $jx ) {
-        $code = get_post_meta( $jx->ID, 'ws_jx_code', true );
-        if ( $code ) {
-            $choices[ $code ] = get_the_title( $jx->ID ) . ' (' . $code . ')';
-        }
-    }
-
-    asort( $choices );
-
-    $field['choices'] = $choices;
-
-    return $field;
-}
+// Dynamic choice filter removed (Phase 3.2 / 12.1).
+// ws_jurisdiction is now a taxonomy field — ACF loads terms natively.

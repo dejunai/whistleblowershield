@@ -181,36 +181,29 @@
 }
 
 
-/* ── Review Badges ───────────────────────────────────────────────────────── */
+/* ── Trust Badges ────────────────────────────────────────────────────────── */
+/* Phase 9: Replaces .ws-badge-legal-reviewed and .ws-review-badges system.  */
 
-.ws-review-badges,
-.ws-review-status {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    margin: 0.75rem 0;
-}
-
-.ws-badge {
+.ws-trust-badge {
     display: inline-block;
-    padding: 0.2rem 0.6rem;
+    padding: 0.15rem 0.5rem;
     border-radius: 3px;
-    font-size: 0.78rem;
-    font-weight: 600;
+    font-size: 0.75rem;
+    font-weight: 500;
     letter-spacing: 0.01em;
+    margin: 0.5rem 0;
 }
 
-.ws-badge-reviewed,
-.ws-badge-legal-reviewed {
-    background: #e6f4ea;
+.ws-trust-badge--reviewed {
+    background: #f0f7f0;
     color: #2e7d32;
-    border: 1px solid #a5d6a7;
+    border: 1px solid #c8e6c9;
 }
 
-.ws-badge-pending {
-    background: #fff8e1;
-    color: #795548;
-    border: 1px solid #ffe082;
+.ws-trust-badge--draft {
+    background: #fafafa;
+    color: #9e9e9e;
+    border: 1px solid #e0e0e0;
 }
 
 

@@ -27,20 +27,16 @@
  *      ├── jx-summary      (one-to-one, ACF relationship)
  *      ├── jx-statutes     (one-to-one, ACF relationship)
  *      ├── s    (one-to-one, ACF relationship)
- *      └── jx-citation     (many-to-one, queried by ws_jx_code)
- *
- * Relationship fields are defined in:
- *
- *      /includes/acf/acf-jurisdiction.php
+ *      └── jx-citation     (many-to-one, scoped by ws_jurisdiction taxonomy)
  *
  *
  * SHARED HELPER
  * -------------
  * ws_get_attached_citation_count( $post_id )
  *
- * Returns the number of published jx-citation records where
- * ws_jx_code matches the given jurisdiction and ws_jx_cite_attach
- * is true. Defined here and shared by admin-columns.php and
+ * Returns the number of published jx-citation records assigned the same
+ * ws_jurisdiction term as the given jurisdiction post with attach_flag = 1.
+ * Defined here and shared by admin-columns.php and
  * jurisdiction-dashboard.php (both load after this file).
  *
  *
@@ -58,6 +54,12 @@
  * 2.3.1  Fixed CPT slug typos (jx_summary → jx-summary for all four).
  *        Added ws_get_attached_citation_count() shared helper.
  *        Added Citations row: count badge + Add Citation + View All.
+ * 3.0.0  Architecture refactor (Phase 3.2):
+ *        - Resources row removed (CPT deleted).
+ *        - Create Now and Add Citation URLs migrated from ws_jx_code query
+ *          arg to ws_jx_term (taxonomy term slug).
+ *        - ws_get_attached_citation_count() migrated from ws_jx_code meta
+ *          query to ws_jurisdiction taxonomy query with attach_flag meta.
  */
 if (!defined('ABSPATH')) {
     exit;
@@ -94,15 +96,45 @@ Render Navigation Box
 */
 
 function ws_render_jx_navigation_box($post) {
-    $summary  = get_field('ws_related_summary',  $post->ID);
-    $statutes = get_field('ws_related_statutes', $post->ID);
-    $resources = get_field('', $post->ID);
+
+    // Resolve taxonomy term slug for this jurisdiction (used to scope addendum queries).
+    $jx_slugs  = wp_get_post_terms( $post->ID, 'ws_jurisdiction', [ 'fields' => 'slugs' ] );
+    $term_slug = ( ! is_wp_error( $jx_slugs ) && ! empty( $jx_slugs ) ) ? $jx_slugs[0] : '';
+    $term      = $term_slug ? get_term_by( 'slug', $term_slug, 'ws_jurisdiction' ) : null;
+    $term_id   = ( $term && ! is_wp_error( $term ) ) ? $term->term_id : 0;
+
+    // Look up existing addendum posts via taxonomy (replaces get_field on relationship fields).
+    $summary_post  = null;
+    $statutes_post = null;
+
+    if ( $term_id ) {
+        $summary_ids = get_posts( [
+            'post_type'      => 'jx-summary',
+            'post_status'    => [ 'publish', 'draft', 'pending' ],
+            'posts_per_page' => 1,
+            'fields'         => 'ids',
+            'tax_query'      => [ [ 'taxonomy' => 'ws_jurisdiction', 'field' => 'term_id', 'terms' => $term_id ] ],
+        ] );
+        if ( ! empty( $summary_ids ) ) {
+            $summary_post = get_post( $summary_ids[0] );
+        }
+
+        $statute_ids = get_posts( [
+            'post_type'      => 'jx-statute',
+            'post_status'    => [ 'publish', 'draft', 'pending' ],
+            'posts_per_page' => 1,
+            'fields'         => 'ids',
+            'tax_query'      => [ [ 'taxonomy' => 'ws_jurisdiction', 'field' => 'term_id', 'terms' => $term_id ] ],
+        ] );
+        if ( ! empty( $statute_ids ) ) {
+            $statutes_post = get_post( $statute_ids[0] );
+        }
+    }
 
     echo '<div class="ws-admin-nav-wrapper" style="line-height:1.6;">';
 
-    ws_render_admin_link('Summary',   $summary,   'jx-summary',  $post->ID);
-    ws_render_admin_link('Statutes',  $statutes,  'jx-statute',  $post->ID);
-    ws_render_admin_link('Resources', $resources, '', $post->ID);
+    ws_render_admin_link('Summary',  $summary_post,  'jx-summary', $post->ID);
+    ws_render_admin_link('Statutes', $statutes_post, 'jx-statute', $post->ID);
 
     ws_render_citation_row( $post->ID );
 
@@ -126,13 +158,15 @@ function ws_render_admin_link($label, $related, $post_type, $parent_id) {
         echo '<span style="font-size: 11px; color: ' . $color . ';">● ' . ucfirst($status) . '</span><br>';
         echo '<a class="button button-small" href="' . get_edit_post_link($related->ID) . '">Edit Record</a>';
     } else {
-        // Build the Smart Link — passes ws_jx_code so the new-post screen
-        // pre-populates the Jurisdiction Code field via admin-hooks.php.
+        // Build the Smart Link — passes ws_jx_term (taxonomy term slug) so the
+        // new-post screen auto-assigns the ws_jurisdiction taxonomy term via
+        // the wp_insert_post hook in admin-hooks.php.
         $parent_name = get_the_title( $parent_id );
-        $jx_code     = get_post_meta( $parent_id, 'ws_jx_code', true );
+        $jx_slugs    = wp_get_post_terms( $parent_id, 'ws_jurisdiction', [ 'fields' => 'slugs' ] );
+        $term_slug   = ( ! is_wp_error( $jx_slugs ) && ! empty( $jx_slugs ) ) ? $jx_slugs[0] : '';
         $create_url  = add_query_arg( [
             'post_type'  => $post_type,
-            'ws_jx_code' => $jx_code,
+            'ws_jx_term' => $term_slug,
             'post_title' => "{$parent_name} {$label}",
         ], admin_url( 'post-new.php' ) );
 
@@ -148,8 +182,8 @@ function ws_render_admin_link($label, $related, $post_type, $parent_id) {
 Shared Helper: Attached Citation Count
 ---------------------------------------------------------
 Returns the number of published jx-citation records that
-are both matched to this jurisdiction (ws_jx_code) and
-have ws_jx_cite_attach set to true.
+are scoped to this jurisdiction (ws_jurisdiction taxonomy)
+and have attach_flag set to true.
 
 Shared by:
     admin-columns.php          — jurisdiction list table column
@@ -159,11 +193,13 @@ Shared by:
 
 function ws_get_attached_citation_count( $post_id ) {
 
-    $jx_code = get_post_meta( $post_id, 'ws_jx_code', true );
+    $terms = wp_get_post_terms( $post_id, 'ws_jurisdiction' );
 
-    if ( ! $jx_code ) {
+    if ( empty( $terms ) || is_wp_error( $terms ) ) {
         return 0;
     }
+
+    $term_id = $terms[0]->term_id;
 
     $query = new WP_Query( [
         'post_type'      => 'jx-citation',
@@ -171,18 +207,17 @@ function ws_get_attached_citation_count( $post_id ) {
         'posts_per_page' => -1,
         'fields'         => 'ids',
         'meta_query'     => [
-            'relation' => 'AND',
             [
-                'key'     => 'ws_jx_code',
-                'value'   => $jx_code,
-                'compare' => '=',
-            ],
-            [
-                'key'     => 'ws_jx_cite_attach',
+                'key'     => 'attach_flag',
                 'value'   => '1',
                 'compare' => '=',
             ],
         ],
+        'tax_query' => [ [
+            'taxonomy' => 'ws_jurisdiction',
+            'field'    => 'term_id',
+            'terms'    => $term_id,
+        ] ],
     ] );
 
     return (int) $query->found_posts;
@@ -200,16 +235,16 @@ threshold badge, plus Add Citation and View All buttons.
     1–2 citations → orange badge
     3+ citations  → green badge
 
-"Add Citation" pre-populates ws_jx_code on the new-post
-screen via query arg (handled by admin-hooks.php).
-"View All" filters the jx-citation list by ws_jx_code.
+"Add Citation" links to new jx-citation with ws_jx_term in the URL.
+"View All" filters the jx-citation list by taxonomy term.
 ---------------------------------------------------------
 */
 
 function ws_render_citation_row( $post_id ) {
 
-    $jx_code = get_post_meta( $post_id, 'ws_jx_code', true );
-    $count   = ws_get_attached_citation_count( $post_id );
+    $jx_slugs  = wp_get_post_terms( $post_id, 'ws_jurisdiction', [ 'fields' => 'slugs' ] );
+    $term_slug = ( ! is_wp_error( $jx_slugs ) && ! empty( $jx_slugs ) ) ? $jx_slugs[0] : '';
+    $count     = ws_get_attached_citation_count( $post_id );
 
     if ( $count === 0 ) {
         $badge_color = '#dc3232'; // red
@@ -220,13 +255,13 @@ function ws_render_citation_row( $post_id ) {
     }
 
     $add_url = add_query_arg( [
-        'post_type'   => 'jx-citation',
-        'ws_jx_code'  => $jx_code,
+        'post_type'  => 'jx-citation',
+        'ws_jx_term' => $term_slug,
     ], admin_url( 'post-new.php' ) );
 
     $all_url = add_query_arg( [
-        'post_type'   => 'jx-citation',
-        'ws_jx_code'  => $jx_code,
+        'post_type'      => 'jx-citation',
+        'ws_jurisdiction' => $term_slug,
     ], admin_url( 'edit.php' ) );
 
     echo '<div style="margin-bottom: 12px; padding: 8px; border: 1px solid #ccd0d4; border-radius: 4px; background: #fff;">';

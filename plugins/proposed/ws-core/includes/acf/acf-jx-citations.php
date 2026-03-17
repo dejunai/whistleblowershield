@@ -16,16 +16,15 @@
  * -------------
  * Content tab:
  *   ws_jx_cite_type          Citation type (select)
- *   ws_disclosure_cat        Discloure Categories (checkbox)
+ *   ws_disclosure_type       Disclosure Categories taxonomy (checkbox)
  *   ws_jx_cite_label         Display label (text)
  *   ws_jx_cite_url           Source URL (url)
  *   ws_jx_cite_is_pdf        PDF link toggle (true_false)
- *   ws_jx_cite_attach        Attach to jurisdiction page (true_false)
- *   ws_jx_cite_position      Render order (number, conditional on attach)
+ *   attach_flag              Attach to jurisdiction page (true_false)
+ *   order                    Render order (number, conditional on attach_flag)
  *
- * Relationships tab:
- *   ws_jx_code               Jurisdiction code — primary query key (text)
- *   ws_jurisdiction          Parent Jurisdiction post_object — admin UI
+ * Jurisdiction scope is provided by the ws_jurisdiction taxonomy — the taxonomy
+ * term is assigned via the WordPress taxonomy UI, not via an ACF field.
  *
  * Authorship & Review tab:
  *   ws_jx_cite_last_edited_author  Last edited by (user, readonly non-admins)
@@ -61,6 +60,12 @@
  * VERSION
  * -------
  * 2.3.0  Initial release.
+ * 3.0.0  Architecture refactor (Phase 3.3):
+ *        - Removed Relationships tab: ws_jx_code text field and ws_jurisdiction
+ *          post_object field retired. Scope now provided by ws_jurisdiction taxonomy.
+ *        - Renamed ws_jx_cite_attach → attach_flag (field key unchanged).
+ *        - Renamed ws_jx_cite_position → order (field key unchanged).
+ *        - Admin notice updated to use taxonomy-based citation lookup.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -162,7 +167,7 @@ function ws_register_acf_jx_citations() {
             [
                 'key'           => 'field_ws_jx_cite_attach',
                 'label'         => 'Attach to Jurisdiction Page',
-                'name'          => 'ws_jx_cite_attach',
+                'name'          => 'attach_flag',
                 'type'          => 'true_false',
                 'instructions'  => 'Enable to include this citation in the rendered case law section on the jurisdiction page. Disable to store for reference only.',
                 'ui'            => 1,
@@ -173,7 +178,7 @@ function ws_register_acf_jx_citations() {
             [
                 'key'               => 'field_ws_jx_cite_position',
                 'label'             => 'Display Order',
-                'name'              => 'ws_jx_cite_position',
+                'name'              => 'order',
                 'type'              => 'number',
                 'instructions'      => 'Set the order in which this citation appears in the footnote list. Lower numbers appear first.',
                 'min'               => 1,
@@ -183,35 +188,6 @@ function ws_register_acf_jx_citations() {
                     'operator' => '==',
                     'value'    => '1',
                 ] ] ],
-            ],
-
-            // ── Tab: Relationships ────────────────────────────────────────
-
-            [
-                'key'   => 'field_ws_jx_cite_tab_relationships',
-                'label' => 'Relationships',
-                'type'  => 'tab',
-            ],
-            [
-                'key'          => 'field_ws_jx_cite_jx_code',
-                'label'        => 'Jurisdiction Code',
-                'name'         => 'ws_jx_code',
-                'type'         => 'text',
-                'required'     => 1,
-                'instructions' => 'Standard jurisdiction code used as the primary query key — e.g., CA, TX, federal, DC. Must match the code used on the parent Jurisdiction record.',
-                'maxlength'    => 2,
-                'placeholder'  => 'CA',
-            ],
-            [
-                'key'           => 'field_ws_jx_cite_jurisdiction',
-                'label'         => 'Parent Jurisdiction',
-                'name'          => 'ws_jurisdiction',
-                'type'          => 'post_object',
-                'instructions'  => 'Select the Jurisdiction this citation belongs to. Used for admin UI relationship display and two-way sync.',
-                'required'      => 1,
-                'post_type'     => [ 'jurisdiction' ],
-                'return_format' => 'id',
-                'ui'            => 1,
             ],
 
             // ── Tab: Authorship & Review ──────────────────────────────────
@@ -267,6 +243,71 @@ function ws_register_acf_jx_citations() {
                 'instructions' => 'Update this date each time the citation is meaningfully revised.',
             ],
 
+            // ── Tab: Plain Language (Phase 9.2) ───────────────────────────
+
+            [
+                'key'   => 'tab_ws_jx_cite_plain_language',
+                'label' => 'Plain Language',
+                'type'  => 'tab',
+            ],
+            [
+                'key'           => 'field_ws_jx_cite_has_plain_english',
+                'label'         => 'Has Plain Language Version',
+                'name'          => 'has_plain_english',
+                'type'          => 'true_false',
+                'instructions'  => 'Enable when a plain-language version of this citation has been written below.',
+                'ui'            => 1,
+                'ui_on_text'    => 'Yes',
+                'ui_off_text'   => 'No',
+                'default_value' => 0,
+            ],
+            [
+                'key'               => 'field_ws_jx_cite_plain_english',
+                'label'             => 'Plain Language Content',
+                'name'              => 'plain_english',
+                'type'              => 'wysiwyg',
+                'instructions'      => 'Plain-language explanation of this citation for non-experts.',
+                'tabs'              => 'all',
+                'toolbar'           => 'full',
+                'media_upload'      => 0,
+                'conditional_logic' => [ [ [
+                    'field'    => 'field_ws_jx_cite_has_plain_english',
+                    'operator' => '==',
+                    'value'    => '1',
+                ] ] ],
+            ],
+            [
+                'key'           => 'field_ws_jx_cite_plain_reviewed',
+                'label'         => 'Plain Language Reviewed',
+                'name'          => 'plain_reviewed',
+                'type'          => 'true_false',
+                'instructions'  => 'Check when a human has reviewed and approved the plain-language content.',
+                'ui'            => 1,
+                'ui_on_text'    => 'Reviewed',
+                'ui_off_text'   => 'Pending',
+                'default_value' => 0,
+            ],
+            [
+                'key'           => 'field_ws_jx_cite_summarized_by',
+                'label'         => 'Summarized By',
+                'name'          => 'summarized_by',
+                'type'          => 'user',
+                'instructions'  => 'Auto-stamped on first save after plain language content is created.',
+                'role'          => [ 'author', 'editor', 'administrator' ],
+                'return_format' => 'id',
+                'readonly'      => 1,
+                'disabled'      => 1,
+            ],
+            [
+                'key'          => 'field_ws_jx_cite_summarized_date',
+                'label'        => 'Summarized Date',
+                'name'         => 'summarized_date',
+                'type'         => 'text',
+                'instructions' => 'Auto-stamped on first save after plain language content is created. Read only.',
+                'readonly'     => 1,
+                'disabled'     => 1,
+            ],
+
         ], // end fields
 
     ] ); // end acf_add_local_field_group
@@ -281,10 +322,9 @@ function ws_register_acf_jx_citations() {
 
 // ── Admin notice: zero attached citations ─────────────────────────────────────
 //
-// Fires on jx-summary edit screens only. Reads the ws_jurisdiction
-// back-reference field to find the parent jurisdiction, then checks
-// for ws_jx_code on that jurisdiction record, then queries for
-// attached jx-citation records matching that code.
+// Fires on jx-summary edit screens only. Reads the assigned ws_jurisdiction
+// taxonomy term on the jx-summary post, then queries for attached jx-citation
+// records scoped to that same term.
 //
 // Displays a warning notice if zero attached citations are found,
 // prompting the summary author to act before publishing.
@@ -300,46 +340,45 @@ function ws_jx_cite_no_citations_notice() {
     global $post;
     if ( ! $post ) return;
 
-    // Get the parent jurisdiction post ID from the back-reference field.
-    $jx_post_id = get_post_meta( $post->ID, 'ws_jurisdiction', true );
-    if ( ! $jx_post_id ) return;
+    // Get the ws_jurisdiction taxonomy term assigned to this jx-summary.
+    $terms = wp_get_post_terms( $post->ID, 'ws_jurisdiction' );
+    if ( empty( $terms ) || is_wp_error( $terms ) ) return;
 
-    // Get the jurisdiction code from the parent jurisdiction record.
-    $jx_code = get_post_meta( (int) $jx_post_id, 'ws_jx_code', true );
-    if ( ! $jx_code ) return;
+    $term_id = $terms[0]->term_id;
 
-    // Query for attached citations matching this jurisdiction code.
+    // Query for attached citations scoped to this jurisdiction term.
     $attached = get_posts( [
         'post_type'      => 'jx-citation',
         'post_status'    => 'publish',
         'posts_per_page' => 1,
         'fields'         => 'ids',
         'meta_query'     => [
-            'relation' => 'AND',
             [
-                'key'   => 'ws_jx_code',
-                'value' => $jx_code,
-            ],
-            [
-                'key'   => 'ws_jx_cite_attach',
+                'key'   => 'attach_flag',
                 'value' => '1',
             ],
         ],
+        'tax_query' => [ [
+            'taxonomy' => 'ws_jurisdiction',
+            'field'    => 'term_id',
+            'terms'    => $term_id,
+        ] ],
     ] );
 
     if ( ! empty( $attached ) ) {
         return;
     }
 
-    // Resolve a display name for the jurisdiction.
-    $jx_name = get_the_title( (int) $jx_post_id ) ?: $jx_code;
+    // Resolve a display name for this jurisdiction from the term or its post.
+    $jx_post_id = ws_get_id_by_code( $terms[0]->slug );
+    $jx_name    = $jx_post_id ? get_the_title( $jx_post_id ) : strtoupper( $terms[0]->slug );
 
     echo '<div class="notice notice-warning is-dismissible"><p>';
     echo '<strong>WhistleblowerShield — Citation Warning:</strong> ';
     echo 'No attached citations found for <strong>' . esc_html( $jx_name ) . '</strong>. ';
     echo 'The case law section will not render on the jurisdiction page until at least one ';
     echo '<a href="' . esc_url( admin_url( 'edit.php?post_type=jx-citation' ) ) . '">citation record</a> ';
-    echo 'is published with <em>Attach to Jurisdiction Page</em> enabled and the jurisdiction code ';
-    echo '<code>' . esc_html( $jx_code ) . '</code> set.';
+    echo 'is published with <em>Attach to Jurisdiction Page</em> enabled and the ';
+    echo esc_html( strtoupper( $terms[0]->slug ) ) . ' jurisdiction term assigned.';
     echo '</p></div>';
 }

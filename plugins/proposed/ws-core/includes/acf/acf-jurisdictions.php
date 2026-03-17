@@ -26,8 +26,8 @@
  * ---------------
  * 1. Jurisdiction Identity
  *      ws_jurisdiction_class
- *      ws_jx_code
  *      ws_jurisdiction_name
+ *      (Jurisdiction code is now the slug of the assigned ws_jurisdiction taxonomy term)
  *
  * 2. Government Links
  *      government portal (url + label)
@@ -51,18 +51,12 @@
  *      Links jurisdiction to its associated legal datasets:
  *      summary, statutes, citations, interpretations.
  *
- * INTERNAL IDENTIFIER
- * -------------------
- * ws_jx_code is the canonical two-letter machine identifier used across
- * the plugin.
- *
- * Examples:
- *      CA  = California
- *      TX  = Texas
- *      NY  = New York
- *      US  = Federal Government
- *      DC  = District of Columbia
- *      PR  = Puerto Rico
+ * JURISDICTION IDENTITY
+ * ---------------------
+ * The canonical two-letter code for each jurisdiction is stored as the slug
+ * of the assigned ws_jurisdiction taxonomy term (e.g., 'ca', 'tx', 'us').
+ * The ws_jx_code text field has been retired; code is now derived from
+ * the taxonomy term slug.
  *
  * POST SLUGS (Territories)
  * ------------------------
@@ -122,6 +116,13 @@
  *        - Revised all instructions for lay-editor clarity.
  *        - Shortened select choice keys for cleaner code.
  *        - Updated auto-fill function to match new field names and values.
+ * 3.0.0  Architecture refactor (Phase 3.2):
+ *        - Removed ws_jx_code text field. Jurisdiction code is now the slug
+ *          of the assigned ws_jurisdiction taxonomy term.
+ *        Phase 3.6:
+ *        - Removed Related Content tab and all ws_jx_related_* relationship
+ *          fields (summary, statutes, citations, interpretations). Jurisdiction
+ *          scoping is now fully taxonomy-based; admin-relationships.php removed.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -185,17 +186,6 @@ function ws_register_acf_jurisdiction_fields() {
                 'ui'            => 1,
                 'return_format' => 'value',
                 'wrapper'       => [ 'width' => '30' ],
-            ],
-
-            [
-                'key'          => 'field_jx_code',
-                'label'        => 'Jurisdiction Code',
-                'name'         => 'ws_jx_code',
-                'type'         => 'text',
-                'instructions' => 'Standard two-letter code (e.g., CA, TX, NY). Used as the unique identifier linking all related records. Must match official postal abbreviation.',
-                'required'     => 1,
-                'maxlength'    => 2,
-                'wrapper'      => [ 'width' => '20' ],
             ],
 
             [
@@ -466,66 +456,6 @@ function ws_register_acf_jurisdiction_fields() {
                 'instructions'  => 'Editor who last updated this record. Updated automatically. Admins can change to credit a different contributor.',
                 'role'          => [ 'author', 'editor', 'administrator' ],
                 'return_format' => 'array',
-            ],
-
-            // ────────────────────────────────────────────────────────────────
-            // Tab: Related Content
-            //
-            // Relationship fields linking this jurisdiction to its associated
-            // legal dataset CPT records. Summary and Statutes accept a single
-            // post object. Citations and Interpretations accept multiple.
-            // ────────────────────────────────────────────────────────────────
-
-            [
-                'key'   => 'field_tab_jx_related',
-                'label' => 'Related Content',
-                'type'  => 'tab',
-            ],
-
-            [
-                'key'           => 'field_jx_related_summary',
-                'label'         => 'Related Summary',
-                'name'          => 'ws_jx_related_summary',
-                'type'          => 'relationship',
-                'instructions'  => 'Connect this jurisdiction\'s overview document. Provides high-level summary of whistleblower protections.',
-                'post_type'     => [ 'jx-summary' ],
-                'filters'       => [ 'search' ],
-                'max'           => 1,
-                'return_format' => 'object',
-            ],
-
-            [
-                'key'           => 'field_jx_related_statutes',
-                'label'         => 'Related Statutes',
-                'name'          => 'ws_jx_related_statutes',
-                'type'          => 'relationship',
-                'instructions'  => 'Connect the statutes record containing whistleblower laws for this jurisdiction.',
-                'post_type'     => [ 'jx-statute' ],
-                'filters'       => [ 'search' ],
-                'max'           => 1,
-                'return_format' => 'object',
-            ],
-
-            [
-                'key'           => 'field_jx_related_citations',
-                'label'         => 'Related Citations',
-                'name'          => 'ws_jx_related_citations',
-                'type'          => 'relationship',
-                'instructions'  => 'Link case citations interpreting whistleblower laws in this jurisdiction. Multiple citations can be linked.',
-                'post_type'     => [ 'jx-citation' ],
-                'filters'       => [ 'search' ],
-                'return_format' => 'object',
-            ],
-
-            [
-                'key'           => 'field_jx_related_interpretations',
-                'label'         => 'Related Interpretations',
-                'name'          => 'ws_jx_related_interpretations',
-                'type'          => 'relationship',
-                'instructions'  => 'Link District, Circuit, and Appellate Court interpretations of Federal whistleblower statutes. Multiple entries can be linked.',
-                'post_type'     => [ 'jx-interpretation' ],
-                'filters'       => [ 'search' ],
-                'return_format' => 'object',
             ],
 
         ], // end fields

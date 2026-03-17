@@ -9,18 +9,15 @@
  * Provides structured metadata for Jurisdiction Summary records.
  * The main editorial content is written in the WordPress block
  * editor. These fields supply supporting metadata for content
- * management, legal review tracking, and relationship management.
+ * management, plain-language review tracking, and stamp data.
  *
- * BACK-REFERENCE FIELD
+ * JURISDICTION SCOPING
  * --------------------
- * ws_jurisdiction links this summary back to its parent
- * Jurisdiction record. This field is required by
- * ws_sync_jurisdiction_relationships() in admin-relationships.php
- * to maintain two-way relationship consistency.
- *
- * When this record is saved, the sync function reads ws_jurisdiction
- * and writes this post's ID into ws_related_summary on the parent
- * Jurisdiction record automatically.
+ * jx-summary records are scoped to their parent jurisdiction via the
+ * ws_jurisdiction taxonomy term. The ws_jx_code back-reference field
+ * and admin-relationships.php sync logic were removed in Phase 3.2/3.6.
+ * Auto-assignment of the ws_jurisdiction term on "Create Now" is
+ * handled by the wp_insert_post hook in admin-hooks.php.
  *
  * STAMP FIELDS
  * ------------
@@ -63,6 +60,14 @@
  *        after [ws_jx_case_law]. ws-case-law section removed from
  *        ws_jurisdiction_summary wysiwyg — now managed entirely
  *        via jx-citation CPT records.
+ * 3.0.0  Phase 9.0+9.1 refactor:
+ *        - Removed ws_jx_sum_legal_review_completed and ws_jx_sum_legal_reviewer
+ *          (legal review badge system removed entirely).
+ *        - Replaced ws_jx_sum_human_reviewed with canonical plain_reviewed toggle.
+ *        - Added summarized_by (user, stamped once) and summarized_date (text, stamped once).
+ *        - Removed Relationships tab and ws_jx_code field (retired in Phase 3.2;
+ *          jx-summary is now scoped via ws_jurisdiction taxonomy).
+ *        - Back-reference note in PURPOSE removed (admin-relationships.php deleted Phase 3.6).
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -160,38 +165,35 @@ function ws_register_acf_jx_summary() {
                 'return_format' => 'array',
             ],
             [
-                'key'           => 'field_ws_jx_sum_human_reviewed',
-                'label'         => 'Human Reviewed',
-                'name'          => 'ws_jx_sum_human_reviewed',
+                'key'           => 'field_ws_jx_sum_plain_reviewed',
+                'label'         => 'Plain Language Reviewed',
+                'name'          => 'plain_reviewed',
                 'type'          => 'true_false',
-                'instructions'  => 'Check when a human (non-AI) has reviewed and approved this summary.',
+                'instructions'  => 'Check when a human has reviewed and approved this plain-language summary.',
                 'ui'            => 1,
                 'ui_on_text'    => 'Reviewed',
                 'ui_off_text'   => 'Pending',
                 'default_value' => 0,
             ],
             [
-                'key'           => 'field_ws_jx_sum_legal_review_completed',
-                'label'         => 'Legal Review Completed',
-                'name'          => 'ws_jx_sum_legal_review_completed',
-                'type'          => 'true_false',
-                'instructions'  => 'Check when a licensed attorney has reviewed this summary.',
-                'ui'            => 1,
-                'ui_on_text'    => 'Completed',
-                'ui_off_text'   => 'Pending',
-                'default_value' => 0,
+                'key'          => 'field_ws_jx_sum_summarized_by',
+                'label'        => 'Summarized By',
+                'name'         => 'summarized_by',
+                'type'         => 'user',
+                'instructions' => 'Stamped automatically on first save. Identifies who created the plain-language content.',
+                'role'         => [ 'author', 'editor', 'administrator' ],
+                'return_format' => 'id',
+                'readonly'     => 1,
+                'disabled'     => 1,
             ],
             [
-                'key'               => 'field_ws_jx_sum_legal_reviewer',
-                'label'             => 'Legal Reviewer',
-                'name'              => 'ws_jx_sum_legal_reviewer',
-                'type'              => 'text',
-                'instructions'      => 'Full name of the licensed attorney who reviewed this summary. Populate only when Legal Review Completed is checked.',
-                'conditional_logic' => [ [ [
-                    'field'    => 'field_ws_jx_sum_legal_review_completed',
-                    'operator' => '==',
-                    'value'    => '1',
-                ] ] ],
+                'key'          => 'field_ws_jx_sum_summarized_date',
+                'label'        => 'Summarized Date',
+                'name'         => 'summarized_date',
+                'type'         => 'text',
+                'instructions' => 'Stamped automatically on first save. Read only.',
+                'readonly'     => 1,
+                'disabled'     => 1,
             ],
 
             // ── Dates (bottom of Authorship & Review) ─────────────────────
@@ -229,24 +231,6 @@ function ws_register_acf_jx_summary() {
                 'name'         => 'ws_jx_sum_last_reviewed',
                 'type'         => 'text',
                 'instructions' => 'Update this date each time the summary content is meaningfully revised. This date is displayed publicly on the jurisdiction page.',
-            ],
-
-            // ── Tab: Relationships ────────────────────────────────────────
-
-            [
-                'key'   => 'field_ws_jx_sum_tab_relationships',
-                'label' => 'Relationships',
-                'type'  => 'tab',
-            ],
-            [
-                'key'          => 'field_ws_summary_jx_code',
-                'label'        => 'Jurisdiction Code',
-                'name'         => 'ws_jx_code',
-                'type'         => 'text',
-                'instructions' => 'USPS code for the parent jurisdiction (e.g., CA, TX, US). Required for relationship sync. Pre-populated automatically when created via the Jurisdiction editor.',
-                'required'     => 1,
-                'maxlength'    => 2,
-                'placeholder'  => 'CA',
             ],
 
         ], // end fields

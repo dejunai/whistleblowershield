@@ -8,17 +8,17 @@
  * -------
  * Displays all jx-interpretation records linked to the current statute,
  * with a direct "Add New Interpretation" button that opens the creation
- * form in a new tab. Only renders when the statute's ws_jx_code is 'US',
- * since only federal statutes receive court interpretation records.
+ * form in a new tab. Only renders when the statute has the 'us'
+ * ws_jurisdiction taxonomy term (i.e. it is a federal statute).
  *
  * WORKFLOW
  * --------
- * 1. Editor saves a jx-statute post with ws_jx_code = 'US'.
+ * 1. Editor saves a jx-statute post assigned the 'us' ws_jurisdiction term.
  * 2. The meta box appears below the ACF field groups.
  * 3. Existing interpretations are listed: case name, court, year, favorable?,
  *    and an Edit link.
  * 4. "Add New Interpretation" opens:
- *    post-new.php?post_type=jx-interpretation&statute_id={ID}&ws_jx_code=US
+ *    post-new.php?post_type=jx-interpretation&statute_id={ID}
  *    in a new browser tab.
  * 5. After saving the new interpretation, the editor closes the tab and
  *    refreshes the statute screen to see the updated list.
@@ -39,6 +39,8 @@
  *         returning interpretations across all statutes. Fixed by using
  *         a proper meta_query for the statute filter and a separate
  *         'meta_key' / 'orderby' pair for the year sort.
+ * 3.0.0  Phase 12.1: Replaced ws_jx_code meta check with has_term() against
+ *         the ws_jurisdiction taxonomy. &ws_jx_code=US removed from add URL.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -63,8 +65,9 @@ function ws_register_interpretation_metabox() {
 /**
  * Renders the Federal Court Interpretations meta box.
  *
- * Only shows interpretation content when ws_jx_code = 'US'. For all
- * other jurisdictions a short explanatory notice is displayed instead.
+ * Only shows interpretation content when the statute has the 'us'
+ * ws_jurisdiction term. For all other jurisdictions a short explanatory
+ * notice is displayed instead.
  *
  * @param WP_Post $post  The current jx-statute post object.
  */
@@ -73,10 +76,11 @@ function ws_render_interpretation_metabox( $post ) {
     global $ws_court_matrix;
 
     // ── Jurisdiction guard ────────────────────────────────────────────────
+    //
+    // Federal statutes carry the 'us' ws_jurisdiction term. Only federal
+    // statutes receive court interpretation records.
 
-    $jx_code = get_post_meta( $post->ID, 'ws_jx_code', true );
-
-    if ( $jx_code !== 'US' ) {
+    if ( ! has_term( 'us', 'ws_jurisdiction', $post->ID ) ) {
         echo '<p style="color:#666;font-style:italic;">Court interpretation records are only tracked for federal (US) statutes.</p>';
         return;
     }
@@ -84,7 +88,7 @@ function ws_render_interpretation_metabox( $post ) {
     // ── Auto-draft guard ──────────────────────────────────────────────────
 
     $is_draft   = ( $post->post_status === 'auto-draft' );
-    $add_url    = admin_url( 'post-new.php?post_type=jx-interpretation&statute_id=' . $post->ID . '&ws_jx_code=US' );
+    $add_url    = admin_url( 'post-new.php?post_type=jx-interpretation&statute_id=' . $post->ID );
     $post_title = esc_attr( get_the_title( $post ) );
     if ( $post_title ) {
         $add_url .= '&post_title=' . rawurlencode( 'Interpretation — ' . get_the_title( $post ) );

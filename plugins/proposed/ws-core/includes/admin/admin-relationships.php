@@ -49,24 +49,20 @@
  * ----------------
  * Addendum CPT    → Jurisdiction Relationship Field
  * ────────────────────────────────────────────────
- * jx-summary      → ws_related_summary
- * jx-statutes     → ws_related_statutes
- * s    → 
+ * jx-summary      → ws_jx_related_summary
+ * jx-statute      → ws_jx_related_statutes
  *
  * NOTE: ws-legal-update is NOT included here. Legal Updates use a
  * many-to-many relationship (one update → many jurisdictions) managed
  * entirely from the update side via ws_update_jurisdictions. No
  * back-sync to individual jurisdiction records is needed.
  *
- * NOTE: jx-citation is NOT included here. Citations do not use an
- * ACF relationship field to identify their parent jurisdiction — they
- * store the jurisdiction's ws_jx_code string in a plain text field
- * (ws_jx_code). The parent Jurisdiction record holds no corresponding
- * relationship field for citations; the count is derived at runtime
- * by querying ws_jx_code + ws_jx_cite_attach (see
- * ws_get_attached_citation_count() in admin-navigation.php).
- * There is no bidirectional field link to maintain, so no sync hook
- * is needed and jx-citation must not be added to this map.
+ * NOTE: jx-citation, jx-interpretation are NOT included here. These CPTs
+ * use ws_jurisdiction taxonomy with the attach_flag pattern — no ACF
+ * relationship field link to maintain on the parent jurisdiction record.
+ *
+ * NOTE: This entire file is pending removal in Phase 3.6 once Phase 3.5.1
+ * confirms the relationship model is fully replaced by taxonomy scoping.
  *
  * @package    WhistleblowerShield
  * @since      2.1.0
@@ -81,6 +77,9 @@
  *        ACF field groups. Sync hook activated.
  * 2.3.1  Added jx-citation exclusion note explaining the ws_jx_code
  *        string-key architecture and why no sync is needed.
+ * 3.0.0  Architecture refactor (Phase 3.2): sync migrated from ws_jx_code
+ *        string lookup to ws_jurisdiction taxonomy term lookup.
+ *        Pending full removal in Phase 3.6.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -97,9 +96,8 @@ defined( 'ABSPATH' ) || exit;
 
 function ws_addendum_relationship_map() {
     return [
-        'jx-summary'  => 'ws_related_summary',
-        'jx-statute'  => 'ws_related_statutes',
-        '' => '',
+        'jx-summary' => 'ws_jx_related_summary',
+        'jx-statute' => 'ws_jx_related_statutes',
     ];
 }
 
@@ -107,15 +105,18 @@ function ws_addendum_relationship_map() {
 // ════════════════════════════════════════════════════════════════════════════
 // Two-Way Relationship Sync
 //
-// When a jx-* addendum post is saved, reads the ws_jurisdiction
-// back-reference field to identify the parent Jurisdiction, then
-// writes this addendum's post ID into the corresponding relationship
-// field on the Jurisdiction record.
+// When a jx-* addendum post is saved, reads the assigned ws_jurisdiction
+// taxonomy term to identify the parent Jurisdiction, then writes this
+// addendum's post ID into the corresponding relationship field on the
+// Jurisdiction record.
 //
 // Guards:
 //   - Skips CPTs not in the relationship map
-//   - Skips if ws_jurisdiction is empty (no parent selected)
-//   - Skips if the referenced parent is not a jurisdiction record
+//   - Skips if no ws_jurisdiction term is assigned
+//   - Skips if the term slug doesn't resolve to a jurisdiction post
+//
+// NOTE: This entire file is pending removal in Phase 3.6 once the
+// relationship model is confirmed fully replaced by taxonomy scoping.
 //
 // @param int $post_id  The post ID being saved.
 // ════════════════════════════════════════════════════════════════════════════
@@ -132,21 +133,18 @@ function ws_sync_jurisdiction_relationships( $post_id ) {
         return;
     }
 
-    // Read the canonical ws_jx_code string that identifies the parent Jurisdiction.
-    // All jx-* CPTs now use ws_jx_code (plain text) as their back-reference,
-    // consistent with jx-citation. The post ID is resolved via ws_get_id_by_code()
-    // which uses the cached transient lookup in query-jurisdiction.php.
-    $jx_code = get_field( 'ws_jx_code', $post_id );
+    // Read the assigned ws_jurisdiction taxonomy term to identify the parent.
+    $terms = wp_get_post_terms( $post_id, 'ws_jurisdiction' );
 
-    if ( ! $jx_code ) {
-        // No code set — nothing to sync
+    if ( empty( $terms ) || is_wp_error( $terms ) ) {
+        // No jurisdiction term assigned — nothing to sync
         return;
     }
 
-    $jurisdiction_id = ws_get_id_by_code( $jx_code );
+    $jurisdiction_id = ws_get_id_by_code( $terms[0]->slug );
 
     if ( ! $jurisdiction_id ) {
-        // Code doesn't resolve to a known jurisdiction
+        // Term slug doesn't resolve to a known jurisdiction post
         return;
     }
 

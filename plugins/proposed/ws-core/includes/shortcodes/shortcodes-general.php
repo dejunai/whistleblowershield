@@ -25,6 +25,9 @@
  * VERSION
  * -------
  * 2.1.3  Full implementations restored from v2.0.0
+ * 3.0.0  Phase 12.2: [ws_legal_updates] field reads moved to
+ *         ws_get_legal_updates_data() in query-jurisdiction.php.
+ *         Shortcode now delegates all data access to the query layer.
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit;
@@ -83,17 +86,18 @@ function ws_shortcode_legal_updates( $atts ) {
         'count'        => 5,
     ], $atts, 'ws_legal_updates' );
 
-    $count = max( 1, (int) $atts['count'] );
+    // ── Resolve jurisdiction parameter to a post ID ───────────────────────
+    //
+    // Accepts: numeric post ID, USPS code ("CA"), or post slug ("california").
+    // All data reads are delegated to ws_get_legal_updates_data().
 
-    $meta_query = [];
+    $jx_id = 0;
     if ( ! empty( $atts['jurisdiction'] ) ) {
-        // Resolve slug or ID to a jurisdiction post
         if ( is_numeric( $atts['jurisdiction'] ) ) {
             $jx_id = (int) $atts['jurisdiction'];
         } else {
             $jx_id = ws_get_id_by_code( strtoupper( $atts['jurisdiction'] ) );
             if ( ! $jx_id ) {
-                // Fall back to slug lookup
                 $posts = get_posts( [
                     'post_type'      => 'jurisdiction',
                     'name'           => sanitize_title( $atts['jurisdiction'] ),
@@ -104,49 +108,12 @@ function ws_shortcode_legal_updates( $atts ) {
                 $jx_id = ! empty( $posts ) ? $posts[0] : 0;
             }
         }
-
-        if ( $jx_id ) {
-            // ACF relationship fields store post IDs as serialized arrays.
-            // LIKE with a quoted ID matches within the serialized string.
-            $meta_query = [ [
-                'key'     => 'ws_legal_update_jurisdiction',
-                'value'   => '"' . $jx_id . '"',
-                'compare' => 'LIKE',
-            ] ];
-        }
     }
 
-    $query_args = [
-        'post_type'      => 'ws-legal-update',
-        'post_status'    => 'publish',
-        'posts_per_page' => $count,
-        'orderby'        => 'date',
-        'order'          => 'DESC',
-        'no_found_rows'  => true,
-    ];
+    $items = ws_get_legal_updates_data( $jx_id, (int) $atts['count'] );
 
-    if ( ! empty( $meta_query ) ) {
-        $query_args['meta_query'] = $meta_query;
-    }
-
-    $updates = get_posts( $query_args );
-
-    if ( empty( $updates ) ) {
+    if ( empty( $items ) ) {
         return '';
-    }
-
-    // Assemble data for each update item before passing to the render layer.
-    $items = [];
-    foreach ( $updates as $update ) {
-        $effective_date = get_field( 'ws_legal_update_effective_date', $update->ID );
-        $items[] = [
-            'title'         => get_the_title( $update->ID ),
-            'source_url'    => get_field( 'ws_legal_update_source_url', $update->ID ) ?: '',
-            'law_name'      => get_field( 'ws_legal_update_law_name',   $update->ID ) ?: '',
-            'fmt_effective' => $effective_date ? date( 'F j, Y', strtotime( $effective_date ) ) : '',
-            'post_date'     => get_the_date( 'F j, Y', $update->ID ),
-            'summary_html'  => wp_kses_post( get_field( 'ws_legal_update_summary', $update->ID ) ?: '' ),
-        ];
     }
 
     return ws_render_legal_updates( $items );

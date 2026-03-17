@@ -170,37 +170,59 @@ function ws_handle_jurisdiction_render( $content ) {
     // Render disclaimer notice below header, before summary content
     $output .= do_shortcode( '[ws_nla_disclaimer_notice]' );
 
-    // Each section renders only if its addendum post exists and is published
-    // (for CPT-backed sections), or if content exists (for field-backed sections).
-    // Post_content is NOT checked — content lives in ACF fields.
+    // Each section renders only if its addendum post exists and is published.
+    // Post_content is NOT checked — content lives in ACF fields on addendum CPTs.
+    //
+    // Resolve ws_jurisdiction term ID once; used for all dataset gate checks.
+    $jx_term_id  = ws_get_jx_term_id( $post->ID );
+    $has_content = false; // Phase 10: tracks whether any content section was added.
 
     // Render summary.
-    $related_summary = ws_get_jx_summary( $post->ID );
-    if ( ws_is_published( $related_summary ) ) {
-        $output .= do_shortcode( '[ws_jx_summary]' );
+    if ( $jx_term_id ) {
+        $related_summary = ws_get_jx_summary_data( $jx_term_id );
+        if ( ws_is_published( $related_summary ) ) {
+            $output .= do_shortcode( '[ws_jx_summary]' );
+            $has_content = true;
+        }
     }
 
     // Render statutes — shown before case law so users see what protects
     // them before seeing how courts have interpreted those protections.
-    $related_statutes = ws_get_jx_statutes( $post->ID );
-    if ( ws_is_published( $related_statutes ) ) {
-        $output .= do_shortcode( '[ws_jx_statutes]' );
+    if ( $jx_term_id ) {
+        $related_statutes = ws_get_jx_statute_data( $jx_term_id );
+        if ( ws_is_published( $related_statutes ) ) {
+            $output .= do_shortcode( '[ws_jx_statutes]' );
+            $has_content = true;
+        }
     }
 
     // Render case law citations — [ws_jx_case_law] returns empty if none attached.
-    $output .= do_shortcode( '[ws_jx_case_law]' );
-
-    // Render limitations — [ws_jx_limitations] returns empty if field is empty.
-    $output .= do_shortcode( '[ws_jx_limitations]' );
-
-    // Render resources.
-    $related_resources = ws_get_jx_resources( $post->ID );
-    if ( ws_is_published( $related_resources ) ) {
-        $output .= do_shortcode( '[ws_jx_resources]' );
+    $case_law = do_shortcode( '[ws_jx_case_law]' );
+    if ( $case_law ) {
+        $output      .= $case_law;
+        $has_content  = true;
     }
 
-    // Legal updates — always attempt; shortcode returns empty if none exist
-    $output .= do_shortcode( '[ws_legal_updates jurisdiction="' . esc_attr( $post->post_name ) . '" count="5"]' );
+    // Render limitations — [ws_jx_limitations] returns empty if field is empty.
+    $limitations = do_shortcode( '[ws_jx_limitations]' );
+    if ( $limitations ) {
+        $output      .= $limitations;
+        $has_content  = true;
+    }
+
+    // Legal updates — always attempt; shortcode returns empty if none exist.
+    $legal_updates = do_shortcode( '[ws_legal_updates jurisdiction="' . esc_attr( $post->post_name ) . '" count="5"]' );
+    if ( $legal_updates ) {
+        $output      .= $legal_updates;
+        $has_content  = true;
+    }
+
+    // Phase 10 — Fallback: if no content sections were assembled, render a
+    // placeholder notice. Only triggered when the entire page is empty — no
+    // per-section placeholders.
+    if ( ! $has_content ) {
+        $output .= '<div class="ws-section--placeholder">Content for this jurisdiction is currently being prepared.</div>';
+    }
 
     $is_rendering = false;
     return $output;

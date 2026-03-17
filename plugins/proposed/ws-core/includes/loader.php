@@ -98,6 +98,16 @@ require_once WS_CORE_PATH . 'includes/taxonomies/register-taxonomies.php';
 ---------------------------------------------------------
 */
 if ( is_admin() ) {
+
+    // LOAD ORDER IS NON-NEGOTIABLE: taxonomies must be registered before any seeder runs.
+    // register-taxonomies.php is loaded in the Universal Layer above — it always runs first.
+    // jurisdiction-matrix.php seeds ws_jurisdiction terms (including US) first — load before
+    // agency, fed-statutes, and assist-org matrices which depend on the US term existing.
+    require_once WS_CORE_PATH . 'includes/admin/jurisdiction-matrix.php';
+    require_once WS_CORE_PATH . 'includes/admin/agency-matrix.php';
+    require_once WS_CORE_PATH . 'includes/admin/fed-statutes-matrix.php';
+    require_once WS_CORE_PATH . 'includes/admin/assist-org-matrix.php';
+
     // ACF Layer: Huge memory save by keeping these out of the frontend
     $acf_files = [
         'acf-jurisdictions', 'acf-jx-summary',        'acf-jx-statutes', 'acf-s', 'acf-legal-update',
@@ -109,11 +119,12 @@ if ( is_admin() ) {
     }
 
     // Admin Tools & Workflow Improvements
+    require_once WS_CORE_PATH . 'includes/admin/admin-matrix-watch.php';
     require_once WS_CORE_PATH . 'includes/admin/admin-navigation.php'; // Must load first.
     require_once WS_CORE_PATH . 'includes/admin/admin-columns.php';
     require_once WS_CORE_PATH . 'includes/admin/admin-hooks.php';
     require_once WS_CORE_PATH . 'includes/admin/admin-audit-trail.php';
-    require_once WS_CORE_PATH . 'includes/admin/admin-relationships.php';
+    // admin-relationships.php removed — Phase 3.6: relationship model replaced by taxonomy scoping.
     require_once WS_CORE_PATH . 'includes/admin/jurisdiction-dashboard.php';
     require_once WS_CORE_PATH . 'includes/admin/court-matrix.php';
     require_once WS_CORE_PATH . 'includes/admin/admin-interpretation-metabox.php';

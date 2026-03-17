@@ -10,8 +10,49 @@
  * the "blob" model. This enables granular queries for deadlines,
  * enforcement agencies, and misconduct categories.
  *
+ * FIELD SUMMARY
+ * -------------
+ * Legal Basis tab:
+ *   ws_jx_statute_official_name   Official statutory name (text, required)
+ *   ws_jx_statute_disclosure_type Disclosure Categories taxonomy (multi_select)
+ *   attach_flag                   Attach to jurisdiction page (true_false)
+ *   order                         Render order (number, conditional on attach_flag)
+ *
+ * Jurisdiction scope is provided by the ws_jurisdiction taxonomy — the
+ * taxonomy term is assigned via the WordPress taxonomy UI, not via an ACF field.
+ *
+ * Statutes of Limitations tab:
+ *   ws_jx_statute_limit_value         Filing Window Value (number)
+ *   ws_jx_statute_limit_unit          Time Unit (select)
+ *   ws_jx_statute_trigger             Deadline Trigger (select)
+ *   ws_jx_statute_tolling_notes       Tolling & Extension Notes (textarea)
+ *   ws_jx_statute_exhaustion_required Administrative Exhaustion Required? (true_false)
+ *   ws_jx_statute_exhaustion_details  Exhaustion Procedure & Deadline (textarea)
+ *   ws_statute_burden_of_proof        Burden of Proof (select)
+ *   ws_jx_statute_remedies            Available Remedies (taxonomy checkbox)
+ *
+ * Relationships tab:
+ *   ws_jx_statute_related_agencies    Primary Oversight Agencies (post_object)
+ *
+ * Authorship & Review tab:
+ *   ws_jx_statute_last_edited_author  Last edited by (user, readonly non-admins)
+ *   ws_jx_statute_date_created        Date created (text, readonly)
+ *   ws_jx_statute_last_edited         Last edited (text, readonly)
+ *   ws_jx_statute_last_reviewed       Last reviewed (text)
+ *
  * @package    WhistleblowerShield
- * @author     Dejunai
+ * @since      2.0.0
+ * @author     Whistleblower Shield
+ * @link       https://whistleblowershield.org
+ * @copyright  Copyright (c) Whistleblower Shield
+ *
+ * VERSION
+ * -------
+ * 2.0.0  Initial release.
+ * 3.0.0  Architecture refactor (Phase 3.4):
+ *        - Removed ws_jx_code text field (retired; scope now via ws_jurisdiction taxonomy).
+ *        - Added attach_flag toggle and order number field.
+ *        - Updated docblock to match Phase 3 conventions.
  */
 
 add_action( 'acf/init', 'ws_register_acf_jx_statutes' );
@@ -60,19 +101,6 @@ function ws_register_acf_jx_statutes() {
                 'type'         => 'text',
                 'instructions' => 'Use standard legal notation, e.g., "California Labor Code § 1102.5" or "5 U.S.C. § 2302".',
                 'required'     => 1,
-                'wrapper'      => [ 'width' => '70' ],
-            ],
-
-            [
-                'key'          => 'field_jx_statute_jx_code',
-                'label'        => 'Jurisdiction Code',
-                'name'         => 'ws_jx_code',
-                'type'         => 'text',
-                'instructions' => 'USPS code for the parent jurisdiction (e.g., CA, TX, US). Used for relationship sync and cross-CPT queries.',
-                'required'     => 1,
-                'maxlength'    => 2,
-                'placeholder'  => 'CA',
-                'wrapper'      => [ 'width' => '30' ],
             ],
 
             [
@@ -87,6 +115,33 @@ function ws_register_acf_jx_statutes() {
                 'save_terms'   => 1,
                 'load_terms'   => 1,
                 'return_format' => 'id',
+            ],
+
+            [
+                'key'           => 'field_jx_statute_attach_flag',
+                'label'         => 'Attach to Jurisdiction Page',
+                'name'          => 'attach_flag',
+                'type'          => 'true_false',
+                'instructions'  => 'Enable to include this statute in the rendered statutes section on the jurisdiction page. Disable to store for reference only.',
+                'ui'            => 1,
+                'ui_on_text'    => 'Attached',
+                'ui_off_text'   => 'Unattached',
+                'default_value' => 0,
+            ],
+
+            [
+                'key'               => 'field_jx_statute_order',
+                'label'             => 'Display Order',
+                'name'              => 'order',
+                'type'              => 'number',
+                'instructions'      => 'Set the order in which this statute appears on the jurisdiction page. Lower numbers appear first.',
+                'min'               => 1,
+                'step'              => 1,
+                'conditional_logic' => [ [ [
+                    'field'    => 'field_jx_statute_attach_flag',
+                    'operator' => '==',
+                    'value'    => '1',
+                ] ] ],
             ],
 
             // ────────────────────────────────────────────────────────────────
@@ -303,6 +358,72 @@ function ws_register_acf_jx_statutes() {
                 'type'         => 'text',
                 'instructions' => 'Update this date each time the statute record is meaningfully revised.',
             ],
+
+            // ── Tab: Plain Language (Phase 9.2) ───────────────────────────
+
+            [
+                'key'   => 'tab_jx_statute_plain_language',
+                'label' => 'Plain Language',
+                'type'  => 'tab',
+            ],
+            [
+                'key'           => 'field_jx_statute_has_plain_english',
+                'label'         => 'Has Plain Language Version',
+                'name'          => 'has_plain_english',
+                'type'          => 'true_false',
+                'instructions'  => 'Enable when a plain-language version of this statute has been written below.',
+                'ui'            => 1,
+                'ui_on_text'    => 'Yes',
+                'ui_off_text'   => 'No',
+                'default_value' => 0,
+            ],
+            [
+                'key'               => 'field_jx_statute_plain_english',
+                'label'             => 'Plain Language Content',
+                'name'              => 'plain_english',
+                'type'              => 'wysiwyg',
+                'instructions'      => 'Plain-language explanation of this statute for non-experts.',
+                'tabs'              => 'all',
+                'toolbar'           => 'full',
+                'media_upload'      => 0,
+                'conditional_logic' => [ [ [
+                    'field'    => 'field_jx_statute_has_plain_english',
+                    'operator' => '==',
+                    'value'    => '1',
+                ] ] ],
+            ],
+            [
+                'key'           => 'field_jx_statute_plain_reviewed',
+                'label'         => 'Plain Language Reviewed',
+                'name'          => 'plain_reviewed',
+                'type'          => 'true_false',
+                'instructions'  => 'Check when a human has reviewed and approved the plain-language content.',
+                'ui'            => 1,
+                'ui_on_text'    => 'Reviewed',
+                'ui_off_text'   => 'Pending',
+                'default_value' => 0,
+            ],
+            [
+                'key'           => 'field_jx_statute_summarized_by',
+                'label'         => 'Summarized By',
+                'name'          => 'summarized_by',
+                'type'          => 'user',
+                'instructions'  => 'Auto-stamped on first save after plain language content is created.',
+                'role'          => [ 'author', 'editor', 'administrator' ],
+                'return_format' => 'id',
+                'readonly'      => 1,
+                'disabled'      => 1,
+            ],
+            [
+                'key'          => 'field_jx_statute_summarized_date',
+                'label'        => 'Summarized Date',
+                'name'         => 'summarized_date',
+                'type'         => 'text',
+                'instructions' => 'Auto-stamped on first save after plain language content is created. Read only.',
+                'readonly'     => 1,
+                'disabled'     => 1,
+            ],
+
         ],
     ] );
 

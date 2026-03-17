@@ -100,17 +100,18 @@ Returns:
 HTML block ready for output
 */
 
-function ws_render_section($title, $content)
-{
+function ws_render_section( $title, $content, $section_class = '' ) {
 
-    if (!$content) {
+    if ( ! $content ) {
         return '';
     }
+
+    $extra_class = $section_class ? ' ' . sanitize_html_class( $section_class ) : '';
 
     ob_start();
     ?>
 
-    <section class="ws-jx-section">
+    <section class="ws-jx-section<?php echo $extra_class; ?>">
 
         <h2 class="ws-jx-section-title">
             <?php echo esc_html($title); ?>
@@ -126,6 +127,35 @@ function ws_render_section($title, $content)
 
     return ob_get_clean();
 
+}
+
+
+/**
+ * Renders a local + federal two-group section pair.
+ *
+ * When a dataset contains both local (is_fed=false) and federal (is_fed=true)
+ * records, call this function with the pre-built HTML for each group.
+ * Wraps local content in .ws-section--local and federal content in
+ * .ws-section--federal. Omits a group's block entirely if its HTML is empty.
+ *
+ * The section class logic lives here only — shortcodes pass pre-built
+ * content strings and do not reference the class names directly.
+ *
+ * @param  string $title_local   Section heading for the local group.
+ * @param  string $content_local HTML content for state/territory records.
+ * @param  string $title_fed     Section heading for the federal group.
+ * @param  string $content_fed   HTML content for US-scoped records.
+ * @return string  HTML output (one or two section blocks).
+ */
+function ws_render_section_two_group( $title_local, $content_local, $title_fed, $content_fed ) {
+    $out = '';
+    if ( $content_local ) {
+        $out .= ws_render_section( $title_local, $content_local, 'ws-section--local' );
+    }
+    if ( $content_fed ) {
+        $out .= ws_render_section( $title_fed, $content_fed, 'ws-section--federal' );
+    }
+    return $out;
 }
 
 
@@ -320,47 +350,28 @@ function ws_render_jx_summary_section( $content, $review_html = '' ) {
 
 
 // ════════════════════════════════════════════════════════════════════════════
-// Review Badges
+// Trust Badge (plain_reviewed)
 //
-// Private helper shared by ws_render_jx_summary_footer() and
-// ws_render_jx_review_status(). Renders the .ws-review-badges block only.
+// Renders the plain-language review status badge for a summary record.
+// Legal review badge system was removed in Phase 9.0.
 //
-// @param  bool   $human_reviewed  True if human review is complete.
-// @param  bool   $legal_reviewed  True if legal review is complete.
-// @param  string $legal_reviewer  Name of legal reviewer, or empty string.
-// @return string                  HTML badges block.
+// @param  bool $plain_reviewed  True if a human has reviewed the plain-language content.
+// @return string                HTML badge span.
 // ════════════════════════════════════════════════════════════════════════════
 
-function ws_render_review_badges( $human_reviewed, $legal_reviewed, $legal_reviewer ) {
-    ob_start(); ?>
-    <div class="ws-review-badges">
-        <?php if ( $human_reviewed ) : ?>
-            <span class="ws-badge ws-badge-reviewed">&#10003; Human Reviewed</span>
-        <?php else : ?>
-            <span class="ws-badge ws-badge-pending">&#9679; Pending Human Review</span>
-        <?php endif; ?>
-
-        <?php if ( $legal_reviewed ) : ?>
-            <span class="ws-badge ws-badge-legal-reviewed">
-                &#10003; Legally Reviewed
-                <?php if ( $legal_reviewer ) : ?>
-                    &mdash; <?php echo esc_html( $legal_reviewer ); ?>
-                <?php endif; ?>
-            </span>
-        <?php else : ?>
-            <span class="ws-badge ws-badge-pending">&#9679; Pending Legal Review</span>
-        <?php endif; ?>
-    </div>
-    <?php
-    return ob_get_clean();
+function ws_render_plain_reviewed_badge( $plain_reviewed ) {
+    if ( $plain_reviewed ) {
+        return '<span class="ws-trust-badge ws-trust-badge--reviewed">&#10003; Reviewed</span>';
+    }
+    return '<span class="ws-trust-badge ws-trust-badge--draft">&#9679; Draft</span>';
 }
 
 
 /**
  * Renders the summary section footer.
  *
- * Displays author, creation date, last reviewed date, review status
- * badges, and sources & citations. All fields are optional — sections
+ * Displays author, creation date, last reviewed date, plain-language
+ * review badge, and sources & citations. All fields are optional — sections
  * are omitted when their data is empty.
  *
  * Called by the [ws_jx_summary] shortcode; the return value is passed
@@ -370,9 +381,7 @@ function ws_render_review_badges( $human_reviewed, $legal_reviewed, $legal_revie
  *     @type string $author_name    Display name of the content author.
  *     @type string $fmt_created    Formatted creation date string, or empty.
  *     @type string $fmt_reviewed   Formatted last-reviewed date string, or empty.
- *     @type bool   $human_reviewed True if human review is complete.
- *     @type bool   $legal_reviewed True if legal review is complete.
- *     @type string $legal_reviewer Name of legal reviewer, or empty string.
+ *     @type bool   $plain_reviewed True if plain-language review is complete.
  *     @type string $sources        Sources & citations raw text, or empty.
  * }
  * @return string  HTML footer block.
@@ -399,11 +408,7 @@ function ws_render_jx_summary_footer( $data ) {
         </p>
         <?php endif; ?>
 
-        <?php echo ws_render_review_badges(
-            $data['human_reviewed'],
-            $data['legal_reviewed'],
-            $data['legal_reviewer']
-        ); ?>
+        <?php echo ws_render_plain_reviewed_badge( ! empty( $data['plain_reviewed'] ) ); ?>
 
         <?php if ( $data['sources'] ) : ?>
         <div class="ws-jx-summary-sources">
@@ -418,41 +423,10 @@ function ws_render_jx_summary_footer( $data ) {
 }
 
 
-/**
- * Renders the standalone review status block.
- *
- * Displays last reviewed date and review badge indicators. Used by
- * the [ws_jx_review_status] shortcode for embedding review status
- * independently from the full summary section.
- *
- * @param  array $data {
- *     @type string $fmt_reviewed   Formatted last-reviewed date string, or empty.
- *     @type bool   $human_reviewed True if human review is complete.
- *     @type bool   $legal_reviewed True if legal review is complete.
- *     @type string $legal_reviewer Name of legal reviewer, or empty string.
- * }
- * @return string  HTML review status block.
- */
-function ws_render_jx_review_status( $data ) {
-    ob_start(); ?>
-    <div class="ws-review-status">
-
-        <?php if ( $data['fmt_reviewed'] ) : ?>
-        <p class="ws-jx-summary-last-reviewed">
-            <strong>Last Reviewed:</strong> <?php echo esc_html( $data['fmt_reviewed'] ); ?>
-        </p>
-        <?php endif; ?>
-
-        <?php echo ws_render_review_badges(
-            $data['human_reviewed'],
-            $data['legal_reviewed'],
-            $data['legal_reviewer']
-        ); ?>
-
-    </div>
-    <?php
-    return ob_get_clean();
-}
+// ws_render_jx_review_status() removed in Phase 9.0.
+// The [ws_jx_review_status] shortcode was the only caller; it has been
+// removed along with the legal review badge system. Plain-language review
+// status is now rendered inline by ws_render_jx_summary_footer().
 
 
 /**
@@ -468,10 +442,11 @@ function ws_render_jx_review_status( $data ) {
  * @param  array $items  Array of footnote item HTML strings.
  * @return string        HTML section block, or empty string if $items is empty.
  */
-function ws_render_jx_case_law( $items ) {
+function ws_render_jx_case_law( $items, $section_class = '' ) {
     if ( empty( $items ) ) return '';
+    $extra = $section_class ? ' ' . sanitize_html_class( $section_class ) : '';
     ob_start(); ?>
-    <section class="ws-case-law">
+    <section class="ws-case-law<?php echo $extra; ?>">
         <hr class="ws-section-divider">
         <?php foreach ( $items as $item ) : ?>
             <?php echo $item; ?><br>

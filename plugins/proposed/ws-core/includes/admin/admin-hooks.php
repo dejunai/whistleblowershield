@@ -6,9 +6,9 @@
  * content types. Centralises four cross-CPT behaviours that were previously
  * duplicated in every ACF registration file:
  *
- *   1. URL pre-population   — fills ws_jx_code and post title on new-post
- *                             screens opened from the "Create Now" links in
- *                             admin-navigation.php.
+ *   1. URL pre-population   — auto-assigns ws_jurisdiction taxonomy term and
+ *                             post title on new-post screens opened from the
+ *                             "Create Now" links in admin-navigation.php.
  *
  *   2. Field locking        — makes date_created and last_edited_author
  *                             readonly + disabled for non-administrators.
@@ -27,15 +27,20 @@
  *                             driven by a per-CPT configuration map.
  *
  *
- * FIELD NAMES
- * -----------
- * All jx-* CPTs (jx-summary, , , jx-statute,
- * jx-citation) use the same ACF field name for their jurisdiction
- * back-reference:
+ * JURISDICTION TAXONOMY
+ * ---------------------
+ * ws_jx_code has been retired as the jurisdiction join mechanism. Addendum
+ * CPTs (jx-summary, jx-statute, jx-citation, jx-interpretation) now use the
+ * ws_jurisdiction taxonomy to identify their parent jurisdiction.
  *
- *   ws_jx_code   — plain text field on all jx-* CPTs
+ * Auto-assignment on Create Now flow: when a new addendum post is created from
+ * the admin navigation panel, ws_jx_term (term slug) is passed as a URL query
+ * arg. The wp_insert_post hook below reads this arg and assigns the matching
+ * ws_jurisdiction term immediately on post creation.
  *
- * A single acf/load_field filter covers all CPTs.
+ * ws_jx_term_id post meta: written on every jurisdiction save via the
+ * save_post_jurisdiction hook below. Provides a direct post→term_id mapping
+ * for seeder and query layer use.
  *
  *
  * VERSION
@@ -55,23 +60,55 @@
  *        attribution. Added auto-fill-editor filter so the field pre-fills
  *        to the current user for admins, ensuring the override check works
  *        correctly on save. Added last_edited date to visible lock list.
+ * 3.0.0  Architecture refactor (Phase 3.2):
+ *        - Removed ws_jx_code pre-populate filter (ws_jx_code retired).
+ *        - Removed deleted CPT entries from stamp config.
+ *        - Added save_post_jurisdiction hook writing ws_jx_term_id post meta.
+ *        - Added wp_insert_post hook auto-assigning ws_jurisdiction taxonomy
+ *          term on new addendum post creation (reads ws_jx_term URL arg).
+ * 3.0.1  Phase 8: Added ws_languages "additional" term auto-assign/unassign
+ *        hook for ws-agency (ws_agency_additional_languages) and
+ *        ws-assist-org (ws_ao_additional_languages).
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit;
 
 
-// ── Pre-populate ws_jx_code on new addendum and citation screens ──────────────
+// ── Auto-assign ws_jurisdiction taxonomy on new addendum post creation ────────
 //
-// All jx-* CPTs (jx-summary, , , jx-statute,
-// jx-citation) now use ws_jx_code as their shared Jurisdiction Code field.
-// The "Create Now" links in admin-navigation.php pass ws_jx_code as a query
-// arg, as does the "Add Citation" button. One filter covers all CPTs.
+// When the "Create Now" or "Add Citation" link is clicked from the jurisdiction
+// admin navigation panel, the URL includes ws_jx_term (jurisdiction term slug).
+// This hook fires on wp_insert_post for new posts and assigns the matching
+// ws_jurisdiction term immediately, so the addendum is correctly scoped.
 
-add_filter( 'acf/load_field/name=ws_jx_code', function( $field ) {
-    if ( isset( $_GET['ws_jx_code'] ) ) {
-        $field['default_value'] = sanitize_text_field( $_GET['ws_jx_code'] );
+add_action( 'wp_insert_post', function( $post_id, $post, $update ) {
+    if ( $update ) return;
+    if ( ! isset( $_GET['ws_jx_term'] ) ) return;
+
+    $addendum_types = [ 'jx-summary', 'jx-statute', 'jx-citation', 'jx-interpretation' ];
+    if ( ! in_array( $post->post_type, $addendum_types, true ) ) return;
+
+    $term_slug = sanitize_key( $_GET['ws_jx_term'] );
+    $term      = get_term_by( 'slug', $term_slug, 'ws_jurisdiction' );
+    if ( $term && ! is_wp_error( $term ) ) {
+        wp_set_object_terms( $post_id, $term->term_id, 'ws_jurisdiction' );
     }
-    return $field;
+}, 10, 3 );
+
+
+// ── Write ws_jx_term_id post meta on jurisdiction save ────────────────────────
+//
+// Stores the term ID of the assigned ws_jurisdiction term as post meta on each
+// jurisdiction post. Provides a direct post→term_id mapping used by seeders and
+// admin tooling without requiring a get_term_by() lookup at runtime.
+
+add_action( 'save_post_jurisdiction', function( $post_id ) {
+    if ( wp_is_post_revision( $post_id ) ) return;
+
+    $terms = wp_get_post_terms( $post_id, 'ws_jurisdiction' );
+    if ( ! empty( $terms ) && ! is_wp_error( $terms ) ) {
+        update_post_meta( $post_id, 'ws_jx_term_id', $terms[0]->term_id );
+    }
 } );
 
 
@@ -127,6 +164,9 @@ $ws_lock_field_names = [
     'ws_lu_last_edited_author',
     'ws_ao_last_edited_author',
     'ws_interp_last_edited_author',
+    // summarized_by / summarized_date — stamped once (Phase 9.1), never editable
+    'summarized_by',
+    'summarized_date',
 ];
 
 foreach ( $ws_lock_field_names as $_ws_field_name ) {
@@ -264,8 +304,6 @@ $ws_stamp_cpts = [
     'jx-summary'        => [ 'meta_prefix' => 'ws_jx_sum',     'author_acf_key' => 'field_ws_jx_sum_last_edited_author'    ],
     'jx-citation'       => [ 'meta_prefix' => 'ws_jx_cite',    'author_acf_key' => 'field_ws_jx_cite_last_edited_author'   ],
     'jx-statute'        => [ 'meta_prefix' => 'ws_jx_statute', 'author_acf_key' => 'field_jx_statute_last_edited_author'   ],
-    ''      => [ 'meta_prefix' => 'ws_jx_proc',    'author_acf_key' => 'field_last_edited_author'   ],
-    ''       => [ 'meta_prefix' => 'ws_jx_res',     'author_acf_key' => 'field_last_edited_author'    ],
     'jx-interpretation' => [ 'meta_prefix' => 'ws_interp',     'author_acf_key' => 'field_ws_interp_last_edited_author'    ],
     'ws-agency'         => [ 'meta_prefix' => 'ws_agency',     'author_acf_key' => 'field_ws_agency_last_edited_author'    ],
     'ws-legal-update'   => [ 'meta_prefix' => 'ws_lu',         'author_acf_key' => 'field_ws_lu_last_edited_author'        ],
@@ -331,5 +369,92 @@ function ws_acf_write_stamp_fields( $post_id ) {
         update_post_meta( $post_id, "{$p}_last_edited_author", $posted_user );
     } else {
         update_post_meta( $post_id, "{$p}_last_edited_author", $user_id );
+    }
+}
+
+
+// ── summarized_by + summarized_date one-time stamps (Phase 9) ────────────────
+//
+// Stamped once when plain language content is first saved on a supported CPT.
+// For jx-summary the stamp fires on every first save (it IS the plain language doc).
+// For all other CPTs the stamp is deferred until has_plain_english is enabled.
+//
+// Meta keys: jx-summary uses ws_jx_sum_summarized_by / ws_jx_sum_summarized_date
+// (prefixed to avoid collision with the standard stamp system). All other CPTs
+// use the generic summarized_by / summarized_date keys matching the ACF field names.
+//
+// Runs at priority 25 (after ACF fields at 10, after main stamps at 20).
+
+add_action( 'acf/save_post', 'ws_acf_stamp_summarized_fields', 25 );
+
+function ws_acf_stamp_summarized_fields( $post_id ) {
+
+    $supported = [
+        'jx-summary',
+        'jx-statute', 'jx-citation', 'jx-interpretation',
+        'ws-agency', 'ws-assist-org',
+    ];
+
+    $post_type = get_post_type( $post_id );
+    if ( ! in_array( $post_type, $supported, true ) ) {
+        return;
+    }
+
+    $is_summary = ( $post_type === 'jx-summary' );
+
+    $date_key = $is_summary ? 'ws_jx_sum_summarized_date' : 'summarized_date';
+    $by_key   = $is_summary ? 'ws_jx_sum_summarized_by'   : 'summarized_by';
+
+    // Only stamp once.
+    if ( get_post_meta( $post_id, $date_key, true ) ) {
+        return;
+    }
+
+    // Non-summary CPTs: defer stamp until has_plain_english is enabled.
+    if ( ! $is_summary && ! get_post_meta( $post_id, 'has_plain_english', true ) ) {
+        return;
+    }
+
+    update_post_meta( $post_id, $date_key, current_time( 'Y-m-d' ) );
+    update_post_meta( $post_id, $by_key,   get_current_user_id() );
+}
+
+
+// ── Auto-assign ws_languages "additional" term ────────────────────────────────
+//
+// When ws_agency_additional_languages (ws-agency) or ws_ao_additional_languages
+// (ws-assist-org) is non-empty, the "additional" ws_languages term is assigned
+// automatically so the taxonomy filter can surface these records.
+// When the field is cleared, the term is removed.
+//
+// Runs at priority 25 (after ACF fields commit at 10, after stamps at 20).
+
+add_action( 'acf/save_post', 'ws_sync_additional_languages_term', 25 );
+
+function ws_sync_additional_languages_term( $post_id ) {
+
+    $post_type = get_post_type( $post_id );
+
+    if ( $post_type === 'ws-agency' ) {
+        $meta_key = 'ws_agency_additional_languages';
+    } elseif ( $post_type === 'ws-assist-org' ) {
+        $meta_key = 'ws_ao_additional_languages';
+    } else {
+        return;
+    }
+
+    $additional_term = get_term_by( 'slug', 'additional', 'ws_languages' );
+    if ( ! $additional_term || is_wp_error( $additional_term ) ) {
+        return; // Taxonomy not yet seeded — bail silently.
+    }
+
+    $value = trim( (string) get_post_meta( $post_id, $meta_key, true ) );
+
+    if ( $value !== '' ) {
+        // Non-empty: ensure "additional" term is assigned (append=true preserves existing terms).
+        wp_set_object_terms( $post_id, $additional_term->term_id, 'ws_languages', true );
+    } else {
+        // Empty: remove "additional" term only.
+        wp_remove_object_terms( $post_id, $additional_term->term_id, 'ws_languages' );
     }
 }
