@@ -157,7 +157,7 @@ add_shortcode( 'ws_jx_header', function( $atts ) {
         'jx_name'   => $jx_data['name'],
         'flag_data' => [
             'url'        => $jx_data['flag']['url'],
-            'source_url' => $jx_data['flag']['attribution_url'], // fixed: was ['source_url']
+            'source_url' => $jx_data['flag']['source_url'],
             'attr_str'   => $jx_data['flag']['attribution'],     // fixed: was ['attr_str']
             'license'    => $jx_data['flag']['license'],
         ],
@@ -274,7 +274,7 @@ add_shortcode( 'ws_jx_flag', function( $atts ) {
     // Map query layer 'flag' array to the keys ws_render_jx_flag() expects.
     return ws_render_jx_flag( [
         'url'        => $jx_data['flag']['url'],
-        'source_url' => $jx_data['flag']['attribution_url'],
+        'source_url' => $jx_data['flag']['source_url'],
         'attr_str'   => $jx_data['flag']['attribution'],
         'license'    => $jx_data['flag']['license'],
     ] );

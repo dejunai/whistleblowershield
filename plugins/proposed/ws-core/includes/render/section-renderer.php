@@ -195,7 +195,7 @@ function ws_render_jx_header($data) {
  *
  * @param  array $flag_data {
  *     @type string $url            URL to the flag image.
- *     @type string $source_url     URL to the attribution source.
+ *     @type string $source_url     URL to the wikimedia source.
  *     @type string $attr_str       Attribution string (plain text).
  *     @type string $license        License identifier (e.g., "Public Domain").
  * }

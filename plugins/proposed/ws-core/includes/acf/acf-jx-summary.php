@@ -104,7 +104,7 @@ function ws_register_acf_jx_summary() {
             // ── Tab: Content ──────────────────────────────────────────────
 
             [
-                'key'   => 'field_ws_jx_sum_tab_content',
+                'key'   => 'field_ws_jx_sum_content_tab',
                 'label' => 'Content',
                 'type'  => 'tab',
             ],
@@ -140,7 +140,7 @@ function ws_register_acf_jx_summary() {
                 'key'          => 'field_ws_jx_limitations',
                 'label'        => 'Limitations & Ramifications',
                 'name'         => 'ws_jx_limitations',
-                'type'         => 'wysiwyg',
+                'type'         => 'wysiwyg', // @todo - consider using 'repeater' type
                 'instructions' => 'Content for the Limitations and Ramifications section. Rendered automatically after the case law section on the jurisdiction page via [ws_jx_limitations]. Use the editor toolbar for all formatting — do NOT paste raw Markdown.',
                 'tabs'         => 'all',
                 'toolbar'      => 'full',
@@ -151,7 +151,7 @@ function ws_register_acf_jx_summary() {
             // ── Tab: Authorship & Review ──────────────────────────────────
 
             [
-                'key'   => 'field_ws_jx_sum_tab_authorship',
+                'key'   => 'field_ws_jx_sum_authorship_tab',
                 'label' => 'Authorship & Review',
                 'type'  => 'tab',
             ],
@@ -166,19 +166,22 @@ function ws_register_acf_jx_summary() {
             ],
             [
                 'key'           => 'field_ws_jx_sum_plain_reviewed',
-                'label'         => 'Plain Language Reviewed',
-                'name'          => 'plain_reviewed',
-                'type'          => 'true_false',
+                'label'         => 'Plain Language Reviewed', //@todo - should only be readonly to author-rank
+                'name'          => 'plain_reviewed',          //        while summary exists but is not reviewed, should be tracked in admin-panel
+                'type'          => 'true_false',              //        we need to capture user and store at 'ws_jx_sum_last_reviewed_by'
+															  //        'ws_jx_sum_last_reviewed_by' needs to reveal on toggle, autostamp current user,
+															  //        and be readonly -- editable only by admin
                 'instructions'  => 'Check when a human has reviewed and approved this plain-language summary.',
                 'ui'            => 1,
                 'ui_on_text'    => 'Reviewed',
                 'ui_off_text'   => 'Pending',
                 'default_value' => 0,
             ],
+			//@todo - 'ws_jx_sum_create_author' - inadverantly removed, re-add
             [
-                'key'          => 'field_ws_jx_sum_summarized_by',
+                'key'          => 'field_ws_jx_summarized_by',
                 'label'        => 'Summarized By',
-                'name'         => 'summarized_by',
+                'name'         => 'ws_jx_summarized_by', //@todo - duplicate data to 'ws_jx_sum_create_author', unecessary meta_data
                 'type'         => 'user',
                 'instructions' => 'Stamped automatically on first save. Identifies who created the plain-language content.',
                 'role'         => [ 'author', 'editor', 'administrator' ],
@@ -187,9 +190,9 @@ function ws_register_acf_jx_summary() {
                 'disabled'     => 1,
             ],
             [
-                'key'          => 'field_ws_jx_sum_summarized_date',
+                'key'          => 'field_ws_jx_summarized_date', //@todo - duplicate data to 'ws_jx_sum_date_created', unecessary meta_data
                 'label'        => 'Summarized Date',
-                'name'         => 'summarized_date',
+                'name'         => 'ws_jx_summarized_date',
                 'type'         => 'text',
                 'instructions' => 'Stamped automatically on first save. Read only.',
                 'readonly'     => 1,
@@ -210,7 +213,7 @@ function ws_register_acf_jx_summary() {
                 'label'        => 'Date Created',
                 'name'         => 'ws_jx_sum_date_created',
                 'type'         => 'text',
-                'instructions' => 'Set automatically on first save. Read only.',
+                'instructions' => 'Set automatically on first save. Read only.', //@todo - should be hidden
                 'readonly'     => 1,
                 'disabled'     => 1,
                 'wrapper'      => [ 'width' => '50' ],
@@ -226,7 +229,7 @@ function ws_register_acf_jx_summary() {
                 'wrapper'      => [ 'width' => '50' ],
             ],
             [
-                'key'          => 'field_ws_jx_sum_last_reviewed',
+                'key'          => 'field_ws_jx_sum_last_reviewed', //@todo - should be hidden until plain_reviewed is true, at which should autofill and be readonly, instructions need to updated.
                 'label'        => 'Last Reviewed',
                 'name'         => 'ws_jx_sum_last_reviewed',
                 'type'         => 'text',

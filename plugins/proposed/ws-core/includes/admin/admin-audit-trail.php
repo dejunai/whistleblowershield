@@ -50,13 +50,11 @@
  *
  *   jurisdiction
  *   jx-summary
- *   s
- *   s
  *   jx-statutes
  *   jx-citation
+ *   jx-interpretation
  *   ws-legal-update
  *   ws-agencies
- *   ws-statutes
  *
  * RETRIEVAL
  * ---------
@@ -67,17 +65,6 @@
  *   ws_get_last_editor( $post_id )   — returns last edit entry or null
  *   ws_get_edit_history( $post_id )  — returns full history array or []
  *
- * RELATIONSHIP SYNC
- * -----------------
- * Two-way relationship synchronization between jurisdiction records
- * and their associated addendum CPTs (jx-*) is handled separately
- * in admin-relationships.php.
- *
- * @package    WhistleblowerShield
- * @since      1.0.0
- * @author     Whistleblower Shield
- * @link       https://whistleblowershield.org
- * @copyright  Copyright (c) Whistleblower Shield
  *
  * VERSION
  * -------
@@ -106,10 +93,9 @@ function ws_audited_post_types() {
     return [
         'jurisdiction',
         'jx-summary',
-        '',
-        '',
         'jx-statute',
         'jx-citation',
+		'jx-interpretation',
         'ws-legal-update',
         'ws-agency',
     ];

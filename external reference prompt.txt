@@ -1,0 +1,183 @@
+We are retiring the jx-resource CPT entirely and replacing it with a new lightweight ws-reference CPT that serves a fundamentally different purpose and audience. Here is the full design and context:
+
+THE AUDIENCES
+This distinction must inform every decision in this implementation:
+Primary users (A/B) — whistleblowers in crisis seeking guidance. They should never need the reference system. If they land on a reference page, the disclaimer should redirect them immediately back to operational content.
+Secondary users (C) — legal researchers, journalists, attorneys. The reference system is built for them. They expect editorial transparency and depth.
+
+PART 1: RETIRE jx-resource
+Remove everything related to jx-resource cleanly. There is no existing data to protect.
+Files to delete:
+
+includes/cpt/cpt-jx-resources.php
+includes/acf/acf-jx-resources.php
+
+Files to modify — scan every file in the plugin for any reference to jx-resource, ws_related_resources, ws_get_jx_resources, ws_jx_res_, or jx-resource and remove them:
+
+loader.php — remove from $cpt_files and $acf_files arrays
+admin-audit-trail.php — remove jx-resource from ws_audited_post_types()
+admin-hooks.php — remove all fields prefixed ws_jx_res_
+admin-relationships.php — remove jx-resource and ws_related_resources from the relationship map
+admin-navigation.php — remove resources from the navigation metabox
+admin-columns.php — remove resources column
+query-jurisdiction.php — remove ws_get_jx_resources() function and all calls to it
+render-jurisdiction.php — remove resources from the assembler
+shortcodes-jurisdiction.php — remove any resources shortcode
+acf-jurisdiction.php — remove ws_related_resources relationship field
+
+Flag anything ambiguous before removing.
+
+PART 2: REGISTER ws-reference CPT — cpt-ws-reference.php
+Create includes/cpt/cpt-ws-reference.php. This CPT is fundamentally different from the retired jx-resource CPT:
+
+It is not jurisdiction-joined. It is parent-record-joined — attached to individual statutes, citations, or interpretations via a relationship field on the parent record.
+It is not rendered in the jurisdiction assembly pipeline at all.
+It serves secondary users only — researchers, journalists, attorneys.
+It should be public with a permalink so the reference page can be reached via URL, but it does not need archive support.
+
+CPT arguments:
+
+Post type slug: ws-reference
+Labels: singular "Reference", plural "References"
+Public: true
+Has archive: false
+Supports: title, editor, thumbnail
+Show in REST: true
+Menu icon: dashicons-book-alt
+Capability type: post
+
+At the bottom of this file, after the registration function, add a clear docblock comment explaining the purpose distinction:
+NOTE: ws-reference is not part of the jurisdiction assembly pipeline.
+It is a secondary-audience CPT for legal researchers and journalists.
+Records are attached to individual statutes, citations, or interpretations
+via relationship fields on the parent record. They are never rendered
+directly on jurisdiction pages.
+
+PART 3: ACF FIELDS — acf-ws-reference.php
+Create includes/acf/acf-ws-reference.php. Fields per reference record:
+
+ws_ref_title — text — the title of the referenced resource
+ws_ref_url — url — the external link (required)
+ws_ref_description — textarea — brief description of the resource and its relevance
+ws_ref_type — select — options: Case Law, Academic Paper, Government Report, Journalism, Policy Analysis, Other
+ws_ref_source_name — text — name of the publishing organization or author
+ws_ref_approved — true/false — editor approval toggle, admin-rank only — label: "Approved for public display"
+ws_ref_last_edited_author — user field — read only, auto-stamped
+ws_ref_date_created — date — read only, auto-stamped
+ws_ref_last_edited — date — read only, auto-stamped
+
+Field group location: post type is ws-reference.
+Read acf-jx-statutes.php and acf-jx-citations.php before writing to confirm field group structure and autostamp field patterns already in use.
+
+PART 4: RELATIONSHIP FIELDS ON PARENT CPTs
+Add a ws_reference_materials relationship field to the following ACF field groups. Read each file before modifying:
+
+acf-jx-statutes.php — add relationship field pointing to ws-reference, post type filter ws-reference, label "Reference Materials", name ws_ref_materials
+acf-jx-citations.php — same
+acf-jx-interpretations.php — same
+
+The relationship field should appear in its own tab labeled "Reference Materials" in each field group. The field instructions should read:
+"Attach external reference materials relevant to this record. Only approved references will display publicly. These are for researchers and legal professionals — not for primary users seeking guidance."
+
+PART 5: ADMIN HOOKS — admin-hooks.php
+Add ws-reference autostamp fields to the existing autostamp arrays in admin-hooks.php. Read the file before modifying to confirm the exact array names and patterns in use. Fields to add:
+
+ws_ref_date_created to the date created array
+ws_ref_last_edited to the last edited array
+ws_ref_last_edited_author to the last edited author array
+
+
+PART 6: AUDIT TRAIL — admin-audit-trail.php
+Add ws-reference to ws_audited_post_types(). Read the file before modifying.
+
+PART 7: REFERENCE PAGE — shortcode and static page
+Create a new shortcode ws_reference_page in shortcodes-general.php. Read the file before modifying.
+The shortcode reads a source query parameter from the URL — this is the post ID of the parent record (statute, citation, or interpretation). It then:
+
+Retrieves the parent post title and post type
+Queries all ws-reference posts attached to the parent via ws_ref_materials where ws_ref_approved is true
+If no approved references exist, renders a brief message: "No reference materials are currently available for this record."
+If approved references exist, renders the full reference page structure described below
+
+Page structure — in this exact order:
+
+Back navigation link — rendered before everything else including the disclaimer:
+← Back to [Parent Post Title]
+Linked to the parent post permalink. Styled as simple back navigation, not a button. This is the primary exit for user A/B who landed here by accident.
+Page heading:
+Reference Materials: [Parent Post Title]
+Primary disclaimer block — visually distinct, warm neutral color, impossible to miss but not alarming. Plain language for user A/B:
+
+
+If you are in need and seeking guidance, these links may not be for you. They serve as legal reference for visitors needing more specific information about case law. Please consult a qualified attorney before acting on any information found by following these links.
+
+
+Secondary disclaimer block — smaller, muted gray, editorial transparency for user C:
+
+
+The resources below have been reviewed and approved by an editor for inclusion on this page. However, WhistleblowerShield.org makes no claim as to the accuracy, completeness, or currency of any linked content. These resources are not affiliated with WhistleblowerShield.org and are provided for informational purposes only. Always verify information with a licensed legal professional.
+
+
+Reference list — one entry per approved reference record containing:
+
+
+Resource title linked to ws_ref_url
+Source name and reference type in muted text
+Description paragraph
+All outbound links must carry target="_blank" rel="noopener noreferrer nofollow" — no exceptions
+
+All outbound links throughout this shortcode must carry target="_blank" rel="noopener noreferrer nofollow". This is a sitewide standard for all outbound links and should be noted as such in a comment at the top of the shortcode function.
+
+PART 8: THE "FOR MORE INFO" BUTTON
+In shortcodes-jurisdiction.php, for the statute, citation, and interpretation shortcodes — after the primary content block and before the closing section tag — add a conditional check:
+
+Query ws_ref_materials on the current post
+Filter for approved references only (ws_ref_approved = true)
+If count > 0, render a small unobtrusive link:
+
+→ External References
+Linked to /references/?source=[post_id]. Styled as a text link with subtle border, clearly secondary to all primary content. CSS class ws-ref-trigger. Position: bottom of the content block, visually lighter than everything above it.
+The static WordPress page for the reference system should have the slug references and contain only the [ws_reference_page] shortcode. Note this requirement in a code comment but do not create the page programmatically — it will be created manually in the WordPress admin.
+
+PART 9: CSS — ws-core-front.css
+Add styles for:
+
+.ws-ref-trigger — small, muted, text link with subtle border, clearly secondary
+.ws-ref-disclaimer-primary — warm neutral background, slightly larger text, prominent but not alarming
+.ws-ref-disclaimer-secondary — small, muted gray, standard disclaimer styling
+.ws-ref-list — clean list layout for reference entries
+.ws-ref-list-item — individual reference entry
+.ws-ref-back-nav — simple back navigation link, no button styling
+
+Read the existing ws-core-front.css in full before adding styles to ensure consistency with existing conventions and trust badge styling already in place.
+
+FILES TO CREATE:
+
+includes/cpt/cpt-ws-reference.php
+includes/acf/acf-ws-reference.php
+
+FILES TO DELETE:
+
+includes/cpt/cpt-jx-resources.php
+includes/acf/acf-jx-resources.php
+
+FILES TO MODIFY:
+
+loader.php
+admin-audit-trail.php
+admin-hooks.php
+admin-relationships.php
+admin-navigation.php
+admin-columns.php
+query-jurisdiction.php
+render-jurisdiction.php
+shortcodes-jurisdiction.php
+shortcodes-general.php
+acf-jurisdiction.php
+acf-jx-statutes.php
+acf-jx-citations.php
+acf-jx-interpretations.php
+ws-core-front.css
+
+
+Before writing any code: Read every file listed above in full. Confirm the full impact of all nine parts. Flag every conflict, ambiguity, or gap you find. Do not begin writing or deleting any code until the complete assessment has been reviewed and confirmed. Treat all nine parts as a single coordinated change — do not implement any part in isolation.
