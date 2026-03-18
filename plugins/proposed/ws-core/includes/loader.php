@@ -119,8 +119,9 @@ if ( is_admin() ) {
     }
 
     // Admin Tools & Workflow Improvements
-    require_once WS_CORE_PATH . 'includes/admin/admin-matrix-watch.php';
     require_once WS_CORE_PATH . 'includes/admin/admin-navigation.php'; // Must load first.
+    require_once WS_CORE_PATH . 'includes/admin/admin-matrix-watch.php';
+	require_once WS_CORE_PATH . 'includes/admin/admin-url-monitor.php';
     require_once WS_CORE_PATH . 'includes/admin/admin-columns.php';
     require_once WS_CORE_PATH . 'includes/admin/admin-hooks.php';
     require_once WS_CORE_PATH . 'includes/admin/admin-audit-trail.php';

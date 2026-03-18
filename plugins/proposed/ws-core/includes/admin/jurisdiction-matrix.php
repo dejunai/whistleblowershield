@@ -19,7 +19,7 @@
  * title                    — post_title (same as ws_jurisdiction_name)
  * slug                     — post_name
  * ws_jurisdiction_class    — constitutional classification: state | federal |
- * district | territory
+ *                            district | territory
  * ws_jx_code               — 2-letter USPS postal code (canonical identifier)
  * ws_jurisdiction_name     — display name used in headings and labels
  * ws_jx_gov_portal_url     — official state/territory homepage
@@ -29,8 +29,10 @@
  * ws_jx_legislature_url    — official legislative body homepage
  * ws_jx_legislature_label  — official name of the legislative body
  * ws_jx_executive_url      — chief executive office homepage
- * ws_jx_executive_label    — title of the chief executive office; empty for
- * Federal (suppressed by display template)
+ * ws_jx_executive_label    — title of the chief executive office; null for
+ *                            Federal (suppressed by display template)
+ * ws_jx_flag_source_url    — Wikimedia Commons page for the jurisdiction's
+ *                            canonical SVG flag file
  *
  * LOADING
  * -------
@@ -50,19 +52,28 @@
  * 2.3.3  Data accuracy pass:
  *        - Updated ws_jx_wb_authority_label for 9 states with dedicated
  *          whistleblower offices (FL, IL, MA, NJ, NY, OH, PA, TX, VA).
- *        - Updated ws_jx_legislature_label for all 50 states to official
- * 2.3.4  Inclusion of URLs and Official Government Portals
+ *        - Updated ws_jx_legislature_label for all 50 states to official names.
+ * 2.3.4  Inclusion of URLs and Official Government Portals.
  * 3.0.0  Architecture refactor (Phase 6.1):
  *        - Converted from a bare return-array data file to a seeder file.
  *        - Added ws_seed_jurisdiction_matrix() function and admin_init gate.
  *        - Seeder: seeds ws_jurisdiction taxonomy terms, creates jurisdiction
  *          posts, assigns terms, writes ws_jx_term_id post meta, writes
  *          ws_us_term_id option, and sets ws_matrix_source post meta.
+ * 3.1.0  Data integrity pass:
+ *        - Removed duplicate stub entries that were silently overwriting
+ *          fully-populated entries for AL, AK, AZ, AR, CA, CO, CT, DE, FL,
+ *          GA, HI, ID, IL, IN, IA, KS, KY, LA, ME, MD, MA, MI, MN, MS, MO,
+ *          MT, NE, NV, NH, NJ, MP, AS (orphaned outside array closing brace).
+ *        - Added ws_jx_flag_source_url to all 57 entries (Wikimedia Commons).
+ *        - Added ws_jx_flag_source_url to seeder $meta_fields write block.
  */
 
 defined( 'ABSPATH' ) || exit;
 
 $_ws_jx_matrix = [
+
+    // ── Federal ───────────────────────────────────────────────────────────────
 
     'US' => [
         'title'                    => 'United States',
@@ -78,7 +89,29 @@ $_ws_jx_matrix = [
         'ws_jx_legislature_label'  => 'United States Congress',
         'ws_jx_executive_url'      => null,
         'ws_jx_executive_label'    => null,
+        'ws_jx_flag_source_url'    => 'https://commons.wikimedia.org/wiki/File:Flag_of_the_United_States.svg',
     ],
+
+    // ── District ──────────────────────────────────────────────────────────────
+
+    'DC' => [
+        'title'                    => 'District of Columbia',
+        'slug'                     => 'district-of-columbia',
+        'ws_jurisdiction_class'    => 'district',
+        'ws_jx_code'               => 'DC',
+        'ws_jurisdiction_name'     => 'District of Columbia',
+        'ws_jx_gov_portal_url'     => 'https://dc.gov',
+        'ws_jx_gov_portal_label'   => 'District of Columbia Official Government Portal',
+        'ws_jx_wb_authority_url'   => 'https://oag.dc.gov',
+        'ws_jx_wb_authority_label' => 'District of Columbia Office of the Attorney General',
+        'ws_jx_legislature_url'    => 'https://dccouncil.gov',
+        'ws_jx_legislature_label'  => 'Council of the District of Columbia',
+        'ws_jx_executive_url'      => 'https://mayor.dc.gov',
+        'ws_jx_executive_label'    => 'Office of the Mayor',
+        'ws_jx_flag_source_url'    => 'https://commons.wikimedia.org/wiki/File:Flag_of_the_District_of_Columbia.svg',
+    ],
+
+    // ── 50 States ─────────────────────────────────────────────────────────────
 
     'AL' => [
         'title'                    => 'Alabama',
@@ -94,6 +127,7 @@ $_ws_jx_matrix = [
         'ws_jx_legislature_label'  => 'Alabama Legislature',
         'ws_jx_executive_url'      => 'https://governor.alabama.gov',
         'ws_jx_executive_label'    => 'Office of the Governor',
+        'ws_jx_flag_source_url'    => 'https://commons.wikimedia.org/wiki/File:Flag_of_Alabama.svg',
     ],
 
     'AK' => [
@@ -110,22 +144,7 @@ $_ws_jx_matrix = [
         'ws_jx_legislature_label'  => 'Alaska State Legislature',
         'ws_jx_executive_url'      => 'https://gov.alaska.gov',
         'ws_jx_executive_label'    => 'Office of the Governor',
-    ],
-
-    'AS' => [
-        'title'                    => 'American Samoa',
-        'slug'                     => 'american-samoa',
-        'ws_jurisdiction_class'    => 'territory',
-        'ws_jx_code'               => 'AS',
-        'ws_jurisdiction_name'     => 'American Samoa',
-        'ws_jx_gov_portal_url'     => 'https://www.americansamoa.gov',
-        'ws_jx_gov_portal_label'   => 'American Samoa Official Government Portal',
-        'ws_jx_wb_authority_url'   => 'https://www.asag.as.gov',
-        'ws_jx_wb_authority_label' => 'American Samoa Office of the Attorney General',
-        'ws_jx_legislature_url'    => 'https://www.asbar.org/legislature',
-        'ws_jx_legislature_label'  => 'Fono',
-        'ws_jx_executive_url'      => 'https://www.americansamoa.gov/office-of-the-governor',
-        'ws_jx_executive_label'    => 'Office of the Governor',
+        'ws_jx_flag_source_url'    => 'https://commons.wikimedia.org/wiki/File:Flag_of_Alaska.svg',
     ],
 
     'AZ' => [
@@ -142,6 +161,7 @@ $_ws_jx_matrix = [
         'ws_jx_legislature_label'  => 'Arizona State Legislature',
         'ws_jx_executive_url'      => 'https://azgovernor.gov',
         'ws_jx_executive_label'    => 'Office of the Governor',
+        'ws_jx_flag_source_url'    => 'https://commons.wikimedia.org/wiki/File:Flag_of_Arizona.svg',
     ],
 
     'AR' => [
@@ -158,6 +178,7 @@ $_ws_jx_matrix = [
         'ws_jx_legislature_label'  => 'Arkansas General Assembly',
         'ws_jx_executive_url'      => 'https://governor.arkansas.gov',
         'ws_jx_executive_label'    => 'Office of the Governor',
+        'ws_jx_flag_source_url'    => 'https://commons.wikimedia.org/wiki/File:Flag_of_Arkansas.svg',
     ],
 
     'CA' => [
@@ -174,6 +195,7 @@ $_ws_jx_matrix = [
         'ws_jx_legislature_label'  => 'California State Legislature',
         'ws_jx_executive_url'      => 'https://www.gov.ca.gov',
         'ws_jx_executive_label'    => 'Office of the Governor',
+        'ws_jx_flag_source_url'    => 'https://commons.wikimedia.org/wiki/File:Flag_of_California.svg',
     ],
 
     'CO' => [
@@ -190,6 +212,7 @@ $_ws_jx_matrix = [
         'ws_jx_legislature_label'  => 'Colorado General Assembly',
         'ws_jx_executive_url'      => 'https://www.colorado.gov/governor',
         'ws_jx_executive_label'    => 'Office of the Governor',
+        'ws_jx_flag_source_url'    => 'https://commons.wikimedia.org/wiki/File:Flag_of_Colorado.svg',
     ],
 
     'CT' => [
@@ -206,6 +229,7 @@ $_ws_jx_matrix = [
         'ws_jx_legislature_label'  => 'Connecticut General Assembly',
         'ws_jx_executive_url'      => 'https://portal.ct.gov/Office-of-the-Governor',
         'ws_jx_executive_label'    => 'Office of the Governor',
+        'ws_jx_flag_source_url'    => 'https://commons.wikimedia.org/wiki/File:Flag_of_Connecticut.svg',
     ],
 
     'DE' => [
@@ -222,22 +246,7 @@ $_ws_jx_matrix = [
         'ws_jx_legislature_label'  => 'Delaware General Assembly',
         'ws_jx_executive_url'      => 'https://governor.delaware.gov',
         'ws_jx_executive_label'    => 'Office of the Governor',
-    ],
-
-    'DC' => [
-        'title'                    => 'District of Columbia',
-        'slug'                     => 'district-of-columbia',
-        'ws_jurisdiction_class'    => 'district',
-        'ws_jx_code'               => 'DC',
-        'ws_jurisdiction_name'     => 'District of Columbia',
-        'ws_jx_gov_portal_url'     => 'https://dc.gov',
-        'ws_jx_gov_portal_label'   => 'District of Columbia Official Government Portal',
-        'ws_jx_wb_authority_url'   => 'https://oag.dc.gov',
-        'ws_jx_wb_authority_label' => 'District of Columbia Office of the Attorney General',
-        'ws_jx_legislature_url'    => 'https://dccouncil.gov',
-        'ws_jx_legislature_label'  => 'Council of the District of Columbia',
-        'ws_jx_executive_url'      => 'https://mayor.dc.gov',
-        'ws_jx_executive_label'    => 'Office of the Mayor',
+        'ws_jx_flag_source_url'    => 'https://commons.wikimedia.org/wiki/File:Flag_of_Delaware.svg',
     ],
 
     'FL' => [
@@ -249,11 +258,12 @@ $_ws_jx_matrix = [
         'ws_jx_gov_portal_url'     => 'https://www.myflorida.com',
         'ws_jx_gov_portal_label'   => 'Florida Official Government Portal',
         'ws_jx_wb_authority_url'   => 'https://www.myfloridalegal.com',
-        'ws_jx_wb_authority_label' => 'Florida Office of the Attorney General',
+        'ws_jx_wb_authority_label' => 'Florida Office of the Chief Inspector General',
         'ws_jx_legislature_url'    => 'https://www.leg.state.fl.us',
         'ws_jx_legislature_label'  => 'Florida Legislature',
         'ws_jx_executive_url'      => 'https://www.flgov.com',
         'ws_jx_executive_label'    => 'Office of the Governor',
+        'ws_jx_flag_source_url'    => 'https://commons.wikimedia.org/wiki/File:Flag_of_Florida.svg',
     ],
 
     'GA' => [
@@ -270,22 +280,7 @@ $_ws_jx_matrix = [
         'ws_jx_legislature_label'  => 'Georgia General Assembly',
         'ws_jx_executive_url'      => 'https://gov.georgia.gov',
         'ws_jx_executive_label'    => 'Office of the Governor',
-    ],
-
-    'GU' => [
-        'title'                    => 'Guam',
-        'slug'                     => 'guam',
-        'ws_jurisdiction_class'    => 'territory',
-        'ws_jx_code'               => 'GU',
-        'ws_jurisdiction_name'     => 'Guam',
-        'ws_jx_gov_portal_url'     => 'https://www.guam.gov',
-        'ws_jx_gov_portal_label'   => 'Guam Official Government Portal',
-        'ws_jx_wb_authority_url'   => 'https://oagguam.org',
-        'ws_jx_wb_authority_label' => 'Guam Office of the Attorney General',
-        'ws_jx_legislature_url'    => 'https://www.guamlegislature.org',
-        'ws_jx_legislature_label'  => 'Liheslaturan Guåhan',
-        'ws_jx_executive_url'      => 'https://governor.guam.gov',
-        'ws_jx_executive_label'    => 'Office of the Governor',
+        'ws_jx_flag_source_url'    => 'https://commons.wikimedia.org/wiki/File:Flag_of_Georgia_(U.S._state).svg',
     ],
 
     'HI' => [
@@ -302,6 +297,7 @@ $_ws_jx_matrix = [
         'ws_jx_legislature_label'  => 'Hawaii State Legislature',
         'ws_jx_executive_url'      => 'https://governor.hawaii.gov',
         'ws_jx_executive_label'    => 'Office of the Governor',
+        'ws_jx_flag_source_url'    => 'https://commons.wikimedia.org/wiki/File:Flag_of_Hawaii.svg',
     ],
 
     'ID' => [
@@ -318,6 +314,7 @@ $_ws_jx_matrix = [
         'ws_jx_legislature_label'  => 'Idaho State Legislature',
         'ws_jx_executive_url'      => 'https://gov.idaho.gov',
         'ws_jx_executive_label'    => 'Office of the Governor',
+        'ws_jx_flag_source_url'    => 'https://commons.wikimedia.org/wiki/File:Flag_of_Idaho.svg',
     ],
 
     'IL' => [
@@ -329,11 +326,12 @@ $_ws_jx_matrix = [
         'ws_jx_gov_portal_url'     => 'https://www.illinois.gov',
         'ws_jx_gov_portal_label'   => 'Illinois Official Government Portal',
         'ws_jx_wb_authority_url'   => 'https://www.illinoisattorneygeneral.gov',
-        'ws_jx_wb_authority_label' => 'Illinois Office of the Attorney General',
+        'ws_jx_wb_authority_label' => 'Office of the Executive Inspector General',
         'ws_jx_legislature_url'    => 'https://www.ilga.gov',
         'ws_jx_legislature_label'  => 'Illinois General Assembly',
         'ws_jx_executive_url'      => 'https://www.illinois.gov/government/executive-branch/governor',
         'ws_jx_executive_label'    => 'Office of the Governor',
+        'ws_jx_flag_source_url'    => 'https://commons.wikimedia.org/wiki/File:Flag_of_Illinois.svg',
     ],
 
     'IN' => [
@@ -350,6 +348,7 @@ $_ws_jx_matrix = [
         'ws_jx_legislature_label'  => 'Indiana General Assembly',
         'ws_jx_executive_url'      => 'https://www.in.gov/gov',
         'ws_jx_executive_label'    => 'Office of the Governor',
+        'ws_jx_flag_source_url'    => 'https://commons.wikimedia.org/wiki/File:Flag_of_Indiana.svg',
     ],
 
     'IA' => [
@@ -366,6 +365,7 @@ $_ws_jx_matrix = [
         'ws_jx_legislature_label'  => 'Iowa General Assembly',
         'ws_jx_executive_url'      => 'https://governor.iowa.gov',
         'ws_jx_executive_label'    => 'Office of the Governor',
+        'ws_jx_flag_source_url'    => 'https://commons.wikimedia.org/wiki/File:Flag_of_Iowa.svg',
     ],
 
     'KS' => [
@@ -382,6 +382,7 @@ $_ws_jx_matrix = [
         'ws_jx_legislature_label'  => 'Kansas State Legislature',
         'ws_jx_executive_url'      => 'https://governor.kansas.gov',
         'ws_jx_executive_label'    => 'Office of the Governor',
+        'ws_jx_flag_source_url'    => 'https://commons.wikimedia.org/wiki/File:Flag_of_Kansas.svg',
     ],
 
     'KY' => [
@@ -398,6 +399,7 @@ $_ws_jx_matrix = [
         'ws_jx_legislature_label'  => 'Kentucky General Assembly',
         'ws_jx_executive_url'      => 'https://governor.ky.gov',
         'ws_jx_executive_label'    => 'Office of the Governor',
+        'ws_jx_flag_source_url'    => 'https://commons.wikimedia.org/wiki/File:Flag_of_Kentucky.svg',
     ],
 
     'LA' => [
@@ -414,6 +416,7 @@ $_ws_jx_matrix = [
         'ws_jx_legislature_label'  => 'Louisiana State Legislature',
         'ws_jx_executive_url'      => 'https://gov.louisiana.gov',
         'ws_jx_executive_label'    => 'Office of the Governor',
+        'ws_jx_flag_source_url'    => 'https://commons.wikimedia.org/wiki/File:Flag_of_Louisiana.svg',
     ],
 
     'ME' => [
@@ -430,6 +433,7 @@ $_ws_jx_matrix = [
         'ws_jx_legislature_label'  => 'Maine State Legislature',
         'ws_jx_executive_url'      => 'https://www.maine.gov/governor',
         'ws_jx_executive_label'    => 'Office of the Governor',
+        'ws_jx_flag_source_url'    => 'https://commons.wikimedia.org/wiki/File:Flag_of_Maine.svg',
     ],
 
     'MD' => [
@@ -446,6 +450,7 @@ $_ws_jx_matrix = [
         'ws_jx_legislature_label'  => 'Maryland General Assembly',
         'ws_jx_executive_url'      => 'https://governor.maryland.gov',
         'ws_jx_executive_label'    => 'Office of the Governor',
+        'ws_jx_flag_source_url'    => 'https://commons.wikimedia.org/wiki/File:Flag_of_Maryland.svg',
     ],
 
     'MA' => [
@@ -457,11 +462,12 @@ $_ws_jx_matrix = [
         'ws_jx_gov_portal_url'     => 'https://www.mass.gov',
         'ws_jx_gov_portal_label'   => 'Massachusetts Official Government Portal',
         'ws_jx_wb_authority_url'   => 'https://www.mass.gov/orgs/office-of-attorney-general-andrea-joy-campbell',
-        'ws_jx_wb_authority_label' => 'Massachusetts Office of the Attorney General',
+        'ws_jx_wb_authority_label' => 'Massachusetts Office of the Inspector General',
         'ws_jx_legislature_url'    => 'https://malegislature.gov',
         'ws_jx_legislature_label'  => 'Massachusetts General Court',
         'ws_jx_executive_url'      => 'https://www.mass.gov/orgs/office-of-the-governor',
         'ws_jx_executive_label'    => 'Office of the Governor',
+        'ws_jx_flag_source_url'    => 'https://commons.wikimedia.org/wiki/File:Flag_of_Massachusetts.svg',
     ],
 
     'MI' => [
@@ -478,6 +484,7 @@ $_ws_jx_matrix = [
         'ws_jx_legislature_label'  => 'Michigan Legislature',
         'ws_jx_executive_url'      => 'https://www.michigan.gov/whitmer',
         'ws_jx_executive_label'    => 'Office of the Governor',
+        'ws_jx_flag_source_url'    => 'https://commons.wikimedia.org/wiki/File:Flag_of_Michigan.svg',
     ],
 
     'MN' => [
@@ -494,6 +501,7 @@ $_ws_jx_matrix = [
         'ws_jx_legislature_label'  => 'Minnesota State Legislature',
         'ws_jx_executive_url'      => 'https://mn.gov/governor',
         'ws_jx_executive_label'    => 'Office of the Governor',
+        'ws_jx_flag_source_url'    => 'https://commons.wikimedia.org/wiki/File:Flag_of_Minnesota.svg',
     ],
 
     'MS' => [
@@ -510,6 +518,7 @@ $_ws_jx_matrix = [
         'ws_jx_legislature_label'  => 'Mississippi Legislature',
         'ws_jx_executive_url'      => 'https://www.governorreeves.ms.gov',
         'ws_jx_executive_label'    => 'Office of the Governor',
+        'ws_jx_flag_source_url'    => 'https://commons.wikimedia.org/wiki/File:Flag_of_Mississippi.svg',
     ],
 
     'MO' => [
@@ -526,6 +535,7 @@ $_ws_jx_matrix = [
         'ws_jx_legislature_label'  => 'Missouri General Assembly',
         'ws_jx_executive_url'      => 'https://governor.mo.gov',
         'ws_jx_executive_label'    => 'Office of the Governor',
+        'ws_jx_flag_source_url'    => 'https://commons.wikimedia.org/wiki/File:Flag_of_Missouri.svg',
     ],
 
     'MT' => [
@@ -542,6 +552,7 @@ $_ws_jx_matrix = [
         'ws_jx_legislature_label'  => 'Montana State Legislature',
         'ws_jx_executive_url'      => 'https://governor.mt.gov',
         'ws_jx_executive_label'    => 'Office of the Governor',
+        'ws_jx_flag_source_url'    => 'https://commons.wikimedia.org/wiki/File:Flag_of_Montana.svg',
     ],
 
     'NE' => [
@@ -558,6 +569,7 @@ $_ws_jx_matrix = [
         'ws_jx_legislature_label'  => 'Nebraska Legislature',
         'ws_jx_executive_url'      => 'https://governor.nebraska.gov',
         'ws_jx_executive_label'    => 'Office of the Governor',
+        'ws_jx_flag_source_url'    => 'https://commons.wikimedia.org/wiki/File:Flag_of_Nebraska.svg',
     ],
 
     'NV' => [
@@ -574,6 +586,7 @@ $_ws_jx_matrix = [
         'ws_jx_legislature_label'  => 'Nevada Legislature',
         'ws_jx_executive_url'      => 'https://gov.nv.gov',
         'ws_jx_executive_label'    => 'Office of the Governor',
+        'ws_jx_flag_source_url'    => 'https://commons.wikimedia.org/wiki/File:Flag_of_Nevada.svg',
     ],
 
     'NH' => [
@@ -590,6 +603,7 @@ $_ws_jx_matrix = [
         'ws_jx_legislature_label'  => 'New Hampshire General Court',
         'ws_jx_executive_url'      => 'https://www.governor.nh.gov',
         'ws_jx_executive_label'    => 'Office of the Governor',
+        'ws_jx_flag_source_url'    => 'https://commons.wikimedia.org/wiki/File:Flag_of_New_Hampshire.svg',
     ],
 
     'NJ' => [
@@ -601,11 +615,12 @@ $_ws_jx_matrix = [
         'ws_jx_gov_portal_url'     => 'https://www.nj.gov',
         'ws_jx_gov_portal_label'   => 'New Jersey Official Government Portal',
         'ws_jx_wb_authority_url'   => 'https://www.njoag.gov',
-        'ws_jx_wb_authority_label' => 'New Jersey Office of the Attorney General',
+        'ws_jx_wb_authority_label' => 'New Jersey State Ethics Commission',
         'ws_jx_legislature_url'    => 'https://www.njleg.state.nj.us',
         'ws_jx_legislature_label'  => 'New Jersey Legislature',
         'ws_jx_executive_url'      => 'https://nj.gov/governor',
         'ws_jx_executive_label'    => 'Office of the Governor',
+        'ws_jx_flag_source_url'    => 'https://commons.wikimedia.org/wiki/File:Flag_of_New_Jersey.svg',
     ],
 
     'NM' => [
@@ -622,6 +637,7 @@ $_ws_jx_matrix = [
         'ws_jx_legislature_label'  => 'New Mexico Legislature',
         'ws_jx_executive_url'      => 'https://www.governor.state.nm.us',
         'ws_jx_executive_label'    => 'Office of the Governor',
+        'ws_jx_flag_source_url'    => 'https://commons.wikimedia.org/wiki/File:Flag_of_New_Mexico.svg',
     ],
 
     'NY' => [
@@ -633,11 +649,12 @@ $_ws_jx_matrix = [
         'ws_jx_gov_portal_url'     => 'https://www.ny.gov',
         'ws_jx_gov_portal_label'   => 'New York Official Government Portal',
         'ws_jx_wb_authority_url'   => 'https://ag.ny.gov',
-        'ws_jx_wb_authority_label' => 'New York Office of the Attorney General',
+        'ws_jx_wb_authority_label' => 'Office of the State Inspector General',
         'ws_jx_legislature_url'    => 'https://www.nysenate.gov',
         'ws_jx_legislature_label'  => 'New York State Legislature',
         'ws_jx_executive_url'      => 'https://www.governor.ny.gov',
         'ws_jx_executive_label'    => 'Office of the Governor',
+        'ws_jx_flag_source_url'    => 'https://commons.wikimedia.org/wiki/File:Flag_of_New_York.svg',
     ],
 
     'NC' => [
@@ -654,6 +671,7 @@ $_ws_jx_matrix = [
         'ws_jx_legislature_label'  => 'North Carolina General Assembly',
         'ws_jx_executive_url'      => 'https://governor.nc.gov',
         'ws_jx_executive_label'    => 'Office of the Governor',
+        'ws_jx_flag_source_url'    => 'https://commons.wikimedia.org/wiki/File:Flag_of_North_Carolina.svg',
     ],
 
     'ND' => [
@@ -670,22 +688,7 @@ $_ws_jx_matrix = [
         'ws_jx_legislature_label'  => 'North Dakota Legislative Assembly',
         'ws_jx_executive_url'      => 'https://www.governor.nd.gov',
         'ws_jx_executive_label'    => 'Office of the Governor',
-    ],
-
-    'MP' => [
-        'title'                    => 'Northern Mariana Islands',
-        'slug'                     => 'northern-mariana-islands',
-        'ws_jurisdiction_class'    => 'territory',
-        'ws_jx_code'               => 'MP',
-        'ws_jurisdiction_name'     => 'Northern Mariana Islands',
-        'ws_jx_gov_portal_url'     => 'https://www.gov.mp',
-        'ws_jx_gov_portal_label'   => 'Northern Mariana Islands Official Government Portal',
-        'ws_jx_wb_authority_url'   => 'https://www.cnmioag.gov.mp',
-        'ws_jx_wb_authority_label' => 'NMI Office of the Attorney General',
-        'ws_jx_legislature_url'    => 'https://www.cnmileg.net',
-        'ws_jx_legislature_label'  => 'CNMI Legislature',
-        'ws_jx_executive_url'      => 'https://www.governor.gov.mp',
-        'ws_jx_executive_label'    => 'Office of the Governor',
+        'ws_jx_flag_source_url'    => 'https://commons.wikimedia.org/wiki/File:Flag_of_North_Dakota.svg',
     ],
 
     'OH' => [
@@ -697,11 +700,12 @@ $_ws_jx_matrix = [
         'ws_jx_gov_portal_url'     => 'https://ohio.gov',
         'ws_jx_gov_portal_label'   => 'Ohio Official Government Portal',
         'ws_jx_wb_authority_url'   => 'https://www.ohioattorneygeneral.gov',
-        'ws_jx_wb_authority_label' => 'Ohio Office of the Attorney General',
+        'ws_jx_wb_authority_label' => 'Ohio Inspector General',
         'ws_jx_legislature_url'    => 'https://www.legislature.ohio.gov',
         'ws_jx_legislature_label'  => 'Ohio General Assembly',
         'ws_jx_executive_url'      => 'https://governor.ohio.gov',
         'ws_jx_executive_label'    => 'Office of the Governor',
+        'ws_jx_flag_source_url'    => 'https://commons.wikimedia.org/wiki/File:Flag_of_Ohio.svg',
     ],
 
     'OK' => [
@@ -718,6 +722,7 @@ $_ws_jx_matrix = [
         'ws_jx_legislature_label'  => 'Oklahoma Legislature',
         'ws_jx_executive_url'      => 'https://www.gov.ok.gov',
         'ws_jx_executive_label'    => 'Office of the Governor',
+        'ws_jx_flag_source_url'    => 'https://commons.wikimedia.org/wiki/File:Flag_of_Oklahoma.svg',
     ],
 
     'OR' => [
@@ -734,6 +739,7 @@ $_ws_jx_matrix = [
         'ws_jx_legislature_label'  => 'Oregon Legislative Assembly',
         'ws_jx_executive_url'      => 'https://www.oregon.gov/gov',
         'ws_jx_executive_label'    => 'Office of the Governor',
+        'ws_jx_flag_source_url'    => 'https://commons.wikimedia.org/wiki/File:Flag_of_Oregon.svg',
     ],
 
     'PA' => [
@@ -745,27 +751,12 @@ $_ws_jx_matrix = [
         'ws_jx_gov_portal_url'     => 'https://www.pa.gov',
         'ws_jx_gov_portal_label'   => 'Pennsylvania Official Government Portal',
         'ws_jx_wb_authority_url'   => 'https://www.attorneygeneral.gov',
-        'ws_jx_wb_authority_label' => 'Pennsylvania Office of Attorney General',
+        'ws_jx_wb_authority_label' => 'Office of State Inspector General',
         'ws_jx_legislature_url'    => 'https://www.legis.state.pa.us',
         'ws_jx_legislature_label'  => 'Pennsylvania General Assembly',
         'ws_jx_executive_url'      => 'https://www.governor.pa.gov',
         'ws_jx_executive_label'    => 'Office of the Governor',
-    ],
-
-    'PR' => [
-        'title'                    => 'Puerto Rico',
-        'slug'                     => 'puerto-rico',
-        'ws_jurisdiction_class'    => 'territory',
-        'ws_jx_code'               => 'PR',
-        'ws_jurisdiction_name'     => 'Puerto Rico',
-        'ws_jx_gov_portal_url'     => 'https://www.pr.gov',
-        'ws_jx_gov_portal_label'   => 'Puerto Rico Official Government Portal',
-        'ws_jx_wb_authority_url'   => 'https://www.justicia.pr.gov',
-        'ws_jx_wb_authority_label' => 'Puerto Rico Department of Justice',
-        'ws_jx_legislature_url'    => 'https://www.oslpr.org',
-        'ws_jx_legislature_label'  => 'Legislative Assembly of Puerto Rico',
-        'ws_jx_executive_url'      => 'https://www.fortaleza.pr.gov',
-        'ws_jx_executive_label'    => 'Office of the Governor',
+        'ws_jx_flag_source_url'    => 'https://commons.wikimedia.org/wiki/File:Flag_of_Pennsylvania.svg',
     ],
 
     'RI' => [
@@ -782,6 +773,7 @@ $_ws_jx_matrix = [
         'ws_jx_legislature_label'  => 'Rhode Island General Assembly',
         'ws_jx_executive_url'      => 'https://governor.ri.gov',
         'ws_jx_executive_label'    => 'Office of the Governor',
+        'ws_jx_flag_source_url'    => 'https://commons.wikimedia.org/wiki/File:Flag_of_Rhode_Island.svg',
     ],
 
     'SC' => [
@@ -798,6 +790,7 @@ $_ws_jx_matrix = [
         'ws_jx_legislature_label'  => 'South Carolina General Assembly',
         'ws_jx_executive_url'      => 'https://governor.sc.gov',
         'ws_jx_executive_label'    => 'Office of the Governor',
+        'ws_jx_flag_source_url'    => 'https://commons.wikimedia.org/wiki/File:Flag_of_South_Carolina.svg',
     ],
 
     'SD' => [
@@ -814,6 +807,7 @@ $_ws_jx_matrix = [
         'ws_jx_legislature_label'  => 'South Dakota State Legislature',
         'ws_jx_executive_url'      => 'https://governor.sd.gov',
         'ws_jx_executive_label'    => 'Office of the Governor',
+        'ws_jx_flag_source_url'    => 'https://commons.wikimedia.org/wiki/File:Flag_of_South_Dakota.svg',
     ],
 
     'TN' => [
@@ -830,6 +824,7 @@ $_ws_jx_matrix = [
         'ws_jx_legislature_label'  => 'Tennessee General Assembly',
         'ws_jx_executive_url'      => 'https://www.tn.gov/governor',
         'ws_jx_executive_label'    => 'Office of the Governor',
+        'ws_jx_flag_source_url'    => 'https://commons.wikimedia.org/wiki/File:Flag_of_Tennessee.svg',
     ],
 
     'TX' => [
@@ -841,27 +836,12 @@ $_ws_jx_matrix = [
         'ws_jx_gov_portal_url'     => 'https://www.texas.gov',
         'ws_jx_gov_portal_label'   => 'Texas Official Government Portal',
         'ws_jx_wb_authority_url'   => 'https://www.texasattorneygeneral.gov',
-        'ws_jx_wb_authority_label' => 'Texas Office of the Attorney General',
+        'ws_jx_wb_authority_label' => 'State Auditor\'s Office',
         'ws_jx_legislature_url'    => 'https://capitol.texas.gov',
         'ws_jx_legislature_label'  => 'Texas Legislature',
         'ws_jx_executive_url'      => 'https://gov.texas.gov',
         'ws_jx_executive_label'    => 'Office of the Governor',
-    ],
-
-    'VI' => [
-        'title'                    => 'U.S. Virgin Islands',
-        'slug'                     => 'virgin-islands',
-        'ws_jurisdiction_class'    => 'territory',
-        'ws_jx_code'               => 'VI',
-        'ws_jurisdiction_name'     => 'U.S. Virgin Islands',
-        'ws_jx_gov_portal_url'     => 'https://www.vi.gov',
-        'ws_jx_gov_portal_label'   => 'U.S. Virgin Islands Official Government Portal',
-        'ws_jx_wb_authority_url'   => 'https://doj.vi.gov',
-        'ws_jx_wb_authority_label' => 'U.S. Virgin Islands Department of Justice',
-        'ws_jx_legislature_url'    => 'https://www.legvi.org',
-        'ws_jx_legislature_label'  => 'Legislature of the Virgin Islands',
-        'ws_jx_executive_url'      => 'https://www.vi.gov/executive-branch',
-        'ws_jx_executive_label'    => 'Office of the Governor',
+        'ws_jx_flag_source_url'    => 'https://commons.wikimedia.org/wiki/File:Flag_of_Texas.svg',
     ],
 
     'UT' => [
@@ -878,6 +858,7 @@ $_ws_jx_matrix = [
         'ws_jx_legislature_label'  => 'Utah State Legislature',
         'ws_jx_executive_url'      => 'https://governor.utah.gov',
         'ws_jx_executive_label'    => 'Office of the Governor',
+        'ws_jx_flag_source_url'    => 'https://commons.wikimedia.org/wiki/File:Flag_of_Utah.svg',
     ],
 
     'VT' => [
@@ -894,6 +875,7 @@ $_ws_jx_matrix = [
         'ws_jx_legislature_label'  => 'Vermont General Assembly',
         'ws_jx_executive_url'      => 'https://governor.vermont.gov',
         'ws_jx_executive_label'    => 'Office of the Governor',
+        'ws_jx_flag_source_url'    => 'https://commons.wikimedia.org/wiki/File:Flag_of_Vermont.svg',
     ],
 
     'VA' => [
@@ -905,11 +887,12 @@ $_ws_jx_matrix = [
         'ws_jx_gov_portal_url'     => 'https://www.virginia.gov',
         'ws_jx_gov_portal_label'   => 'Virginia Official Government Portal',
         'ws_jx_wb_authority_url'   => 'https://www.oag.state.va.us',
-        'ws_jx_wb_authority_label' => 'Virginia Office of the Attorney General',
+        'ws_jx_wb_authority_label' => 'Office of the State Inspector General',
         'ws_jx_legislature_url'    => 'https://virginiageneralassembly.gov',
         'ws_jx_legislature_label'  => 'Virginia General Assembly',
         'ws_jx_executive_url'      => 'https://www.governor.virginia.gov',
         'ws_jx_executive_label'    => 'Office of the Governor',
+        'ws_jx_flag_source_url'    => 'https://commons.wikimedia.org/wiki/File:Flag_of_Virginia.svg',
     ],
 
     'WA' => [
@@ -926,6 +909,7 @@ $_ws_jx_matrix = [
         'ws_jx_legislature_label'  => 'Washington State Legislature',
         'ws_jx_executive_url'      => 'https://governor.wa.gov',
         'ws_jx_executive_label'    => 'Office of the Governor',
+        'ws_jx_flag_source_url'    => 'https://commons.wikimedia.org/wiki/File:Flag_of_Washington.svg',
     ],
 
     'WV' => [
@@ -942,6 +926,7 @@ $_ws_jx_matrix = [
         'ws_jx_legislature_label'  => 'West Virginia Legislature',
         'ws_jx_executive_url'      => 'https://governor.wv.gov',
         'ws_jx_executive_label'    => 'Office of the Governor',
+        'ws_jx_flag_source_url'    => 'https://commons.wikimedia.org/wiki/File:Flag_of_West_Virginia.svg',
     ],
 
     'WI' => [
@@ -958,6 +943,7 @@ $_ws_jx_matrix = [
         'ws_jx_legislature_label'  => 'Wisconsin Legislature',
         'ws_jx_executive_url'      => 'https://evers.wi.gov',
         'ws_jx_executive_label'    => 'Office of the Governor',
+        'ws_jx_flag_source_url'    => 'https://commons.wikimedia.org/wiki/File:Flag_of_Wisconsin.svg',
     ],
 
     'WY' => [
@@ -974,11 +960,43 @@ $_ws_jx_matrix = [
         'ws_jx_legislature_label'  => 'Wyoming State Legislature',
         'ws_jx_executive_url'      => 'https://governor.wyo.gov',
         'ws_jx_executive_label'    => 'Office of the Governor',
+        'ws_jx_flag_source_url'    => 'https://commons.wikimedia.org/wiki/File:Flag_of_Wyoming.svg',
     ],
-];        'ws_jurisdiction_name'     => 'American Samoa',
-        'ws_jx_wb_authority_label' => 'Office of the Attorney General',
-        'ws_jx_legislature_label'  => 'American Samoa Fono',
+
+    // ── Territories ───────────────────────────────────────────────────────────
+
+    'AS' => [
+        'title'                    => 'American Samoa',
+        'slug'                     => 'american-samoa',
+        'ws_jurisdiction_class'    => 'territory',
+        'ws_jx_code'               => 'AS',
+        'ws_jurisdiction_name'     => 'American Samoa',
+        'ws_jx_gov_portal_url'     => 'https://www.americansamoa.gov',
+        'ws_jx_gov_portal_label'   => 'American Samoa Official Government Portal',
+        'ws_jx_wb_authority_url'   => 'https://www.asag.as.gov',
+        'ws_jx_wb_authority_label' => 'American Samoa Office of the Attorney General',
+        'ws_jx_legislature_url'    => 'https://www.asbar.org/legislature',
+        'ws_jx_legislature_label'  => 'Fono',
+        'ws_jx_executive_url'      => 'https://www.americansamoa.gov/office-of-the-governor',
         'ws_jx_executive_label'    => 'Office of the Governor',
+        'ws_jx_flag_source_url'    => 'https://commons.wikimedia.org/wiki/File:Flag_of_American_Samoa.svg',
+    ],
+
+    'GU' => [
+        'title'                    => 'Guam',
+        'slug'                     => 'guam',
+        'ws_jurisdiction_class'    => 'territory',
+        'ws_jx_code'               => 'GU',
+        'ws_jurisdiction_name'     => 'Guam',
+        'ws_jx_gov_portal_url'     => 'https://www.guam.gov',
+        'ws_jx_gov_portal_label'   => 'Guam Official Government Portal',
+        'ws_jx_wb_authority_url'   => 'https://oagguam.org',
+        'ws_jx_wb_authority_label' => 'Guam Office of the Attorney General',
+        'ws_jx_legislature_url'    => 'https://www.guamlegislature.org',
+        'ws_jx_legislature_label'  => 'Liheslaturan Guåhan',
+        'ws_jx_executive_url'      => 'https://governor.guam.gov',
+        'ws_jx_executive_label'    => 'Office of the Governor',
+        'ws_jx_flag_source_url'    => 'https://commons.wikimedia.org/wiki/File:Flag_of_Guam.svg',
     ],
 
     'MP' => [
@@ -987,561 +1005,49 @@ $_ws_jx_matrix = [
         'ws_jurisdiction_class'    => 'territory',
         'ws_jx_code'               => 'MP',
         'ws_jurisdiction_name'     => 'Northern Mariana Islands',
-        'ws_jx_wb_authority_label' => 'Office of the Attorney General',
+        'ws_jx_gov_portal_url'     => 'https://www.gov.mp',
+        'ws_jx_gov_portal_label'   => 'Northern Mariana Islands Official Government Portal',
+        'ws_jx_wb_authority_url'   => 'https://www.cnmioag.gov.mp',
+        'ws_jx_wb_authority_label' => 'NMI Office of the Attorney General',
+        'ws_jx_legislature_url'    => 'https://www.cnmileg.net',
         'ws_jx_legislature_label'  => 'Northern Mariana Islands Commonwealth Legislature',
+        'ws_jx_executive_url'      => 'https://www.governor.gov.mp',
         'ws_jx_executive_label'    => 'Office of the Governor',
+        'ws_jx_flag_source_url'    => 'https://commons.wikimedia.org/wiki/File:Flag_of_the_Northern_Mariana_Islands.svg',
     ],
 
-    // ── 50 States ─────────────────────────────────────────────────────────
-
-    'AL' => [
-        'title'                    => 'Alabama',
-        'slug'                     => 'alabama',
-        'ws_jurisdiction_class'    => 'state',
-        'ws_jx_code'               => 'AL',
-        'ws_jurisdiction_name'     => 'Alabama',
-        'ws_jx_wb_authority_label' => 'Office of the Attorney General',
-        'ws_jx_legislature_label'  => 'Alabama Legislature',
+    'PR' => [
+        'title'                    => 'Puerto Rico',
+        'slug'                     => 'puerto-rico',
+        'ws_jurisdiction_class'    => 'territory',
+        'ws_jx_code'               => 'PR',
+        'ws_jurisdiction_name'     => 'Puerto Rico',
+        'ws_jx_gov_portal_url'     => 'https://www.pr.gov',
+        'ws_jx_gov_portal_label'   => 'Puerto Rico Official Government Portal',
+        'ws_jx_wb_authority_url'   => 'https://www.justicia.pr.gov',
+        'ws_jx_wb_authority_label' => 'Puerto Rico Department of Justice',
+        'ws_jx_legislature_url'    => 'https://www.oslpr.org',
+        'ws_jx_legislature_label'  => 'Legislative Assembly of Puerto Rico',
+        'ws_jx_executive_url'      => 'https://www.fortaleza.pr.gov',
         'ws_jx_executive_label'    => 'Office of the Governor',
+        'ws_jx_flag_source_url'    => 'https://commons.wikimedia.org/wiki/File:Flag_of_Puerto_Rico.svg',
     ],
 
-    'AK' => [
-        'title'                    => 'Alaska',
-        'slug'                     => 'alaska',
-        'ws_jurisdiction_class'    => 'state',
-        'ws_jx_code'               => 'AK',
-        'ws_jurisdiction_name'     => 'Alaska',
-        'ws_jx_wb_authority_label' => 'Office of the Attorney General',
-        'ws_jx_legislature_label'  => 'Alaska Legislature',
+    'VI' => [
+        'title'                    => 'U.S. Virgin Islands',
+        'slug'                     => 'virgin-islands',
+        'ws_jurisdiction_class'    => 'territory',
+        'ws_jx_code'               => 'VI',
+        'ws_jurisdiction_name'     => 'U.S. Virgin Islands',
+        'ws_jx_gov_portal_url'     => 'https://www.vi.gov',
+        'ws_jx_gov_portal_label'   => 'U.S. Virgin Islands Official Government Portal',
+        'ws_jx_wb_authority_url'   => 'https://doj.vi.gov',
+        'ws_jx_wb_authority_label' => 'U.S. Virgin Islands Department of Justice',
+        'ws_jx_legislature_url'    => 'https://www.legvi.org',
+        'ws_jx_legislature_label'  => 'Legislature of the Virgin Islands',
+        'ws_jx_executive_url'      => 'https://www.vi.gov/executive-branch',
         'ws_jx_executive_label'    => 'Office of the Governor',
-    ],
-
-    'AZ' => [
-        'title'                    => 'Arizona',
-        'slug'                     => 'arizona',
-        'ws_jurisdiction_class'    => 'state',
-        'ws_jx_code'               => 'AZ',
-        'ws_jurisdiction_name'     => 'Arizona',
-        'ws_jx_wb_authority_label' => 'Office of the Attorney General',
-        'ws_jx_legislature_label'  => 'Arizona State Legislature',
-        'ws_jx_executive_label'    => 'Office of the Governor',
-    ],
-
-    'AR' => [
-        'title'                    => 'Arkansas',
-        'slug'                     => 'arkansas',
-        'ws_jurisdiction_class'    => 'state',
-        'ws_jx_code'               => 'AR',
-        'ws_jurisdiction_name'     => 'Arkansas',
-        'ws_jx_wb_authority_label' => 'Office of the Attorney General',
-        'ws_jx_legislature_label'  => 'Arkansas General Assembly',
-        'ws_jx_executive_label'    => 'Office of the Governor',
-    ],
-
-    'CA' => [
-        'title'                    => 'California',
-        'slug'                     => 'california',
-        'ws_jurisdiction_class'    => 'state',
-        'ws_jx_code'               => 'CA',
-        'ws_jurisdiction_name'     => 'California',
-        'ws_jx_wb_authority_label' => 'Office of the Attorney General',
-        'ws_jx_legislature_label'  => 'California State Legislature',
-        'ws_jx_executive_label'    => 'Office of the Governor',
-    ],
-
-    'CO' => [
-        'title'                    => 'Colorado',
-        'slug'                     => 'colorado',
-        'ws_jurisdiction_class'    => 'state',
-        'ws_jx_code'               => 'CO',
-        'ws_jurisdiction_name'     => 'Colorado',
-        'ws_jx_wb_authority_label' => 'Office of the Attorney General',
-        'ws_jx_legislature_label'  => 'Colorado General Assembly',
-        'ws_jx_executive_label'    => 'Office of the Governor',
-    ],
-
-    'CT' => [
-        'title'                    => 'Connecticut',
-        'slug'                     => 'connecticut',
-        'ws_jurisdiction_class'    => 'state',
-        'ws_jx_code'               => 'CT',
-        'ws_jurisdiction_name'     => 'Connecticut',
-        'ws_jx_wb_authority_label' => 'Office of the Attorney General',
-        'ws_jx_legislature_label'  => 'Connecticut General Assembly',
-        'ws_jx_executive_label'    => 'Office of the Governor',
-    ],
-
-    'DE' => [
-        'title'                    => 'Delaware',
-        'slug'                     => 'delaware',
-        'ws_jurisdiction_class'    => 'state',
-        'ws_jx_code'               => 'DE',
-        'ws_jurisdiction_name'     => 'Delaware',
-        'ws_jx_wb_authority_label' => 'Office of the Attorney General',
-        'ws_jx_legislature_label'  => 'Delaware General Assembly',
-        'ws_jx_executive_label'    => 'Office of the Governor',
-    ],
-
-    'FL' => [
-        'title'                    => 'Florida',
-        'slug'                     => 'florida',
-        'ws_jurisdiction_class'    => 'state',
-        'ws_jx_code'               => 'FL',
-        'ws_jurisdiction_name'     => 'Florida',
-        'ws_jx_wb_authority_label' => 'Office of the Chief Inspector General',
-        'ws_jx_legislature_label'  => 'Florida Legislature',
-        'ws_jx_executive_label'    => 'Office of the Governor',
-    ],
-
-    'GA' => [
-        'title'                    => 'Georgia',
-        'slug'                     => 'georgia',
-        'ws_jurisdiction_class'    => 'state',
-        'ws_jx_code'               => 'GA',
-        'ws_jurisdiction_name'     => 'Georgia',
-        'ws_jx_wb_authority_label' => 'Office of the Attorney General',
-        'ws_jx_legislature_label'  => 'Georgia General Assembly',
-        'ws_jx_executive_label'    => 'Office of the Governor',
-    ],
-
-    'HI' => [
-        'title'                    => 'Hawaii',
-        'slug'                     => 'hawaii',
-        'ws_jurisdiction_class'    => 'state',
-        'ws_jx_code'               => 'HI',
-        'ws_jurisdiction_name'     => 'Hawaii',
-        'ws_jx_wb_authority_label' => 'Office of the Attorney General',
-        'ws_jx_legislature_label'  => 'Hawaii State Legislature',
-        'ws_jx_executive_label'    => 'Office of the Governor',
-    ],
-
-    'ID' => [
-        'title'                    => 'Idaho',
-        'slug'                     => 'idaho',
-        'ws_jurisdiction_class'    => 'state',
-        'ws_jx_code'               => 'ID',
-        'ws_jurisdiction_name'     => 'Idaho',
-        'ws_jx_wb_authority_label' => 'Office of the Attorney General',
-        'ws_jx_legislature_label'  => 'Idaho Legislature',
-        'ws_jx_executive_label'    => 'Office of the Governor',
-    ],
-
-    'IL' => [
-        'title'                    => 'Illinois',
-        'slug'                     => 'illinois',
-        'ws_jurisdiction_class'    => 'state',
-        'ws_jx_code'               => 'IL',
-        'ws_jurisdiction_name'     => 'Illinois',
-        'ws_jx_wb_authority_label' => 'Office of the Executive Inspector General',
-        'ws_jx_legislature_label'  => 'Illinois General Assembly',
-        'ws_jx_executive_label'    => 'Office of the Governor',
-    ],
-
-    'IN' => [
-        'title'                    => 'Indiana',
-        'slug'                     => 'indiana',
-        'ws_jurisdiction_class'    => 'state',
-        'ws_jx_code'               => 'IN',
-        'ws_jurisdiction_name'     => 'Indiana',
-        'ws_jx_wb_authority_label' => 'Office of the Attorney General',
-        'ws_jx_legislature_label'  => 'Indiana General Assembly',
-        'ws_jx_executive_label'    => 'Office of the Governor',
-    ],
-
-    'IA' => [
-        'title'                    => 'Iowa',
-        'slug'                     => 'iowa',
-        'ws_jurisdiction_class'    => 'state',
-        'ws_jx_code'               => 'IA',
-        'ws_jurisdiction_name'     => 'Iowa',
-        'ws_jx_wb_authority_label' => 'Office of the Attorney General',
-        'ws_jx_legislature_label'  => 'Iowa General Assembly',
-        'ws_jx_executive_label'    => 'Office of the Governor',
-    ],
-
-    'KS' => [
-        'title'                    => 'Kansas',
-        'slug'                     => 'kansas',
-        'ws_jurisdiction_class'    => 'state',
-        'ws_jx_code'               => 'KS',
-        'ws_jurisdiction_name'     => 'Kansas',
-        'ws_jx_wb_authority_label' => 'Office of the Attorney General',
-        'ws_jx_legislature_label'  => 'Kansas Legislature',
-        'ws_jx_executive_label'    => 'Office of the Governor',
-    ],
-
-    'KY' => [
-        'title'                    => 'Kentucky',
-        'slug'                     => 'kentucky',
-        'ws_jurisdiction_class'    => 'state',
-        'ws_jx_code'               => 'KY',
-        'ws_jurisdiction_name'     => 'Kentucky',
-        'ws_jx_wb_authority_label' => 'Office of the Attorney General',
-        'ws_jx_legislature_label'  => 'Kentucky General Assembly',
-        'ws_jx_executive_label'    => 'Office of the Governor',
-    ],
-
-    'LA' => [
-        'title'                    => 'Louisiana',
-        'slug'                     => 'louisiana',
-        'ws_jurisdiction_class'    => 'state',
-        'ws_jx_code'               => 'LA',
-        'ws_jurisdiction_name'     => 'Louisiana',
-        'ws_jx_wb_authority_label' => 'Office of the Attorney General',
-        'ws_jx_legislature_label'  => 'Louisiana State Legislature',
-        'ws_jx_executive_label'    => 'Office of the Governor',
-    ],
-
-    'ME' => [
-        'title'                    => 'Maine',
-        'slug'                     => 'maine',
-        'ws_jurisdiction_class'    => 'state',
-        'ws_jx_code'               => 'ME',
-        'ws_jurisdiction_name'     => 'Maine',
-        'ws_jx_wb_authority_label' => 'Office of the Attorney General',
-        'ws_jx_legislature_label'  => 'Maine Legislature',
-        'ws_jx_executive_label'    => 'Office of the Governor',
-    ],
-
-    'MD' => [
-        'title'                    => 'Maryland',
-        'slug'                     => 'maryland',
-        'ws_jurisdiction_class'    => 'state',
-        'ws_jx_code'               => 'MD',
-        'ws_jurisdiction_name'     => 'Maryland',
-        'ws_jx_wb_authority_label' => 'Office of the Attorney General',
-        'ws_jx_legislature_label'  => 'Maryland General Assembly',
-        'ws_jx_executive_label'    => 'Office of the Governor',
-    ],
-
-    'MA' => [
-        'title'                    => 'Massachusetts',
-        'slug'                     => 'massachusetts',
-        'ws_jurisdiction_class'    => 'state',
-        'ws_jx_code'               => 'MA',
-        'ws_jurisdiction_name'     => 'Massachusetts',
-        'ws_jx_wb_authority_label' => 'Office of the Inspector General',
-        'ws_jx_legislature_label'  => 'Massachusetts General Court',
-        'ws_jx_executive_label'    => 'Office of the Governor',
-    ],
-
-    'MI' => [
-        'title'                    => 'Michigan',
-        'slug'                     => 'michigan',
-        'ws_jurisdiction_class'    => 'state',
-        'ws_jx_code'               => 'MI',
-        'ws_jurisdiction_name'     => 'Michigan',
-        'ws_jx_wb_authority_label' => 'Office of the Attorney General',
-        'ws_jx_legislature_label'  => 'Michigan Legislature',
-        'ws_jx_executive_label'    => 'Office of the Governor',
-    ],
-
-    'MN' => [
-        'title'                    => 'Minnesota',
-        'slug'                     => 'minnesota',
-        'ws_jurisdiction_class'    => 'state',
-        'ws_jx_code'               => 'MN',
-        'ws_jurisdiction_name'     => 'Minnesota',
-        'ws_jx_wb_authority_label' => 'Office of the Attorney General',
-        'ws_jx_legislature_label'  => 'Minnesota Legislature',
-        'ws_jx_executive_label'    => 'Office of the Governor',
-    ],
-
-    'MS' => [
-        'title'                    => 'Mississippi',
-        'slug'                     => 'mississippi',
-        'ws_jurisdiction_class'    => 'state',
-        'ws_jx_code'               => 'MS',
-        'ws_jurisdiction_name'     => 'Mississippi',
-        'ws_jx_wb_authority_label' => 'Office of the Attorney General',
-        'ws_jx_legislature_label'  => 'Mississippi Legislature',
-        'ws_jx_executive_label'    => 'Office of the Governor',
-    ],
-
-    'MO' => [
-        'title'                    => 'Missouri',
-        'slug'                     => 'missouri',
-        'ws_jurisdiction_class'    => 'state',
-        'ws_jx_code'               => 'MO',
-        'ws_jurisdiction_name'     => 'Missouri',
-        'ws_jx_wb_authority_label' => 'Office of the Attorney General',
-        'ws_jx_legislature_label'  => 'Missouri General Assembly',
-        'ws_jx_executive_label'    => 'Office of the Governor',
-    ],
-
-    'MT' => [
-        'title'                    => 'Montana',
-        'slug'                     => 'montana',
-        'ws_jurisdiction_class'    => 'state',
-        'ws_jx_code'               => 'MT',
-        'ws_jurisdiction_name'     => 'Montana',
-        'ws_jx_wb_authority_label' => 'Office of the Attorney General',
-        'ws_jx_legislature_label'  => 'Montana Legislature',
-        'ws_jx_executive_label'    => 'Office of the Governor',
-    ],
-
-    'NE' => [
-        'title'                    => 'Nebraska',
-        'slug'                     => 'nebraska',
-        'ws_jurisdiction_class'    => 'state',
-        'ws_jx_code'               => 'NE',
-        'ws_jurisdiction_name'     => 'Nebraska',
-        'ws_jx_wb_authority_label' => 'Office of the Attorney General',
-        'ws_jx_legislature_label'  => 'Nebraska Legislature',
-        'ws_jx_executive_label'    => 'Office of the Governor',
-    ],
-
-    'NV' => [
-        'title'                    => 'Nevada',
-        'slug'                     => 'nevada',
-        'ws_jurisdiction_class'    => 'state',
-        'ws_jx_code'               => 'NV',
-        'ws_jurisdiction_name'     => 'Nevada',
-        'ws_jx_wb_authority_label' => 'Office of the Attorney General',
-        'ws_jx_legislature_label'  => 'Nevada Legislature',
-        'ws_jx_executive_label'    => 'Office of the Governor',
-    ],
-
-    'NH' => [
-        'title'                    => 'New Hampshire',
-        'slug'                     => 'new-hampshire',
-        'ws_jurisdiction_class'    => 'state',
-        'ws_jx_code'               => 'NH',
-        'ws_jurisdiction_name'     => 'New Hampshire',
-        'ws_jx_wb_authority_label' => 'Office of the Attorney General',
-        'ws_jx_legislature_label'  => 'New Hampshire General Court',
-        'ws_jx_executive_label'    => 'Office of the Governor',
-    ],
-
-    'NJ' => [
-        'title'                    => 'New Jersey',
-        'slug'                     => 'new-jersey',
-        'ws_jurisdiction_class'    => 'state',
-        'ws_jx_code'               => 'NJ',
-        'ws_jurisdiction_name'     => 'New Jersey',
-        'ws_jx_wb_authority_label' => 'State Ethics Commission',
-        'ws_jx_legislature_label'  => 'New Jersey Legislature',
-        'ws_jx_executive_label'    => 'Office of the Governor',
-    ],
-
-    'NM' => [
-        'title'                    => 'New Mexico',
-        'slug'                     => 'new-mexico',
-        'ws_jurisdiction_class'    => 'state',
-        'ws_jx_code'               => 'NM',
-        'ws_jurisdiction_name'     => 'New Mexico',
-        'ws_jx_wb_authority_label' => 'Office of the Attorney General',
-        'ws_jx_legislature_label'  => 'New Mexico Legislature',
-        'ws_jx_executive_label'    => 'Office of the Governor',
-    ],
-
-    'NY' => [
-        'title'                    => 'New York',
-        'slug'                     => 'new-york',
-        'ws_jurisdiction_class'    => 'state',
-        'ws_jx_code'               => 'NY',
-        'ws_jurisdiction_name'     => 'New York',
-        'ws_jx_wb_authority_label' => 'Office of the State Inspector General',
-        'ws_jx_legislature_label'  => 'New York State Legislature',
-        'ws_jx_executive_label'    => 'Office of the Governor',
-    ],
-
-    'NC' => [
-        'title'                    => 'North Carolina',
-        'slug'                     => 'north-carolina',
-        'ws_jurisdiction_class'    => 'state',
-        'ws_jx_code'               => 'NC',
-        'ws_jurisdiction_name'     => 'North Carolina',
-        'ws_jx_wb_authority_label' => 'Office of the Attorney General',
-        'ws_jx_legislature_label'  => 'North Carolina General Assembly',
-        'ws_jx_executive_label'    => 'Office of the Governor',
-    ],
-
-    'ND' => [
-        'title'                    => 'North Dakota',
-        'slug'                     => 'north-dakota',
-        'ws_jurisdiction_class'    => 'state',
-        'ws_jx_code'               => 'ND',
-        'ws_jurisdiction_name'     => 'North Dakota',
-        'ws_jx_wb_authority_label' => 'Office of the Attorney General',
-        'ws_jx_legislature_label'  => 'North Dakota Legislative Assembly',
-        'ws_jx_executive_label'    => 'Office of the Governor',
-    ],
-
-    'OH' => [
-        'title'                    => 'Ohio',
-        'slug'                     => 'ohio',
-        'ws_jurisdiction_class'    => 'state',
-        'ws_jx_code'               => 'OH',
-        'ws_jurisdiction_name'     => 'Ohio',
-        'ws_jx_wb_authority_label' => 'Ohio Inspector General',
-        'ws_jx_legislature_label'  => 'Ohio General Assembly',
-        'ws_jx_executive_label'    => 'Office of the Governor',
-    ],
-
-    'OK' => [
-        'title'                    => 'Oklahoma',
-        'slug'                     => 'oklahoma',
-        'ws_jurisdiction_class'    => 'state',
-        'ws_jx_code'               => 'OK',
-        'ws_jurisdiction_name'     => 'Oklahoma',
-        'ws_jx_wb_authority_label' => 'Office of the Attorney General',
-        'ws_jx_legislature_label'  => 'Oklahoma Legislature',
-        'ws_jx_executive_label'    => 'Office of the Governor',
-    ],
-
-    'OR' => [
-        'title'                    => 'Oregon',
-        'slug'                     => 'oregon',
-        'ws_jurisdiction_class'    => 'state',
-        'ws_jx_code'               => 'OR',
-        'ws_jurisdiction_name'     => 'Oregon',
-        'ws_jx_wb_authority_label' => 'Office of the Attorney General',
-        'ws_jx_legislature_label'  => 'Oregon Legislative Assembly',
-        'ws_jx_executive_label'    => 'Office of the Governor',
-    ],
-
-    'PA' => [
-        'title'                    => 'Pennsylvania',
-        'slug'                     => 'pennsylvania',
-        'ws_jurisdiction_class'    => 'state',
-        'ws_jx_code'               => 'PA',
-        'ws_jurisdiction_name'     => 'Pennsylvania',
-        'ws_jx_wb_authority_label' => 'Office of State Inspector General',
-        'ws_jx_legislature_label'  => 'Pennsylvania General Assembly',
-        'ws_jx_executive_label'    => 'Office of the Governor',
-    ],
-
-    'RI' => [
-        'title'                    => 'Rhode Island',
-        'slug'                     => 'rhode-island',
-        'ws_jurisdiction_class'    => 'state',
-        'ws_jx_code'               => 'RI',
-        'ws_jurisdiction_name'     => 'Rhode Island',
-        'ws_jx_wb_authority_label' => 'Office of the Attorney General',
-        'ws_jx_legislature_label'  => 'Rhode Island General Assembly',
-        'ws_jx_executive_label'    => 'Office of the Governor',
-    ],
-
-    'SC' => [
-        'title'                    => 'South Carolina',
-        'slug'                     => 'south-carolina',
-        'ws_jurisdiction_class'    => 'state',
-        'ws_jx_code'               => 'SC',
-        'ws_jurisdiction_name'     => 'South Carolina',
-        'ws_jx_wb_authority_label' => 'Office of the Attorney General',
-        'ws_jx_legislature_label'  => 'South Carolina General Assembly',
-        'ws_jx_executive_label'    => 'Office of the Governor',
-    ],
-
-    'SD' => [
-        'title'                    => 'South Dakota',
-        'slug'                     => 'south-dakota',
-        'ws_jurisdiction_class'    => 'state',
-        'ws_jx_code'               => 'SD',
-        'ws_jurisdiction_name'     => 'South Dakota',
-        'ws_jx_wb_authority_label' => 'Office of the Attorney General',
-        'ws_jx_legislature_label'  => 'South Dakota Legislature',
-        'ws_jx_executive_label'    => 'Office of the Governor',
-    ],
-
-    'TN' => [
-        'title'                    => 'Tennessee',
-        'slug'                     => 'tennessee',
-        'ws_jurisdiction_class'    => 'state',
-        'ws_jx_code'               => 'TN',
-        'ws_jurisdiction_name'     => 'Tennessee',
-        'ws_jx_wb_authority_label' => 'Office of the Attorney General',
-        'ws_jx_legislature_label'  => 'Tennessee General Assembly',
-        'ws_jx_executive_label'    => 'Office of the Governor',
-    ],
-
-    'TX' => [
-        'title'                    => 'Texas',
-        'slug'                     => 'texas',
-        'ws_jurisdiction_class'    => 'state',
-        'ws_jx_code'               => 'TX',
-        'ws_jurisdiction_name'     => 'Texas',
-        'ws_jx_wb_authority_label' => 'State Auditor\'s Office',
-        'ws_jx_legislature_label'  => 'Texas Legislature',
-        'ws_jx_executive_label'    => 'Office of the Governor',
-    ],
-
-    'UT' => [
-        'title'                    => 'Utah',
-        'slug'                     => 'utah',
-        'ws_jurisdiction_class'    => 'state',
-        'ws_jx_code'               => 'UT',
-        'ws_jurisdiction_name'     => 'Utah',
-        'ws_jx_wb_authority_label' => 'Office of the Attorney General',
-        'ws_jx_legislature_label'  => 'Utah State Legislature',
-        'ws_jx_executive_label'    => 'Office of the Governor',
-    ],
-
-    'VT' => [
-        'title'                    => 'Vermont',
-        'slug'                     => 'vermont',
-        'ws_jurisdiction_class'    => 'state',
-        'ws_jx_code'               => 'VT',
-        'ws_jurisdiction_name'     => 'Vermont',
-        'ws_jx_wb_authority_label' => 'Office of the Attorney General',
-        'ws_jx_legislature_label'  => 'Vermont General Assembly',
-        'ws_jx_executive_label'    => 'Office of the Governor',
-    ],
-
-    'VA' => [
-        'title'                    => 'Virginia',
-        'slug'                     => 'virginia',
-        'ws_jurisdiction_class'    => 'state',
-        'ws_jx_code'               => 'VA',
-        'ws_jurisdiction_name'     => 'Virginia',
-        'ws_jx_wb_authority_label' => 'Office of the State Inspector General',
-        'ws_jx_legislature_label'  => 'Virginia General Assembly',
-        'ws_jx_executive_label'    => 'Office of the Governor',
-    ],
-
-    'WA' => [
-        'title'                    => 'Washington',
-        'slug'                     => 'washington',
-        'ws_jurisdiction_class'    => 'state',
-        'ws_jx_code'               => 'WA',
-        'ws_jurisdiction_name'     => 'Washington',
-        'ws_jx_wb_authority_label' => 'Office of the Attorney General',
-        'ws_jx_legislature_label'  => 'Washington State Legislature',
-        'ws_jx_executive_label'    => 'Office of the Governor',
-    ],
-
-    'WV' => [
-        'title'                    => 'West Virginia',
-        'slug'                     => 'west-virginia',
-        'ws_jurisdiction_class'    => 'state',
-        'ws_jx_code'               => 'WV',
-        'ws_jurisdiction_name'     => 'West Virginia',
-        'ws_jx_wb_authority_label' => 'Office of the Attorney General',
-        'ws_jx_legislature_label'  => 'West Virginia Legislature',
-        'ws_jx_executive_label'    => 'Office of the Governor',
-    ],
-
-    'WI' => [
-        'title'                    => 'Wisconsin',
-        'slug'                     => 'wisconsin',
-        'ws_jurisdiction_class'    => 'state',
-        'ws_jx_code'               => 'WI',
-        'ws_jurisdiction_name'     => 'Wisconsin',
-        'ws_jx_wb_authority_label' => 'Office of the Attorney General',
-        'ws_jx_legislature_label'  => 'Wisconsin Legislature',
-        'ws_jx_executive_label'    => 'Office of the Governor',
-    ],
-
-    'WY' => [
-        'title'                    => 'Wyoming',
-        'slug'                     => 'wyoming',
-        'ws_jurisdiction_class'    => 'state',
-        'ws_jx_code'               => 'WY',
-        'ws_jurisdiction_name'     => 'Wyoming',
-        'ws_jx_wb_authority_label' => 'Office of the Attorney General',
-        'ws_jx_legislature_label'  => 'Wyoming Legislature',
-        'ws_jx_executive_label'    => 'Office of the Governor',
+        'ws_jx_flag_source_url'    => 'https://commons.wikimedia.org/wiki/File:Flag_of_the_United_States_Virgin_Islands.svg',
     ],
 
 ]; // end $_ws_jx_matrix
@@ -1590,6 +1096,9 @@ function ws_seed_jurisdiction_matrix() {
         $term_map[ $slug ] = $term_id;
 
         // Write the US term ID option used by ws_get_us_term_id() in the query layer.
+        // Direct get_post_meta() call is intentional here. ws_us_term_id is a site
+        // option storing a taxonomy term ID — not jurisdiction content — and is not
+        // routed through the query layer.
         if ( $slug === 'us' ) {
             update_option( 'ws_us_term_id', $term_id );
         }
@@ -1637,6 +1146,7 @@ function ws_seed_jurisdiction_matrix() {
             'ws_jx_legislature_label'  => $jx['ws_jx_legislature_label']  ?? '',
             'ws_jx_executive_url'      => $jx['ws_jx_executive_url']      ?? '',
             'ws_jx_executive_label'    => $jx['ws_jx_executive_label']    ?? '',
+            'ws_jx_flag_source_url'    => $jx['ws_jx_flag_source_url']    ?? '',
         ];
 
         foreach ( $meta_fields as $key => $value ) {
@@ -1646,12 +1156,26 @@ function ws_seed_jurisdiction_matrix() {
         }
 
         // Assign ws_jurisdiction taxonomy term and write ws_jx_term_id meta.
+        //
+        // wp_set_object_terms() writes the actual taxonomy relationship to
+        // wp_term_relationships. This is what makes tax_query, wp_get_post_terms(),
+        // and the ACF load_terms behavior work. It is not redundant with ws_jx_code
+        // (a display string) or ws_jx_term_id (below).
+        //
+        // ws_jx_term_id is a deliberate convenience cache — it stores the term_id
+        // directly on the post so seeders and admin tooling can retrieve it via
+        // get_post_meta() without an additional get_term_by() or wp_get_post_terms()
+        // call at runtime. The data is derivable from the taxonomy relationship but
+        // the direct lookup is faster and simpler in contexts where only the ID is needed.
         if ( $term_id ) {
             wp_set_object_terms( $post_id, $term_id, 'ws_jurisdiction' );
             update_post_meta( $post_id, 'ws_jx_term_id', $term_id );
         }
 
         // Mark as seeded.
+        // Direct get_post_meta() call is intentional here. ws_matrix_source is an
+        // administrative flag written by the seeder and consumed exclusively by admin
+        // tooling. It is not jurisdiction content and does not belong in the query layer.
         update_post_meta( $post_id, 'ws_matrix_source', 'jurisdiction-matrix' );
     }
 }

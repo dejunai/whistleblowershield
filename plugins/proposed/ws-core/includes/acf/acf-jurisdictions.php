@@ -137,7 +137,7 @@ function ws_register_acf_jurisdiction_fields() {
 
     acf_add_local_field_group( [
 
-        'key'                   => 'group_ws_jurisdiction',
+        'key'                   => 'group_ws_jurisdiction_metadata',
         'title'                 => 'Jurisdiction Metadata',
         'menu_order'            => 0,
         'position'              => 'normal',
@@ -154,18 +154,46 @@ function ws_register_acf_jurisdiction_fields() {
 
         'fields' => [
 
-            // ────────────────────────────────────────────────────────────────
-            // Tab: Identity
-            //
-            // Core identifiers for each jurisdiction record. ws_jx_code is the
-            // canonical machine identifier used across the plugin. All three
-            // fields are required.
-            // ────────────────────────────────────────────────────────────────
+			// ────────────────────────────────────────────────────────────────
+			// Tab: Identity
+			//
+			// Core identifiers for each jurisdiction record. ws_jx_code is a
+			// legacy display field retained for visual reference only — the
+			// canonical jurisdiction identifier is the slug of the assigned
+			// ws_jurisdiction taxonomy term. All fields are seeder-populated
+			// and locked against manual editing.
+			// ────────────────────────────────────────────────────────────────
 
             [
-                'key'   => 'field_tab_jx_identity',
+                'key'   => 'field_jx_identity_tab',
                 'label' => 'Identity',
                 'type'  => 'tab',
+            ],
+
+            [
+                'key'           => 'field_jurisdiction_tax',
+                'label'         => 'Jurisdiction USPS Code',
+                'name'          => 'ws_jurisdiction_tax',
+                'type'          => 'taxonomy',
+                'taxonomy'      => 'ws_jurisdiction',
+                'field_type'    => 'select',
+                'instructions'  => 'Select the Jurisdiction\'s canonical USPS code',
+				'requied'       => 1,
+				'add_term'      => 0,
+                'save_terms'    => 1,
+				'load_terms'    => 1,
+                'return_format' => 'id',
+                'wrapper'      => [ 'class' => 'hidden' ],
+            ],
+
+            [
+                'key'           => 'field_jx_code',
+                'label'         => 'Jurisdiction USPS Code',
+                'name'          => 'ws_jx_code',
+                'type'          => 'text',
+                'instructions'  => 'Displays the Jurisdiction\'s canonical USPS code',
+                'requied'       => 1,
+				'wrapper'       => [ 'data-maxlength' => 2, 'width' => '20' ],
             ],
 
             [
@@ -175,13 +203,13 @@ function ws_register_acf_jurisdiction_fields() {
                 'type'          => 'select',
                 'instructions'  => 'Determines how this jurisdiction is treated throughout the system. Affects default values for executive office, whistleblower authority, and legislature.',
                 'required'      => 1,
-                'choices'       => [
-                    'state'     => 'U.S. State',
+                'choices'      => [
                     'federal'   => 'Federal',
-                    'district'  => 'District (D.C.)',
+                    'state'     => 'U.S. State',
                     'territory' => 'U.S. Territory',
+                    'district'  => 'District (D.C.)',
                 ],
-                'default_value' => 'state',
+				'default_value' => 'state',
                 'allow_null'    => 0,
                 'ui'            => 1,
                 'return_format' => 'value',
@@ -199,7 +227,7 @@ function ws_register_acf_jurisdiction_fields() {
             ],
 
             // ────────────────────────────────────────────────────────────────
-            // Tab: Government URLs
+            // Tab: Government Leadership URLs
             //
             // External links rendered in the jurisdiction header. Labels are
             // selectable to accommodate naming differences across jurisdictions.
@@ -208,8 +236,8 @@ function ws_register_acf_jurisdiction_fields() {
             // ────────────────────────────────────────────────────────────────
 
             [
-                'key'   => 'field_tab_jx_gov_urls',
-                'label' => 'Government URLs',
+                'key'   => 'field_jx_gov_urls_tab',
+                'label' => 'Government Leadership URLs',
                 'type'  => 'tab',
             ],
 
@@ -221,6 +249,8 @@ function ws_register_acf_jurisdiction_fields() {
                 'name'         => 'ws_jx_gov_portal_url',
                 'type'         => 'url',
                 'instructions' => 'Link to the jurisdiction\'s main government website (e.g., ca.gov, dc.gov).',
+                'placeholder'  => 'https://',
+				'wrapper'      => ['width' => '70']
             ],
 
             [
@@ -230,6 +260,7 @@ function ws_register_acf_jurisdiction_fields() {
                 'type'          => 'text',
                 'instructions'  => 'Text shown to users for this link. Include jurisdiction name (e.g., "California State Portal").',
                 'default_value' => 'Official Government Portal',
+				'wrapper'      => ['width' => '30']
             ],
 
             // Executive Office
@@ -241,22 +272,17 @@ function ws_register_acf_jurisdiction_fields() {
                 'type'         => 'url',
                 'instructions' => 'Official website for this jurisdiction\'s executive office. Leave blank for Federal.',
                 'placeholder'  => 'https://',
+            	'wrapper'      => ['width' => '70']
             ],
 
             [
                 'key'           => 'field_jx_executive_label',
                 'label'         => 'Executive Office Title',
                 'name'          => 'ws_jx_executive_label',
-                'type'          => 'select',
-                'instructions'  => 'Title of the chief executive. Governor for states and most territories; Mayor for D.C.',
-                'choices'       => [
-                    'governor' => 'Governor',
-                    'mayor'    => 'Mayor',
-                ],
-                'default_value' => 'governor',
-                'allow_null'    => 0,
-                'ui'            => 1,
-                'return_format' => 'value',
+                'type'          => 'text',
+                'instructions'  => 'Office title of the chief executive. Governor for states and most territories; Mayor for D.C.',
+                'default_value' => 'Office of the Governor',
+            	'wrapper'      => ['width' => '30']
             ],
 
             // Whistleblower Authority
@@ -266,25 +292,19 @@ function ws_register_acf_jurisdiction_fields() {
                 'label'        => 'Whistleblower Authority URL',
                 'name'         => 'ws_jx_wb_authority_url',
                 'type'         => 'url',
-                'instructions' => 'Website for the office handling whistleblower matters in this jurisdiction. See label field for office type.',
+                'instructions' => 'Website for the office handling whistleblower matters in this jurisdiction.',
+                'placeholder'  => 'https://',
+            	'wrapper'      => ['width' => '70']
             ],
 
             [
                 'key'           => 'field_jx_wb_authority_label',
                 'label'         => 'Whistleblower Authority Office',
                 'name'          => 'ws_jx_wb_authority_label',
-                'type'          => 'select',
-                'instructions'  => 'Primary office for whistleblower protection and enforcement. Auto-selected on first save; can be corrected if needed.',
-                'choices'       => [
-                    'ag'  => 'Attorney General',
-                    'ig'  => 'Inspector General (D.C.)',
-                    'soj' => 'Secretary of Justice (PR)',
-                    'osc' => 'Office of Special Counsel (Federal)',
-                ],
-                'default_value' => 'ag',
-                'allow_null'    => 0,
-                'ui'            => 1,
-                'return_format' => 'value',
+                'type'          => 'text',
+                'instructions'  => 'Primary office for whistleblower protection and enforcement.',
+                'default_value' => 'Office of the Attorney General',
+            	'wrapper'      => ['width' => '30']
             ],
 
             // Legislature
@@ -295,28 +315,18 @@ function ws_register_acf_jurisdiction_fields() {
                 'name'         => 'ws_jx_legislature_url',
                 'type'         => 'url',
                 'instructions' => 'Official website for the state legislature, territorial assembly, or Congress.',
+                'placeholder'  => 'https://',
+            	'wrapper'      => ['width' => '70']
             ],
 
             [
                 'key'           => 'field_jx_legislature_label',
                 'label'         => 'Legislature Name',
                 'name'          => 'ws_jx_legislature_label',
-                'type'          => 'select',
-                'instructions'  => 'Name of the legislative body. Auto-selected on first save; can be corrected if needed.',
-                'choices'       => [
-                    'state'   => 'State Legislature',
-                    'congress'=> 'U.S. Congress',
-                    'council' => 'D.C. Council',
-                    'guam'    => 'Guam Legislature',
-                    'pr'      => 'Puerto Rico Legislature',
-                    'usvi'    => 'Virgin Islands Legislature',
-                    'fono'    => 'American Samoa Fono',
-                    'cnmi'    => 'CNMI Legislature',
-                ],
-                'default_value' => 'state',
-                'allow_null'    => 0,
-                'ui'            => 1,
-                'return_format' => 'value',
+                'type'          => 'text',
+                'instructions'  => 'Name of the Jurisdiction\'s legislative body.',
+                'default_value' => 'State Legislature',
+            	'wrapper'      => ['width' => '30']
             ],
 
             // ────────────────────────────────────────────────────────────────
@@ -327,7 +337,7 @@ function ws_register_acf_jurisdiction_fields() {
             // ────────────────────────────────────────────────────────────────
 
             [
-                'key'   => 'field_tab_jx_flag',
+                'key'   => 'field_jx_flag_tab',
                 'label' => 'Flag',
                 'type'  => 'tab',
             ],
@@ -340,8 +350,9 @@ function ws_register_acf_jurisdiction_fields() {
                 'instructions'  => 'Upload the official flag image. Source from Wikimedia Commons to ensure proper licensing.',
                 'return_format' => 'array',
                 'preview_size'  => 'thumbnail',
-                'library'       => 'all',
-            ],
+                'library'       => 'uploadedTo',
+				'wrapper'       => ['width' => '30' ]
+			],
 
             [
                 'key'          => 'field_jx_flag_attribution',
@@ -349,7 +360,8 @@ function ws_register_acf_jurisdiction_fields() {
                 'name'         => 'ws_jx_flag_attribution',
                 'type'         => 'text',
                 'instructions' => 'Credit line from Wikimedia Commons. Copy from the file\'s attribution section (e.g., "Devin Cook / Public domain").',
-            ],
+            	'wrapper'      => ['width' => '70' ]
+			],
 
             [
                 'key'          => 'field_jx_flag_source_url',
@@ -357,7 +369,8 @@ function ws_register_acf_jurisdiction_fields() {
                 'name'         => 'ws_jx_flag_source_url',
                 'type'         => 'url',
                 'instructions' => 'Link to the Wikimedia Commons page for this flag image. Used for attribution and license verification.',
-            ],
+            	'wrapper'      => ['width' => '70' ]
+			],
 
             [
                 'key'           => 'field_jx_flag_license',
@@ -366,7 +379,8 @@ function ws_register_acf_jurisdiction_fields() {
                 'type'          => 'text',
                 'instructions'  => 'License from Wikimedia Commons. Most U.S. flags are Public Domain. Check file page if unsure.',
                 'default_value' => 'Public Domain',
-            ],
+            	'wrapper'       => ['width' => '30' ]
+			],
 
             // ────────────────────────────────────────────────────────────────
             // Tab: Record Management
@@ -385,17 +399,17 @@ function ws_register_acf_jurisdiction_fields() {
             // ────────────────────────────────────────────────────────────────
 
             [
-                'key'   => 'field_tab_jx_record',
+                'key'   => 'field_record_tab',
                 'label' => 'Record Management',
                 'type'  => 'tab',
             ],
 
-            // Hidden fields: author, date_created, date_created_gmt, date_updated_gmt
+            // Hidden fields: create_author, date_created, date_created_gmt, last_edited_gmt
 
             [
-                'key'          => 'field_jx_author',
-                'label'        => 'Author',
-                'name'         => 'ws_jx_author',
+                'key'          => 'field_create_author',
+                'label'        => 'Create Author',
+                'name'         => 'create_author',
                 'type'         => 'text',
                 'instructions' => 'Editor who created this record. Set automatically.',
                 'readonly'     => 1,
@@ -404,9 +418,9 @@ function ws_register_acf_jurisdiction_fields() {
             ],
 
             [
-                'key'          => 'field_jx_date_created',
+                'key'          => 'field_date_created',
                 'label'        => 'Date Created',
-                'name'         => 'ws_jx_date_created',
+                'name'         => 'date_created',
                 'type'         => 'text',
                 'instructions' => 'Date this record was created. Set automatically.',
                 'readonly'     => 1,
@@ -415,9 +429,9 @@ function ws_register_acf_jurisdiction_fields() {
             ],
 
             [
-                'key'          => 'field_jx_date_created_gmt',
+                'key'          => 'field_date_created_gmt',
                 'label'        => 'Date Created (GMT)',
-                'name'         => 'ws_jx_date_created_gmt',
+                'name'         => 'date_created_gmt',
                 'type'         => 'text',
                 'instructions' => 'UTC date this record was created. Set automatically.',
                 'readonly'     => 1,
@@ -425,37 +439,34 @@ function ws_register_acf_jurisdiction_fields() {
                 'wrapper'      => [ 'class' => 'hidden' ],
             ],
 
-            // Visible fields: date_updated, last_editor
-
             [
-                'key'          => 'field_jx_date_updated',
-                'label'        => 'Date Updated',
-                'name'         => 'ws_jx_date_updated',
+                'key'          => 'field_last_edited_gmt',
+                'label'        => 'Date Last Edited (GMT)',
+                'name'         => 'last_edited_gmt',
                 'type'         => 'text',
-                'instructions' => 'Date of most recent update. Refreshed automatically on save.',
-                'readonly'     => 1,
-                'disabled'     => 1,
-            ],
-
-            [
-                'key'          => 'field_jx_date_updated_gmt',
-                'label'        => 'Date Updated (GMT)',
-                'name'         => 'ws_jx_date_updated_gmt',
-                'type'         => 'text',
-                'instructions' => 'UTC date of most recent update. Refreshed automatically on save.',
                 'readonly'     => 1,
                 'disabled'     => 1,
                 'wrapper'      => [ 'class' => 'hidden' ],
             ],
 
-            [
-                'key'           => 'field_jx_last_editor',
+            // Visible fields: last_edited, last_edited_author
+			[
+                'key'           => 'field_last_edited_author',
                 'label'         => 'Last Editor',
-                'name'          => 'ws_jx_last_editor',
+                'name'          => 'last_edited_author',
                 'type'          => 'user',
-                'instructions'  => 'Editor who last updated this record. Updated automatically. Admins can change to credit a different contributor.',
+                'instructions'  => 'User who last updated this record. Updated automatically. Admins can change to credit a different contributor.',
                 'role'          => [ 'author', 'editor', 'administrator' ],
                 'return_format' => 'array',
+            ],
+			
+            [
+                'key'          => 'field_last_edited',
+                'label'        => 'Date Last Edited',
+                'name'         => 'last_edited',
+                'type'         => 'text',
+                'readonly'     => 1,
+                'disabled'     => 1,
             ],
 
         ], // end fields
@@ -465,187 +476,3 @@ function ws_register_acf_jurisdiction_fields() {
 } // end ws_register_acf_jurisdiction_fields
 
 
-// ════════════════════════════════════════════════════════════════════════════
-// Save Post: Auto-populate Record Management and Label Fields
-//
-// Fires on acf/save_post with priority 5 (before ACF's default priority 10)
-// to ensure values are written before ACF finalizes the save.
-//
-// Handles:
-//   - Author                set once on first save
-//   - Date Created          set once on first save (local + GMT)
-//   - Date Updated          refreshed on every save (local + GMT)
-//   - Last Editor           auto-filled on every save; admin-overridable
-//   - WB Authority Label    set once on first save based on class/slug
-//   - Legislature Label     set once on first save based on class/slug
-// ════════════════════════════════════════════════════════════════════════════
-
-add_action( 'acf/save_post', 'ws_autofill_jx_record_fields', 5 );
-
-function ws_autofill_jx_record_fields( $post_id ) {
-
-    // Only act on jurisdiction CPT records
-    if ( get_post_type( $post_id ) !== 'jurisdiction' ) {
-        return;
-    }
-
-    $current_user_id = get_current_user_id();
-    $now_local       = current_time( 'Y-m-d' );       // Respects WP timezone setting
-    $now_gmt         = current_time( 'Y-m-d', true ); // UTC equivalent
-
-    // ── Author ───────────────────────────────────────────────────────────────
-    // Written once on first save. Never overwritten after initial creation.
-
-    $existing_author = get_field( 'ws_jx_author', $post_id );
-    if ( empty( $existing_author ) ) {
-        update_field( 'ws_jx_author', $current_user_id, $post_id );
-    }
-
-    // ── Date Created (local) ─────────────────────────────────────────────────
-    // Written once on first save. Never overwritten after initial creation.
-
-    $existing_created = get_field( 'ws_jx_date_created', $post_id );
-    if ( empty( $existing_created ) ) {
-        update_field( 'ws_jx_date_created', $now_local, $post_id );
-    }
-
-    // ── Date Created (GMT) ───────────────────────────────────────────────────
-    // Written once on first save. Never overwritten after initial creation.
-
-    $existing_created_gmt = get_field( 'ws_jx_date_created_gmt', $post_id );
-    if ( empty( $existing_created_gmt ) ) {
-        update_field( 'ws_jx_date_created_gmt', $now_gmt, $post_id );
-    }
-
-    // ── Date Updated (local) ─────────────────────────────────────────────────
-    // Refreshed on every save.
-
-    update_field( 'ws_jx_date_updated', $now_local, $post_id );
-
-    // ── Date Updated (GMT) ───────────────────────────────────────────────────
-    // Refreshed on every save.
-
-    update_field( 'ws_jx_date_updated_gmt', $now_gmt, $post_id );
-
-    // ── Last Editor ──────────────────────────────────────────────────────────
-    // Auto-filled with the current user on every save.
-    // Exception: if the current user is an administrator and has explicitly
-    // selected a different user in the field UI, that selection is preserved.
-    // This allows admins to credit a specific author when making minor corrections.
-
-    $posted_editor    = isset( $_POST['acf']['field_jx_last_editor'] )
-                            ? (int) $_POST['acf']['field_jx_last_editor']
-                            : 0;
-    $current_is_admin = current_user_can( 'administrator' );
-
-    if ( $current_is_admin && $posted_editor && $posted_editor !== $current_user_id ) {
-        // Admin explicitly selected a different user — honor the override
-        update_field( 'ws_jx_last_editor', $posted_editor, $post_id );
-    } else {
-        // All other cases — auto-fill with the current user
-        update_field( 'ws_jx_last_editor', $current_user_id, $post_id );
-    }
-
-    // ── Whistleblower Authority Label ────────────────────────────────────────
-    // Set once on first save only. Can be manually corrected afterward.
-    //
-    // Mapping:
-    //   district          → ig   (Inspector General - D.C.)
-    //   federal           → osc  (Office of Special Counsel)
-    //   slug: puerto-rico → soj  (Secretary of Justice)
-    //   all others        → ag   (Attorney General)
-
-    $existing_wb_authority = get_field( 'ws_jx_wb_authority_label', $post_id );
-    if ( empty( $existing_wb_authority ) ) {
-
-        $class = get_field( 'ws_jurisdiction_class', $post_id );
-        $slug  = get_post_field( 'post_name', $post_id );
-
-        if ( $class === 'district' ) {
-            update_field( 'ws_jx_wb_authority_label', 'ig', $post_id );
-        } elseif ( $class === 'federal' ) {
-            update_field( 'ws_jx_wb_authority_label', 'osc', $post_id );
-        } elseif ( ws_slug_starts_with( $slug, 'puerto-rico' ) ) {
-            update_field( 'ws_jx_wb_authority_label', 'soj', $post_id );
-        } else {
-            // Default for all 50 states and remaining territories
-            update_field( 'ws_jx_wb_authority_label', 'ag', $post_id );
-        }
-    }
-
-    // ── Legislature Label ────────────────────────────────────────────────────
-    // Set once on first save only. Can be manually corrected afterward.
-    // States all share 'state'. Federal and D.C. map by class.
-    // Territories are differentiated by post slug.
-    // Unrecognized territory slugs fall back to 'state' as a safe default.
-    //
-    // Mapping:
-    //   federal                             → congress (U.S. Congress)
-    //   district                            → council  (D.C. Council)
-    //   territory + slug: guam              → guam     (Guam Legislature)
-    //   territory + slug: puerto-rico       → pr       (Puerto Rico Legislature)
-    //   territory + slug: us-virgin-islands → usvi     (Virgin Islands Legislature)
-    //   territory + slug: american-samoa    → fono     (American Samoa Fono)
-    //   territory + slug: northern-mariana-islands → cnmi (CNMI Legislature)
-    //   all others / unmatched              → state    (State Legislature)
-
-    $existing_legislature = get_field( 'ws_jx_legislature_label', $post_id );
-    if ( empty( $existing_legislature ) ) {
-
-        // Re-use $class and $slug if already retrieved above
-        if ( ! isset( $class ) ) {
-            $class = get_field( 'ws_jurisdiction_class', $post_id );
-        }
-        if ( ! isset( $slug ) ) {
-            $slug = get_post_field( 'post_name', $post_id );
-        }
-
-        if ( $class === 'federal' ) {
-            update_field( 'ws_jx_legislature_label', 'congress', $post_id );
-        } elseif ( $class === 'district' ) {
-            update_field( 'ws_jx_legislature_label', 'council', $post_id );
-        } elseif ( $class === 'territory' ) {
-
-            if ( ws_slug_starts_with( $slug, 'guam' ) ) {
-                update_field( 'ws_jx_legislature_label', 'guam', $post_id );
-            } elseif ( ws_slug_starts_with( $slug, 'puerto-rico' ) ) {
-                update_field( 'ws_jx_legislature_label', 'pr', $post_id );
-            } elseif ( ws_slug_starts_with( $slug, 'us-virgin-islands' ) ) {
-                update_field( 'ws_jx_legislature_label', 'usvi', $post_id );
-            } elseif ( ws_slug_starts_with( $slug, 'american-samoa' ) ) {
-                update_field( 'ws_jx_legislature_label', 'fono', $post_id );
-            } elseif ( ws_slug_starts_with( $slug, 'northern-mariana-islands' ) ) {
-                update_field( 'ws_jx_legislature_label', 'cnmi', $post_id );
-            } else {
-                // Unrecognized territory slug — fall back to state legislature
-                update_field( 'ws_jx_legislature_label', 'state', $post_id );
-            }
-
-        } else {
-            // Default for all 50 states
-            update_field( 'ws_jx_legislature_label', 'state', $post_id );
-        }
-    }
-
-} // end ws_autofill_jx_record_fields
-
-
-// ════════════════════════════════════════════════════════════════════════════
-// Helper: PHP 8.0 Backstop for str_starts_with
-//
-// str_starts_with() was introduced in PHP 8.0. This helper wraps the native
-// function with a function_exists() check and falls back to a substr()
-// comparison for environments running PHP < 8.0. Both paths produce
-// identical behavior.
-//
-// @param  string $slug    The post slug to test.
-// @param  string $prefix  The prefix to check for.
-// @return bool
-// ════════════════════════════════════════════════════════════════════════════
-
-function ws_slug_starts_with( $slug, $prefix ) {
-    if ( function_exists( 'str_starts_with' ) ) {
-        return str_starts_with( $slug, $prefix );
-    }
-    return substr( $slug, 0, strlen( $prefix ) ) === $prefix;
-}

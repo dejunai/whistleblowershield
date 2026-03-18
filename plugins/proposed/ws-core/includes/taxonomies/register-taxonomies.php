@@ -261,7 +261,7 @@ function ws_register_taxonomies() {
     if ( ! taxonomy_exists( 'ws_jurisdiction' ) ) {
         register_taxonomy(
             'ws_jurisdiction',
-            [ 'jx-statute', 'jx-summary', 'jx-citation', 'jx-interpretation', 'ws-agency', 'ws-assist-org' ],
+            [ 'ws-jurisdiction', 'jx-statute', 'jx-summary', 'jx-citation', 'jx-interpretation', 'ws-agency', 'ws-assist-org' ],
             [
                 'label'             => 'Jurisdictions',
                 'labels'            => [
@@ -314,7 +314,7 @@ add_action( 'admin_init', function() {
         update_option( 'ws_seeded_disclosure_type', '1.0.0' );
     }
     if ( get_option( 'ws_seeded_process_type' ) !== '1.0.0' ) {
-        ws_seed_process_type_taxonomy();
+        ws_seed_process_taxonomy();
         update_option( 'ws_seeded_process_type', '1.0.0' );
     }
     if ( get_option( 'ws_seeded_remedy_type' ) !== '1.0.0' ) {
@@ -336,6 +336,10 @@ add_action( 'admin_init', function() {
     if ( get_option( 'ws_seeded_case_stage' ) !== '1.0.0' ) {
         ws_seed_case_stage_taxonomy();
         update_option( 'ws_seeded_case_stage', '1.0.0' );
+    }
+    if ( get_option( 'ws_seeded_jurisdiction' ) !== '1.0.0' ) {
+        ws_seed_jruisdiction_taxonomy();
+        update_option( 'ws_jurisdiction_stage', '1.0.0' );
     }
 } );
 
@@ -423,7 +427,7 @@ function ws_seed_disclosure_taxonomy() {
 /**
  * Seeds the ws_process_type taxonomy with its initial flat term list.
  */
-function ws_seed_process_type_taxonomy() {
+function ws_seed_process_taxonomy() {
     $taxonomy = 'ws_process_type';
     $terms    = [
         'administrative-complaint' => 'Administrative Complaint',
@@ -452,20 +456,19 @@ function ws_seed_process_type_taxonomy() {
 function ws_seed_remedy_taxonomy() {
     $taxonomy = 'ws_remedy_type';
     $terms    = [
-        'Back Pay',
-        'Front Pay',
-        'Reinstatement',
-        'Compensatory Damages',
-        'Punitive Damages',
-        'Treble Damages',
-        'Attorney Fees',
-        'Litigation Costs',
-        'Expungement of Personnel Record',
+        'back-pay'                      => 'Back Pay',
+        'front-pay'                     => 'Front Pay',
+        'reinstatement'                 => 'Reinstatement',
+        'compensatory-damages'          => 'Compensatory Damages',
+        'punitive-damages'              => 'Punitive Damages',
+        'treble-damages'                => 'Treble Damages',
+        'attorney-fees'                 => 'Attorney Fees',
+        'litigation-costs'              => 'Litigation Costs',
+        'expungement-of-personnel-record' => 'Expungement of Personnel Record',
     ];
-
-    foreach ( $terms as $term ) {
-        if ( ! term_exists( $term, $taxonomy ) ) {
-            wp_insert_term( $term, $taxonomy );
+    foreach ( $terms as $slug => $name ) {
+        if ( ! term_exists( $slug, $taxonomy ) ) {
+            wp_insert_term( $name, $taxonomy, [ 'slug' => $slug ] );
         }
     }
 }
@@ -476,17 +479,17 @@ function ws_seed_remedy_taxonomy() {
 function ws_seed_coverage_scope_taxonomy() {
     $taxonomy = 'ws_coverage_scope';
     $terms    = [
-        'federal-employees',
-        'private-sector-employees',
-        'contractors',
-        'state-employees',
-        'local-government-employees',
-        'nonprofit-employees',
-        'other',
+        'federal-employees'          => 'Federal Employees',
+        'private-sector-employees'   => 'Private Sector Employees',
+        'contractors'                => 'Contractors',
+        'state-employees'            => 'State Employees',
+        'local-government-employees' => 'Local Government Employees',
+        'nonprofit-employees'        => 'Nonprofit Employees',
+        'other'                      => 'Other',
     ];
-    foreach ( $terms as $slug ) {
+    foreach ( $terms as $slug => $name ) {
         if ( ! term_exists( $slug, $taxonomy ) ) {
-            wp_insert_term( ucwords( str_replace( '-', ' ', $slug ) ), $taxonomy, [ 'slug' => $slug ] );
+            wp_insert_term( $name, $taxonomy, [ 'slug' => $slug ] );
         }
     }
 }
@@ -497,19 +500,19 @@ function ws_seed_coverage_scope_taxonomy() {
 function ws_seed_retaliation_forms_taxonomy() {
     $taxonomy = 'ws_retaliation_forms';
     $terms    = [
-        'termination',
-        'demotion',
-        'disciplinary-action',
-        'transfer',
-        'schedule-change',
-        'harassment',
-        'blacklisting',
-        'security-clearance-action',
-        'other',
+        'termination'             => 'Termination',
+        'demotion'                => 'Demotion',
+        'disciplinary-action'     => 'Disciplinary Action',
+        'transfer'                => 'Transfer',
+        'schedule-change'         => 'Schedule Change',
+        'harassment'              => 'Harassment',
+        'blacklisting'            => 'Blacklisting',
+        'security-clearance-action' => 'Security Clearance Action',
+        'other'                   => 'Other',
     ];
-    foreach ( $terms as $slug ) {
+    foreach ( $terms as $slug => $name ) {
         if ( ! term_exists( $slug, $taxonomy ) ) {
-            wp_insert_term( ucwords( str_replace( '-', ' ', $slug ) ), $taxonomy, [ 'slug' => $slug ] );
+            wp_insert_term( $name, $taxonomy, [ 'slug' => $slug ] );
         }
     }
 }
@@ -521,26 +524,26 @@ function ws_seed_retaliation_forms_taxonomy() {
 function ws_seed_languages_taxonomy() {
     $taxonomy = 'ws_languages';
     $terms    = [
-        'english',
-        'spanish',
-        'mandarin',
-        'cantonese',
-        'french',
-        'portuguese',
-        'vietnamese',
-        'tagalog',
-        'korean',
-        'arabic',
-        'hindi',
-        'russian',
-        'haitian-creole',
-        'polish',
-        'japanese',
-        'additional',
+        'english'        => 'English',
+        'spanish'        => 'Spanish',
+        'mandarin'       => 'Mandarin',
+        'cantonese'      => 'Cantonese',
+        'french'         => 'French',
+        'portuguese'     => 'Portuguese',
+        'vietnamese'     => 'Vietnamese',
+        'tagalog'        => 'Tagalog',
+        'korean'         => 'Korean',
+        'arabic'         => 'Arabic',
+        'hindi'          => 'Hindi',
+        'russian'        => 'Russian',
+        'haitian-creole' => 'Haitian Creole',
+        'polish'         => 'Polish',
+        'japanese'       => 'Japanese',
+        'additional'     => 'Additional',
     ];
-    foreach ( $terms as $slug ) {
+    foreach ( $terms as $slug => $name ) {
         if ( ! term_exists( $slug, $taxonomy ) ) {
-            wp_insert_term( ucwords( str_replace( '-', ' ', $slug ) ), $taxonomy, [ 'slug' => $slug ] );
+            wp_insert_term( $name, $taxonomy, [ 'slug' => $slug ] );
         }
     }
 }
@@ -551,15 +554,99 @@ function ws_seed_languages_taxonomy() {
 function ws_seed_case_stage_taxonomy() {
     $taxonomy = 'ws_case_stage';
     $terms    = [
-        'pre-report',
-        'post-report',
-        'retaliation-active',
-        'litigation',
-        'other',
+        'pre-report'         => 'Pre-Report',
+        'post-report'        => 'Post-Report',
+        'retaliation-active' => 'Retaliation Active',
+        'litigation'         => 'Litigation',
+        'other'              => 'Other',
     ];
-    foreach ( $terms as $slug ) {
+    foreach ( $terms as $slug => $name ) {
         if ( ! term_exists( $slug, $taxonomy ) ) {
-            wp_insert_term( ucwords( str_replace( '-', ' ', $slug ) ), $taxonomy, [ 'slug' => $slug ] );
+            wp_insert_term( $name, $taxonomy, [ 'slug' => $slug ] );
         }
+    }
+}
+
+/**
+ * Seeds ws_jurisdiction taxonomy with canonical USPS codes.
+ * Special case: 'us' => 'Federal' (not 'Us' or 'United States').
+ * Includes DC and the five U.S. territories.
+ * Display order: Federal first, DC second, states alphabetical, territories alphabetical.
+ */
+function ws_seed_jurisdiction_taxonomy() {
+    $taxonomy = 'ws_jurisdiction';
+    $terms    = [
+        'us' => 'Federal',
+        'dc' => 'District of Columbia',
+        'al' => 'Alabama',
+        'ak' => 'Alaska',
+        'az' => 'Arizona',
+        'ar' => 'Arkansas',
+        'ca' => 'California',
+        'co' => 'Colorado',
+        'ct' => 'Connecticut',
+        'de' => 'Delaware',
+        'fl' => 'Florida',
+        'ga' => 'Georgia',
+        'hi' => 'Hawaii',
+        'id' => 'Idaho',
+        'il' => 'Illinois',
+        'in' => 'Indiana',
+        'ia' => 'Iowa',
+        'ks' => 'Kansas',
+        'ky' => 'Kentucky',
+        'la' => 'Louisiana',
+        'me' => 'Maine',
+        'md' => 'Maryland',
+        'ma' => 'Massachusetts',
+        'mi' => 'Michigan',
+        'mn' => 'Minnesota',
+        'ms' => 'Mississippi',
+        'mo' => 'Missouri',
+        'mt' => 'Montana',
+        'ne' => 'Nebraska',
+        'nv' => 'Nevada',
+        'nh' => 'New Hampshire',
+        'nj' => 'New Jersey',
+        'nm' => 'New Mexico',
+        'ny' => 'New York',
+        'nc' => 'North Carolina',
+        'nd' => 'North Dakota',
+        'oh' => 'Ohio',
+        'ok' => 'Oklahoma',
+        'or' => 'Oregon',
+        'pa' => 'Pennsylvania',
+        'ri' => 'Rhode Island',
+        'sc' => 'South Carolina',
+        'sd' => 'South Dakota',
+        'tn' => 'Tennessee',
+        'tx' => 'Texas',
+        'ut' => 'Utah',
+        'vt' => 'Vermont',
+        'va' => 'Virginia',
+        'wa' => 'Washington',
+        'wv' => 'West Virginia',
+        'wi' => 'Wisconsin',
+        'wy' => 'Wyoming',
+        'as' => 'American Samoa',
+        'gu' => 'Guam',
+        'mp' => 'Northern Mariana Islands',
+        'pr' => 'Puerto Rico',
+        'vi' => 'U.S. Virgin Islands',
+    ];
+    $order = 1;
+    foreach ( $terms as $slug => $name ) {
+        if ( ! term_exists( $slug, $taxonomy ) ) {
+            $result = wp_insert_term( $name, $taxonomy, [ 'slug' => $slug ] );
+            if ( ! is_wp_error( $result ) ) {
+                update_term_meta( $result['term_id'], 'display_order', $order );
+            }
+        } else {
+            $existing = get_term_by( 'slug', $slug, $taxonomy );
+            if ( $existing ) {
+                update_term_meta( $existing->term_id, 'display_order', $order );
+            }
+        }
+        $order++;
     }
 }

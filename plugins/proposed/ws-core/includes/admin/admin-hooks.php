@@ -609,3 +609,101 @@ function ws_sync_additional_languages_term( $post_id ) {
         wp_remove_object_terms( $post_id, $additional_term->term_id, 'ws_languages' );
     }
 }
+
+// ---------------------------------------------------------------
+// ACF Taxonomy Field Query Overrides
+// ---------------------------------------------------------------
+/**
+ * Apply display_order sort to the ws_jurisdiction taxonomy ACF select field.
+ */
+add_filter( 'acf/fields/taxonomy/query/key=field_jurisdiction_tax', function( $args, $field, $post_id ) {
+    $args['meta_key'] = 'display_order';
+    $args['orderby']  = 'meta_value_num';
+    $args['order']    = 'ASC';
+    return $args;
+}, 10, 3 );
+
+// ---------------------------------------------------------------
+// Jurisdiction CPT — Restrict Manual Creation
+// ---------------------------------------------------------------
+// Remove 'Add New' from the ws-jurisdiction CPT menu entirely
+add_action( 'admin_menu', function() {
+    remove_submenu_page( 'edit.php?post_type=ws-jurisdiction', 'post-new.php?post_type=ws-jurisdiction' );
+} );
+
+// Redirect anyone who reaches the new post screen anyway
+add_action( 'load-post-new.php', function() {
+    if ( isset( $_GET['post_type'] ) && $_GET['post_type'] === 'ws-jurisdiction' ) {
+        wp_die(
+            __( '<strong>WhistleblowerShield:</strong> New Jurisdiction records cannot be created manually. All 57 jurisdictions are seeded at installation. If a jurisdiction is missing, re-run the seeder via WP-CLI or contact the site administrator.' ),
+            __( 'Action Not Permitted' ),
+            [ 'back_link' => true ]
+        );
+    }
+} );
+// ---------------------------------------------------------------
+// Jurisdiction CPT — Identity Field Enforcement
+// ---------------------------------------------------------------
+
+add_filter( 'acf/prepare_field/key=field_jx_code', function( $field ) {
+    $field['readonly'] = true;
+    $field['disabled'] = true;
+    return $field;
+} );
+add_filter( 'acf/prepare_field/key=field_jurisdiction_name', function( $field ) {
+    $field['readonly'] = true;
+    $field['disabled'] = true;
+    return $field;
+} );
+add_filter( 'acf/prepare_field/key=field_jurisdiction_class', function( $field ) {
+    $field['readonly'] = true;
+    $field['disabled'] = true;
+    return $field;
+} );
+// ---------------------------------------------------------------
+// Jurisdiction CPT — Enforce Manual Editing Restrictions
+// ---------------------------------------------------------------
+// Direct get_post_meta() call is intentional here. ws_matrix_source is an
+// administrative flag written by the seeder and consumed exclusively by admin
+// tooling. It is not jurisdiction content and does not belong in the query layer.
+
+add_action( 'acf/save_post', function( $post_id ) {
+
+    if ( get_post_type( $post_id ) !== 'ws-jurisdiction' ) {
+        return;
+    }
+
+    $matrix_source = get_post_meta( $post_id, 'ws_matrix_source', true );
+    if ( ! $matrix_source ) {
+        return;
+    }
+
+    $matrix = ws_get_jurisdiction_matrix();
+    $key    = strtoupper( $matrix_source );
+
+    if ( ! isset( $matrix[ $key ] ) ) {
+        return;
+    }
+
+    $entry = $matrix[ $key ];
+
+    update_field( 'field_jx_code',            $entry['ws_jx_code'],            $post_id );
+    update_field( 'field_jurisdiction_class', $entry['ws_jurisdiction_class'], $post_id );
+    update_field( 'field_jurisdiction_name',  $entry['ws_jurisdiction_name'],  $post_id );
+
+}, 1 );
+// ── Jurisdiction CPT — Conditional Button to Wikimedia Flag when URL is present
+// ---------------------------------------------------------------
+// Direct get_post_meta() call is intentional here. ws_matrix_source is an
+// administrative flag...
+// ---------------------------------------------------------------
+// ACF Field Presentation Overrides
+// ---------------------------------------------------------------
+add_filter( 'acf/prepare_field/key=field_jx_flag_source_url', function( $field ) {
+    $post_id = get_the_ID();
+    $url     = get_post_meta( $post_id, 'ws_jx_flag_source_url', true );
+    if ( $url ) {
+        $field['instructions'] .= ' <a href="' . esc_url( $url ) . '" target="_blank" rel="noopener noreferrer nofollow">Open Commons page &rarr;</a>';
+    }
+    return $field;
+} );
