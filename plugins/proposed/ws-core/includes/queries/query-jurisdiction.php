@@ -172,9 +172,6 @@ function ws_resolve_display_name( $user_id ) {
 /**
  * Builds the standard stamp record sub-array for a given post.
  *
- * //@todo — Remove date_created_gmt and last_edited_gmt from passed data;
- *            they are for internal data audit only and should not be surfaced
- *            through the shortcode / render layer.
  *
  * @param  int   $post_id  Post ID.
  * @return array
@@ -188,12 +185,10 @@ function ws_build_record_array( $post_id ) {
         'create_author'      => $create_author_id,
         'author_name'        => ws_resolve_display_name( $create_author_id ),
         'date_created'       => get_post_meta( $post_id, 'date_created',     true ),
-        'date_created_gmt'   => get_post_meta( $post_id, 'date_created_gmt', true ),
+        'last_edited'        => get_post_meta( $post_id, 'last_edited',      true ),
         'last_edited_author' => $last_edited_author_id,
         'editor_name'        => ws_resolve_display_name( $last_edited_author_id ),
-        'last_edited'        => get_post_meta( $post_id, 'last_edited',      true ),
-        'last_edited_gmt'    => get_post_meta( $post_id, 'last_edited_gmt',  true ),
-    ];
+		];
 }
 
 
@@ -215,18 +210,18 @@ function ws_build_record_array( $post_id ) {
  */
 function ws_build_plain_english_array( $post_id ) {
 
-    $plain_reviewed_by_id = (int) get_post_meta( $post_id, 'plain_english_reviewed_by', true );
-    $summarized_by_id     = (int) get_post_meta( $post_id, 'plain_english_by',     true );
+    $plain_english_reviewed_by_id = (int) get_post_meta( $post_id, 'plain_english_reviewed_by', true );
+    $plain_english_by_id          = (int) get_post_meta( $post_id, 'plain_english_by',          true );
 
     return [
         'has_plain_english'             => (bool) get_post_meta( $post_id, 'has_plain_english', true ),
-        'plain_english_wysiwyg'         => get_post_meta( $post_id, 'plain_english',            true ),
-        'plain_english_by'                 => $summarized_by_id,
-        'plain_english_by_name'            => ws_resolve_display_name( $summarized_by_id ),
-        'plain_english_date'               => get_post_meta( $post_id, 'summarized_date', true ),
+        'plain_english_wysiwyg'         => get_post_meta( $post_id, 'plain_english_wysiwyg', true ),
+        'plain_english_by'              => $plain_english_by_id,
+        'plain_english_by_name'         => ws_resolve_display_name( $plain_english_by_id ),
+        'plain_english_date'            => get_post_meta( $post_id, 'plain_english_date', true ),
         'plain_english_reviewed'        => (bool) get_post_meta( $post_id, 'plain_english_reviewed', true ),
-        'plain_english_reviewed_by'     => $plain_reviewed_by_id,
-        'plain_english_reviewed_name'   => ws_resolve_display_name( $plain_reviewed_by_id ),
+        'plain_english_reviewed_by'     => $plain_english_reviewed_by_id,
+        'plain_english_reviewed_name'   => ws_resolve_display_name( $plain_english_reviewed_by_id ),
   ];
 }
 
@@ -419,6 +414,8 @@ function ws_get_jx_summary_data( $jx_term_id ) {
         // Review field — jx-summary uses last_reviewed directly (no has_plain_english gate)
 		// 'has_plain_english' is always true for jx-summary no meta flag required
         // 'last_reviewed' => get_post_meta( $sid, 'last_reviewed', true ), // - depreciated
+		// Plain language fields
+        'plain'         => ws_build_plain_english_array( $sid ),
         // Record management
         'record'        => ws_build_record_array( $sid ),
     ];
@@ -479,14 +476,15 @@ function ws_get_jx_statute_data( $jx_term_id ) {
                 'order'   => (int) get_post_meta( $sid, 'order', true ),
                 'is_fed'  => $is_fed,
                 // Statute-specific structured fields
-                'official_name'       => get_post_meta( $sid, 'ws_jx_statute_official_name',       true ),
-                'limit_value'         => get_post_meta( $sid, 'ws_jx_statute_limit_value',         true ),
-                'limit_unit'          => get_post_meta( $sid, 'ws_jx_statute_limit_unit',          true ),
-                'trigger'             => get_post_meta( $sid, 'ws_jx_statute_trigger',             true ),
-                'tolling_notes'       => get_post_meta( $sid, 'ws_jx_statute_tolling_notes',       true ),
-                'exhaustion_required' => (bool) get_post_meta( $sid, 'ws_jx_statute_exhaustion_required', true ),
-                'exhaustion_details'  => get_post_meta( $sid, 'ws_jx_statute_exhaustion_details',  true ),
-                'burden_of_proof'     => get_post_meta( $sid, 'ws_statute_burden_of_proof',        true ),
+                'official_name'           => get_post_meta( $sid, 'ws_jx_statute_official_name',              true ),
+                'limit_value'             => get_post_meta( $sid, 'ws_jx_statute_limit_value',                true ),
+                'limit_unit'              => get_post_meta( $sid, 'ws_jx_statute_limit_unit',                 true ),
+                'trigger'                 => get_post_meta( $sid, 'ws_jx_statute_trigger',                    true ),
+                'tolling_notes'           => get_post_meta( $sid, 'ws_jx_statute_tolling_notes',              true ),
+                'exhaustion_required'     => (bool) get_post_meta( $sid, 'ws_jx_statute_exhaustion_required', true ),
+                'exhaustion_details'      => get_post_meta( $sid, 'ws_jx_statute_exhaustion_details',         true ),
+                'burden_of_proof'         => get_post_meta( $sid, 'ws_statute_burden_of_proof',               true ),
+                'burden_of_proof_details' => get_post_meta( $sid, 'ws_statute_burden_of_proof_details',       true ),
                 // Plain language fields
                 'plain'  => ws_build_plain_english_array( $sid ),
                 // Record management
@@ -972,10 +970,10 @@ function ws_get_legal_updates_data( $jx_id = 0, $count = 5 ) {
     ];
 
     if ( $jx_id ) {
-        // ws_legal_update_jurisdiction is an ACF relationship field that
+        // ws_update_jurisdiction is a taxonomy field that
         // serialises post IDs — LIKE with a quoted ID matches within it.
-        $query_args['meta_query'] = [ [
-            'key'     => 'ws_legal_update_jurisdiction',
+        $query_args['tax_query'] = [ [
+            'key'     => 'ws_update_jurisdiction',
             'value'   => '"' . (int) $jx_id . '"',
             'compare' => 'LIKE',
         ] ];
@@ -996,6 +994,8 @@ function ws_get_legal_updates_data( $jx_id = 0, $count = 5 ) {
             'law_name'       => get_post_meta( $uid, 'ws_legal_update_law_name',      true ) ?: '',
             'effective_date' => get_post_meta( $uid, 'ws_legal_update_effective_date', true ),
             'post_date'      => get_post_field( 'post_date', $uid ),
+            'source_post_id'      => get_post_field( 'ws_legal_update_source_post_id', $uid ),
+            'source_post_type'      => get_post_field( 'ws_legal_update_source_post_type', $uid ),
             'summary_html'   => wp_kses_post( get_post_meta( $uid, 'ws_legal_update_summary', true ) ?: '' ),
             // Record management
             'record' => ws_build_record_array( $uid ),

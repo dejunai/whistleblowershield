@@ -1,5 +1,24 @@
 <?php
 /**
+// ⚠️  DEVELOPMENT ONLY — NOT LIVE
+// ==================================================================
+// This plugin is NOT deployed to a live site. There is NO
+// production database. NO user data exists. NO migration
+// concerns apply. Architectural changes are free to be
+// destructive until this notice is removed.
+//
+// When this changes: remove this block, audit all @todo items
+// flagged "pre-launch only", and run the full testing pass
+// documented in project-status.md before activating.
+// ===================================================================
+//	
+//	**THIS PLUGIN USES A QUERY-LAYER. DO NOT USE DIRECT CALLS TO META**
+//
+//	/includes/queries/query-jurisdiction.php is the query-layer,
+//	if it does not return the necessary data, extend or add functions
+//	
+// ----------------------------------------------------------------------
+ *
  * Plugin Name: WhistleblowerShield Core
  * Description: Core architecture for WhistleblowerShield. Proposed replacement
  *              plugin — radical refactor of v2.3.1. Not an upgrade of the live plugin.
@@ -40,8 +59,8 @@
  *      jx-summary is the plain language document; the other CPTs have optional
  *      plain language overlays toggled per-record.
  *
- *   8. Trust badge: ws_render_plain_reviewed_badge() replaces the removed legal
- *      review badge system. Legal review badge removed entirely.
+ *   8. Trust badge: ws_render_plain_english_reviewed_badge() replaces the removed
+ *      legal review badge system. Legal review badge removed entirely.
  *
  *   9. Query layer: ws_get_jx_summary_data(), ws_get_agency_data(),
  *      ws_get_assist_org_data() added. ws_get_jx_summary() and

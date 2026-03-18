@@ -310,106 +310,119 @@ function ws_apply_glossary_tooltips( $html ) {
     $doc          = new DOMDocument();
 
     $prev_libxml = libxml_use_internal_errors( true );
-    $doc->loadHTML( $charset_hint . $html . '</body></html>', LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD );
-    libxml_clear_errors();
 
-    $body = $doc->getElementsByTagName( 'body' )->item( 0 );
-    if ( ! $body ) {
-        libxml_use_internal_errors( $prev_libxml );
-        return $html;
-    }
+	try {
 
-    // ── Walk text nodes ───────────────────────────────────────────────────
+		$doc->loadHTML( $charset_hint . $html . '</body></html>', LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD );
+		libxml_clear_errors();
 
-    // Build a list of text nodes first — modifying the DOM during traversal
-    // causes iterator issues with recursive descent.
-    $text_nodes = [];
-    ws_glossary_collect_text_nodes( $body, $skip_tags, $text_nodes );
+		$body = $doc->getElementsByTagName( 'body' )->item( 0 );
+		if ( ! $body ) {
+			return $html;
+			}
 
-    foreach ( $text_nodes as $text_node ) {
+		// ── Walk text nodes ───────────────────────────────────────────────────
 
-        $original = $text_node->nodeValue;
-        if ( empty( trim( $original ) ) ) {
-            continue;
-        }
+		// Build a list of text nodes first — modifying the DOM during traversal
+		// causes iterator issues with recursive descent.
+		$text_nodes = [];
+		ws_glossary_collect_text_nodes( $body, $skip_tags, $text_nodes );
 
-        // Track whether this text node was modified.
-        $fragment_html = htmlspecialchars( $original, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
-        $modified      = false;
+		foreach ( $text_nodes as $text_node ) {
 
-        foreach ( $lookup as $term => $definition ) {
+			$original = $text_node->nodeValue;
+			if ( empty( trim( $original ) ) ) {
+				continue;
+			}
 
-            $term_lower = strtolower( $term );
+			// Track whether this text node was modified.
+			$fragment_html = htmlspecialchars( $original, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+			$modified      = false;
 
-            // Skip if already matched in this scan pass.
-            if ( isset( $matched[ $term_lower ] ) ) {
-                continue;
-            }
+			foreach ( $lookup as $term => $definition ) {
 
-            // Whole-word, case-insensitive pattern.
-            // \b word boundary anchors prevent partial-word matches.
-            $pattern     = '/\b(' . preg_quote( $term, '/' ) . ')\b/iu';
-            $replacement = '<span class="ws-term-highlight" data-tooltip="'
-                         . esc_attr( $definition )
-                         . '">$1</span>';
+				$term_lower = strtolower( $term );
 
-            // Replace first occurrence only (limit = 1).
-            $new_html = preg_replace( $pattern, $replacement, $fragment_html, 1, $count );
+				// Skip if already matched in this scan pass.
+				if ( isset( $matched[ $term_lower ] ) ) {
+					continue;
+				}
 
-            if ( $count > 0 && null !== $new_html ) {
-                $fragment_html          = $new_html;
-                $matched[ $term_lower ] = true;
-                $modified               = true;
-            }
-        }
+				// Whole-word, case-insensitive pattern.
+				// \b word boundary anchors prevent partial-word matches.
+				$pattern     = '/\b(' . preg_quote( $term, '/' ) . ')\b/iu';
+				$replacement = '<span class="ws-term-highlight" data-tooltip="'
+							 . esc_attr( $definition )
+							 . '">$1</span>';
 
-        if ( ! $modified ) {
-            continue;
-        }
+				// Replace first occurrence only (limit = 1).
+				$new_html = preg_replace( $pattern, $replacement, $fragment_html, 1, $count );
 
-        // ── Replace text node with parsed HTML fragment ───────────────────
-        //
-        // Since DOMText cannot contain child elements, we replace the text
-        // node with a temporary container, parse the injected HTML into it,
-        // then move its children into the parent and remove the container.
+				if ( $count > 0 && null !== $new_html ) {
+					$fragment_html          = $new_html;
+					$matched[ $term_lower ] = true;
+					$modified               = true;
+				}
+			}
 
-        $parent    = $text_node->parentNode;
-        $container = $doc->createElement( 'ws-gloss-tmp' );
-        $parent->replaceChild( $container, $text_node );
+			if ( ! $modified ) {
+				continue;
+			}
 
-        $frag_doc = new DOMDocument();
-        libxml_use_internal_errors( true );
-        $frag_doc->loadHTML(
-            '<html><head><meta charset="UTF-8"></head><body>' . $fragment_html . '</body></html>',
-            LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD
-        );
-        libxml_clear_errors();
+			// ── Replace text node with parsed HTML fragment ───────────────────
+			//
+			// Since DOMText cannot contain child elements, we replace the text
+			// node with a temporary container, parse the injected HTML into it,
+			// then move its children into the parent and remove the container.
 
-        $frag_body = $frag_doc->getElementsByTagName( 'body' )->item( 0 );
-        if ( ! $frag_body ) {
-            // Restore original text node on parse failure.
-            $parent->replaceChild( $text_node, $container );
-            continue;
-        }
+			$parent    = $text_node->parentNode;
+			$container = $doc->createElement( 'ws-gloss-tmp' );
+			$parent->replaceChild( $container, $text_node );
 
-        foreach ( iterator_to_array( $frag_body->childNodes ) as $child ) {
-            $imported = $doc->importNode( $child, true );
-            $parent->insertBefore( $imported, $container );
-        }
+			$frag_doc = new DOMDocument();
 
-        $parent->removeChild( $container );
-    }
+			$frag_doc->loadHTML(
+				'<html><head><meta charset="UTF-8"></head><body>' . $fragment_html . '</body></html>',
+				LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD
+			);
+			libxml_clear_errors();
 
-    // ── Extract modified body HTML ────────────────────────────────────────
+			$frag_body = $frag_doc->getElementsByTagName( 'body' )->item( 0 );
+			if ( ! $frag_body ) {
+				// Restore original text node on parse failure.
+				$parent->replaceChild( $text_node, $container );
+				continue;
+			}
 
-    $result = '';
-    foreach ( $body->childNodes as $child ) {
-        $result .= $doc->saveHTML( $child );
-    }
+			foreach ( iterator_to_array( $frag_body->childNodes ) as $child ) {
+				$imported = $doc->importNode( $child, true );
+				$parent->insertBefore( $imported, $container );
+			}
 
-    libxml_use_internal_errors( $prev_libxml );
-    return $result ?: $html;
-}
+			$parent->removeChild( $container );
+		}
+
+		// ── Extract modified body HTML ────────────────────────────────────────
+
+		$result = '';
+		foreach ( $body->childNodes as $child ) {
+			$result .= $doc->saveHTML( $child );
+		}
+
+		return $result ?: $html;
+
+		} catch ( Exception $e ) {
+			error_log( sprintf(
+				'[ws-core] Glossary scanner exception: %s (in %s line %d)',
+				$e->getMessage(),
+				__FILE__,
+				__LINE__
+			) );
+			return $html;
+
+		} finally {
+			libxml_use_internal_errors( $prev_libxml );
+	}
 
 
 // ════════════════════════════════════════════════════════════════════════════

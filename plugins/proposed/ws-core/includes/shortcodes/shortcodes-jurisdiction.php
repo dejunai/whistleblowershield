@@ -142,37 +142,25 @@ add_shortcode( 'ws_jx_header', function( $atts ) {
         'district'  => 'District Leadership Offices',
         'federal'   => 'Federal Offices',
     ];
-    $box_label = $labels[ $jx_data['type'] ] ?? 'Official Offices';
+    $box_label = $labels[ $jx_data['class'] ] ?? 'Official Leadership Offices';
 
-    // Map jurisdiction matrix keys to display labels.
-    $gov_label_map = [
-        'governor' => 'Office of the Governor',
-        'mayor'    => 'Office of the Mayor',
-    ];
-    $legal_label_map = [
-        'attorney'  => 'Office of the Attorney General',
-        'inspector' => 'D.C. Office of the Inspector General',
-        'secretary' => 'Office of the Secretary of Justice',
-        'special'   => 'U.S. Office of Special Counsel',
-    ];
-
-    $head_label  = $gov_label_map[ $jx_data['gov']['head_gov_label'] ]   ?? 'Office of the Governor';
-    $legal_label = $legal_label_map[ $jx_data['gov']['legal_auth_label'] ] ?? 'Office of the Attorney General';
+    $head_label  = $jx_data['gov']['executive_label']   ?? 'Office of the Governor';
+    $legal_label = $jx_data['gov']['wb_auth_label']     ?? 'Office of the Attorney General';
 
     $render_data = [
         'jx_name'   => $jx_data['name'],
         'flag_data' => [
             'url'        => $jx_data['flag']['url'],
             'source_url' => $jx_data['flag']['source_url'],
-            'attr_str'   => $jx_data['flag']['attribution'],     // fixed: was ['attr_str']
+            'attr_str'   => $jx_data['flag']['attribution'], 
             'license'    => $jx_data['flag']['license'],
         ],
         'gov_data' => [
             'box_label' => $box_label,
             'links'     => [
                 [ 'url' => $jx_data['gov']['portal_url'],     'label' => $jx_data['gov']['portal_label'] ?: 'Official Government Portal' ],
-                [ 'url' => $jx_data['gov']['head_gov_url'],   'label' => $head_label ],
-                [ 'url' => $jx_data['gov']['legal_auth_url'], 'label' => $legal_label ],
+                [ 'url' => $jx_data['gov']['executive_url'],  'label' => $head_label ],
+                [ 'url' => $jx_data['gov']['wb_auth_url'],    'label' => $legal_label ],
             ],
         ],
     ];
@@ -199,11 +187,13 @@ add_shortcode( 'ws_jx_summary', function() {
     if ( ! $data || empty( $data['content'] ) ) return '';
 
     $footer_html = ws_render_jx_summary_footer( [
-        'author_name'    => $data['author_name'],
-        'fmt_created'    => $data['fmt_created'],
-        'fmt_reviewed'   => $data['fmt_reviewed'],
-        'plain_english_reviewed' => $data['plain_english_reviewed'],
-        'sources'        => $data['sources'] ?: '',
+        'author_name'            => $data['record']['author_name'],
+        'editor_name'            => $data['record']['editor_name'],
+        'date_created'           => $data['record']['date_created'],
+        'last_edited'            => $data['record']['last_edited'],
+        'plain_english_reviewed' => $data['plain']['plain_english_reviewed'],
+        'reviewer_name'          => $data['plain']['plain_english_reviewed_name'],
+        'sources'                => $data['sources'] ?: '',
     ] );
 
     return ws_render_jx_summary_section( wp_kses_post( $data['content'] ), $footer_html );

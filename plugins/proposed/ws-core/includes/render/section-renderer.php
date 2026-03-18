@@ -359,11 +359,14 @@ function ws_render_jx_summary_section( $content, $review_html = '' ) {
 // @return string                HTML badge span.
 // ════════════════════════════════════════════════════════════════════════════
 
-function ws_render_plain_reviewed_badge( $plain_reviewed ) {
+function ws_render_plain_english_reviewed_badge( $plain_reviewed, $reviewer_name = '', $reviewed_date = '' ) {
     if ( $plain_reviewed ) {
-        return '<span class="ws-trust-badge ws-trust-badge--reviewed">&#10003; Reviewed</span>';
+        $tooltip = 'Reviewed by ' . esc_attr( $reviewer_name ) . ' on ' . esc_attr( $reviewed_date );
+        return '<span class="ws-trust-badge ws-trust-badge--reviewed" title="' . $tooltip . '">'
+             . 'Editor Reviewed'
+             . '</span>';
     }
-    return '<span class="ws-trust-badge ws-trust-badge--draft">&#9679; Draft</span>';
+    return '<span class="ws-trust-badge ws-trust-badge--pending">Pending Review</span>';
 }
 
 
@@ -396,19 +399,17 @@ function ws_render_jx_summary_footer( $data ) {
         </p>
         <?php endif; ?>
 
-        <?php if ( $data['fmt_created'] ) : ?>
+        <?php if ( $data['create_date'] ) : ?>
         <p class="ws-jx-summary-date-created">
-            <strong>Date Created:</strong> <?php echo esc_html( $data['fmt_created'] ); ?>
+            <strong>Date Created:</strong> <?php echo esc_html( $data['create_date'] ); ?>
         </p>
         <?php endif; ?>
 
-        <?php if ( $data['fmt_reviewed'] ) : ?>
-        <p class="ws-jx-summary-last-reviewed">
-            <strong>Last Reviewed:</strong> <?php echo esc_html( $data['fmt_reviewed'] ); ?>
-        </p>
-        <?php endif; ?>
-
-        <?php echo ws_render_plain_reviewed_badge( ! empty( $data['plain_english_reviewed'] ) ); ?>
+        <?php echo ws_render_plain_english_reviewed_badge(
+			! empty( $data['plain_english_reviewed'] ),
+			$data['plain_english_reviewed_name'] ?? '',
+			$data['plain_english_date'] ?? ''
+		); ?>
 
         <?php if ( $data['sources'] ) : ?>
         <div class="ws-jx-summary-sources">

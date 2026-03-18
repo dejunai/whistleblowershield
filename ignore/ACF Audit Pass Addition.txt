@@ -1,0 +1,3 @@
+ACF Audit Pass — Phase 4 addition:
+
+Extract stamp fields and plain English fields out of all individual ACF files into two standalone shared field groups: acf-stamp-fields.php and acf-plain-english-fields.php. Remove duplicate field registrations from acf-jx-summaries.php, acf-jx-statutes.php, acf-jx-citations.php, acf-jx-interpretations.php, acf-agencies.php, acf-assist-orgs.php. Update location rules in the two new files to cover all supported CPTs. Verify field keys are canonical and consistent with admin-hooks.php references.

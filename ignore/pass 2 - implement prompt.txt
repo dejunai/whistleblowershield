@@ -1,0 +1,69 @@
+ARCHITECTURAL RULE — NON-NEGOTIABLE:
+Shortcodes are presentation layer only. All data retrieval must go through the query layer in query-jurisdiction.php. If you identify a shortcode that calls get_field(), get_post_meta(), or WP_Query directly, flag it before proceeding — do not silently perpetuate the pattern.
+
+We are implementing the structural findings from a completed ACF audit. The audit report is pasted below. This pass covers field attribute fixes, type corrections, and prefix removals only. Instructions changes are handled in a separate pass.
+Read the audit report carefully before reading any files. The analysis is complete — do not re-audit. Implement only what the report identifies.
+
+AUDIT REPORT
+(paste the full audit report output from Prompt 1 here)
+
+SCOPE OF THIS PASS
+Implement all findings flagged in the audit report under these categories only:
+
+Category 1 — Field Attributes: all attribute additions, removals, and corrections
+Category 2 — Field Types: all type corrections
+Category 3 — Prefix Review: all prefix removals flagged as candidates
+Cross-reference fixes: all field name mismatches, autostamp mismatches, and taxonomy mismatches identified in the report
+
+Do NOT implement Category 4 (Instructions) findings in this pass — those are handled separately.
+
+PREFIX REMOVAL — DOWNSTREAM CONSEQUENCES
+Prefix changes to field names are not isolated to ACF files. Every field name change must be propagated across all files that reference that field name. Before implementing any prefix removal, compile a complete list of every file that references the affected field name and confirm the full scope of changes required.
+Files that may reference field names and must be checked:
+
+query-jurisdiction.php — update all get_field() calls to use new field names
+admin-hooks.php — update all autostamp arrays and hook references
+admin-audit-trail.php — update any field name references
+admin-relationships.php — update any field name references
+admin-navigation.php — update any field name references
+admin-columns.php — update any field name references
+admin-interpretation-metabox.php — update any field name references
+shortcodes-jurisdiction.php — update any field name references
+shortcodes-general.php — update any field name references
+render-jurisdiction.php — update any field name references
+section-renderer.php — update any field name references
+jurisdiction-matrix.php — update any field name references
+court-matrix.php — update any field name references
+
+For field key changes — ACF field keys are internal identifiers. Changing a field key requires updating every get_field() call that uses the key format field_[key] rather than the field name. Scan all files for key-based references before changing any key.
+
+IMPLEMENTATION ORDER
+
+Read every affected file in full before writing any code
+Compile the complete change list from the audit report
+For each prefix removal, confirm the full downstream impact before implementing
+Implement ACF file changes first
+Implement downstream file changes in dependency order — query layer before shortcodes, hooks before render layer
+After all changes, verify no orphaned field references remain
+
+
+FILES LIKELY TO BE MODIFIED:
+
+All ACF files listed in the audit
+query-jurisdiction.php
+admin-hooks.php
+admin-audit-trail.php
+admin-relationships.php
+admin-navigation.php
+admin-columns.php
+admin-interpretation-metabox.php
+shortcodes-jurisdiction.php
+shortcodes-general.php
+render-jurisdiction.php
+section-renderer.php
+jurisdiction-matrix.php
+court-matrix.php
+
+The exact file list will be determined by the audit report findings. Do not modify files not implicated by the audit.
+
+Before writing any code: Read every file listed above in full. Confirm the complete downstream impact of every prefix removal. Flag any conflict, ambiguity, or finding in the audit report that requires clarification before proceeding. Do not implement any change until the full impact has been assessed and confirmed. Treat all structural changes as a single coordinated implementation — do not implement any file in isolation.

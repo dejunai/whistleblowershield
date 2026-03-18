@@ -50,7 +50,7 @@ function ws_register_acf_legal_update() {
 
     acf_add_local_field_group( [
 
-        'key'                   => 'group_ws_legal_update',
+        'key'                   => 'group_legal_update_metadata',
         'title'                 => 'Legal Update Metadata',
         'menu_order'            => 0,
         'position'              => 'normal',
@@ -69,24 +69,26 @@ function ws_register_acf_legal_update() {
         'fields' => [
 
             // ── Affected Jurisdictions ────────────────────────────────────
-            // Multi-select relationship — one update may affect many
-            // jurisdictions. Returns an array of post IDs.
-
-            [
-                'key'           => 'field_ws_update_jurisdictions',
-                'label'         => 'Affected Jurisdictions',
-                'name'          => 'ws_update_jurisdictions',
-                'type'          => 'relationship',
-                'instructions'  => 'Select all jurisdictions affected by this legal update.',
-                'post_type'     => [ 'jurisdiction' ],
-                'filters'       => [ 'search' ],
-                'return_format' => 'id',
-            ],
+			// Taxonomy multi-select — one update may affect many
+			// jurisdictions. Scoped via ws_jurisdiction taxonomy terms.
+			[
+				'key'           => 'field_update_jurisdictions',
+				'label'         => 'Affected Jurisdictions',
+				'name'          => 'ws_update_jurisdictions',
+				'type'          => 'taxonomy',
+				'instructions'  => 'Select all jurisdictions affected by this legal update.',
+				'taxonomy'      => 'ws_jurisdiction',
+				'field_type'    => 'multi_select',
+				'return_format' => 'id',
+				'save_terms'    => 0,
+				'load_terms'    => 0,
+				'add_term'      => 0,
+			],
 
             // ── Update Date ───────────────────────────────────────────────
 
             [
-                'key'            => 'field_ws_update_date',
+                'key'            => 'field_update_date',
                 'label'          => 'Update Date',
                 'name'           => 'ws_update_date',
                 'type'           => 'date_picker',
@@ -119,6 +121,7 @@ function ws_register_acf_legal_update() {
                     'court'      => 'Court Decision',
                     'regulation' => 'Regulatory Change',
                     'policy'     => 'Agency Policy',
+                    'internal'   => 'Internal',
                     'other'      => 'Other',
                 ],
                 'default_value' => 'statute',
@@ -166,7 +169,7 @@ function ws_register_acf_legal_update() {
             // ── Tab: Authorship & Review ──────────────────────────────────
 
             [
-                'key'   => 'field_ws_lu_tab_authorship',
+                'key'   => 'field_authorship_tab',
                 'label' => 'Authorship & Review',
                 'type'  => 'tab',
             ],
