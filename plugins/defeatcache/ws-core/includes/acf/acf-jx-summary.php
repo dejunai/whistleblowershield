@@ -25,23 +25,20 @@
  * at priority 20 (after ACF commits its own fields at priority 10).
  *
  * Written once, never overwritten:
- *   ws_jx_sum_date_created      Local date (Y-m-d)
- *   ws_jx_sum_date_created_gmt  UTC date (Y-m-d)
- *   ws_jx_sum_create_author     User ID of creating user
+ *   date_created      Local date (Y-m-d)
+ *   date_created_gmt  UTC date (Y-m-d)
+ *   create_author     User ID of creating user
  *
  * Written on every save:
- *   ws_jx_sum_last_edited       Local date (Y-m-d)
- *   ws_jx_sum_last_edited_gmt   UTC date (Y-m-d)
- *   ws_jx_sum_last_edited_author  User ID — stamped automatically,
- *                                 visible and editable by admins only.
+ *   last_edited       Local date (Y-m-d)
+ *   last_edited_gmt   UTC date (Y-m-d)
+ *   last_edited_author  User ID — stamped automatically,
+ *                        visible and editable by admins only.
  *
- * ws_jx_sum_date_created is rendered readonly at the bottom of the
- * Authorship & Review tab for admin reference. The remaining stamp
- * fields are not shown in the form, with the exception of
- * ws_jx_sum_last_edited_author which also appears in Authorship &
- * Review (readonly for non-admins, editable for administrators).
- * ws_jx_sum_last_reviewed appears as an editable text field above
- * the date stamps in the same tab.
+ * date_created is rendered readonly at the bottom of the
+ * Authorship & Review tab for admin reference. last_edited_author
+ * also appears in Authorship & Review (readonly for non-admins,
+ * editable for administrators). create_author is displayed readonly.
  *
  * @package    WhistleblowerShield
  * @since      2.1.0
@@ -156,18 +153,18 @@ function ws_register_acf_jx_summary() {
                 'type'  => 'tab',
             ],
             [
-                'key'           => 'field_ws_jx_sum_last_edited_author',
+                'key'           => 'field_last_edited_author',
                 'label'         => 'Last Edited By',
-                'name'          => 'ws_jx_sum_last_edited_author',
+                'name'          => 'last_edited_author',
                 'type'          => 'user',
                 'instructions'  => 'Stamped automatically on every save. Editable by administrators only.',
                 'role'          => [ 'author', 'editor', 'administrator' ],
                 'return_format' => 'array',
             ],
             [
-                'key'           => 'field_ws_jx_sum_plain_reviewed',
+                'key'           => 'field_jx_sum_plain_english_reviewed',
                 'label'         => 'Plain Language Reviewed', //@todo - should only be readonly to author-rank
-                'name'          => 'plain_reviewed',          //        while summary exists but is not reviewed, should be tracked in admin-panel
+                'name'          => 'plain_english_reviewed',          //        while summary exists but is not reviewed, should be tracked in admin-panel
                 'type'          => 'true_false',              //        we need to capture user and store at 'ws_jx_sum_last_reviewed_by'
 															  //        'ws_jx_sum_last_reviewed_by' needs to reveal on toggle, autostamp current user,
 															  //        and be readonly -- editable only by admin
@@ -177,11 +174,11 @@ function ws_register_acf_jx_summary() {
                 'ui_off_text'   => 'Pending',
                 'default_value' => 0,
             ],
-			//@todo - 'ws_jx_sum_create_author' - inadverantly removed, re-add
+			
             [
-                'key'          => 'field_ws_jx_summarized_by',
+                'key'          => 'field_ws_jx_sum_plain_english_by_temp',
                 'label'        => 'Summarized By',
-                'name'         => 'ws_jx_summarized_by', //@todo - duplicate data to 'ws_jx_sum_create_author', unecessary meta_data
+                'name'         => 'ws_jx_sum_create_author',
                 'type'         => 'user',
                 'instructions' => 'Stamped automatically on first save. Identifies who created the plain-language content.',
                 'role'         => [ 'author', 'editor', 'administrator' ],
@@ -190,11 +187,13 @@ function ws_register_acf_jx_summary() {
                 'disabled'     => 1,
             ],
             [
-                'key'          => 'field_ws_jx_summarized_date', //@todo - duplicate data to 'ws_jx_sum_date_created', unecessary meta_data
-                'label'        => 'Summarized Date',
-                'name'         => 'ws_jx_summarized_date',
-                'type'         => 'text',
-                'instructions' => 'Stamped automatically on first save. Read only.',
+                'key'          => 'field_ws_jx_sum_plain_english_reviewed_by',
+                'label'        => 'Reviewed By',
+                'name'         => 'plain_english_reviewed_by',
+                'type'         => 'user',
+                'instructions' => 'Stamped automatically when plain language content is reviewed.',
+                'role'         => [ 'author', 'editor', 'administrator' ],
+                'return_format' => 'id',
                 'readonly'     => 1,
                 'disabled'     => 1,
             ],
@@ -202,39 +201,43 @@ function ws_register_acf_jx_summary() {
             // ── Dates (bottom of Authorship & Review) ─────────────────────
             //
             // All date fields are text type to support readonly rendering.
-            // ws_jx_sum_date_created is stamped once on first save.
-            // ws_jx_sum_last_edited is stamped on every save.
-            // ws_jx_sum_last_reviewed is editable — update manually on
-            // meaningful content revisions. GMT variants and create_author
-            // are written server-side only and do not appear in the form.
+            // date_created is stamped once on first save.
+            // last_edited is stamped on every save.
+            // GMT variants are written server-side only and do not appear in the form.
 
             [
-                'key'          => 'field_ws_jx_sum_date_created',
+                'key'          => 'field_date_created',
                 'label'        => 'Date Created',
-                'name'         => 'ws_jx_sum_date_created',
+                'name'         => 'date_created',
                 'type'         => 'text',
-                'instructions' => 'Set automatically on first save. Read only.', //@todo - should be hidden
+                'instructions' => 'Set automatically on first save. Read only.',
                 'readonly'     => 1,
                 'disabled'     => 1,
-                'wrapper'      => [ 'width' => '50' ],
+                'wrapper'      => [ 'width' => '33' ],
             ],
             [
-                'key'          => 'field_ws_jx_sum_last_edited',
+                'key'          => 'field_last_edited',
                 'label'        => 'Last Edited',
-                'name'         => 'ws_jx_sum_last_edited',
+                'name'         => 'last_edited',
                 'type'         => 'text',
                 'instructions' => 'Stamped automatically on every save. Read only.',
                 'readonly'     => 1,
                 'disabled'     => 1,
-                'wrapper'      => [ 'width' => '50' ],
+                'wrapper'      => [ 'width' => '33' ],
             ],
             [
-                'key'          => 'field_ws_jx_sum_last_reviewed', //@todo - should be hidden until plain_reviewed is true, at which should autofill and be readonly, instructions need to updated.
-                'label'        => 'Last Reviewed',
-                'name'         => 'ws_jx_sum_last_reviewed',
-                'type'         => 'text',
-                'instructions' => 'Update this date each time the summary content is meaningfully revised. This date is displayed publicly on the jurisdiction page.',
+                'key'           => 'field_create_author',
+                'label'         => 'Created By',
+                'name'          => 'create_author',
+                'type'          => 'user',
+                'instructions'  => 'Stamped automatically on first save. Read only.',
+                'role'          => [ 'author', 'editor', 'administrator' ],
+                'return_format' => 'id',
+                'readonly'      => 1,
+                'disabled'      => 1,
+                'wrapper'       => [ 'width' => '33' ],
             ],
+
 
         ], // end fields
 

@@ -95,9 +95,10 @@ function ws_audited_post_types() {
         'jx-summary',
         'jx-statute',
         'jx-citation',
-		'jx-interpretation',
+        'jx-interpretation',
         'ws-legal-update',
         'ws-agency',
+        'ws-reference',
     ];
 }
 

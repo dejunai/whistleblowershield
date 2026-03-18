@@ -116,6 +116,12 @@
  *         registered ACF field). Rewrote [ws_jx_statutes] to handle the
  *         array-of-arrays return from ws_get_jx_statutes() including the
  *         state + federal merge with per-record is_fed labeling.
+ * 3.1.0  Added "→ External References" button to [ws_jx_statutes] and
+ *         [ws_jx_case_law] per-record rendering. Button only renders when
+ *         ws_get_ref_materials() returns non-empty results AND the
+ *         reference materials page resolves via ws_get_reference_page_url().
+ *         @todo Add "→ External References" button to jx-interpretation
+ *         shortcode when that shortcode is implemented.
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit;
@@ -196,7 +202,7 @@ add_shortcode( 'ws_jx_summary', function() {
         'author_name'    => $data['author_name'],
         'fmt_created'    => $data['fmt_created'],
         'fmt_reviewed'   => $data['fmt_reviewed'],
-        'plain_reviewed' => $data['plain_reviewed'],
+        'plain_english_reviewed' => $data['plain_english_reviewed'],
         'sources'        => $data['sources'] ?: '',
     ] );
 
@@ -231,11 +237,31 @@ function ws_shortcode_jx_statutes() {
         if ( $s['is_fed'] ) { $has_fed = true; break; }
     }
 
+    // Helper: build HTML for one statute block including the optional
+    // "→ External References" button. The button is omitted when no
+    // approved ws-reference items are linked to this statute record.
+    $build_statute_chunk = function( $statute ) {
+        $html = apply_filters( 'the_content', $statute['content'] );
+
+        $refs     = ws_get_ref_materials( $statute['id'] );
+        $ref_url  = ! empty( $refs ) ? ws_get_reference_page_url( $statute['id'] ) : '';
+
+        if ( $ref_url ) {
+            $html .= '<div class="ws-ref-materials-link">'
+                   . '<a href="' . esc_url( $ref_url ) . '" class="ws-ref-materials-btn">'
+                   . '&rarr; External References'
+                   . '</a>'
+                   . '</div>';
+        }
+
+        return $html;
+    };
+
     if ( ! $has_fed ) {
         // Single-group render: no federal append.
         $content = '';
         foreach ( $statutes as $statute ) {
-            $content .= apply_filters( 'the_content', $statute['content'] );
+            $content .= $build_statute_chunk( $statute );
         }
         return ws_render_section( 'Relevant Statutes', $content );
     }
@@ -244,7 +270,7 @@ function ws_shortcode_jx_statutes() {
     $local_html = '';
     $fed_html   = '';
     foreach ( $statutes as $statute ) {
-        $chunk = apply_filters( 'the_content', $statute['content'] );
+        $chunk = $build_statute_chunk( $statute );
         if ( $statute['is_fed'] ) {
             $fed_html   .= $chunk;
         } else {
@@ -345,10 +371,24 @@ function ws_shortcode_jx_case_law() {
                          . 'class="ws-footnote-return" '
                          . 'title="Return to text">&#x21a9;</a>';
 
+            // "→ External References" button — only when approved references exist.
+            $ref_btn = '';
+            $refs    = ws_get_ref_materials( $citation['id'] );
+            if ( ! empty( $refs ) ) {
+                $ref_url = ws_get_reference_page_url( $citation['id'] );
+                if ( $ref_url ) {
+                    $ref_btn = ' <a href="' . esc_url( $ref_url ) . '" '
+                             . 'class="ws-ref-materials-btn ws-ref-materials-btn--inline">'
+                             . '&rarr; External References'
+                             . '</a>';
+                }
+            }
+
             $items[] = '<small id="' . esc_attr( $fn_id ) . '">'
                      . $return_link . ' '
                      . $fn_index . '. '
                      . $linked_label
+                     . $ref_btn
                      . '</small>';
 
             $fn_index++;

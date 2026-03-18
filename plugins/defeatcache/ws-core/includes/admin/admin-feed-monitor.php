@@ -35,7 +35,7 @@
  * --------------
  * Items must contain at least one enacted keyword in title or description:
  *   signed into law, enacted, became law, signed by the president,
- *   chaptered, effective, public law
+ *   chaptered, effective law, public law
  *
  * Items containing exclusion keywords are skipped:
  *   introduced, referred to committee, passed house, passed senate,
@@ -50,7 +50,7 @@
  *
  * STAGED JSON FILE
  * ----------------
- * Location: {plugin_dir}/data/feed-staged.json
+ * Location: {uploads_dir}/ws-feed-data/feed-staged.json
  * Shape per item:
  * {
  *     "guid":        string,   // Unique item identifier from feed
@@ -79,7 +79,7 @@
  * ws_feed_monitor_app_id   — Inoreader App ID (optional)
  * ws_feed_monitor_app_key  — Inoreader App Key (optional)
  * ws_feed_monitor_last_run — Unix timestamp of last successful poll
- * ws_feed_monitor_ingested — array of GUIDs already ingested (dedup log)
+ * ws_feed_monitor_ingested — array of {guid, ts} pairs already ingested (30-day rolling dedup log)
  *
  * @package    WhistleblowerShield
  * @since      3.2.0
@@ -99,11 +99,29 @@ defined( 'ABSPATH' ) || exit;
 // Constants
 // ════════════════════════════════════════════════════════════════════════════
 
-define( 'WS_FEED_STREAM',    'user/-/label/LegalResearch' );
-define( 'WS_FEED_API_BASE',  'https://www.inoreader.com/reader/api/0/stream/contents/' );
-define( 'WS_FEED_DATA_DIR',  WS_CORE_PATH . 'data/' );
-define( 'WS_FEED_STAGED_FILE', WS_FEED_DATA_DIR . 'feed-staged.json' );
+define( 'WS_FEED_STREAM',   'user/-/label/LegalResearch' );
+define( 'WS_FEED_API_BASE', 'https://www.inoreader.com/reader/api/0/stream/contents/' );
 define( 'WS_FEED_MAX_ITEMS', 50 ); // Max items to fetch per poll
+
+/**
+ * Returns the feed data directory path (under wp-content/uploads/ws-feed-data/).
+ * Computed at runtime so it respects multisite and filtered upload paths.
+ * Never inside the plugin directory — safe from data loss on plugin update.
+ */
+function ws_feed_data_dir() {
+    static $dir = null;
+    if ( null === $dir ) {
+        $dir = wp_upload_dir()['basedir'] . '/ws-feed-data/';
+    }
+    return $dir;
+}
+
+/**
+ * Returns the absolute path to the staged JSON file.
+ */
+function ws_feed_staged_file() {
+    return ws_feed_data_dir() . 'feed-staged.json';
+}
 
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -140,21 +158,25 @@ define( 'WS_FEED_EXCLUSION_KEYWORDS', [
 // ════════════════════════════════════════════════════════════════════════════
 // Ensure Data Directory Exists
 //
-// Creates the /data/ directory on first load if it does not exist.
-// Writes an .htaccess to block direct web access to the JSON file.
+// Creates the feed data directory under wp-content/uploads on first load.
+// Writes an .htaccess to block direct web access (Apache only; Nginx servers
+// must block the path at the server-config level).
 // ════════════════════════════════════════════════════════════════════════════
 
 add_action( 'admin_init', 'ws_feed_monitor_ensure_data_dir' );
 
 /**
- * Creates the data directory and protects it from direct web access.
+ * Creates the feed data directory and writes an Apache .htaccess guard.
  */
 function ws_feed_monitor_ensure_data_dir() {
-    if ( ! file_exists( WS_FEED_DATA_DIR ) ) {
-        wp_mkdir_p( WS_FEED_DATA_DIR );
+    $dir = ws_feed_data_dir();
+    if ( ! file_exists( $dir ) ) {
+        wp_mkdir_p( $dir );
     }
 
-    $htaccess = WS_FEED_DATA_DIR . '.htaccess';
+    // .htaccess blocks direct HTTP access on Apache. Nginx requires separate
+    // server-level configuration to protect this path.
+    $htaccess = $dir . '.htaccess';
     if ( ! file_exists( $htaccess ) ) {
         file_put_contents( $htaccess, "Deny from all\n" );
     }
@@ -238,7 +260,7 @@ function ws_feed_monitor_poll() {
     }
 
     $code = wp_remote_retrieve_response_code( $response );
-    if ( $code !== 200 ) {
+    if ( (int) $code !== 200 ) {
         // Store the error code for display in the admin UI.
         update_option( 'ws_feed_monitor_last_error', "HTTP {$code}" );
         return -1;
@@ -259,6 +281,11 @@ function ws_feed_monitor_poll() {
     $staged   = ws_feed_monitor_read_staged();
     $ingested = get_option( 'ws_feed_monitor_ingested', [] );
 
+    // Extract GUIDs — supports both legacy bare strings and current {guid, ts} entries.
+    $ingested_guids = array_map(
+        fn( $e ) => is_array( $e ) ? $e['guid'] : $e,
+        $ingested
+    );
     $staged_guids = array_column( $staged, 'guid' );
     $new_count    = 0;
 
@@ -280,7 +307,7 @@ function ws_feed_monitor_poll() {
         }
 
         // Skip already ingested or already staged.
-        if ( in_array( $guid, $ingested, true ) ) {
+        if ( in_array( $guid, $ingested_guids, true ) ) {
             continue;
         }
         if ( in_array( $guid, $staged_guids, true ) ) {
@@ -411,7 +438,7 @@ function ws_feed_ingest_item( $guid ) {
     // ── Plain English defaults ────────────────────────────────────────────
 
     update_post_meta( $post_id, 'has_plain_english', 0 );
-    update_post_meta( $post_id, 'plain_reviewed',    0 );
+    update_post_meta( $post_id, 'plain_english_reviewed', 0 );
 
     // ── Reviewer notes → post excerpt ─────────────────────────────────────
 
@@ -428,7 +455,16 @@ function ws_feed_ingest_item( $guid ) {
     ws_feed_monitor_write_staged( $staged );
 
     $ingested   = get_option( 'ws_feed_monitor_ingested', [] );
-    $ingested[] = $entry['guid'];
+    $ingested[] = [ 'guid' => $entry['guid'], 'ts' => time() ];
+
+    // Trim log to entries within the last 30 days to keep the option bounded.
+    // Legacy bare-string entries (no ts) are dropped on first trim pass.
+    $cutoff   = time() - ( 30 * DAY_IN_SECONDS );
+    $ingested = array_values( array_filter(
+        $ingested,
+        fn( $e ) => is_array( $e ) && $e['ts'] >= $cutoff
+    ) );
+
     update_option( 'ws_feed_monitor_ingested', $ingested );
 
     return $post_id;
@@ -445,10 +481,11 @@ function ws_feed_ingest_item( $guid ) {
  * @return array  Staged items array, empty array if file missing or invalid.
  */
 function ws_feed_monitor_read_staged() {
-    if ( ! file_exists( WS_FEED_STAGED_FILE ) ) {
+    $file = ws_feed_staged_file();
+    if ( ! file_exists( $file ) ) {
         return [];
     }
-    $raw  = file_get_contents( WS_FEED_STAGED_FILE );
+    $raw  = file_get_contents( $file );
     $data = json_decode( $raw, true );
     return is_array( $data ) ? $data : [];
 }
@@ -461,7 +498,7 @@ function ws_feed_monitor_read_staged() {
  */
 function ws_feed_monitor_write_staged( array $staged ) {
     $json = wp_json_encode( $staged, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE );
-    return (bool) file_put_contents( WS_FEED_STAGED_FILE, $json );
+    return (bool) file_put_contents( ws_feed_staged_file(), $json );
 }
 
 

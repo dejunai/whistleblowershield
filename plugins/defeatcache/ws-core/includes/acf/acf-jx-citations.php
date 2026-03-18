@@ -198,9 +198,9 @@ function ws_register_acf_jx_citations() {
                 'type'  => 'tab',
             ],
             [
-                'key'           => 'field_ws_jx_cite_last_edited_author',
+                'key'           => 'field_last_edited_author',
                 'label'         => 'Last Edited By',
-                'name'          => 'ws_jx_cite_last_edited_author',
+                'name'          => 'last_edited_author',
                 'type'          => 'user',
                 'instructions'  => 'Stamped automatically on every save. Editable by administrators only.',
                 'role'          => [ 'author', 'editor', 'administrator' ],
@@ -209,31 +209,42 @@ function ws_register_acf_jx_citations() {
 
             // ── Dates (bottom of Authorship & Review) ─────────────────────
             //
-            // Text fields for readonly display. ws_jx_cite_date_created
-            // is stamped once on first save. ws_jx_cite_last_edited is
-            // stamped on every save. ws_jx_cite_last_reviewed is editable —
-            // update when citation content is meaningfully revised.
-            // GMT variants written server-side only, not shown.
+            // Text fields for readonly display. date_created is stamped once
+            // on first save. last_edited is stamped on every save.
+            // last_reviewed is editable — update when citation content is
+            // meaningfully revised. GMT variants written server-side only.
 
             [
-                'key'          => 'field_ws_jx_cite_date_created',
+                'key'          => 'field_date_created',
                 'label'        => 'Date Created',
-                'name'         => 'ws_jx_cite_date_created',
+                'name'         => 'date_created',
                 'type'         => 'text',
                 'instructions' => 'Set automatically on first save. Read only.',
                 'readonly'     => 1,
                 'disabled'     => 1,
-                'wrapper'      => [ 'width' => '50' ],
+                'wrapper'      => [ 'width' => '33' ],
             ],
             [
-                'key'          => 'field_ws_jx_cite_last_edited',
+                'key'          => 'field_last_edited',
                 'label'        => 'Last Edited',
-                'name'         => 'ws_jx_cite_last_edited',
+                'name'         => 'last_edited',
                 'type'         => 'text',
                 'instructions' => 'Stamped automatically on every save. Read only.',
                 'readonly'     => 1,
                 'disabled'     => 1,
-                'wrapper'      => [ 'width' => '50' ],
+                'wrapper'      => [ 'width' => '33' ],
+            ],
+            [
+                'key'           => 'field_create_author',
+                'label'         => 'Created By',
+                'name'          => 'create_author',
+                'type'          => 'user',
+                'instructions'  => 'Stamped automatically on first save. Read only.',
+                'role'          => [ 'author', 'editor', 'administrator' ],
+                'return_format' => 'id',
+                'readonly'      => 1,
+                'disabled'      => 1,
+                'wrapper'       => [ 'width' => '33' ],
             ],
             [
                 'key'          => 'field_ws_jx_cite_last_reviewed',
@@ -251,7 +262,7 @@ function ws_register_acf_jx_citations() {
                 'type'  => 'tab',
             ],
             [
-                'key'           => 'field_ws_jx_cite_has_plain_english',
+                'key'           => 'field_has_plain_english',
                 'label'         => 'Has Plain Language Version',
                 'name'          => 'has_plain_english',
                 'type'          => 'true_false',
@@ -262,24 +273,24 @@ function ws_register_acf_jx_citations() {
                 'default_value' => 0,
             ],
             [
-                'key'               => 'field_ws_jx_cite_plain_english',
+                'key'               => 'field_plain_english_wysiwyg',
                 'label'             => 'Plain Language Content',
-                'name'              => 'plain_english',
+                'name'              => 'plain_english_wysiwyg',
                 'type'              => 'wysiwyg',
                 'instructions'      => 'Plain-language explanation of this citation for non-experts.',
                 'tabs'              => 'all',
                 'toolbar'           => 'full',
                 'media_upload'      => 0,
                 'conditional_logic' => [ [ [
-                    'field'    => 'field_ws_jx_cite_has_plain_english',
+                    'field'    => 'field_has_plain_english',
                     'operator' => '==',
                     'value'    => '1',
                 ] ] ],
             ],
             [
-                'key'           => 'field_ws_jx_cite_plain_reviewed',
+                'key'           => 'field_plain_english_reviewed',
                 'label'         => 'Plain Language Reviewed',
-                'name'          => 'plain_reviewed',
+                'name'          => 'plain_english_reviewed',
                 'type'          => 'true_false',
                 'instructions'  => 'Check when a human has reviewed and approved the plain-language content.',
                 'ui'            => 1,
@@ -288,9 +299,20 @@ function ws_register_acf_jx_citations() {
                 'default_value' => 0,
             ],
             [
-                'key'           => 'field_ws_jx_cite_summarized_by',
+                'key'           => 'field_plain_english_reviewed_by',
+                'label'         => 'Reviewed By',
+                'name'          => 'plain_english_reviewed_by',
+                'type'          => 'user',
+                'instructions'  => 'Auto-stamped when Plain Language Reviewed is first enabled.',
+                'role'          => [ 'author', 'editor', 'administrator' ],
+                'return_format' => 'id',
+                'readonly'      => 1,
+                'disabled'      => 1,
+            ],
+            [
+                'key'           => 'field_plain_english_by',
                 'label'         => 'Summarized By',
-                'name'          => 'summarized_by',
+                'name'          => 'plain_english_by',
                 'type'          => 'user',
                 'instructions'  => 'Auto-stamped on first save after plain language content is created.',
                 'role'          => [ 'author', 'editor', 'administrator' ],
@@ -299,13 +321,38 @@ function ws_register_acf_jx_citations() {
                 'disabled'      => 1,
             ],
             [
-                'key'          => 'field_ws_jx_cite_summarized_date',
+                'key'          => 'field_plain_english_date',
                 'label'        => 'Summarized Date',
-                'name'         => 'summarized_date',
+                'name'         => 'plain_english_date',
                 'type'         => 'text',
                 'instructions' => 'Auto-stamped on first save after plain language content is created. Read only.',
                 'readonly'     => 1,
                 'disabled'     => 1,
+            ],
+
+            // ── Tab: Reference Materials ───────────────────────────────────
+            //
+            // Links this citation to ws-reference records for researchers and
+            // legal professionals. Not rendered on jurisdiction pages.
+            // Only approved references display publicly via [ws_reference_page].
+
+            [
+                'key'   => 'field_jx_citation_ref_materials_tab',
+                'label' => 'Reference Materials',
+                'type'  => 'tab',
+            ],
+
+            [
+                'key'           => 'field_citation_ref_materials',
+                'label'         => 'Reference Materials',
+                'name'          => 'ws_ref_materials',
+                'type'          => 'relationship',
+                'post_type'     => [ 'ws-reference' ],
+                'filters'       => [ 'search' ],
+                'instructions'  => 'Attach external reference materials relevant to this record. Only approved references will display publicly. These are for researchers and legal professionals — not for primary users seeking guidance.',
+                'min'           => 0,
+                'max'           => 0,
+                'return_format' => 'object',
             ],
 
         ], // end fields

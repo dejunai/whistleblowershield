@@ -66,7 +66,7 @@ define( 'WS_CORE_URL',     plugin_dir_url( __FILE__ ) );
 // ── Deactivation Hooks ────────────────────────────────────────────────────────
 
 register_deactivation_hook( __FILE__, 'ws_url_monitor_deactivate' );
-
+register_deactivation_hook( __FILE__, 'ws_feed_monitor_deactivate' );
 
 // ── Bootstrap ─────────────────────────────────────────────────────────────────
 //

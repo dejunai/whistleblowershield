@@ -75,9 +75,9 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 */
 // CPT Layer: Must load everywhere so WordPress understands the URLs
 $cpt_files = [
-    'cpt-jurisdictions', 'cpt-jx-summary',    'cpt-jx-statutes', 'cpt-s', 'cpt-legal-update',
+    'cpt-jurisdictions', 'cpt-jx-summary',    'cpt-jx-statutes', 'cpt-s', 'cpt-legal-updates',
     'cpt-jx-citations', 'cpt-agencies', 'cpt-assist-org',
-    'cpt-jx-interpretations',
+    'cpt-jx-interpretations', 'cpt-references',
 ];
 foreach ( $cpt_files as $file ) {
     require_once WS_CORE_PATH . "includes/cpt/{$file}.php";
@@ -90,6 +90,7 @@ require_once WS_CORE_PATH . 'includes/queries/query-jurisdiction.php';
 // for URL rewriting, REST API, and frontend queries. Seeding functions inside
 // this file run only on admin_init and are self-gating.
 require_once WS_CORE_PATH . 'includes/taxonomies/register-taxonomies.php';
+require_once WS_CORE_PATH . 'includes/taxonomies/register-glossary.php';
 
 
 /*
@@ -110,9 +111,9 @@ if ( is_admin() ) {
 
     // ACF Layer: Huge memory save by keeping these out of the frontend
     $acf_files = [
-        'acf-jurisdictions', 'acf-jx-summary',        'acf-jx-statutes', 'acf-s', 'acf-legal-update',
+        'acf-jurisdictions', 'acf-jx-summary',        'acf-jx-statutes', 'acf-s', 'acf-legal-updates',
         'acf-jx-citations', 'acf-agencies', 'acf-assist-org',
-        'acf-jx-interpretations',
+        'acf-jx-interpretations', 'acf-references',
     ];
     foreach ( $acf_files as $file ) {
         require_once WS_CORE_PATH . "includes/acf/{$file}.php";
@@ -122,6 +123,7 @@ if ( is_admin() ) {
     require_once WS_CORE_PATH . 'includes/admin/admin-navigation.php'; // Must load first.
     require_once WS_CORE_PATH . 'includes/admin/admin-matrix-watch.php';
 	require_once WS_CORE_PATH . 'includes/admin/admin-url-monitor.php';
+    require_once WS_CORE_PATH . 'includes/admin/admin-feed-monitor.php';
     require_once WS_CORE_PATH . 'includes/admin/admin-columns.php';
     require_once WS_CORE_PATH . 'includes/admin/admin-hooks.php';
     require_once WS_CORE_PATH . 'includes/admin/admin-audit-trail.php';

@@ -1,0 +1,64 @@
+// ════════════════════════════════════════════════════════════════════════════
+// Transient Cache: Build and Invalidate
+//
+// The glossary lookup is a flat array:
+//   [ term_string => definition, ... ]
+//
+// Both canonical terms and all aliases point to the same definition.
+// Sorted by string length descending so multi-word phrases match first.
+// ════════════════════════════════════════════════════════════════════════════
+
+$ws_glossary_lookup = [
+
+    // ─────────────────────────────────────────────
+    // WHISTLEBLOWER CORE TERMS
+    // ─────────────────────────────────────────────
+
+    'whistleblower' => 'An individual who reports misconduct, illegal activity, or wrongdoing within an organization.',
+    'whistle blower' => 'An individual who reports misconduct, illegal activity, or wrongdoing within an organization.',
+
+    'protected disclosure' => 'A report of wrongdoing that is legally protected from retaliation under applicable law.',
+    'protected report' => 'A report of wrongdoing that is legally protected from retaliation under applicable law.',
+
+    'retaliation' => 'Adverse action taken against an individual for engaging in a legally protected activity such as whistleblowing.',
+    'workplace retaliation' => 'Adverse action taken against an individual for engaging in a legally protected activity such as whistleblowing.',
+
+    // ─────────────────────────────────────────────
+    // LEGAL / STATUTORY TERMS
+    // ─────────────────────────────────────────────
+
+    'false claims act' => 'A federal law that imposes liability on individuals or companies who defraud governmental programs.',
+    'fca' => 'A federal law that imposes liability on individuals or companies who defraud governmental programs.',
+
+    'qui tam' => 'A provision that allows a private individual to file a lawsuit on behalf of the government and share in any recovery.',
+    'qui tam action' => 'A provision that allows a private individual to file a lawsuit on behalf of the government and share in any recovery.',
+
+    'statute of limitations' => 'The time limit within which a legal action must be filed.',
+    'limitations period' => 'The time limit within which a legal action must be filed.',
+
+    // ─────────────────────────────────────────────
+    // EMPLOYMENT & COMPLIANCE
+    // ─────────────────────────────────────────────
+
+    'adverse employment action' => 'Any action by an employer that negatively affects the terms, conditions, or privileges of employment.',
+    'adverse action' => 'Any action by an employer that negatively affects the terms, conditions, or privileges of employment.',
+
+    'internal complaint' => 'A report of misconduct made within an organization rather than to an external authority.',
+    'internal reporting' => 'A report of misconduct made within an organization rather than to an external authority.',
+
+    'compliance program' => 'An internal system designed to ensure an organization follows laws, regulations, and ethical standards.',
+
+    // ─────────────────────────────────────────────
+    // GOVERNMENT & ENFORCEMENT
+    // ─────────────────────────────────────────────
+
+    'department of justice' => 'The federal executive department responsible for enforcement of the law and administration of justice.',
+    'doj' => 'The federal executive department responsible for enforcement of the law and administration of justice.',
+
+    'securities and exchange commission' => 'A federal agency that enforces securities laws and regulates financial markets.',
+    'sec' => 'A federal agency that enforces securities laws and regulates financial markets.',
+
+    'occupational safety and health administration' => 'A federal agency that ensures safe and healthy working conditions.',
+    'osha' => 'A federal agency that ensures safe and healthy working conditions.',
+
+];

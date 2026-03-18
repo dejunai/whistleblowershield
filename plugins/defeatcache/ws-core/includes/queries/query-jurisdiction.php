@@ -71,7 +71,7 @@
  *              'date_created'       => string, // Y-m-d local
  *              'date_created_gmt'   => string, // Y-m-d GMT
  *              'last_edited_author' => int,    // WP user ID
- *              'last_edited_by'     => string, // display name for shortcode use
+ *              'editor_name'        => string, // display name for shortcode use
  *              'last_edited'        => string, // Y-m-d local
  *              'last_edited_gmt'    => string, // Y-m-d GMT
  *          ],
@@ -190,7 +190,7 @@ function ws_build_record_array( $post_id ) {
         'date_created'       => get_post_meta( $post_id, 'date_created',     true ),
         'date_created_gmt'   => get_post_meta( $post_id, 'date_created_gmt', true ),
         'last_edited_author' => $last_edited_author_id,
-        'last_edited_by'     => ws_resolve_display_name( $last_edited_author_id ),
+        'editor_name'        => ws_resolve_display_name( $last_edited_author_id ),
         'last_edited'        => get_post_meta( $post_id, 'last_edited',      true ),
         'last_edited_gmt'    => get_post_meta( $post_id, 'last_edited_gmt',  true ),
     ];
@@ -215,19 +215,19 @@ function ws_build_record_array( $post_id ) {
  */
 function ws_build_plain_english_array( $post_id ) {
 
-    $plain_reviewed_by_id = (int) get_post_meta( $post_id, 'plain_reviewed_by', true );
-    $summarized_by_id     = (int) get_post_meta( $post_id, 'summarized_by',     true );
+    $plain_reviewed_by_id = (int) get_post_meta( $post_id, 'plain_english_reviewed_by', true );
+    $summarized_by_id     = (int) get_post_meta( $post_id, 'plain_english_by',     true );
 
     return [
-        'has_plain_english'   => (bool) get_post_meta( $post_id, 'has_plain_english', true ),
-        'plain_english'       => get_post_meta( $post_id, 'plain_english',            true ),
-        'plain_reviewed'      => (bool) get_post_meta( $post_id, 'plain_reviewed',    true ),
-        'plain_reviewed_by'   => $plain_reviewed_by_id,
-        'plain_reviewed_name' => ws_resolve_display_name( $plain_reviewed_by_id ),
-        'summarized_by'       => $summarized_by_id,
-        'summarized_by_name'  => ws_resolve_display_name( $summarized_by_id ),
-        'summarized_date'     => get_post_meta( $post_id, 'summarized_date', true ),
-    ];
+        'has_plain_english'             => (bool) get_post_meta( $post_id, 'has_plain_english', true ),
+        'plain_english_wysiwyg'         => get_post_meta( $post_id, 'plain_english',            true ),
+        'plain_english_by'                 => $summarized_by_id,
+        'plain_english_by_name'            => ws_resolve_display_name( $summarized_by_id ),
+        'plain_english_date'               => get_post_meta( $post_id, 'summarized_date', true ),
+        'plain_english_reviewed'        => (bool) get_post_meta( $post_id, 'plain_english_reviewed', true ),
+        'plain_english_reviewed_by'     => $plain_reviewed_by_id,
+        'plain_english_reviewed_name'   => ws_resolve_display_name( $plain_reviewed_by_id ),
+  ];
 }
 
 
@@ -417,7 +417,8 @@ function ws_get_jx_summary_data( $jx_term_id ) {
         'sources'       => get_post_meta( $sid, 'ws_jx_summary_sources',   true ),
         'limitations'   => get_post_meta( $sid, 'ws_jx_limitations',       true ),
         // Review field — jx-summary uses last_reviewed directly (no has_plain_english gate)
-        'last_reviewed' => get_post_meta( $sid, 'last_reviewed', true ),
+		// 'has_plain_english' is always true for jx-summary no meta flag required
+        // 'last_reviewed' => get_post_meta( $sid, 'last_reviewed', true ), // - depreciated
         // Record management
         'record'        => ws_build_record_array( $sid ),
     ];
@@ -1002,6 +1003,67 @@ function ws_get_legal_updates_data( $jx_id = 0, $count = 5 ) {
     }
 
     return $items;
+}
+
+
+// ════════════════════════════════════════════════════════════════════════════
+// Reference Materials
+//
+// ws_get_ref_materials( $post_id )
+//     Returns an array of approved ws-reference items linked to a parent
+//     post via the ws_ref_materials ACF relationship field.
+//     Only approved references (ws_ref_approved == 1) are included.
+//     Returns [] if no approved references exist.
+//
+// ws_get_reference_page_data( $parent_post_id )
+//     Builds the full data payload for the [ws_reference_page] shortcode.
+//     Returns null if the post type is not jx-statute, jx-citation, or
+//     jx-interpretation. Returns an array with parent_title, parent_url,
+//     and references keys otherwise.
+// ════════════════════════════════════════════════════════════════════════════
+
+function ws_get_ref_materials( $post_id ) {
+    $post_id = (int) $post_id;
+    if ( ! $post_id ) return [];
+
+    $refs = get_field( 'ws_ref_materials', $post_id );
+    if ( ! is_array( $refs ) || empty( $refs ) ) return [];
+
+    $items = [];
+    foreach ( $refs as $ref ) {
+        if ( ! ( $ref instanceof WP_Post ) ) continue;
+        $rid = $ref->ID;
+        if ( ! (bool) get_post_meta( $rid, 'ws_ref_approved', true ) ) continue;
+
+        $title = get_post_meta( $rid, 'ws_ref_title', true );
+        if ( empty( $title ) ) {
+            $title = get_the_title( $rid );
+        }
+
+        $items[] = [
+            'title'       => sanitize_text_field( $title ),
+            'url'         => esc_url_raw( get_post_meta( $rid, 'ws_ref_url', true ) ),
+            'description' => sanitize_textarea_field( get_post_meta( $rid, 'ws_ref_description', true ) ),
+            'type'        => sanitize_text_field( get_post_meta( $rid, 'ws_ref_type', true ) ),
+            'source_name' => sanitize_text_field( get_post_meta( $rid, 'ws_ref_source_name', true ) ),
+        ];
+    }
+
+    return $items;
+}
+
+function ws_get_reference_page_data( $parent_post_id ) {
+    $parent_post_id = (int) $parent_post_id;
+    if ( ! $parent_post_id ) return null;
+
+    $allowed_types = [ 'jx-statute', 'jx-citation', 'jx-interpretation' ];
+    if ( ! in_array( get_post_type( $parent_post_id ), $allowed_types, true ) ) return null;
+
+    return [
+        'parent_title' => get_the_title( $parent_post_id ),
+        'parent_url'   => get_permalink( $parent_post_id ),
+        'references'   => ws_get_ref_materials( $parent_post_id ),
+    ];
 }
 
 

@@ -381,7 +381,7 @@ function ws_render_plain_reviewed_badge( $plain_reviewed ) {
  *     @type string $author_name    Display name of the content author.
  *     @type string $fmt_created    Formatted creation date string, or empty.
  *     @type string $fmt_reviewed   Formatted last-reviewed date string, or empty.
- *     @type bool   $plain_reviewed True if plain-language review is complete.
+ *     @type bool   $plain_english_reviewed True if plain-language review is complete.
  *     @type string $sources        Sources & citations raw text, or empty.
  * }
  * @return string  HTML footer block.
@@ -408,7 +408,7 @@ function ws_render_jx_summary_footer( $data ) {
         </p>
         <?php endif; ?>
 
-        <?php echo ws_render_plain_reviewed_badge( ! empty( $data['plain_reviewed'] ) ); ?>
+        <?php echo ws_render_plain_reviewed_badge( ! empty( $data['plain_english_reviewed'] ) ); ?>
 
         <?php if ( $data['sources'] ) : ?>
         <div class="ws-jx-summary-sources">
