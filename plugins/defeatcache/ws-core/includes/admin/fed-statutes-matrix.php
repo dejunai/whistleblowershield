@@ -156,6 +156,11 @@ function ws_seed_fed_statutes_matrix() {
 
         $existing = get_page_by_path( $statute['slug'], OBJECT, 'jx-statute' );
 
+		if ( ! defined( 'WS_MATRIX_SEEDING_IN_PROGRESS' ) ) {
+			define( 'WS_MATRIX_SEEDING_IN_PROGRESS', true );
+		}
+
+
         if ( $existing ) {
             $post_id = $existing->ID;
             wp_update_post( [

@@ -45,6 +45,11 @@ defined( 'ABSPATH' ) || exit;
 add_action( 'save_post', 'ws_matrix_watch_detect_divergence', 20, 2 );
 
 function ws_matrix_watch_detect_divergence( $post_id, $post ) {
+	
+		
+	if ( defined( 'WS_MATRIX_SEEDING_IN_PROGRESS' ) ) {
+		return;
+	}
 
     if ( wp_is_post_revision( $post_id ) ) return;
     if ( $post->post_status === 'auto-draft' ) return;

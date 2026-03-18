@@ -169,6 +169,11 @@ function ws_seed_assist_org_matrix() {
         ];
 
         foreach ( $meta_fields as $key => $value ) {
+			
+			if ( ! defined( 'WS_MATRIX_SEEDING_IN_PROGRESS' ) ) {
+				define( 'WS_MATRIX_SEEDING_IN_PROGRESS', true );
+			}
+			
             if ( $value !== '' ) {
                 update_post_meta( $post_id, $key, $value );
             }

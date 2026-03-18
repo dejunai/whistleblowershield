@@ -1113,6 +1113,11 @@ function ws_seed_jurisdiction_matrix() {
 
         // Find existing post by slug.
         $existing_post = get_page_by_path( $jx['slug'], OBJECT, 'jurisdiction' );
+		
+		if ( ! defined( 'WS_MATRIX_SEEDING_IN_PROGRESS' ) ) {
+			define( 'WS_MATRIX_SEEDING_IN_PROGRESS', true );
+		}
+		
 
         if ( $existing_post ) {
             $post_id = $existing_post->ID;

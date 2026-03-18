@@ -426,3 +426,33 @@ $ws_court_matrix = [
     'wi-app'     => [ 'name' => 'Wisconsin Court of Appeals',                          'short' => 'Wis. Ct. App.',          'type' => 'state_appellate', 'ws_jx_codes' => [ 'WI' ], 'circuit' => null, 'level' => 2 ],
 
 ];
+
+
+// ════════════════════════════════════════════════════════════════════════════
+// Gate: ws_seeded_court_matrix
+//
+// Courts are not a CPT. $ws_court_matrix is the single source of truth —
+// loaded into memory at runtime and consumed directly by:
+//   - acf-jx-interpretations.php  (ws_interp_court select field choices)
+//   - admin-interpretation-metabox.php  (court label resolution)
+//
+// No posts are created. No database rows need to exist for courts to work.
+//
+// The gate option serves two purposes:
+//   1. Version tracking — increment the string (e.g. '1.0.1') to signal that
+//      the matrix data changed, allowing any future initialization logic to
+//      detect a stale state and act accordingly.
+//   2. Consistency — all matrix files write a ws_seeded_* option so tooling
+//      can confirm every matrix loaded successfully on a given install.
+//
+// If courts ever need front-end pages or per-court admin UI, a ws-court CPT
+// can be added at that time. The ws_interp_court meta key already stores the
+// matrix array key as a string, so no migration of existing data would be
+// required — the CPT slug would simply match the stored key.
+// ════════════════════════════════════════════════════════════════════════════
+
+add_action( 'admin_init', function() {
+    if ( get_option( 'ws_seeded_court_matrix' ) !== '1.0.0' ) {
+        update_option( 'ws_seeded_court_matrix', '1.0.0' );
+    }
+} );

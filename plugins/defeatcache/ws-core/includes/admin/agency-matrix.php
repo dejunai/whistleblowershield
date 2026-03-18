@@ -141,6 +141,10 @@ function ws_seed_agency_matrix() {
     foreach ( $_ws_agency_matrix as $agency ) {
 
         $existing = get_page_by_path( $agency['slug'], OBJECT, 'ws-agency' );
+		
+		if ( ! defined( 'WS_MATRIX_SEEDING_IN_PROGRESS' ) ) {
+			define( 'WS_MATRIX_SEEDING_IN_PROGRESS', true );
+		}
 
         if ( $existing ) {
             $post_id = $existing->ID;
