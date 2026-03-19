@@ -10,7 +10,7 @@
  * 2.1.0  Initial: ws_disclosure_type
  * 2.3.1  Added ws_process_type taxonomy and seed.
  * 2.4.0  STABILIZATION PASS:
- *        - Hard Delete: Removed  from all taxonomy associations.
+ *        - Hard Delete: Removed empty string from all taxonomy associations.
  *        - New Taxonomies: Added ws_coverage_scope, ws_retaliation_forms,
  *          ws_languages, ws_case_stage.
  *        - Security: Implemented capability mapping to lock vocabulary to
@@ -28,16 +28,46 @@
  * 3.0.0  ARCHITECTURE REFACTOR (Phase 2 + 3.1):
  *        - Empty string removed from ws_disclosure_type object types array.
  *        - Registered ws_jurisdiction taxonomy (private, non-hierarchical) —
- *          replaces ws_jx_code meta as the jurisdiction join mechanism.
+ *          replaces ws_jx_code post meta as the jurisdiction join mechanism.
  *        - All seed gates migrated to Unified Option-Gate Method (key prefix
  *          ws_seeded_*, version string '1.0.0').
  *        - Grouped ws_v240_taxonomies_seeded gate split into four individual
  *          gates: ws_seeded_coverage_scope, ws_seeded_retaliation_forms,
  *          ws_seeded_languages_taxonomy, ws_seeded_case_stage.
  *        - ws_seed_v240_taxonomies() replaced by four dedicated functions.
+ * 3.1.0  TAXONOMY RENAME + EXPANSION PASS:
+ *        - ws_coverage_scope  → ws_protected_class (aligns with JSON field name).
+ *        - ws_retaliation_forms → ws_adverse_action_types (aligns with JSON
+ *          field name adverse_action; cleaner legal terminology).
+ *        - ws_remedy_type → ws_remedies (aligns with JSON field name).
+ *        - New Taxonomy: ws_disclosure_targets (Who was the disclosure made to?).
+ *          Replaces proposed ws_protected_audience — disclosure_targets is
+ *          more precise and consistent with site terminology.
+ *        - New Taxonomy: ws_fee_shifting (Fee shifting rules).
+ *        - ws_protected_class seeded with hierarchical employee type structure
+ *          incorporating terms from prior ws_coverage_scope.
+ *        - ws_adverse_action_types seeded with expanded adverse action terms.
+ *        - ws_remedies seeded with expanded remedy terms.
+ *        - ws_disclosure_targets seeded with hierarchical recipient structure.
+ *        - ws_fee_shifting seeded with four flat terms.
+ *        - ws_bulk_insert_hierarchical() helper added.
+ *        - Gate typo fixed: ws_seed_jruisdiction_taxonomy →
+ *          ws_seed_jurisdiction_taxonomy.
+ *        - Gate keys added for all new and renamed taxonomies.
+ *
+ * @todo  After deploying 3.1.0: run a one-time migration to re-assign any
+ *        posts previously tagged under ws_coverage_scope, ws_retaliation_forms,
+ *        and ws_remedy_type to the new taxonomy slugs before removing the old
+ *        registrations from this file. Old registrations are retained below
+ *        with a DEPRECATED comment until migration is confirmed complete.
  */
 
 defined( 'ABSPATH' ) || exit;
+
+
+// ════════════════════════════════════════════════════════════════════════════
+// TAXONOMY REGISTRATION
+// ════════════════════════════════════════════════════════════════════════════
 
 /**
  * Register all taxonomies for the WhistleblowerShield Core.
@@ -108,10 +138,13 @@ function ws_register_taxonomies() {
     }
 
     // ── 3. Remedies ───────────────────────────────────────────────────────
+    //
+    // Renamed from ws_remedy_type → ws_remedies (3.1.0).
+    // ws_remedy_type retained below as DEPRECATED until migration confirmed.
 
-    if ( ! taxonomy_exists( 'ws_remedy_type' ) ) {
+    if ( ! taxonomy_exists( 'ws_remedies' ) ) {
         register_taxonomy(
-            'ws_remedy_type',
+            'ws_remedies',
             [ 'jx-statute' ],
             [
                 'label'             => 'Remedies',
@@ -136,57 +169,69 @@ function ws_register_taxonomies() {
         );
     }
 
-    // ── 4. Coverage Scope ─────────────────────────────────────────────────
+    // ── 4. Protected Class ────────────────────────────────────────────────
+    //
+    // Renamed from ws_coverage_scope → ws_protected_class (3.1.0).
+    // Converted to hierarchical to support employee type groupings.
+    // ws_coverage_scope retained below as DEPRECATED until migration confirmed.
 
-    if ( ! taxonomy_exists( 'ws_coverage_scope' ) ) {
+    if ( ! taxonomy_exists( 'ws_protected_class' ) ) {
         register_taxonomy(
-            'ws_coverage_scope',
+            'ws_protected_class',
             [ 'jx-statute' ],
             [
-                'label'             => 'Coverage Scope',
+                'label'             => 'Protected Class',
                 'labels'            => [
-                    'name'              => 'Coverage Scopes',
-                    'singular_name'     => 'Coverage Scope',
-                    'search_items'      => 'Search Scopes',
-                    'all_items'         => 'All Scopes',
-                    'edit_item'         => 'Edit Scope',
-                    'update_item'       => 'Update Scope',
-                    'add_new_item'      => 'Add New Scope',
-                    'new_item_name'     => 'New Coverage Scope Name',
-                    'menu_name'         => 'Coverage Scope',
+                    'name'              => 'Protected Classes',
+                    'singular_name'     => 'Protected Class',
+                    'search_items'      => 'Search Protected Classes',
+                    'all_items'         => 'All Protected Classes',
+                    'parent_item'       => 'Parent Class',
+                    'parent_item_colon' => 'Parent Class:',
+                    'edit_item'         => 'Edit Protected Class',
+                    'update_item'       => 'Update Protected Class',
+                    'add_new_item'      => 'Add New Protected Class',
+                    'new_item_name'     => 'New Protected Class Name',
+                    'menu_name'         => 'Protected Classes',
                 ],
                 'public'            => false,
-                'hierarchical'      => false,
+                'hierarchical'      => true,
                 'show_ui'           => true,
                 'show_in_rest'      => true,
+                'show_admin_column' => true,
                 'capabilities'      => ws_get_taxonomy_caps(),
             ]
         );
     }
 
-    // ── 5. Retaliation Forms ──────────────────────────────────────────────
+    // ── 5. Adverse Action Types ───────────────────────────────────────────
+    //
+    // Renamed from ws_retaliation_forms → ws_adverse_action_types (3.1.0).
+    // Aligns with JSON field name adverse_action; cleaner legal terminology.
+    // ws_retaliation_forms retained below as DEPRECATED until migration confirmed.
 
-    if ( ! taxonomy_exists( 'ws_retaliation_forms' ) ) {
+    if ( ! taxonomy_exists( 'ws_adverse_action_types' ) ) {
         register_taxonomy(
-            'ws_retaliation_forms',
+            'ws_adverse_action_types',
             [ 'jx-statute' ],
             [
-                'label'             => 'Retaliation Forms',
+                'label'             => 'Adverse Action Types',
                 'labels'            => [
-                    'name'              => 'Retaliation Forms',
-                    'singular_name'     => 'Retaliation Form',
-                    'search_items'      => 'Search Retaliation Forms',
-                    'all_items'         => 'All Retaliation Forms',
-                    'edit_item'         => 'Edit Retaliation Form',
-                    'update_item'       => 'Update Retaliation Form',
-                    'add_new_item'      => 'Add New Retaliation Form',
-                    'new_item_name'     => 'New Retaliation Form Name',
-                    'menu_name'         => 'Retaliation Forms',
+                    'name'              => 'Adverse Action Types',
+                    'singular_name'     => 'Adverse Action Type',
+                    'search_items'      => 'Search Adverse Action Types',
+                    'all_items'         => 'All Adverse Action Types',
+                    'edit_item'         => 'Edit Adverse Action Type',
+                    'update_item'       => 'Update Adverse Action Type',
+                    'add_new_item'      => 'Add New Adverse Action Type',
+                    'new_item_name'     => 'New Adverse Action Type Name',
+                    'menu_name'         => 'Adverse Action Types',
                 ],
                 'public'            => false,
                 'hierarchical'      => false,
                 'show_ui'           => true,
                 'show_in_rest'      => true,
+                'show_admin_column' => true,
                 'capabilities'      => ws_get_taxonomy_caps(),
             ]
         );
@@ -284,8 +329,137 @@ function ws_register_taxonomies() {
             ]
         );
     }
+
+    // ── 9. Disclosure Targets ─────────────────────────────────────────────
+    //
+    // New in 3.1.0. Describes who the disclosure was made to in order for
+    // protection to apply. Hierarchical — grouped by reporting channel type.
+    // Applied to jx-statute and ws-assist-org.
+
+    if ( ! taxonomy_exists( 'ws_disclosure_targets' ) ) {
+        register_taxonomy(
+            'ws_disclosure_targets',
+            [ 'jx-statute', 'ws-assist-org' ],
+            [
+                'label'             => 'Disclosure Targets',
+                'labels'            => [
+                    'name'              => 'Disclosure Targets',
+                    'singular_name'     => 'Disclosure Target',
+                    'search_items'      => 'Search Disclosure Targets',
+                    'all_items'         => 'All Disclosure Targets',
+                    'parent_item'       => 'Parent Target',
+                    'parent_item_colon' => 'Parent Target:',
+                    'edit_item'         => 'Edit Disclosure Target',
+                    'update_item'       => 'Update Disclosure Target',
+                    'add_new_item'      => 'Add New Disclosure Target',
+                    'new_item_name'     => 'New Disclosure Target Name',
+                    'menu_name'         => 'Disclosure Targets',
+                ],
+                'public'            => false,
+                'hierarchical'      => true,
+                'show_ui'           => true,
+                'show_in_rest'      => true,
+                'show_admin_column' => true,
+                'capabilities'      => ws_get_taxonomy_caps(),
+            ]
+        );
+    }
+
+    // ── 10. Fee Shifting ──────────────────────────────────────────────────
+    //
+    // New in 3.1.0. Flat taxonomy describing the fee shifting rule that
+    // applies to enforcement of a statute. Applied to jx-statute only.
+
+    if ( ! taxonomy_exists( 'ws_fee_shifting' ) ) {
+        register_taxonomy(
+            'ws_fee_shifting',
+            [ 'jx-statute' ],
+            [
+                'label'             => 'Fee Shifting Rules',
+                'labels'            => [
+                    'name'              => 'Fee Shifting Rules',
+                    'singular_name'     => 'Fee Shifting Rule',
+                    'search_items'      => 'Search Fee Shifting Rules',
+                    'all_items'         => 'All Fee Shifting Rules',
+                    'edit_item'         => 'Edit Fee Shifting Rule',
+                    'update_item'       => 'Update Fee Shifting Rule',
+                    'add_new_item'      => 'Add New Fee Shifting Rule',
+                    'new_item_name'     => 'New Fee Shifting Rule Name',
+                    'menu_name'         => 'Fee Shifting',
+                ],
+                'public'            => false,
+                'hierarchical'      => false,
+                'show_ui'           => true,
+                'show_in_rest'      => true,
+                'show_admin_column' => true,
+                'capabilities'      => ws_get_taxonomy_caps(),
+            ]
+        );
+    }
+
+    // ════════════════════════════════════════════════════════════════════
+    // DEPRECATED REGISTRATIONS
+    //
+    // Retained to preserve post assignments during migration window.
+    // Remove after migration to renamed taxonomies is confirmed complete.
+    // @todo  Remove ws_remedy_type, ws_coverage_scope, ws_retaliation_forms
+    //        after migration pass.
+    // ════════════════════════════════════════════════════════════════════
+
+    // DEPRECATED: ws_remedy_type → ws_remedies
+    if ( ! taxonomy_exists( 'ws_remedy_type' ) ) {
+        register_taxonomy(
+            'ws_remedy_type',
+            [ 'jx-statute' ],
+            [
+                'label'        => 'Remedies (Deprecated)',
+                'public'       => false,
+                'hierarchical' => false,
+                'show_ui'      => false,
+                'show_in_rest' => false,
+                'capabilities' => ws_get_taxonomy_caps(),
+            ]
+        );
+    }
+
+    // DEPRECATED: ws_coverage_scope → ws_protected_class
+    if ( ! taxonomy_exists( 'ws_coverage_scope' ) ) {
+        register_taxonomy(
+            'ws_coverage_scope',
+            [ 'jx-statute' ],
+            [
+                'label'        => 'Coverage Scope (Deprecated)',
+                'public'       => false,
+                'hierarchical' => false,
+                'show_ui'      => false,
+                'show_in_rest' => false,
+                'capabilities' => ws_get_taxonomy_caps(),
+            ]
+        );
+    }
+
+    // DEPRECATED: ws_retaliation_forms → ws_adverse_action_types
+    if ( ! taxonomy_exists( 'ws_retaliation_forms' ) ) {
+        register_taxonomy(
+            'ws_retaliation_forms',
+            [ 'jx-statute' ],
+            [
+                'label'        => 'Retaliation Forms (Deprecated)',
+                'public'       => false,
+                'hierarchical' => false,
+                'show_ui'      => false,
+                'show_in_rest' => false,
+                'capabilities' => ws_get_taxonomy_caps(),
+            ]
+        );
+    }
 }
 add_action( 'init', 'ws_register_taxonomies' );
+
+
+// ════════════════════════════════════════════════════════════════════════════
+// SHARED HELPERS
+// ════════════════════════════════════════════════════════════════════════════
 
 /**
  * Helper: Taxonomy Capability Mapping
@@ -301,14 +475,55 @@ function ws_get_taxonomy_caps() {
     ];
 }
 
+/**
+ * Helper: Hierarchical Term Seeder
+ *
+ * Inserts a parent/child term structure into a taxonomy. Skips terms
+ * that already exist. Used by seeding functions for hierarchical taxonomies.
+ *
+ * @param array  $hierarchy  Associative array: parent_slug => [ 'name' => '', 'children' => [] ]
+ * @param string $taxonomy   Taxonomy slug.
+ */
+function ws_bulk_insert_hierarchical( array $hierarchy, string $taxonomy ) {
+    foreach ( $hierarchy as $parent_slug => $data ) {
+        $existing_parent = term_exists( $parent_slug, $taxonomy );
+        if ( ! $existing_parent ) {
+            $parent = wp_insert_term( $data['name'], $taxonomy, [ 'slug' => $parent_slug ] );
+        } else {
+            $parent = is_array( $existing_parent )
+                ? $existing_parent
+                : [ 'term_id' => $existing_parent ];
+        }
+        if ( is_wp_error( $parent ) || empty( $data['children'] ) ) {
+            continue;
+        }
+        $parent_id = (int) $parent['term_id'];
+        foreach ( $data['children'] as $child_slug => $child_name ) {
+            if ( ! term_exists( $child_slug, $taxonomy ) ) {
+                wp_insert_term( $child_name, $taxonomy, [
+                    'slug'   => $child_slug,
+                    'parent' => $parent_id,
+                ] );
+            }
+        }
+    }
+}
 
-// ── Seeding execution gates ───────────────────────────────────────────────────
+
+// ════════════════════════════════════════════════════════════════════════════
+// SEEDING EXECUTION GATES
 //
 // Each seeder is individually gated using the Unified Option-Gate Method.
-// Key format: ws_seeded_{seeder_slug} / version: '1.0.0'
+// Key format: ws_seeded_{seeder_slug} / version string: '1.0.0'
 // No grouped gates — each taxonomy has its own independent gate.
+//
+// Gate version bump pattern: to re-seed a taxonomy after a term change,
+// increment the version string (e.g. '1.0.0' → '1.1.0') in both the
+// gate check and the update_option() call below.
+// ════════════════════════════════════════════════════════════════════════════
 
 add_action( 'admin_init', function() {
+
     if ( get_option( 'ws_seeded_disclosure_type' ) !== '1.0.0' ) {
         ws_seed_disclosure_taxonomy();
         update_option( 'ws_seeded_disclosure_type', '1.0.0' );
@@ -317,17 +532,17 @@ add_action( 'admin_init', function() {
         ws_seed_process_taxonomy();
         update_option( 'ws_seeded_process_type', '1.0.0' );
     }
-    if ( get_option( 'ws_seeded_remedy_type' ) !== '1.0.0' ) {
-        ws_seed_remedy_taxonomy();
-        update_option( 'ws_seeded_remedy_type', '1.0.0' );
+    if ( get_option( 'ws_seeded_remedies' ) !== '1.0.0' ) {
+        ws_seed_remedies_taxonomy();
+        update_option( 'ws_seeded_remedies', '1.0.0' );
     }
-    if ( get_option( 'ws_seeded_coverage_scope' ) !== '1.0.0' ) {
-        ws_seed_coverage_scope_taxonomy();
-        update_option( 'ws_seeded_coverage_scope', '1.0.0' );
+    if ( get_option( 'ws_seeded_protected_class' ) !== '1.0.0' ) {
+        ws_seed_protected_class_taxonomy();
+        update_option( 'ws_seeded_protected_class', '1.0.0' );
     }
-    if ( get_option( 'ws_seeded_retaliation_forms' ) !== '1.0.0' ) {
-        ws_seed_retaliation_forms_taxonomy();
-        update_option( 'ws_seeded_retaliation_forms', '1.0.0' );
+    if ( get_option( 'ws_seeded_adverse_action_types' ) !== '1.0.0' ) {
+        ws_seed_adverse_action_types_taxonomy();
+        update_option( 'ws_seeded_adverse_action_types', '1.0.0' );
     }
     if ( get_option( 'ws_seeded_languages_taxonomy' ) !== '1.0.0' ) {
         ws_seed_languages_taxonomy();
@@ -338,16 +553,27 @@ add_action( 'admin_init', function() {
         update_option( 'ws_seeded_case_stage', '1.0.0' );
     }
     if ( get_option( 'ws_seeded_jurisdiction' ) !== '1.0.0' ) {
-        ws_seed_jruisdiction_taxonomy();
-        update_option( 'ws_jurisdiction_stage', '1.0.0' );
+        ws_seed_jurisdiction_taxonomy();
+        update_option( 'ws_seeded_jurisdiction', '1.0.0' );
     }
+    if ( get_option( 'ws_seeded_disclosure_targets' ) !== '1.0.0' ) {
+        ws_seed_disclosure_targets_taxonomy();
+        update_option( 'ws_seeded_disclosure_targets', '1.0.0' );
+    }
+    if ( get_option( 'ws_seeded_fee_shifting' ) !== '1.0.0' ) {
+        ws_seed_fee_shifting_taxonomy();
+        update_option( 'ws_seeded_fee_shifting', '1.0.0' );
+    }
+
 } );
 
 
-// ── Seeding functions ─────────────────────────────────────────────────────────
+// ════════════════════════════════════════════════════════════════════════════
+// SEEDING FUNCTIONS
+// ════════════════════════════════════════════════════════════════════════════
 
 /**
- * Seeds the ws_disclosure_type taxonomy with its initial hierarchical structure.
+ * Seeds ws_disclosure_type with its hierarchical structure.
  */
 function ws_seed_disclosure_taxonomy() {
     $taxonomy  = 'ws_disclosure_type';
@@ -403,29 +629,31 @@ function ws_seed_disclosure_taxonomy() {
     ];
 
     foreach ( $structure as $parent_name => $data ) {
-        $parent_term = term_exists( $data['slug'], $taxonomy );
-        if ( ! $parent_term ) {
+        $existing_parent = term_exists( $data['slug'], $taxonomy );
+        if ( ! $existing_parent ) {
             $parent = wp_insert_term( $parent_name, $taxonomy, [ 'slug' => $data['slug'] ] );
         } else {
-            $parent = is_array( $parent_term ) ? $parent_term : [ 'term_id' => $parent_term ];
+            $parent = is_array( $existing_parent )
+                ? $existing_parent
+                : [ 'term_id' => $existing_parent ];
         }
-
-        if ( ! is_wp_error( $parent ) ) {
-            $parent_id = (int) $parent['term_id'];
-            foreach ( $data['children'] as $child_slug => $child_name ) {
-                if ( ! term_exists( $child_slug, $taxonomy ) ) {
-                    wp_insert_term( $child_name, $taxonomy, [
-                        'slug'   => $child_slug,
-                        'parent' => $parent_id,
-                    ] );
-                }
+        if ( is_wp_error( $parent ) ) {
+            continue;
+        }
+        $parent_id = (int) $parent['term_id'];
+        foreach ( $data['children'] as $child_slug => $child_name ) {
+            if ( ! term_exists( $child_slug, $taxonomy ) ) {
+                wp_insert_term( $child_name, $taxonomy, [
+                    'slug'   => $child_slug,
+                    'parent' => $parent_id,
+                ] );
             }
         }
     }
 }
 
 /**
- * Seeds the ws_process_type taxonomy with its initial flat term list.
+ * Seeds ws_process_type with its flat term list.
  */
 function ws_seed_process_taxonomy() {
     $taxonomy = 'ws_process_type';
@@ -438,8 +666,8 @@ function ws_seed_process_taxonomy() {
         'criminal-referral'        => 'Criminal Referral',
         'state-agency-complaint'   => 'State Agency Complaint',
         'congressional-disclosure' => 'Congressional Disclosure',
+        'representative-action'    => 'Representative Action',
     ];
-
     foreach ( $terms as $slug => $name ) {
         if ( ! term_exists( $slug, $taxonomy ) ) {
             wp_insert_term( $name, $taxonomy, [ 'slug' => $slug ] );
@@ -448,23 +676,32 @@ function ws_seed_process_taxonomy() {
 }
 
 /**
- * Seeds the ws_remedy_type taxonomy with its initial flat term list.
- *
- * Bug #3 fix: update_option() call added so the gate check does not
- * re-run on every admin_init after first execution.
+ * Seeds ws_remedies with its flat term list.
+ * Replaces ws_seed_remedy_taxonomy() for ws_remedy_type (deprecated).
  */
-function ws_seed_remedy_taxonomy() {
-    $taxonomy = 'ws_remedy_type';
+function ws_seed_remedies_taxonomy() {
+    $taxonomy = 'ws_remedies';
     $terms    = [
-        'back-pay'                      => 'Back Pay',
-        'front-pay'                     => 'Front Pay',
-        'reinstatement'                 => 'Reinstatement',
-        'compensatory-damages'          => 'Compensatory Damages',
-        'punitive-damages'              => 'Punitive Damages',
-        'treble-damages'                => 'Treble Damages',
-        'attorney-fees'                 => 'Attorney Fees',
-        'litigation-costs'              => 'Litigation Costs',
+        'reinstatement'                   => 'Reinstatement',
+        'back-pay'                        => 'Back Pay',
+        'front-pay'                       => 'Front Pay',
+        'double-back-pay'                 => 'Double Back Pay',
+        'lost-wages'                      => 'Lost Wages',
+        'benefits-restoration'            => 'Benefits Restoration',
+        'compensatory-damages'            => 'Compensatory Damages',
+        'punitive-damages'                => 'Punitive Damages',
+        'treble-damages'                  => 'Treble Damages',
+        'civil-penalty'                   => 'Civil Penalty',
+        'civil-penalties'                 => 'Civil Penalties (Aggregate)',
+        'attorney-fees'                   => 'Attorney Fees',
+        'litigation-costs'                => 'Litigation Costs',
+        'injunctive-relief'               => 'Injunctive Relief',
+        'cease-and-desist'                => 'Cease and Desist Order',
+        'license-suspension'              => 'License Suspension',
         'expungement-of-personnel-record' => 'Expungement of Personnel Record',
+        'bounty-qui-tam-award'            => 'Bounty / Qui Tam Award',
+        'wage-differential'               => 'Wage Differential',
+        'liquidated-damages'              => 'Liquidated Damages',
     ];
     foreach ( $terms as $slug => $name ) {
         if ( ! term_exists( $slug, $taxonomy ) ) {
@@ -474,41 +711,70 @@ function ws_seed_remedy_taxonomy() {
 }
 
 /**
- * Seeds ws_coverage_scope terms.
+ * Seeds ws_protected_class with its hierarchical employee type structure.
+ * Replaces ws_seed_coverage_scope_taxonomy() for ws_coverage_scope (deprecated).
  */
-function ws_seed_coverage_scope_taxonomy() {
-    $taxonomy = 'ws_coverage_scope';
-    $terms    = [
-        'federal-employees'          => 'Federal Employees',
-        'private-sector-employees'   => 'Private Sector Employees',
-        'contractors'                => 'Contractors',
-        'state-employees'            => 'State Employees',
-        'local-government-employees' => 'Local Government Employees',
-        'nonprofit-employees'        => 'Nonprofit Employees',
-        'other'                      => 'Other',
+function ws_seed_protected_class_taxonomy() {
+    $hierarchy = [
+        'public-sector' => [
+            'name'     => 'Public Sector',
+            'children' => [
+                'federal-employee'     => 'Federal Employee',
+                'state-employee'       => 'State Agency Employee',
+                'local-gov-staff'      => 'Local / Municipal Employee',
+                'k12-education-staff'  => 'K-12 / Higher Ed Staff',
+                'military-personnel'   => 'Military Personnel',
+            ],
+        ],
+        'private-sector' => [
+            'name'     => 'Private Sector',
+            'children' => [
+                'corporate-staff'      => 'Corporate / Private Employee',
+                'contractor-gig'       => 'Independent Contractor / Gig',
+                'non-profit-staff'     => 'Non-Profit Employee',
+                'agricultural-worker'  => 'Agricultural Worker',
+            ],
+        ],
+        'healthcare-staff' => [
+            'name'     => 'Healthcare & Medical',
+            'children' => [
+                'clinical-staff'       => 'Clinical (Nurse / Physician)',
+                'medical-student'      => 'Medical Student / Intern / Resident',
+            ],
+        ],
+        'special-status' => [
+            'name'     => 'Special Status',
+            'children' => [
+                'job-applicant'        => 'Job Applicant',
+                'former-employee'      => 'Former Employee',
+                'perceived-whistleblower' => 'Perceived Whistleblower',
+            ],
+        ],
     ];
-    foreach ( $terms as $slug => $name ) {
-        if ( ! term_exists( $slug, $taxonomy ) ) {
-            wp_insert_term( $name, $taxonomy, [ 'slug' => $slug ] );
-        }
-    }
+    ws_bulk_insert_hierarchical( $hierarchy, 'ws_protected_class' );
 }
 
 /**
- * Seeds ws_retaliation_forms terms.
+ * Seeds ws_adverse_action_types with its flat term list.
+ * Replaces ws_seed_retaliation_forms_taxonomy() for ws_retaliation_forms (deprecated).
  */
-function ws_seed_retaliation_forms_taxonomy() {
-    $taxonomy = 'ws_retaliation_forms';
+function ws_seed_adverse_action_types_taxonomy() {
+    $taxonomy = 'ws_adverse_action_types';
     $terms    = [
-        'termination'             => 'Termination',
-        'demotion'                => 'Demotion',
-        'disciplinary-action'     => 'Disciplinary Action',
-        'transfer'                => 'Transfer',
-        'schedule-change'         => 'Schedule Change',
-        'harassment'              => 'Harassment',
-        'blacklisting'            => 'Blacklisting',
+        'termination'               => 'Termination',
+        'constructive-discharge'    => 'Constructive Discharge',
+        'demotion'                  => 'Demotion',
+        'suspension'                => 'Suspension',
+        'disciplinary-action'       => 'Disciplinary Action',
+        'transfer'                  => 'Transfer',
+        'schedule-change'           => 'Schedule Change',
+        'pay-reduction'             => 'Pay / Benefits Reduction',
+        'harassment'                => 'Harassment',
+        'blacklisting'              => 'Blacklisting',
         'security-clearance-action' => 'Security Clearance Action',
-        'other'                   => 'Other',
+        'contract-non-renewal'      => 'Contract Non-Renewal',
+        'privilege-revocation'      => 'Privilege / Access Revocation',
+        'immigration-threat'        => 'Immigration-Related Threat',
     ];
     foreach ( $terms as $slug => $name ) {
         if ( ! term_exists( $slug, $taxonomy ) ) {
@@ -519,7 +785,8 @@ function ws_seed_retaliation_forms_taxonomy() {
 
 /**
  * Seeds ws_languages terms.
- * 'additional' is a functional flag — auto-assigned when additional_languages text exists.
+ * 'additional' is a functional flag — auto-assigned when ws_agency_additional_languages
+ * or ws_ao_additional_languages text fields contain a value.
  */
 function ws_seed_languages_taxonomy() {
     $taxonomy = 'ws_languages';
@@ -648,5 +915,73 @@ function ws_seed_jurisdiction_taxonomy() {
             }
         }
         $order++;
+    }
+}
+
+/**
+ * Seeds ws_disclosure_targets with its hierarchical recipient structure.
+ * New in 3.1.0. Describes who received the disclosure for protection to apply.
+ */
+function ws_seed_disclosure_targets_taxonomy() {
+    $hierarchy = [
+        'internal' => [
+            'name'     => 'Internal',
+            'children' => [
+                'internal-supervisor'  => 'Supervisor / Manager',
+                'internal-hr'          => 'Human Resources',
+                'internal-compliance'  => 'Compliance / Ethics Hotline',
+                'internal-legal'       => 'In-House Legal Counsel',
+            ],
+        ],
+        'external-agency' => [
+            'name'     => 'External: Government Agency',
+            'children' => [
+                'agency-federal'       => 'Federal Agency',
+                'agency-state'         => 'State Agency',
+                'agency-local'         => 'Local / Municipal Agency',
+                'law-enforcement'      => 'Law Enforcement',
+            ],
+        ],
+        'legislative' => [
+            'name'     => 'Legislative Body',
+            'children' => [
+                'legislative-federal'  => 'U.S. Congress',
+                'legislative-state'    => 'State Legislature',
+            ],
+        ],
+        'judicial' => [
+            'name'     => 'Judicial / Legal',
+            'children' => [
+                'court-filing'         => 'Court Filing',
+                'attorney-counsel'     => 'Personal Attorney / Counsel',
+            ],
+        ],
+        'public' => [
+            'name'     => 'Public Disclosure',
+            'children' => [
+                'public-media'         => 'Media / Press',
+                'public-nonprofit'     => 'Non-Profit / Advocacy Organization',
+            ],
+        ],
+    ];
+    ws_bulk_insert_hierarchical( $hierarchy, 'ws_disclosure_targets' );
+}
+
+/**
+ * Seeds ws_fee_shifting with its flat term list.
+ * New in 3.1.0.
+ */
+function ws_seed_fee_shifting_taxonomy() {
+    $taxonomy = 'ws_fee_shifting';
+    $terms    = [
+        'unilateral-pro-plaintiff' => 'Unilateral (Pro-Plaintiff)',
+        'bilateral-loser-pays'     => 'Bilateral (Loser Pays)',
+        'discretionary'            => 'Discretionary',
+        'none-american-rule'       => 'None (American Rule)',
+    ];
+    foreach ( $terms as $slug => $name ) {
+        if ( ! term_exists( $slug, $taxonomy ) ) {
+            wp_insert_term( $name, $taxonomy, [ 'slug' => $slug ] );
+        }
     }
 }

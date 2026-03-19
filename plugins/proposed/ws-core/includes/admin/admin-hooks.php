@@ -714,3 +714,405 @@ add_filter( 'acf/prepare_field/key=field_jx_flag_source_url', function( $field )
     }
     return $field;
 } );
+/**
+ * Additions to: admin-hooks.php
+ *
+ * WhistleblowerShield Core Plugin
+ *
+ * PURPOSE
+ * -------
+ * Hook logic supporting the Source & Verification field group defined
+ * in acf-source-verify.php. Add these functions and constants to
+ * admin-hooks.php in a clearly labelled section banner.
+ *
+ * HOOKS REGISTERED
+ * ----------------
+ *   acf/save_post  priority 5   ws_stamp_source_method()
+ *                               ws_stamp_source_name()
+ *                               ws_default_verification_status()
+ *   acf/save_post  priority 20  ws_stamp_verified_by_date()
+ *                               ws_enforce_source_verify_roles()
+ *
+ * REGISTRATION ORDER NOTE
+ * -----------------------
+ * Within the same priority, hooks fire in registration order. The
+ * sequence at priority 5 must be:
+ *   1. ws_stamp_source_method()    — writes source_method first
+ *   2. ws_stamp_source_name()      — reads source_method to decide 'Direct'
+ *   3. ws_default_verification_status() — reads both fields
+ *
+ * Ensure these are added to admin-hooks.php in this order.
+ *
+ * SOURCE METHOD TABLE
+ * -------------------
+ * The method table is intentionally small and stable. Adding a new
+ * source_method value should be rare and deliberate. New ingest sources
+ * should be expressed as a new source_name under an existing method
+ * rather than a new method constant.
+ *
+ *   WS_SOURCE_MATRIX_SEED    Posts generated programmatically by the
+ *                            plugin installer or seed functions.
+ *   WS_SOURCE_AI_ASSISTED    Posts originating from AI model output,
+ *                            requiring human verification.
+ *   WS_SOURCE_BULK_IMPORT    Posts ingested from a structured data file
+ *                            (JSON, CSV) in a single batch operation.
+ *   WS_SOURCE_FEED_IMPORT    Posts ingested from a live feed source
+ *                            (news feed, newsletter, RSS). Distinct from
+ *                            bulk_import in that it is typically
+ *                            recurring and automated.
+ *   WS_SOURCE_HUMAN_CREATED  Posts created manually through the WP admin
+ *                            by a human editor. Verification is implicit.
+ *
+ * SOURCE NAME CONVENTION
+ * ----------------------
+ * source_name provides a secondary specifier within a method:
+ *
+ *   matrix_seed   → 'Direct'   (auto-set, never changes)
+ *   human_created → 'Direct'   (auto-set, never changes)
+ *   ai_assisted   → e.g. 'Claude AI', 'Gemini', 'ChatGPT'
+ *   bulk_import   → e.g. 'JSON Import', 'CSV Import'
+ *   feed_import   → e.g. 'News Feed', 'Newsletter', 'RSS'
+ *
+ * JSON ingest files should declare source_method and source_name in a
+ * top-level "meta" header block so the ingest tooling can stamp every
+ * record in the batch consistently:
+ *
+ *   {
+ *     "meta": {
+ *       "source_method": "ai_assisted",
+ *       "source_name":   "Claude AI",
+ *       ...
+ *     },
+ *     "records": [ ... ]
+ *   }
+ *
+ * VERSION
+ * -------
+ * 1.0.0  Initial implementation
+ * 1.1.0  Added WS_SOURCE_FEED_IMPORT constant; added source_name stamping;
+ *        added ws_set_source_name() public API; updated Direct auto-population
+ */
+
+if ( ! defined( 'ABSPATH' ) ) exit;
+
+
+// ════════════════════════════════════════════════════════════════════════════
+// CONSTANTS — Source Method values
+//
+// Use these constants everywhere source_method values are written or
+// compared. Never use bare strings — changes to a value only need
+// updating here.
+//
+// The method table is intentionally stable. Prefer adding a new
+// source_name to an existing method over adding a new constant here.
+// ════════════════════════════════════════════════════════════════════════════
+
+define( 'WS_SOURCE_MATRIX_SEED',   'matrix_seed'   );
+define( 'WS_SOURCE_AI_ASSISTED',   'ai_assisted'   );
+define( 'WS_SOURCE_BULK_IMPORT',   'bulk_import'   );
+define( 'WS_SOURCE_FEED_IMPORT',   'feed_import'   );
+define( 'WS_SOURCE_HUMAN_CREATED', 'human_created' );
+
+/**
+ * The source_name value auto-assigned to matrix_seed and human_created
+ * posts. Signals that the source and the method are one and the same —
+ * no external or secondary source is involved.
+ */
+define( 'WS_SOURCE_NAME_DIRECT', 'Direct' );
+
+
+// ════════════════════════════════════════════════════════════════════════════
+// HELPER — CPT list for source/verify hooks
+//
+// Centralised so the list only needs updating in one place if CPTs are
+// added or removed. Must stay in sync with the location rules in
+// acf-source-verify.php.
+// ════════════════════════════════════════════════════════════════════════════
+
+function ws_source_verify_post_types() {
+    return [
+        'jx-statute',
+        'jx-citation',
+        'jx-interpretation',
+        'ws-agency',
+        'ws-assist-org',
+        'jx-summary',
+        'ws-reference',
+    ];
+}
+
+
+// ════════════════════════════════════════════════════════════════════════════
+// HOOK 1 of 5 — Set source_method at post creation (priority 5, first save)
+//
+// Writes source_method once and never again. For jx-summary the value is
+// always WS_SOURCE_HUMAN_CREATED regardless of context — this enforces
+// the policy that summaries are always human-authored.
+//
+// For all other CPTs this hook assumes manual admin creation and writes
+// WS_SOURCE_HUMAN_CREATED as the default. Programmatic sources must call
+// ws_set_source_method( $post_id, WS_SOURCE_* ) directly — they must not
+// rely on this hook.
+// ════════════════════════════════════════════════════════════════════════════
+
+add_action( 'acf/save_post', 'ws_stamp_source_method', 5 );
+
+function ws_stamp_source_method( $post_id ) {
+
+    if ( ! in_array( get_post_type( $post_id ), ws_source_verify_post_types(), true ) ) {
+        return;
+    }
+
+    // First save only — never overwrite.
+    if ( get_post_meta( $post_id, 'source_method', true ) !== '' ) {
+        return;
+    }
+
+    // jx-summary is always human_created by policy.
+    $method = ( get_post_type( $post_id ) === 'jx-summary' )
+        ? WS_SOURCE_HUMAN_CREATED
+        : WS_SOURCE_HUMAN_CREATED; // Default for all manual admin creates.
+
+    update_post_meta( $post_id, 'source_method', $method );
+}
+
+
+// ════════════════════════════════════════════════════════════════════════════
+// HOOK 2 of 5 — Set source_name at post creation (priority 5, first save)
+//
+// Must fire after ws_stamp_source_method() so source_method is already
+// written when this hook runs.
+//
+// matrix_seed and human_created posts always receive WS_SOURCE_NAME_DIRECT
+// ('Direct'). All other methods leave source_name empty — it must be
+// supplied by the ingest tooling via ws_set_source_name() or by the
+// editor in the admin UI.
+//
+// First save only — never overwrites an existing value.
+// ════════════════════════════════════════════════════════════════════════════
+
+add_action( 'acf/save_post', 'ws_stamp_source_name', 5 );
+
+function ws_stamp_source_name( $post_id ) {
+
+    if ( ! in_array( get_post_type( $post_id ), ws_source_verify_post_types(), true ) ) {
+        return;
+    }
+
+    // First save only — never overwrite.
+    if ( get_post_meta( $post_id, 'source_name', true ) !== '' ) {
+        return;
+    }
+
+    $method = get_post_meta( $post_id, 'source_method', true );
+
+    if ( in_array( $method, [ WS_SOURCE_MATRIX_SEED, WS_SOURCE_HUMAN_CREATED ], true ) ) {
+        update_post_meta( $post_id, 'source_name', WS_SOURCE_NAME_DIRECT );
+    }
+    // All other methods: leave empty — must be supplied externally.
+}
+
+
+// ════════════════════════════════════════════════════════════════════════════
+// HOOK 3 of 5 — Default verification_status at creation (priority 5, first)
+//
+// Must fire after ws_stamp_source_method() and ws_stamp_source_name() so
+// both fields are already written when this hook runs.
+//
+// human_created posts default to 'verified' — the act of manual creation
+// implies editorial ownership. All other methods default to 'unverified'.
+//
+// For human_created posts, verified_by and verified_date are also stamped
+// immediately so the provenance cluster is fully populated from first save.
+// ════════════════════════════════════════════════════════════════════════════
+
+add_action( 'acf/save_post', 'ws_default_verification_status', 5 );
+
+function ws_default_verification_status( $post_id ) {
+
+    if ( ! in_array( get_post_type( $post_id ), ws_source_verify_post_types(), true ) ) {
+        return;
+    }
+
+    // First save only.
+    if ( get_post_meta( $post_id, 'verification_status', true ) !== '' ) {
+        return;
+    }
+
+    $source = get_post_meta( $post_id, 'source_method', true );
+
+    if ( $source === WS_SOURCE_HUMAN_CREATED ) {
+        update_post_meta( $post_id, 'verification_status', 'verified' );
+        $current_user = wp_get_current_user();
+        update_post_meta( $post_id, 'verified_by',   $current_user->display_name );
+        update_post_meta( $post_id, 'verified_date', current_time( 'mysql' ) );
+    } else {
+        update_post_meta( $post_id, 'verification_status', 'unverified' );
+    }
+}
+
+
+// ════════════════════════════════════════════════════════════════════════════
+// HOOK 4 of 5 — Auto-stamp verified_by + verified_date on transition (p. 20)
+//
+// Fires on every save. Compares incoming verification_status against the
+// pre-save value. Stamps only on a genuine transition TO 'verified' —
+// not on saves where the status is already 'verified'.
+// ════════════════════════════════════════════════════════════════════════════
+
+add_action( 'acf/save_post', 'ws_stamp_verified_by_date', 20 );
+
+function ws_stamp_verified_by_date( $post_id ) {
+
+    if ( ! in_array( get_post_type( $post_id ), ws_source_verify_post_types(), true ) ) {
+        return;
+    }
+
+    $incoming = isset( $_POST['acf']['field_verification_status'] )
+        ? sanitize_text_field( $_POST['acf']['field_verification_status'] )
+        : '';
+
+    if ( $incoming !== 'verified' ) {
+        return;
+    }
+
+    $previous = get_post_meta( $post_id, 'verification_status', true );
+
+    if ( $previous === 'verified' ) {
+        return; // Already verified — not a transition, do not re-stamp.
+    }
+
+    $current_user = wp_get_current_user();
+    update_post_meta( $post_id, 'verified_by',   $current_user->display_name );
+    update_post_meta( $post_id, 'verified_date', current_time( 'mysql' ) );
+}
+
+
+// ════════════════════════════════════════════════════════════════════════════
+// HOOK 5 of 5 — Enforce role restrictions + source_name gate (priority 20)
+//
+// Three server-side enforcements:
+//
+//   1. needs_review — admin only. Non-admin saves revert to pre-save value.
+//
+//   2. verification_status revert — non-admins cannot set status back to
+//      'unverified' once it is 'verified'. Attempt is silently reverted.
+//
+//   3. source_name gate — no role may set verification_status to 'verified'
+//      if source_name is empty. Attempt is silently reverted to 'unverified'.
+//      This is the server-side enforcement of the ACF conditional logic gate
+//      in acf-source-verify.php.
+// ════════════════════════════════════════════════════════════════════════════
+
+add_action( 'acf/save_post', 'ws_enforce_source_verify_roles', 20 );
+
+function ws_enforce_source_verify_roles( $post_id ) {
+
+    if ( ! in_array( get_post_type( $post_id ), ws_source_verify_post_types(), true ) ) {
+        return;
+    }
+
+    $is_admin = current_user_can( 'manage_options' );
+
+    // ── 1. needs_review: admin only ───────────────────────────────────────
+    if ( ! $is_admin ) {
+        $previous_needs_review = get_post_meta( $post_id, 'needs_review', true );
+        update_post_meta( $post_id, 'needs_review', $previous_needs_review );
+    }
+
+    // ── 2. verification_status: non-admins cannot revert to 'unverified' ─
+    if ( ! $is_admin ) {
+        $previous_status = get_post_meta( $post_id, 'verification_status', true );
+        $incoming_status = isset( $_POST['acf']['field_verification_status'] )
+            ? sanitize_text_field( $_POST['acf']['field_verification_status'] )
+            : $previous_status;
+
+        if ( $previous_status === 'verified' && $incoming_status !== 'verified' ) {
+            update_post_meta( $post_id, 'verification_status', 'verified' );
+        }
+    }
+
+    // ── 3. source_name gate: no role may verify without a source_name ─────
+    $source_name     = trim( (string) get_post_meta( $post_id, 'source_name', true ) );
+    $incoming_status = isset( $_POST['acf']['field_verification_status'] )
+        ? sanitize_text_field( $_POST['acf']['field_verification_status'] )
+        : '';
+
+    if ( $incoming_status === 'verified' && $source_name === '' ) {
+        update_post_meta( $post_id, 'verification_status', 'unverified' );
+    }
+}
+
+
+// ════════════════════════════════════════════════════════════════════════════
+// PUBLIC API — ws_set_source_method()
+//
+// Called by matrix seed functions, bulk import routines, and AI-assisted
+// ingest tooling to set source_method programmatically. Silently refuses
+// to overwrite an existing value (immutability) or accept unknown values.
+// jx-summary posts always receive WS_SOURCE_HUMAN_CREATED regardless of
+// the value passed by the caller.
+//
+// Usage:
+//   ws_set_source_method( $post_id, WS_SOURCE_AI_ASSISTED );
+// ════════════════════════════════════════════════════════════════════════════
+
+function ws_set_source_method( $post_id, $method ) {
+
+    $allowed = [
+        WS_SOURCE_MATRIX_SEED,
+        WS_SOURCE_AI_ASSISTED,
+        WS_SOURCE_BULK_IMPORT,
+        WS_SOURCE_FEED_IMPORT,
+        WS_SOURCE_HUMAN_CREATED,
+    ];
+
+    if ( ! in_array( $method, $allowed, true ) ) {
+        return;
+    }
+
+    // Immutability guard.
+    if ( get_post_meta( $post_id, 'source_method', true ) !== '' ) {
+        return;
+    }
+
+    // jx-summary policy lock.
+    if ( get_post_type( $post_id ) === 'jx-summary' ) {
+        update_post_meta( $post_id, 'source_method', WS_SOURCE_HUMAN_CREATED );
+        return;
+    }
+
+    update_post_meta( $post_id, 'source_method', $method );
+}
+
+
+// ════════════════════════════════════════════════════════════════════════════
+// PUBLIC API — ws_set_source_name()
+//
+// Called by ingest tooling to set source_name programmatically. Typically
+// read from the "meta" header block of a JSON ingest file. Silently refuses
+// to overwrite an existing value (immutability) or accept an empty string.
+//
+// matrix_seed and human_created posts already have source_name = 'Direct'
+// written by ws_stamp_source_name() — calls to this function for those
+// posts will be silently ignored by the immutability guard.
+//
+// Usage:
+//   ws_set_source_name( $post_id, 'Claude AI' );
+// ════════════════════════════════════════════════════════════════════════════
+
+function ws_set_source_name( $post_id, $name ) {
+
+    $name = trim( (string) $name );
+
+    if ( $name === '' ) {
+        return;
+    }
+
+    // Immutability guard.
+    if ( get_post_meta( $post_id, 'source_name', true ) !== '' ) {
+        return;
+    }
+
+    update_post_meta( $post_id, 'source_name', $name );
+}

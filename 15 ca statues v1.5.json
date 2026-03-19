@@ -1,0 +1,750 @@
+{
+  "meta": {
+    "json_format_version": "1.5",
+    "source_method": "ai_assisted",
+    "source_name": "Gemini",
+    "jurisdiction_id": "CA",
+    "generated_date": "2026-03-18",
+    "generated_by": "Gemini 1.5 Pro",
+    "record_count": 15,
+    "proposed_count": 0,
+    "new_terms_proposed": [],
+    "json_run_notes": "Batch request for 15 primary California whistleblower and anti-retaliation statutes. All field naming follows the 'ws_jx_statute_' prefix convention where applicable. Proposed taxonomy terms were not required as existing categories (public_sector, private_sector, etc.) fully cover these records."
+  },
+  "records": [
+    {
+      "jurisdiction_id": "CA",
+      "statute_id": "CA-1102.5",
+      "official_name": "California Labor Code § 1102.5",
+      "common_name": "The General Whistleblower Protection Statute",
+      "legal_basis": {
+        "statute_citation": "Cal. Lab. Code § 1102.5",
+        "disclosure_types": ["statutory_violation", "regulatory_non_compliance", "refusal_illegal_act"],
+        "protected_class": ["private_sector", "public_sector", "contractor_gig"],
+        "adverse_action_scope": "Broad Materiality Standard: Any action that might dissuade a reasonable worker from engaging in protected activity."
+      },
+      "statute_of_limitations": {
+        "limit_value": 3,
+        "limit_unit": "years",
+        "trigger": "occurrence of the retaliatory act",
+        "exhaustion_required": false,
+        "exhaustion_details": "",
+        "tolling_notes": "",
+        "limit_ambiguous": false
+      },
+      "enforcement": {
+        "primary_agency": "Labor Commissioner's Office (DLSE)",
+        "remedies": ["reinstatement", "back_pay", "civil_penalty", "attorney_fees"],
+        "fee_shifting": ["unilateral_pro_plaintiff"],
+        "process_type": ["civil_lawsuit", "administrative_complaint"]
+      },
+      "burden_of_proof": {
+        "employee_standard": "Contributing factor (preponderance of evidence)",
+        "employer_defense": "Clear and convincing evidence that action would have occurred regardless",
+        "rebuttable_presumption": "",
+        "burden_of_proof_details": "Codified under Labor Code § 1102.6.",
+        "burden_of_proof_flag": true
+      },
+      "reward": {
+        "available": false,
+        "reward_details": ""
+      },
+      "links": {
+        "statute_url": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=1102.5.&lawCode=LAB",
+        "is_official": true,
+        "url_source": "",
+        "is_pdf": false
+      },
+      "citations": {
+        "citation_count": 1,
+        "attached_citations": [
+          "Lawson v. PPG Architectural Finishes, Inc. || https://www.courtlistener.com/opinion/4908021/lawson-v-ppg-architectural-finishes-inc/ || CourtListener"
+        ]
+      }
+    },
+    {
+      "jurisdiction_id": "CA",
+      "statute_id": "CA-12653",
+      "official_name": "California Government Code § 12653",
+      "common_name": "California False Claims Act (CFCA) Retaliation",
+      "legal_basis": {
+        "statute_citation": "Cal. Gov. Code § 12653",
+        "disclosure_types": ["fraud_false_claims", "fiscal_misconduct"],
+        "protected_class": ["private_sector", "public_sector", "contractor_gig"],
+        "adverse_action_scope": "Broad: Includes discharge, demotion, suspension, threats, harassment, or any other discrimination."
+      },
+      "statute_of_limitations": {
+        "limit_value": 3,
+        "limit_unit": "years",
+        "trigger": "retaliatory act",
+        "exhaustion_required": false,
+        "exhaustion_details": "",
+        "tolling_notes": "",
+        "limit_ambiguous": false
+      },
+      "enforcement": {
+        "primary_agency": "Attorney General / Department of Justice",
+        "remedies": ["reinstatement", "double_back_pay", "punitive_damages", "attorney_fees"],
+        "fee_shifting": ["unilateral_pro_plaintiff"],
+        "process_type": ["civil_lawsuit", "qui_tam"]
+      },
+      "burden_of_proof": {
+        "employee_standard": "Preponderance of the evidence",
+        "employer_defense": "Legitimate non-retaliatory reason",
+        "rebuttable_presumption": "",
+        "burden_of_proof_details": "Aligns with federal False Claims Act standards.",
+        "burden_of_proof_flag": true
+      },
+      "reward": {
+        "available": true,
+        "reward_details": "Whistleblower (relator) entitled to 15% to 50% of recovered funds depending on government intervention."
+      },
+      "links": {
+        "statute_url": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=12653.&lawCode=GOV",
+        "is_official": true,
+        "url_source": "",
+        "is_pdf": false
+      },
+      "citations": {
+        "citation_count": 1,
+        "attached_citations": [
+          "State ex rel. Harris v. PricewaterhouseCoopers LLP || https://www.courtlistener.com/opinion/2592398/state-ex-rel-harris-v-pricewaterhousecoopers-llp/ || CourtListener"
+        ]
+      }
+    },
+    {
+      "jurisdiction_id": "CA",
+      "statute_id": "CA-8547",
+      "official_name": "California Government Code § 8547 et seq.",
+      "common_name": "California Whistleblower Protection Act (CWPA)",
+      "legal_basis": {
+        "statute_citation": "Cal. Gov. Code § 8547",
+        "disclosure_types": ["improper_governmental_activity", "gross_waste_funds", "abuse_of_authority", "public_health_safety"],
+        "protected_class": ["state_employee"],
+        "adverse_action_scope": "Disciplinary action, reprisal, or any other retaliation."
+      },
+      "statute_of_limitations": {
+        "limit_value": 12,
+        "limit_unit": "months",
+        "trigger": "retaliatory act",
+        "exhaustion_required": true,
+        "exhaustion_details": "Must file a formal written complaint with the State Personnel Board (SPB) before filing a lawsuit.",
+        "tolling_notes": "Tort claim notice must be filed within 6 months under Government Claims Act.",
+        "limit_ambiguous": false
+      },
+      "enforcement": {
+        "primary_agency": "State Personnel Board / State Auditor",
+        "remedies": ["reinstatement", "back_pay", "compensatory_damages", "punitive_damages"],
+        "fee_shifting": ["unilateral_pro_plaintiff"],
+        "process_type": ["administrative_complaint", "civil_lawsuit"]
+      },
+      "burden_of_proof": {
+        "employee_standard": "Contributing factor",
+        "employer_defense": "Clear and convincing evidence of legitimate independent grounds",
+        "rebuttable_presumption": "",
+        "burden_of_proof_details": "The burden shifts once the employee makes a prima facie case.",
+        "burden_of_proof_flag": true
+      },
+      "reward": {
+        "available": false,
+        "reward_details": ""
+      },
+      "links": {
+        "statute_url": "https://leginfo.legislature.ca.gov/faces/codes_displayText.xhtml?lawCode=GOV&division=1.&title=2.&part=&chapter=6.5.&article=",
+        "is_official": true,
+        "url_source": "",
+        "is_pdf": false
+      },
+      "citations": {
+        "citation_count": 1,
+        "attached_citations": [
+          "Miklosy v. Regents of University of California || https://www.courtlistener.com/opinion/2596541/miklosy-v-regents-of-university-of-california/ || CourtListener"
+        ]
+      }
+    },
+    {
+      "jurisdiction_id": "CA",
+      "statute_id": "CA-1278.5",
+      "official_name": "California Health & Safety Code § 1278.5",
+      "common_name": "Healthcare Facility Whistleblower Protection",
+      "legal_basis": {
+        "statute_citation": "Cal. Health & Safety Code § 1278.5",
+        "disclosure_types": ["patient_safety_care", "public_health_safety"],
+        "protected_class": ["healthcare_staff", "clinical_staff", "medical_student"],
+        "adverse_action_scope": "Discriminatory treatment, including demotion, suspension, or breach of contract/privileges."
+      },
+      "statute_of_limitations": {
+        "limit_value": 2,
+        "limit_unit": "years",
+        "trigger": "discriminatory act",
+        "exhaustion_required": false,
+        "exhaustion_details": "",
+        "tolling_notes": "",
+        "limit_ambiguous": false
+      },
+      "enforcement": {
+        "primary_agency": "Department of Public Health",
+        "remedies": ["reinstatement", "lost_wages", "civil_penalty", "attorney_fees"],
+        "fee_shifting": ["unilateral_pro_plaintiff"],
+        "process_type": ["civil_lawsuit", "administrative_complaint"]
+      },
+      "burden_of_proof": {
+        "employee_standard": "Substantial motivating factor",
+        "employer_defense": "Interests of justice / legitimate peer review",
+        "rebuttable_presumption": "Retaliation is presumed if adverse action occurs within 180 days of the disclosure.",
+        "burden_of_proof_details": "The 180-day presumption is a significant advantage for healthcare workers.",
+        "burden_of_proof_flag": true
+      },
+      "reward": {
+        "available": false,
+        "reward_details": ""
+      },
+      "links": {
+        "statute_url": "https://law.justia.com/codes/california/code-hsc/division-2/chapter-2/article-3/section-1278-5/",
+        "is_official": false,
+        "url_source": "Justia Law",
+        "is_pdf": false
+      },
+      "citations": {
+        "citation_count": 0,
+        "attached_citations": []
+      }
+    },
+    {
+      "jurisdiction_id": "CA",
+      "statute_id": "CA-6310",
+      "official_name": "California Labor Code § 6310",
+      "common_name": "Cal/OSHA Whistleblower Protection",
+      "legal_basis": {
+        "statute_citation": "Cal. Lab. Code § 6310",
+        "disclosure_types": ["workplace_safety"],
+        "protected_class": ["private_sector", "public_sector"],
+        "adverse_action_scope": "Any discrimination, including firing, demotion, transfer, or loss of overtime."
+      },
+      "statute_of_limitations": {
+        "limit_value": 6,
+        "limit_unit": "months",
+        "trigger": "retaliatory act",
+        "exhaustion_required": false,
+        "exhaustion_details": "",
+        "tolling_notes": "Up to 3 years if filing as a wrongful termination civil lawsuit.",
+        "limit_ambiguous": false
+      },
+      "enforcement": {
+        "primary_agency": "Division of Occupational Safety and Health (Cal/OSHA)",
+        "remedies": ["reinstatement", "back_wages", "benefits_restoration"],
+        "fee_shifting": ["unilateral_pro_plaintiff"],
+        "process_type": ["administrative_complaint", "civil_lawsuit"]
+      },
+      "burden_of_proof": {
+        "employee_standard": "Protected activity was a motivating factor",
+        "employer_defense": "Legitimate safety or performance reason",
+        "rebuttable_presumption": "",
+        "burden_of_proof_details": "",
+        "burden_of_proof_flag": false
+      },
+      "reward": {
+        "available": false,
+        "reward_details": ""
+      },
+      "links": {
+        "statute_url": "https://www.dir.ca.gov/dosh/whisteblowercomplaint.htm",
+        "is_official": true,
+        "url_source": "",
+        "is_pdf": false
+      },
+      "citations": {
+        "citation_count": 1,
+        "attached_citations": [
+          "Cabesuela v. Browning-Ferris Industries of California, Inc. || https://www.courtlistener.com/opinion/2290547/cabesuela-v-browning-ferris-industries-of-california-inc/ || CourtListener"
+        ]
+      }
+    },
+    {
+      "jurisdiction_id": "CA",
+      "statute_id": "CA-98.6",
+      "official_name": "California Labor Code § 98.6",
+      "common_name": "General Labor Rights Protection",
+      "legal_basis": {
+        "statute_citation": "Cal. Lab. Code § 98.6",
+        "disclosure_types": ["statutory_violation"],
+        "protected_class": ["private_sector", "public_sector", "job_applicant"],
+        "adverse_action_scope": "Discharge or any manner of discrimination for exercising Labor Code rights."
+      },
+      "statute_of_limitations": {
+        "limit_value": 1,
+        "limit_unit": "years",
+        "trigger": "retaliatory act",
+        "exhaustion_required": false,
+        "exhaustion_details": "",
+        "tolling_notes": "6 months for certain complaints to Labor Commissioner.",
+        "limit_ambiguous": false
+      },
+      "enforcement": {
+        "primary_agency": "Labor Commissioner's Office",
+        "remedies": ["reinstatement", "lost_wages", "civil_penalty", "attorney_fees"],
+        "fee_shifting": ["unilateral_pro_plaintiff"],
+        "process_type": ["administrative_complaint", "civil_lawsuit"]
+      },
+      "burden_of_proof": {
+        "employee_standard": "Participated in protected activity",
+        "employer_defense": "Non-discriminatory justification",
+        "rebuttable_presumption": "Presumption of retaliation if occurring within 90 days (per recent amendments).",
+        "burden_of_proof_details": "Recent CA law updates have significantly increased the burden on employers to disprove retaliation within short windows.",
+        "burden_of_proof_flag": true
+      },
+      "reward": {
+        "available": false,
+        "reward_details": ""
+      },
+      "links": {
+        "statute_url": "https://codes.findlaw.com/ca/labor-code/lab-sect-98-6/",
+        "is_official": false,
+        "url_source": "FindLaw",
+        "is_pdf": false
+      },
+      "citations": {
+        "citation_count": 0,
+        "attached_citations": []
+      }
+    },
+    {
+      "jurisdiction_id": "CA",
+      "statute_id": "CA-12940(h)",
+      "official_name": "California Government Code § 12940(h)",
+      "common_name": "FEHA Anti-Retaliation",
+      "legal_basis": {
+        "statute_citation": "Cal. Gov. Code § 12940(h)",
+        "disclosure_types": ["statutory_violation"],
+        "protected_class": ["private_sector", "public_sector", "job_applicant"],
+        "adverse_action_scope": "Any adverse action that materially affects terms and conditions of employment."
+      },
+      "statute_of_limitations": {
+        "limit_value": 3,
+        "limit_unit": "years",
+        "trigger": "retaliatory act",
+        "exhaustion_required": true,
+        "exhaustion_details": "Must obtain a 'Right-to-Sue' notice from the Civil Rights Department (CRD) before filing suit.",
+        "tolling_notes": "",
+        "limit_ambiguous": false
+      },
+      "enforcement": {
+        "primary_agency": "Civil Rights Department (CRD)",
+        "remedies": ["compensatory_damages", "punitive_damages", "reinstatement", "attorney_fees"],
+        "fee_shifting": ["unilateral_pro_plaintiff"],
+        "process_type": ["administrative_complaint", "civil_lawsuit"]
+      },
+      "burden_of_proof": {
+        "employee_standard": "Causal link (motivating factor)",
+        "employer_defense": "Legitimate, non-discriminatory reason",
+        "rebuttable_presumption": "",
+        "burden_of_proof_details": "Uses the McDonnell Douglas burden-shifting framework.",
+        "burden_of_proof_flag": true
+      },
+      "reward": {
+        "available": false,
+        "reward_details": ""
+      },
+      "links": {
+        "statute_url": "https://calcivilrights.ca.gov/wp-content/uploads/sites/32/2025/07/Retaliation-Factsheet-English.pdf",
+        "is_official": true,
+        "url_source": "",
+        "is_pdf": true
+      },
+      "citations": {
+        "citation_count": 1,
+        "attached_citations": [
+          "Yanowitz v. L'Oreal USA, Inc. || https://www.courtlistener.com/opinion/2635035/yanowitz-v-loreal-usa-inc/ || CourtListener"
+        ]
+      }
+    },
+    {
+      "jurisdiction_id": "CA",
+      "statute_id": "CA-1197.5",
+      "official_name": "California Labor Code § 1197.5",
+      "common_name": "Equal Pay Act Retaliation",
+      "legal_basis": {
+        "statute_citation": "Cal. Lab. Code § 1197.5",
+        "disclosure_types": ["statutory_violation"],
+        "protected_class": ["private_sector", "public_sector"],
+        "adverse_action_scope": "Any discrimination or retaliation for inquiring about or discussing wages."
+      },
+      "statute_of_limitations": {
+        "limit_value": 3,
+        "limit_unit": "years",
+        "trigger": "pay differential or retaliatory act",
+        "exhaustion_required": false,
+        "exhaustion_details": "",
+        "tolling_notes": "Up to 6 years for recovery of lost pay under continuing violations theory (as of 2026).",
+        "limit_ambiguous": false
+      },
+      "enforcement": {
+        "primary_agency": "Labor Commissioner's Office",
+        "remedies": ["wage_differential", "liquidated_damages", "attorney_fees"],
+        "fee_shifting": ["unilateral_pro_plaintiff"],
+        "process_type": ["civil_lawsuit", "administrative_complaint"]
+      },
+      "burden_of_proof": {
+        "employee_standard": "Show substantially similar work for unequal pay",
+        "employer_defense": "Bona fide factor other than sex/race/ethnicity (e.g. seniority, merit)",
+        "rebuttable_presumption": "",
+        "burden_of_proof_details": "Employer carries a heavy burden to justify pay disparities.",
+        "burden_of_proof_flag": true
+      },
+      "reward": {
+        "available": false,
+        "reward_details": ""
+      },
+      "links": {
+        "statute_url": "https://www.hunton.com/hunton-employment-labor-perspectives/californias-pay-equity-enforcement-act-what-employers-need-to-know",
+        "is_official": false,
+        "url_source": "Hunton Andrews Kurth LLP",
+        "is_pdf": false
+      },
+      "citations": {
+        "citation_count": 0,
+        "attached_citations": []
+      }
+    },
+    {
+      "jurisdiction_id": "CA",
+      "statute_id": "CA-2699",
+      "official_name": "California Labor Code § 2699",
+      "common_name": "Private Attorneys General Act (PAGA)",
+      "legal_basis": {
+        "statute_citation": "Cal. Lab. Code § 2699",
+        "disclosure_types": ["statutory_violation"],
+        "protected_class": ["private_sector"],
+        "adverse_action_scope": "Any retaliation for filing a PAGA notice or pursuing a PAGA claim."
+      },
+      "statute_of_limitations": {
+        "limit_value": 1,
+        "limit_unit": "years",
+        "trigger": "labor code violation",
+        "exhaustion_required": true,
+        "exhaustion_details": "Must provide online notice to the Labor and Workforce Development Agency (LWDA).",
+        "tolling_notes": "LWDA has 65 days to respond before the employee can proceed.",
+        "limit_ambiguous": false
+      },
+      "enforcement": {
+        "primary_agency": "Labor and Workforce Development Agency (LWDA)",
+        "remedies": ["civil_penalties", "attorney_fees"],
+        "fee_shifting": ["unilateral_pro_plaintiff"],
+        "process_type": ["civil_lawsuit", "representative_action"]
+      },
+      "burden_of_proof": {
+        "employee_standard": "Aggrieved employee status",
+        "employer_defense": "Cure provisions for certain violations",
+        "rebuttable_presumption": "",
+        "burden_of_proof_details": "Unique 'private attorney general' standing to recover penalties on behalf of the state.",
+        "burden_of_proof_flag": true
+      },
+      "reward": {
+        "available": true,
+        "reward_details": "Employees receive 25% of the civil penalties recovered."
+      },
+      "links": {
+        "statute_url": "https://www.labor.ca.gov/wp-content/uploads/sites/338/2026/02/2026-2-6-Express-Terms-of-Prop-Rulemaking_LWDA_PAGA-Z2026-0121-03.pdf",
+        "is_official": true,
+        "url_source": "",
+        "is_pdf": true
+      },
+      "citations": {
+        "citation_count": 1,
+        "attached_citations": [
+          "Kim v. Reins International California, Inc. || https://www.courtlistener.com/opinion/4711394/kim-v-reins-international-california-inc/ || CourtListener"
+        ]
+      }
+    },
+    {
+      "jurisdiction_id": "CA",
+      "statute_id": "CA-230",
+      "official_name": "California Labor Code § 230",
+      "common_name": "Jury & Witness Duty Protection",
+      "legal_basis": {
+        "statute_citation": "Cal. Lab. Code § 230",
+        "disclosure_types": ["statutory_violation"],
+        "protected_class": ["private_sector", "public_sector"],
+        "adverse_action_scope": "Discharge or any manner of discrimination for taking time off for jury/witness duty."
+      },
+      "statute_of_limitations": {
+        "limit_value": 1,
+        "limit_unit": "years",
+        "trigger": "retaliatory act",
+        "exhaustion_required": false,
+        "exhaustion_details": "",
+        "tolling_notes": "",
+        "limit_ambiguous": false
+      },
+      "enforcement": {
+        "primary_agency": "Labor Commissioner's Office",
+        "remedies": ["reinstatement", "back_wages", "benefits_restoration"],
+        "fee_shifting": ["none_american_rule"],
+        "process_type": ["administrative_complaint", "civil_lawsuit"]
+      },
+      "burden_of_proof": {
+        "employee_standard": "Show service/compliance with subpoena and reasonable notice provided",
+        "employer_defense": "Failure to provide notice",
+        "rebuttable_presumption": "",
+        "burden_of_proof_details": "",
+        "burden_of_proof_flag": false
+      },
+      "reward": {
+        "available": false,
+        "reward_details": ""
+      },
+      "links": {
+        "statute_url": "https://law.justia.com/codes/california/code-lab/division-2/part-1/chapter-1/article-1/section-230/",
+        "is_official": false,
+        "url_source": "Justia Law",
+        "is_pdf": false
+      },
+      "citations": {
+        "citation_count": 0,
+        "attached_citations": []
+      }
+    },
+    {
+      "jurisdiction_id": "CA",
+      "statute_id": "CA-44110",
+      "official_name": "California Education Code § 44110",
+      "common_name": "Reporting by School Employees Act",
+      "legal_basis": {
+        "statute_citation": "Cal. Ed. Code § 44110",
+        "disclosure_types": ["improper_governmental_activity"],
+        "protected_class": ["k12_education"],
+        "adverse_action_scope": "Reprisal or any other retaliation for reporting improper activities."
+      },
+      "statute_of_limitations": {
+        "limit_value": 12,
+        "limit_unit": "months",
+        "trigger": "retaliatory act",
+        "exhaustion_required": true,
+        "exhaustion_details": "Varies by school district; often involves local board procedures.",
+        "tolling_notes": "",
+        "limit_ambiguous": false
+      },
+      "enforcement": {
+        "primary_agency": "Local School Boards / County Office of Education",
+        "remedies": ["reinstatement", "back_pay", "damages"],
+        "fee_shifting": ["unilateral_pro_plaintiff"],
+        "process_type": ["administrative_complaint", "civil_lawsuit"]
+      },
+      "burden_of_proof": {
+        "employee_standard": "Protected activity was a contributing factor",
+        "employer_defense": "Same action would have been taken for non-retaliatory reasons",
+        "rebuttable_presumption": "",
+        "burden_of_proof_details": "Modeled after the CWPA (Gov. Code 8547).",
+        "burden_of_proof_flag": true
+      },
+      "reward": {
+        "available": false,
+        "reward_details": ""
+      },
+      "links": {
+        "statute_url": "https://leginfo.legislature.ca.gov/faces/codes_displayText.xhtml?lawCode=EDC&division=3.&title=2.&part=25.&chapter=3.&article=2.5.",
+        "is_official": true,
+        "url_source": "",
+        "is_pdf": false
+      },
+      "citations": {
+        "citation_count": 0,
+        "attached_citations": []
+      }
+    },
+    {
+      "jurisdiction_id": "CA",
+      "statute_id": "CA-1144",
+      "official_name": "California Labor Code § 1144",
+      "common_name": "Agricultural Labor Relations Protection",
+      "legal_basis": {
+        "statute_citation": "Cal. Lab. Code § 1144",
+        "disclosure_types": ["statutory_violation"],
+        "protected_class": ["agricultural_worker"],
+        "adverse_action_scope": "Unfair labor practices, including discharge or discrimination for filing charges or testifying."
+      },
+      "statute_of_limitations": {
+        "limit_value": 6,
+        "limit_unit": "months",
+        "trigger": "unfair labor practice",
+        "exhaustion_required": true,
+        "exhaustion_details": "Must file an Unfair Labor Practice (ULP) charge with the ALRB.",
+        "tolling_notes": "",
+        "limit_ambiguous": false
+      },
+      "enforcement": {
+        "primary_agency": "Agricultural Labor Relations Board (ALRB)",
+        "remedies": ["reinstatement", "back_pay", "cease_and_desist"],
+        "fee_shifting": ["none_american_rule"],
+        "process_type": ["administrative_complaint"]
+      },
+      "burden_of_proof": {
+        "employee_standard": "Show participation in ALRB proceedings",
+        "employer_defense": "Legitimate non-discriminatory business reason",
+        "rebuttable_presumption": "",
+        "burden_of_proof_details": "",
+        "burden_of_proof_flag": false
+      },
+      "reward": {
+        "available": false,
+        "reward_details": ""
+      },
+      "links": {
+        "statute_url": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=1144.&lawCode=LAB",
+        "is_official": true,
+        "url_source": "",
+        "is_pdf": false
+      },
+      "citations": {
+        "citation_count": 0,
+        "attached_citations": []
+      }
+    },
+    {
+      "jurisdiction_id": "CA",
+      "statute_id": "CA-230.3",
+      "official_name": "California Labor Code § 230.3",
+      "common_name": "Emergency Responders Protection",
+      "legal_basis": {
+        "statute_citation": "Cal. Lab. Code § 230.3",
+        "disclosure_types": ["statutory_violation"],
+        "protected_class": ["private_sector", "public_sector"],
+        "adverse_action_scope": "Discharge, demotion, suspension, or any discrimination for taking leave to perform emergency duty."
+      },
+      "statute_of_limitations": {
+        "limit_value": 1,
+        "limit_unit": "years",
+        "trigger": "retaliatory act",
+        "exhaustion_required": false,
+        "exhaustion_details": "",
+        "tolling_notes": "",
+        "limit_ambiguous": false
+      },
+      "enforcement": {
+        "primary_agency": "Labor Commissioner's Office",
+        "remedies": ["reinstatement", "lost_wages", "benefits_restoration"],
+        "fee_shifting": ["none_american_rule"],
+        "process_type": ["administrative_complaint", "civil_lawsuit"]
+      },
+      "burden_of_proof": {
+        "employee_standard": "Show volunteer status and notice provided",
+        "employer_defense": "Exigent circumstances or lack of notice",
+        "rebuttable_presumption": "",
+        "burden_of_proof_details": "",
+        "burden_of_proof_flag": false
+      },
+      "reward": {
+        "available": false,
+        "reward_details": ""
+      },
+      "links": {
+        "statute_url": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=230.3.&lawCode=LAB",
+        "is_official": true,
+        "url_source": "",
+        "is_pdf": false
+      },
+      "citations": {
+        "citation_count": 0,
+        "attached_citations": []
+      }
+    },
+    {
+      "jurisdiction_id": "CA",
+      "statute_id": "CA-1019",
+      "official_name": "California Labor Code § 1019",
+      "common_name": "Anti-Immigration Related Retaliation",
+      "legal_basis": {
+        "statute_citation": "Cal. Lab. Code § 1019",
+        "disclosure_types": ["statutory_violation"],
+        "protected_class": ["private_sector"],
+        "adverse_action_scope": "Unfair immigration-related practices, including E-Verify abuse or threats to contact ICE."
+      },
+      "statute_of_limitations": {
+        "limit_value": 3,
+        "limit_unit": "years",
+        "trigger": "unfair practice",
+        "exhaustion_required": false,
+        "exhaustion_details": "",
+        "tolling_notes": "",
+        "limit_ambiguous": false
+      },
+      "enforcement": {
+        "primary_agency": "Labor Commissioner's Office",
+        "remedies": ["civil_penalty", "injunctive_relief", "license_suspension", "attorney_fees"],
+        "fee_shifting": ["unilateral_pro_plaintiff"],
+        "process_type": ["civil_lawsuit", "administrative_complaint"]
+      },
+      "burden_of_proof": {
+        "employee_standard": "Participated in protected activity",
+        "employer_defense": "Clear and convincing evidence of non-retaliatory motive",
+        "rebuttable_presumption": "Presumption of retaliation if occurs within 90 days of protected activity.",
+        "burden_of_proof_details": "",
+        "burden_of_proof_flag": true
+      },
+      "reward": {
+        "available": false,
+        "reward_details": ""
+      },
+      "links": {
+        "statute_url": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=1019.&lawCode=LAB",
+        "is_official": true,
+        "url_source": "",
+        "is_pdf": false
+      },
+      "citations": {
+        "citation_count": 1,
+        "attached_citations": [
+          "Arias v. Raimondo || https://www.courtlistener.com/opinion/4294061/arias-v-raimondo/ || CourtListener"
+        ]
+      }
+    },
+    {
+      "jurisdiction_id": "CA",
+      "statute_id": "CA-232.5",
+      "official_name": "California Labor Code § 232.5",
+      "common_name": "Working Conditions Disclosure Protection",
+      "legal_basis": {
+        "statute_citation": "Cal. Lab. Code § 232.5",
+        "disclosure_types": ["statutory_violation"],
+        "protected_class": ["private_sector"],
+        "adverse_action_scope": "Discharge or discrimination for disclosing working conditions."
+      },
+      "statute_of_limitations": {
+        "limit_value": 3,
+        "limit_unit": "years",
+        "trigger": "retaliatory act",
+        "exhaustion_required": false,
+        "exhaustion_details": "",
+        "tolling_notes": "",
+        "limit_ambiguous": false
+      },
+      "enforcement": {
+        "primary_agency": "Labor Commissioner's Office",
+        "remedies": ["reinstatement", "lost_wages", "civil_penalty"],
+        "fee_shifting": ["none_american_rule"],
+        "process_type": ["civil_lawsuit", "administrative_complaint"]
+      },
+      "burden_of_proof": {
+        "employee_standard": "Show disclosure of conditions occurred",
+        "employer_defense": "Violation of non-disclosure of proprietary information",
+        "rebuttable_presumption": "",
+        "burden_of_proof_details": "",
+        "burden_of_proof_flag": false
+      },
+      "reward": {
+        "available": false,
+        "reward_details": ""
+      },
+      "links": {
+        "statute_url": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=232.5.&lawCode=LAB",
+        "is_official": true,
+        "url_source": "",
+        "is_pdf": false
+      },
+      "citations": {
+        "citation_count": 0,
+        "attached_citations": []
+      }
+    }
+  ]
+}

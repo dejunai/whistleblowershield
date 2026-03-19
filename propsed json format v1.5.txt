@@ -1,0 +1,94 @@
+i have made adjustments to the header and records, as such the JSON will be added to the sites historical chain, and kept in case of audit, it will also allow for proper attribution for you, or other assistants. the ingest tool will be responsible for mapping data to declared ACF form fields.
+{
+  "meta": {
+    "json_format_version": "1.5", // Used by ingest tool to initiate legacy procedures on a legacy JSON batch
+    "source_method":       "ai_assisted",
+    "source_name":         "[YOUR COMMON NAME]",
+    "jurisdiction_id":     "[TWO-LETTER JURISDICTION CODE, e.g. CA]",
+    "generated_date":      "[TODAY'S DATE IN YYYY-MM-DD FORMAT]",
+    "generated_by":        "[YOUR MODEL NAME AND VERSION]",
+    "record_count":        [INTEGER COUNT OF RECORDS IN THIS BATCH],
+    "proposed_count":      [INTEGER COUNT OF PROPOSED TERMS],
+    "new_terms_proposed":  []
+    "json_run_notes":      "[YOUR SUMMARY OF THIS JSON CREATION BATCH]" // Anything you want to add. This will will included in the historical chain. This is place to recommend a new_taxonomy_table if applicable. This is the place to recommend a new_taxonomy_parent.
+  }
+// ... array of "records" ...
+}
+
+attributes of new_terms_proposed as:
+{
+  "taxonomy":      "[TAXONOMY TABLE FROM KNOWN LIST]", // Don't propose new_taxonomy_tables
+  "parent":        "[EXISTING PARENT OF PROPOSED TERM ID]", // Don't propose new_taxonomy_parent
+  "term id":       "[YOUR PROPOSED TERM ID]",
+  "term label":    "[YOUR PROPOSED TERM LABEL]",
+  "notes":         "[NOTES FOR WHY THIS TERM IS NEEDED]",
+  "seen_in":       [ "[STATUTE IDENTIFIER, e.g. CA-1102.5]", "[SECOND STATUTE IDENTIFIER]", "[ETC]" ]
+  "count":         [INTEGER COUNT OF "seen_in"],
+}
+
+Do NOT include the proposed term in the record itself.
+If no new terms are needed, `new_terms_proposed` must be an empty array `[]`
+
+the ingest tool will take care of mapping to the proper ACF entries. each 'record' should look like:
+{
+  "jurisdiction_id":  "[TWO-LETTER CODE]",
+  "statute_id":       "[JURISDICTION_ID]-[SECTION, e.g. CA-1102.5]",
+  "official_name":    "[FULL OFFICIAL STATUTE NAME]",
+  "common_name":      "[PLAIN LANGUAGE COMMON NAME IF ONE EXISTS]",
+ 
+  "legal_basis": {
+    "statute_citation":     "[FORMAL CITATION, e.g. Cal. Lab. Code § 1102.5]",
+    "disclosure_types":     [ "[FROM KNOWN TAXONOMY]", "[SECOND TERM BY ID]", "[ETC]" ],
+    "protected_class":      [ "[FROM COVERAGE_SCOPE OR EMPLOYEE_TYPE]", "[SECOND TERM BY ID]", "[ETC]" ],
+    "protected_audience":   [ "[FROM KNOWN TAXONOMY]", "[SECOND TERM BY ID]", "[ETC]" ],
+	"adverse_action_scope": "[DESCRIBE THE SCOPE OF ACTIONS CONSIDERED ADVERSE]", // "adverse_action" is under "enforcement" and uses "retaliation_forms" taxonomy
+  },
+ 
+  "statute_of_limitations": {
+    "limit_ambiguous":     [true | false], // If 'true' leave "limit_value" and "limit_unit" fields empty, add string to "limit_details"
+    "limit_value":         [INTEGER],
+    "limit_unit":          "[days | months | years]",
+	"limit_details":       "[DETAILS OF LIMITATIONS], // Only used if "limit_ambiguous" is 'true'
+    "trigger":             "[WHAT EVENT STARTS THE CLOCK]",
+    "exhaustion_required": [true | false],
+    "exhaustion_details":  "[IF EXHAUSTION REQUIRED, DESCRIBE THE PROCESS]", // Only used if "exhaustion_required" is 'true'
+    "tolling_notes":       "[ANY TOLLING OR EXTENSION PROVISIONS]"
+  },
+ 
+  "enforcement": {
+    "primary_agency": "[AGENCY NAME]",
+	"process_type":   [ "[FROM KNOWN TAXONOMY]", "[SECOND TERM BY ID]", "[ETC]" ],
+	"adverse_action": [ "[FROM RETALIATION_FOMRS]", "[SECOND TERM ID]", "[ETC]" ],
+    "remedies":       [ "[FROM KNOWN TAXONOMY]", "[SECOND TERM ID]", "[ETC]" ],
+	"fee_shifting":   [ "[FROM KNOWN TAXONOMY]", "[SECOND TERM ID]", "[ETC]" ],
+  },
+ 
+  "burden_of_proof": {
+    "employee_standard":       "[LEGAL STANDARD EMPLOYEE MUST MEET]",
+    "employer_defense":        "[LEGAL STANDARD FOR EMPLOYER DEFENSE]",
+    "rebuttable_presumption":  "[IF APPLICABLE — describe the presumption]",
+    "burden_of_proof_details": "[DETAILS OF THE BURDEN OF PROOF NOT ALREADY COVERED]",
+    "burden_of_proof_flag":    [true | false] // Only 'true' if "burden_of_proof_details" is non-empty
+    },
+ 
+  "reward": {
+    "available":       [true | false],
+    "reward_details": "[DETAILS DESCRIBING REWARD PARAMETERS]" // Only used if "available" is 'true'
+  },
+ 
+  "links": {
+    "statute_url":  "[URL TO OFFICIAL GOVERNMENT OR LEGISLATIVE SOURCE OR RESPECTED ALTERNATIVE]",
+    "is_official":  [true | false],                  // Only 'true' if url links to a .gov
+	"url_source":   "[SOURCE OF AN UNOFFICIAL URL]", // Only used if "is_official" is 'false'
+    "is_pdf":       [true | false],                  // Only 'true' if url links to a PDF document
+  }
+   "citations": {
+      "attached_citations": [ "[CITATION CASE NAME || CITATION URL || CITATION SOURCE]", "[SECOND CITATION]", "[ETC]" ],
+      "citation_count":     [INTEGER COUNT OF "attached_citations"],
+  }
+}
+
+please do not add keys. please do not infer data. if ambiguous data is found do not include. anywhere an array is empty mark as '[]'. anywhere a string is empty mark as "". don't use 'null' or "N/A" or 'other descriptor' to indicate missing or omitted data.
+
+
+does this new header and record details seem like a good change to you? is anything unclear? did i forget anything?

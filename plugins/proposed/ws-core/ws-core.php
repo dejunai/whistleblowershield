@@ -1,6 +1,6 @@
 <?php
 /**
-// ⚠️  DEVELOPMENT ONLY — NOT LIVE
+//  !! DEVELOPMENT ONLY — NOT LIVE
 // ==================================================================
 // This plugin is NOT deployed to a live site. There is NO
 // production database. NO user data exists. NO migration

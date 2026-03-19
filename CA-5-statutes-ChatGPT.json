@@ -1,0 +1,241 @@
+{
+  "meta": {
+    "json_format_version": "1.6",
+    "source_method": "ai_assisted",
+    "source_name": "ChatGPT",
+    "jurisdiction_id": "CA",
+    "generated_date": "2026-03-18",
+    "generated_by": "OpenAI GPT-5.3",
+    "record_count": 5,
+    "proposed_count": 0,
+    "new_terms_proposed": [],
+    "json_run_notes": "Reduced batch size to 5 for testing integrity of schema compliance and ingestion pipeline. All statutes selected are core California whistleblower and retaliation-related provisions. Taxonomy coverage was sufficient for this subset; however, future runs may require expansion for regulatory board disclosures and hybrid administrative pathways."
+  },
+  "records": [
+    {
+      "jurisdiction_id": "CA",
+      "statute_id": "CA-1102.5",
+      "official_name": "California Labor Code Section 1102.5",
+      "common_name": "California Whistleblower Protection Act",
+      "legal_basis": {
+        "statute_citation": "Cal. Lab. Code § 1102.5",
+        "disclosure_types": ["retaliation-protection"],
+        "protected_class": ["corporate-staff", "former-employee"],
+        "disclosure_targets": ["internal-supervisor", "agency-state", "law-enforcement"],
+        "adverse_action_scope": "Prohibits retaliation against employees for disclosing violations of state or federal law or refusing to participate in unlawful activity"
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": false,
+        "limit_value": 3,
+        "limit_unit": "years",
+        "trigger": "date of retaliatory act",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "primary_agency": "California Labor Commissioner",
+        "process_type": ["civil-lawsuit"],
+        "adverse_action": ["termination", "demotion", "harassment"],
+        "remedies": ["reinstatement", "back-pay", "compensatory-damages"],
+        "fee_shifting": ["unilateral-pro-plaintiff"]
+      },
+      "burden_of_proof": {
+        "employee_standard": "contributing factor",
+        "employer_defense": "clear and convincing evidence same decision absent protected activity",
+        "rebuttable_presumption": "retaliation presumed if protected activity contributed to adverse action",
+        "burden_of_proof_flag": false
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=1102.5.&lawCode=LAB",
+        "is_official": true,
+        "is_pdf": false
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      }
+    },
+    {
+      "jurisdiction_id": "CA",
+      "statute_id": "CA-98.6",
+      "official_name": "California Labor Code Section 98.6",
+      "common_name": "Retaliation for Labor Complaints",
+      "legal_basis": {
+        "statute_citation": "Cal. Lab. Code § 98.6",
+        "disclosure_types": ["retaliation-protection"],
+        "protected_class": ["corporate-staff"],
+        "disclosure_targets": ["agency-state"],
+        "adverse_action_scope": "Protects employees from retaliation for filing or participating in labor-related complaints or proceedings"
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": false,
+        "limit_value": 1,
+        "limit_unit": "years",
+        "trigger": "date of violation",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "primary_agency": "California Labor Commissioner",
+        "process_type": ["administrative-complaint"],
+        "adverse_action": ["termination", "disciplinary-action"],
+        "remedies": ["reinstatement", "back-pay"],
+        "fee_shifting": ["unilateral-pro-plaintiff"]
+      },
+      "burden_of_proof": {
+        "employee_standard": "preponderance of evidence",
+        "employer_defense": "legitimate non-retaliatory reason",
+        "burden_of_proof_flag": false
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://leginfo.legislature.ca.gov",
+        "is_official": true,
+        "is_pdf": false
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      }
+    },
+    {
+      "jurisdiction_id": "CA",
+      "statute_id": "CA-6310",
+      "official_name": "California Labor Code Section 6310",
+      "common_name": "Occupational Safety Whistleblower Protection",
+      "legal_basis": {
+        "statute_citation": "Cal. Lab. Code § 6310",
+        "disclosure_types": ["occupational-health-safety"],
+        "protected_class": ["corporate-staff"],
+        "disclosure_targets": ["agency-state", "internal-supervisor"],
+        "adverse_action_scope": "Protects employees who report unsafe working conditions or participate in safety investigations"
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": false,
+        "limit_value": 6,
+        "limit_unit": "months",
+        "trigger": "date of retaliation",
+        "exhaustion_required": true,
+        "exhaustion_details": "Complaint must be filed with Labor Commissioner prior to civil action"
+      },
+      "enforcement": {
+        "primary_agency": "Cal/OSHA",
+        "process_type": ["administrative-complaint"],
+        "adverse_action": ["termination", "harassment"],
+        "remedies": ["reinstatement", "back-pay"],
+        "fee_shifting": ["discretionary"]
+      },
+      "burden_of_proof": {
+        "employee_standard": "motivating factor",
+        "employer_defense": "same decision absent protected conduct",
+        "burden_of_proof_flag": false
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://leginfo.legislature.ca.gov",
+        "is_official": true,
+        "is_pdf": false
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      }
+    },
+    {
+      "jurisdiction_id": "CA",
+      "statute_id": "CA-232.5",
+      "official_name": "California Labor Code Section 232.5",
+      "common_name": "Disclosure of Working Conditions",
+      "legal_basis": {
+        "statute_citation": "Cal. Lab. Code § 232.5",
+        "disclosure_types": ["retaliation-protection"],
+        "protected_class": ["corporate-staff"],
+        "disclosure_targets": ["public-media"],
+        "adverse_action_scope": "Protects employees who disclose information about working conditions"
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": true,
+        "limit_details": "Varies depending on claim pathway",
+        "trigger": "date of retaliation",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "primary_agency": "Private enforcement",
+        "process_type": ["civil-lawsuit"],
+        "adverse_action": ["termination", "disciplinary-action"],
+        "remedies": ["compensatory-damages"],
+        "fee_shifting": ["none-american-rule"]
+      },
+      "burden_of_proof": {
+        "employee_standard": "protected disclosure and adverse action",
+        "employer_defense": "legitimate business reason",
+        "burden_of_proof_flag": false
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://leginfo.legislature.ca.gov",
+        "is_official": true,
+        "is_pdf": false
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      }
+    },
+    {
+      "jurisdiction_id": "CA",
+      "statute_id": "CA-12940",
+      "official_name": "California Government Code Section 12940",
+      "common_name": "FEHA Retaliation Provision",
+      "legal_basis": {
+        "statute_citation": "Cal. Gov. Code § 12940(h)",
+        "disclosure_types": ["retaliation-protection"],
+        "protected_class": ["corporate-staff"],
+        "disclosure_targets": ["agency-state"],
+        "adverse_action_scope": "Prohibits retaliation against individuals who oppose or report unlawful discrimination or harassment"
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": false,
+        "limit_value": 3,
+        "limit_unit": "years",
+        "trigger": "date of violation",
+        "exhaustion_required": true,
+        "exhaustion_details": "Must file with California Civil Rights Department prior to litigation"
+      },
+      "enforcement": {
+        "primary_agency": "California Civil Rights Department",
+        "process_type": ["administrative-complaint", "civil-lawsuit"],
+        "adverse_action": ["termination", "harassment"],
+        "remedies": ["compensatory-damages", "punitive-damages"],
+        "fee_shifting": ["unilateral-pro-plaintiff"]
+      },
+      "burden_of_proof": {
+        "employee_standard": "protected activity and causal connection",
+        "employer_defense": "legitimate non-retaliatory reason",
+        "burden_of_proof_flag": false
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://leginfo.legislature.ca.gov",
+        "is_official": true,
+        "is_pdf": false
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      }
+    }
+  ],
+  "completed": {
+    "batch_completed": "2026-03-18 20:25 UTC"
+  }
+}
