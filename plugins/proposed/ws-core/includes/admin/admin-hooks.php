@@ -105,6 +105,10 @@
  *        save_post_jurisdiction retained for ws_jx_term_id write. Collapsed
  *        per-CPT field-name arrays into single shared field names; lock filters
  *        now register once per shared field name and apply across all CPTs.
+ * 3.1.1  Bug fix: corrected 'ws-jurisdiction' CPT slug references to 'jurisdiction'
+ *        in Restrict Manual Creation hooks and Identity Field Enforcement save hook.
+ *        Slug mismatch caused Add New removal, manual-creation block, and identity
+ *        field re-enforcement to silently not fire.
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit;
@@ -633,14 +637,14 @@ add_filter( 'acf/fields/taxonomy/query/key=field_jurisdiction_tax', function( $a
 // ---------------------------------------------------------------
 // Jurisdiction CPT — Restrict Manual Creation
 // ---------------------------------------------------------------
-// Remove 'Add New' from the ws-jurisdiction CPT menu entirely
+// Remove 'Add New' from the jurisdiction CPT menu entirely
 add_action( 'admin_menu', function() {
-    remove_submenu_page( 'edit.php?post_type=ws-jurisdiction', 'post-new.php?post_type=ws-jurisdiction' );
+    remove_submenu_page( 'edit.php?post_type=jurisdiction', 'post-new.php?post_type=jurisdiction' );
 } );
 
 // Redirect anyone who reaches the new post screen anyway
 add_action( 'load-post-new.php', function() {
-    if ( isset( $_GET['post_type'] ) && $_GET['post_type'] === 'ws-jurisdiction' ) {
+    if ( isset( $_GET['post_type'] ) && $_GET['post_type'] === 'jurisdiction' ) {
         wp_die(
             __( '<strong>WhistleblowerShield:</strong> New Jurisdiction records cannot be created manually. All 57 jurisdictions are seeded at installation. If a jurisdiction is missing, re-run the seeder via WP-CLI or contact the site administrator.' ),
             __( 'Action Not Permitted' ),
@@ -676,7 +680,7 @@ add_filter( 'acf/prepare_field/key=field_jurisdiction_class', function( $field )
 
 add_action( 'acf/save_post', function( $post_id ) {
 
-    if ( get_post_type( $post_id ) !== 'ws-jurisdiction' ) {
+    if ( get_post_type( $post_id ) !== 'jurisdiction' ) {
         return;
     }
 

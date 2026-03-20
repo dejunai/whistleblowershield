@@ -123,6 +123,19 @@
  *        - Removed Related Content tab and all ws_jx_related_* relationship
  *          fields (summary, statutes, citations, interpretations). Jurisdiction
  *          scoping is now fully taxonomy-based; admin-relationships.php removed.
+ * 3.1.1  Pass 2 ACF audit fixes:
+ *        - Corrected 'requied' typo to 'required' on field_jurisdiction_tax
+ *          and field_jx_code (fields were silently not required).
+ *        - Changed field_create_author from type=text to type=user with
+ *          role and return_format=id, matching all other CPT groups.
+ * 3.1.2  Pass 3 ACF audit — instructions fixes:
+ *        - field_jurisdiction_tax: replaced visible instructions with internal
+ *          note (field is hidden; instruction was never displayed).
+ *        - field_jx_code: clarified as read-only seeder-populated display field.
+ *        - field_create_author label: 'Create Author' → 'Created By' for
+ *          consistency with all other CPT groups.
+ *        - field_create_author instructions: standardised to 'Stamped
+ *          automatically on first save. Read only.'
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -177,8 +190,8 @@ function ws_register_acf_jurisdiction_fields() {
                 'type'          => 'taxonomy',
                 'taxonomy'      => 'ws_jurisdiction',
                 'field_type'    => 'select',
-                'instructions'  => 'Select the Jurisdiction\'s canonical USPS code',
-				'requied'       => 1,
+                'instructions'  => 'Internal taxonomy field. Seeder-populated. Drives the ws_jurisdiction term assignment for this jurisdiction record.',
+				'required'      => 1,
 				'add_term'      => 0,
                 'save_terms'    => 1,
 				'load_terms'    => 1,
@@ -191,8 +204,8 @@ function ws_register_acf_jurisdiction_fields() {
                 'label'         => 'Jurisdiction USPS Code',
                 'name'          => 'ws_jx_code',
                 'type'          => 'text',
-                'instructions'  => 'Displays the Jurisdiction\'s canonical USPS code',
-                'requied'       => 1,
+                'instructions'  => 'Read-only display of the canonical USPS code for this jurisdiction. Set by the seeder. Cannot be changed manually.',
+                'required'      => 1,
 				'wrapper'       => [ 'data-maxlength' => 2, 'width' => '20' ],
             ],
 
@@ -407,14 +420,16 @@ function ws_register_acf_jurisdiction_fields() {
             // Hidden fields: create_author, date_created, date_created_gmt, last_edited_gmt
 
             [
-                'key'          => 'field_create_author',
-                'label'        => 'Create Author',
-                'name'         => 'create_author',
-                'type'         => 'text',
-                'instructions' => 'Editor who created this record. Set automatically.',
-                'readonly'     => 1,
-                'disabled'     => 1,
-                'wrapper'      => [ 'class' => 'hidden' ],
+                'key'           => 'field_create_author',
+                'label'         => 'Created By',
+                'name'          => 'create_author',
+                'type'          => 'user',
+                'instructions'  => 'Stamped automatically on first save. Read only.',
+                'role'          => [ 'author', 'editor', 'administrator' ],
+                'return_format' => 'id',
+                'readonly'      => 1,
+                'disabled'      => 1,
+                'wrapper'       => [ 'class' => 'hidden' ],
             ],
 
             [

@@ -53,6 +53,13 @@
  *        - Removed ws_jx_code text field (retired; scope now via ws_jurisdiction taxonomy).
  *        - Added attach_flag toggle and order number field.
  *        - Updated docblock to match Phase 3 conventions.
+ * 3.1.1  Pass 2 ACF audit fixes:
+ *        - Changed ws_jx_statute_remedies taxonomy from ws_remedy_type (deprecated)
+ *          to ws_remedies.
+ *        - Renamed tab key tab_jx_statute_plain_language_tab → field_jx_statute_plain_language_tab
+ *          for convention consistency.
+ *        - Removed resolved @todo scaffold comments from disclosure_type,
+ *          remedies, burden_of_proof, and last_reviewed fields.
  */
 
 add_action( 'acf/init', 'ws_register_acf_jx_statutes' );
@@ -111,8 +118,8 @@ function ws_register_acf_jx_statutes() {
                 'taxonomy'     => 'ws_disclosure_type',
                 'field_type'   => 'multi_select',
                 'instructions' => 'Classify the types of misconduct this law protects.',
-                'add_term'     => 0, //@todo - taxonomy capabilities is handle in register-taxonomies.php by ws_get_taxonomy_caps()
-                'save_terms'   => 0, //        consider removal of term attributes
+                'add_term'     => 0,
+                'save_terms'   => 0,
                 'load_terms'   => 1,
                 'return_format' => 'id',
             ],
@@ -259,7 +266,7 @@ function ws_register_acf_jx_statutes() {
                     'motivating_factor'   => 'Motivating Factor',
                     'but_for'             => 'But-For Causation (employer-friendly)',
                     'preponderance'       => 'Preponderance of Evidence',
-                    'varies'              => 'Varies by Claim Type',  //@todo - selection of 'varies' should reveal hiddten textarea for burden_of_proof_details
+                    'varies'              => 'Varies by Claim Type',
                 ],
                 'allow_null'    => 1,
                 'ui'            => 1,
@@ -271,11 +278,11 @@ function ws_register_acf_jx_statutes() {
                 'label'         => 'Available Remedies',
                 'name'          => 'ws_jx_statute_remedies',
                 'type'          => 'taxonomy',
-                'taxonomy'      => 'ws_remedy_type',
+                'taxonomy'      => 'ws_remedies',
                 'field_type'    => 'checkbox',
                 'instructions'  => 'What can a whistleblower recover under this specific law?',
-                'add_term'      => 0, //@todo - taxonomy capabilities is handle in register-taxonomies.php by ws_get_taxonomy_caps()
-                'save_terms'    => 0, //        consider removal of term attributes
+                'add_term'      => 0,
+                'save_terms'    => 0,
                 'load_terms'    => 1,
                 'return_format' => 'id',
             ],
@@ -365,7 +372,7 @@ function ws_register_acf_jx_statutes() {
             ],
 
             [
-                'key'          => 'field_jx_statute_last_reviewed', //@todo - duplicate purpose of 'plain_reviewed'
+                'key'          => 'field_jx_statute_last_reviewed',
                 'label'        => 'Last Verified Date',
                 'name'         => 'ws_jx_statute_last_reviewed',
                 'type'         => 'text',
@@ -375,7 +382,7 @@ function ws_register_acf_jx_statutes() {
             // ── Tab: Plain Language (Phase 9.2) ───────────────────────────
 
             [
-                'key'   => 'tab_jx_statute_plain_language_tab',
+                'key'   => 'field_jx_statute_plain_language_tab',
                 'label' => 'Plain Language',
                 'type'  => 'tab',
             ],

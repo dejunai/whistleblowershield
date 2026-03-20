@@ -1,158 +1,125 @@
 # System Architecture
 
+This document provides a high-level view of how the system is structured and how its major components interact.
+
+It is intended as an overview, not a detailed specification.
+
+---
+
 ## Overview
 
-WhistleblowerShield is a legal knowledge platform designed to organize,
-verify, and publish United States whistleblower protection laws.
+The system is composed of several interconnected layers:
 
-The platform serves two distinct but complementary purposes:
+- legal system model (conceptual structure)  
+- ws-core system (data and internal logic)  
+- editorial system (content creation and standards)  
+- guidance system (user-facing interpretation)  
 
-**As a legal archive:** Structured, sourced, and verifiable documentation
-of whistleblower protection statutes, procedures, agencies, and legal
-updates — organized by jurisdiction and maintained with full editorial
-accountability.
-
-**As a public resource:** An accessible, plain-language reference for
-ordinary people — including potential whistleblowers seeking to understand
-their protections, and people already facing retaliation who need
-to know what to do next.
-
-These two purposes are not in conflict. The archive is the foundation.
-The resource is what the archive is for.
-
-The system architecture is intentionally modular, allowing legal data,
-editorial workflow, and presentation layers to evolve independently.
+These layers work together to transform legal information into usable guidance.
 
 ---
 
-## The Four Layers
+## Layer Interaction
 
-### 1. Legal Knowledge Layer
+### Legal System Model → ws-core
 
-Defines the conceptual model for how whistleblower law is represented.
+The legal system model defines how legal information is structured conceptually.
 
-Key documents:
-- Whistleblower Law Ontology
-- Whistleblower Law Taxonomy
-- Jurisdiction Scope Model
-- Legal Citation Model
-- Source Verification Policy
+ws-core implements this structure in a usable form:
 
-These documents define what the platform knows and how it knows it.
-They are independent of any implementation detail.
-
-### 2. Data Management Layer
-
-Implements the legal knowledge model inside WordPress.
-
-The ws-core plugin handles:
-- Custom Post Types (jurisdiction, jx-summary, jx-statutes,
-  jx-procedures, jx-resources, ws-legal-update)
-- ACF field groups defining structured data for each CPT
-- Jurisdiction-centric relationships between all content types
-- Audit trail recording all editorial changes
-
-All data structures follow the CPT Relationship Map and the
-ws-core Data Schema documents.
-
-### 3. Editorial Layer
-
-Governs how legal information enters the system and maintains quality.
-
-The editorial layer enforces two standards simultaneously:
-- **Legal accuracy:** primary source citations, verified links,
-  factual correctness, review status tracking
-- **Public accessibility:** plain-language writing, defined reading level
-  target, user-centered summary structure
-
-These standards are documented in:
-- editorial-workflow.md (process)
-- content-standards.md (writing and structure)
-- user-personas.md (who the content is written for)
-- legal-research-methodology.md (source standards)
-- source-verification-policy.md (source reliability tiers)
-
-### 4. Presentation Layer
-
-Exposes structured legal data to end users in a form that serves
-the three user personas defined in user-personas.md.
-
-Current presentation mechanisms:
-- Shortcodes rendering jurisdiction pages (ws_jurisdiction_header,
-  ws_summary, ws_legal_updates, ws_disclaimer_notice, etc.)
-- Jurisdiction index page with type-based filtering
-- Legal updates archive
-
-Future presentation priorities, ordered by user impact:
-- Situation-based entry points ("I want to report something,"
-  "I'm being retaliated against") that route to relevant content
-- Procedures and resources pages rendered via shortcodes
-- Jurisdiction comparison view
-- Structured search by statute, agency, or protected activity type
-- Block-based layouts replacing or supplementing shortcodes
-- API access for researchers and downstream uses
+- translating concepts into data entities  
+- defining relationships in a structured way  
+- supporting jurisdiction-aware data  
 
 ---
 
-## Design Goals
+### ws-core → Editorial System
 
-The architecture prioritizes:
+The editorial system works with structured data provided by ws-core.
 
-**Legal accuracy** — all content is sourced, cited, and tracked.
-
-**Public accessibility** — the frontend serves non-lawyers in real situations,
-not just researchers. This shapes page structure, reading level standards,
-navigation design, and what information appears first.
-
-**Structured data** — legal information exists as structured fields,
-not free-form text, enabling future search, comparison, and export.
-
-**Extensibility** — the jurisdiction-centric model can expand to add
-new content types, new jurisdictions, and new presentation mechanisms
-without restructuring the core data model.
-
-**Long-term maintainability** — editorial accountability (review status,
-audit trail, last-reviewed dates) and documentation-first development
-ensure the platform remains accurate as law evolves.
+- content is written based on defined concepts  
+- relationships in the data inform how content is organized  
+- structure supports consistency across content  
 
 ---
 
-## What This Platform Is Not (Initially)
+### Editorial System → Guidance System
 
-- Not a legal services provider or referral service
-- Not a platform for reporting whistleblower disclosures
-- Not a backend system for legal professionals
-  (this may be added as a separate layer in a future phase)
-- Not a general-purpose legal information site —
-  scope is limited to U.S. whistleblower protection law
+The guidance system builds on editorial content.
 
----
-
-## Technology Stack
-
-- WordPress (application framework)
-- ws-core (custom plugin — legal data model, CPTs, ACF schema,
-  shortcodes, audit trail)
-- Advanced Custom Fields Pro (structured metadata)
-- GeneratePress Premium (theme — layout and design)
-- Cloudflare (security and caching)
-- Managed hosting
+- content is organized around user scenarios  
+- explanations are adapted to user needs  
+- structure supports navigation and understanding  
 
 ---
 
-## Development Status
+### Guidance System → User
 
-The platform is currently in the transition from Phase 1 to Phase 2
-of the project roadmap.
+The guidance system presents information in a way that:
 
-Phase 1 (substantially complete):
-- Legal knowledge documentation
-- System architecture documentation
-- ws-core plugin foundation with all CPTs, ACF field groups,
-  and core shortcodes implemented
+- reflects real-world situations  
+- supports understanding and decision-making  
+- maintains a connection to underlying legal sources  
 
-Phase 2 (in progress):
-- Population of legal knowledge base with jurisdiction content
-- Procedures and resources page rendering
-- Situation-based navigation and entry points
-- Plain-language summary content meeting content-standards.md
+---
+
+## Data Flow
+
+At a high level, the system follows this flow:
+
+1. Legal concepts and sources are defined (legal system model)  
+2. Data is structured and stored (ws-core data layer)  
+3. Data is retrieved and assembled (ws-core query layer)  
+4. Data is rendered (ws-core output layer)  
+5. Content and guidance are presented to the user  
+
+This flow is not strictly linear and may loop or evolve over time.
+
+---
+
+## Separation of Concerns
+
+Each layer has a distinct role:
+
+- **Legal system model** — conceptual structure  
+- **ws-core** — implementation and internal logic  
+- **Editorial system** — content creation  
+- **Guidance system** — user-facing interpretation  
+
+The boundaries are not rigid, but help maintain clarity.
+
+---
+
+## Flexibility
+
+The architecture is intentionally flexible.
+
+- layers may evolve independently  
+- structure may be refined over time  
+- responsibilities may shift where needed  
+
+Strict enforcement of boundaries is not required.
+
+---
+
+## Scope
+
+This document is intended to:
+
+- provide a mental model of the system  
+- show how major parts relate  
+- support navigation of the documentation  
+
+It is not intended to define implementation details.
+
+---
+
+## Ongoing Refinement
+
+The architecture is expected to evolve.
+
+- relationships between layers may be adjusted  
+- structure may be simplified or expanded  
+- inconsistencies may be resolved over time  
+
+The goal is clarity and usability, not a fixed design.

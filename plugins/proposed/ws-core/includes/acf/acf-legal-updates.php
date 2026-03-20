@@ -11,9 +11,10 @@
  * significant development in whistleblower law.
  *
  * Legal Updates are linked to one or more Jurisdiction records
- * through the ws_update_jurisdictions relationship field. This
- * relationship is jurisdiction → update (not managed by
- * admin-relationships.php, which handles jx-* addenda only).
+ * through the ws_update_jurisdictions taxonomy field. Jurisdiction
+ * scoping uses the ws_jurisdiction taxonomy (save_terms=0 — terms
+ * are selected for filtering purposes and not written to the taxonomy
+ * table from this field).
  *
  * FUTURE USE
  * ----------
@@ -36,6 +37,14 @@
  *         to ws-legal-update (hyphenated). File renamed from
  *         acf-legal-update.php to acf-ws-legal-update.php.
  *         Full header and inline comments added.
+ * 3.1.1  Pass 2 ACF audit fix:
+ *        - Added Content tab (field_legal_update_content_tab) before
+ *          field_update_jurisdictions. All content fields now render
+ *          inside a tab, consistent with all other CPT field groups.
+ * 3.1.2  Pass 3 ACF audit — instructions fixes:
+ *        - PURPOSE docblock: updated to remove reference to deleted
+ *          admin-relationships.php; clarified ws_update_jurisdictions
+ *          as a taxonomy field with save_terms=0.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -67,6 +76,14 @@ function ws_register_acf_legal_update() {
         ] ] ],
 
         'fields' => [
+
+            // ── Tab: Content ──────────────────────────────────────────────
+
+            [
+                'key'   => 'field_legal_update_content_tab',
+                'label' => 'Content',
+                'type'  => 'tab',
+            ],
 
             // ── Affected Jurisdictions ────────────────────────────────────
 			// Taxonomy multi-select — one update may affect many

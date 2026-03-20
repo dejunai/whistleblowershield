@@ -65,6 +65,19 @@
  *        - Removed Relationships tab and ws_jx_code field (retired in Phase 3.2;
  *          jx-summary is now scoped via ws_jurisdiction taxonomy).
  *        - Back-reference note in PURPOSE removed (admin-relationships.php deleted Phase 3.6).
+ * 3.1.1  Pass 2 ACF audit fixes:
+ *        - Renamed field key field_jx_sum_plain_english_reviewed → field_plain_english_reviewed
+ *          for consistency with all other CPTs. Removed inline @todo comments.
+ *        - Renamed field key field_ws_jx_sum_plain_english_by_temp → field_plain_english_by.
+ *          Corrected meta name from ws_jx_sum_create_author → plain_english_by to match
+ *          the canonical name written by ws_acf_stamp_summarized_fields() in admin-hooks.php.
+ *          Previously this field always displayed blank (stamp writes plain_english_by;
+ *          field read ws_jx_sum_create_author — two different meta keys).
+ * 3.1.2  Pass 3 ACF audit — instructions fixes:
+ *        - plain_english_reviewed_by instructions: aligned with other CPTs
+ *          ('Auto-stamped when Plain Language Reviewed is first enabled.').
+ *        - plain_english_by instructions: aligned with other CPTs
+ *          ('Auto-stamped on first save after plain language content is created.').
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -162,12 +175,10 @@ function ws_register_acf_jx_summary() {
                 'return_format' => 'array',
             ],
             [
-                'key'           => 'field_jx_sum_plain_english_reviewed',
-                'label'         => 'Plain Language Reviewed', //@todo - should only be readonly to author-rank
-                'name'          => 'plain_english_reviewed',          //        while summary exists but is not reviewed, should be tracked in admin-panel
-                'type'          => 'true_false',              //        we need to capture user and store at 'ws_jx_sum_last_reviewed_by'
-															  //        'ws_jx_sum_last_reviewed_by' needs to reveal on toggle, autostamp current user,
-															  //        and be readonly -- editable only by admin
+                'key'           => 'field_plain_english_reviewed',
+                'label'         => 'Plain Language Reviewed',
+                'name'          => 'plain_english_reviewed',
+                'type'          => 'true_false',
                 'instructions'  => 'Check when a human has reviewed and approved this plain-language summary.',
                 'ui'            => 1,
                 'ui_on_text'    => 'Reviewed',
@@ -176,22 +187,22 @@ function ws_register_acf_jx_summary() {
             ],
 			
             [
-                'key'          => 'field_ws_jx_sum_plain_english_by_temp',
-                'label'        => 'Summarized By',
-                'name'         => 'ws_jx_sum_create_author',
-                'type'         => 'user',
-                'instructions' => 'Stamped automatically on first save. Identifies who created the plain-language content.',
-                'role'         => [ 'author', 'editor', 'administrator' ],
+                'key'           => 'field_plain_english_by',
+                'label'         => 'Summarized By',
+                'name'          => 'plain_english_by',
+                'type'          => 'user',
+                'instructions'  => 'Auto-stamped on first save after plain language content is created.',
+                'role'          => [ 'author', 'editor', 'administrator' ],
                 'return_format' => 'id',
-                'readonly'     => 1,
-                'disabled'     => 1,
+                'readonly'      => 1,
+                'disabled'      => 1,
             ],
             [
                 'key'          => 'field_ws_jx_sum_plain_english_reviewed_by',
                 'label'        => 'Reviewed By',
                 'name'         => 'plain_english_reviewed_by',
                 'type'         => 'user',
-                'instructions' => 'Stamped automatically when plain language content is reviewed.',
+                'instructions' => 'Auto-stamped when Plain Language Reviewed is first enabled.',
                 'role'         => [ 'author', 'editor', 'administrator' ],
                 'return_format' => 'id',
                 'readonly'     => 1,

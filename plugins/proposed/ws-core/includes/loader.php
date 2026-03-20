@@ -65,6 +65,7 @@
  *        Removed duplicate stale docblock.
  * 2.4.0  Added acf-jx-interpretations to ACF load list (Bug #6 fix).
  * 2.4.1  Added error reporting to loading calls, see /logs/ws-core-error.log
+ * 3.0.0  Added acf-source-verify to ACF load list (was registered but never loaded).
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit;
@@ -203,7 +204,7 @@ if ( is_admin() ) {
     $acf_files = [
         'acf-jurisdictions', 'acf-jx-summaries', 'acf-jx-statutes', 'acf-legal-updates',
         'acf-jx-citations', 'acf-agencies', 'acf-assist-orgs', 'acf-major-edit',
-        'acf-jx-interpretations', 'acf-references',
+        'acf-source-verify', 'acf-jx-interpretations', 'acf-references',
     ];
 	
 	foreach ( $acf_files as $file ) {

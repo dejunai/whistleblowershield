@@ -49,6 +49,9 @@
  * VERSION
  * -------
  * 3.3.0  Initial release.
+ * 3.3.1  Pass 2 ACF audit fix:
+ *        - Changed field_ws_ref_type return_format from 'label' to 'value'
+ *          for consistency with all other select fields in the plugin.
  */
 
 add_action( 'acf/init', 'ws_register_acf_ws_reference' );
@@ -133,7 +136,7 @@ function ws_register_acf_ws_reference() {
                 ],
                 'allow_null'    => 1,
                 'ui'            => 1,
-                'return_format' => 'label',
+                'return_format' => 'value',
             ],
 
             [

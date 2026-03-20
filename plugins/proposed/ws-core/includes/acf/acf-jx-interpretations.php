@@ -71,6 +71,9 @@
  *        - Removed ws_jx_code field (retired; scope now via ws_jurisdiction taxonomy).
  *        - Added attach_flag toggle and order number field.
  *        - Updated Relationships tab comment; updated docblock.
+ * 3.1.1  Pass 2 ACF audit fix:
+ *        - Renamed tab key tab_ws_interp_plain_language → field_ws_interp_plain_language
+ *          for convention consistency.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -340,7 +343,7 @@ function ws_register_acf_jx_interpretations() {
             // ── Tab: Plain Language (Phase 9.2) ───────────────────────────
 
             [
-                'key'   => 'tab_ws_interp_plain_language',
+                'key'   => 'field_ws_interp_plain_language',
                 'label' => 'Plain Language',
                 'type'  => 'tab',
             ],

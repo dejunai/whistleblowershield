@@ -66,6 +66,10 @@
  *        - Renamed ws_jx_cite_attach → attach_flag (field key unchanged).
  *        - Renamed ws_jx_cite_position → order (field key unchanged).
  *        - Admin notice updated to use taxonomy-based citation lookup.
+ * 3.1.1  Pass 2 ACF audit fixes:
+ *        - Renamed tab key tab_ws_jx_cite_plain_language → field_ws_jx_cite_plain_language
+ *          for convention consistency.
+ *        - Removed scaffold comment blocks around field_ws_jx_disclosure_cat.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -123,7 +127,6 @@ function ws_register_acf_jx_citations() {
                 'allow_null'    => 0,
                 'ui'            => 1,
             ],
-			/* --- NEW TAXONOMY FIELD ADDED HERE --- */
 			[
 				'key'           => 'field_ws_jx_disclosure_cat',
 				'label'         => 'Disclosure Category',
@@ -137,7 +140,6 @@ function ws_register_acf_jx_citations() {
 				'return_format' => 'id',
 				'multiple'      => 1,
 			],
-			/* ------------------------------------- */
             [
                 'key'          => 'field_ws_jx_cite_label',
                 'label'        => 'Display Label',
@@ -257,7 +259,7 @@ function ws_register_acf_jx_citations() {
             // ── Tab: Plain Language (Phase 9.2) ───────────────────────────
 
             [
-                'key'   => 'tab_ws_jx_cite_plain_language',
+                'key'   => 'field_ws_jx_cite_plain_language',
                 'label' => 'Plain Language',
                 'type'  => 'tab',
             ],

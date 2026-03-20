@@ -54,6 +54,9 @@
  *        - Gate typo fixed: ws_seed_jruisdiction_taxonomy →
  *          ws_seed_jurisdiction_taxonomy.
  *        - Gate keys added for all new and renamed taxonomies.
+ * 3.1.1  Bug fix: corrected 'ws-jurisdiction' to 'jurisdiction' in ws_jurisdiction
+ *        taxonomy object type array. Mismatch prevented ws_jurisdiction (and all
+ *        other taxonomies) from appearing on jurisdiction post edit screens.
  *
  * @todo  After deploying 3.1.0: run a one-time migration to re-assign any
  *        posts previously tagged under ws_coverage_scope, ws_retaliation_forms,
@@ -306,7 +309,7 @@ function ws_register_taxonomies() {
     if ( ! taxonomy_exists( 'ws_jurisdiction' ) ) {
         register_taxonomy(
             'ws_jurisdiction',
-            [ 'ws-jurisdiction', 'jx-statute', 'jx-summary', 'jx-citation', 'jx-interpretation', 'ws-agency', 'ws-assist-org' ],
+            [ 'jurisdiction', 'jx-statute', 'jx-summary', 'jx-citation', 'jx-interpretation', 'ws-agency', 'ws-assist-org' ],
             [
                 'label'             => 'Jurisdictions',
                 'labels'            => [
