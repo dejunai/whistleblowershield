@@ -71,6 +71,7 @@
  *        - Renamed tab key tab_ws_jx_cite_plain_language → field_ws_jx_cite_plain_language
  *          for convention consistency.
  *        - Removed scaffold comment blocks around field_ws_jx_disclosure_cat.
+ * 3.1.2  Field keys corrected to match naming convention (field_ + meta name without ws_ prefix).
  * 3.4.0  Stamp field centralization:
  *        - Removed Authorship & Review tab and all stamp fields (last_edited_author,
  *          date_created, last_edited, create_author) — now registered centrally
@@ -119,7 +120,7 @@ function ws_register_acf_jx_citations() {
                 'type'  => 'tab',
             ],
             [
-                'key'          => 'field_jx_cite_type',
+                'key'          => 'field_jx_citation_type',
                 'label'        => 'Citation Type',
                 'name'         => 'ws_jx_citation_type',
                 'type'         => 'select',
@@ -136,7 +137,7 @@ function ws_register_acf_jx_citations() {
                 'ui'            => 1,
             ],
 			[
-				'key'           => 'field_jx_disclosure_cat',
+				'key'           => 'field_jx_citation_disclosure_type',
 				'label'         => 'Disclosure Category',
 				'name'          => 'ws_jx_citation_disclosure_type',
 				'type'          => 'taxonomy',
@@ -149,7 +150,7 @@ function ws_register_acf_jx_citations() {
 				'multiple'      => 1,
 			],
             [
-                'key'          => 'field_jx_cite_label',
+                'key'          => 'field_jx_citation_official_name',
                 'label'        => 'Official Name',
                 'name'         => 'ws_jx_citation_official_name',
                 'type'         => 'text',
@@ -158,7 +159,7 @@ function ws_register_acf_jx_citations() {
             ],
 
             [
-                'key'          => 'field_jx_cite_common_name',
+                'key'          => 'field_jx_citation_common_name',
                 'label'        => 'Common Name',
                 'name'         => 'ws_jx_citation_common_name',
                 'type'         => 'text',
@@ -166,14 +167,14 @@ function ws_register_acf_jx_citations() {
                 'required'     => 0,
             ],
             [
-                'key'          => 'field_jx_cite_url',
+                'key'          => 'field_jx_citation_url',
                 'label'        => 'Source URL',
                 'name'         => 'ws_jx_citation_url',
                 'type'         => 'url',
                 'instructions' => 'Direct link to the source document, case, or statute.',
             ],
             [
-                'key'           => 'field_jx_cite_is_pdf',
+                'key'           => 'field_jx_citation_is_pdf',
                 'label'         => 'PDF Link',
                 'name'          => 'ws_jx_citation_is_pdf',
                 'type'          => 'true_false',
@@ -184,7 +185,7 @@ function ws_register_acf_jx_citations() {
                 'default_value' => 0,
             ],
             [
-                'key'           => 'field_jx_cite_attach',
+                'key'           => 'field_jx_citation_attach_flag',
                 'label'         => 'Attach to Jurisdiction Page',
                 'name'          => 'ws_attach_flag',
                 'type'          => 'true_false',
@@ -195,7 +196,7 @@ function ws_register_acf_jx_citations() {
                 'default_value' => 0,
             ],
             [
-                'key'               => 'field_jx_cite_position',
+                'key'               => 'field_jx_citation_display_order',
                 'label'             => 'Display Order',
                 'name'              => 'ws_display_order',
                 'type'              => 'number',
@@ -203,7 +204,7 @@ function ws_register_acf_jx_citations() {
                 'min'               => 1,
                 'step'              => 1,
                 'conditional_logic' => [ [ [
-                    'field'    => 'field_jx_cite_attach',
+                    'field'    => 'field_jx_citation_attach_flag',
                     'operator' => '==',
                     'value'    => '1',
                 ] ] ],
@@ -219,7 +220,7 @@ function ws_register_acf_jx_citations() {
             // citation's own group.
 
             [
-                'key'          => 'field_jx_cite_last_reviewed',
+                'key'          => 'field_jx_citation_last_reviewed',
                 'label'        => 'Last Reviewed',
                 'name'         => 'ws_jx_citation_last_reviewed',
                 'type'         => 'text',
@@ -243,7 +244,7 @@ function ws_register_acf_jx_citations() {
             ],
 
             [
-                'key'           => 'field_citation_ref_materials',
+                'key'           => 'field_jx_citation_ref_materials',
                 'label'         => 'Reference Materials',
                 'name'          => 'ws_ref_materials',
                 'type'          => 'relationship',

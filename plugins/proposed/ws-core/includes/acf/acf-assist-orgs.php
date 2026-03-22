@@ -33,7 +33,7 @@
  *   ws_ao_email                    Contact email (email)
  *   ws_ao_mailing_address          Mailing address (textarea)
  *   ws_languages                   Languages served (taxonomy checkbox)
- *   ws_ao_additional_languages     Additional languages not in taxonomy list (text)
+ *   ws_aorg_additional_languages   Additional languages not in taxonomy list (text)
  *
  * Eligibility & Cost tab:
  *   ws_ao_cost_model           Cost structure (select, required)
@@ -74,6 +74,7 @@
  *         Phase 12.1: Replaced ws_ao_jurisdictions checkbox (dynamic choices via
  *         ws_jx_code meta) with ws_jurisdiction taxonomy field. Dynamic choice
  *         filter removed. Plain Language tab added (Phase 9.2).
+ * 3.1.1  Field keys renamed: field_ao_* → field_aorg_* to match meta key prefix (ws_aorg_*).
  * 3.4.0  Stamp field centralization:
  *        - Removed Authorship & Review tab and all stamp fields — now registered
  *          centrally in acf-stamp-fields.php (group_stamp_metadata, menu_order 90).
@@ -119,13 +120,13 @@ function ws_register_acf_assist_org() {
             // ────────────────────────────────────────────────────────────────
 
             [
-                'key'   => 'field_ao_identity_tab',
+                'key'   => 'field_aorg_identity_tab',
                 'label' => 'Identity',
                 'type'  => 'tab',
             ],
 
             [
-                'key'          => 'field_ao_internal_id',
+                'key'          => 'field_aorg_internal_id',
                 'label'        => 'Internal Reference Code',
                 'name'         => 'ws_aorg_internal_id',
                 'type'         => 'text',
@@ -135,7 +136,7 @@ function ws_register_acf_assist_org() {
             ],
 
             [
-                'key'           => 'field_ao_type',
+                'key'           => 'field_aorg_type',
                 'label'         => 'Organization Type',
                 'name'          => 'ws_aorg_type',
                 'type'          => 'select',
@@ -157,7 +158,7 @@ function ws_register_acf_assist_org() {
             ],
 
             [
-                'key'           => 'field_ao_logo',
+                'key'           => 'field_aorg_logo',
                 'label'         => 'Organization Logo',
                 'name'          => 'ws_aorg_logo',
                 'type'          => 'image',
@@ -178,13 +179,13 @@ function ws_register_acf_assist_org() {
             // ────────────────────────────────────────────────────────────────
 
             [
-                'key'   => 'field_ao_scope_tab',
+                'key'   => 'field_aorg_scope_tab',
                 'label' => 'Scope of Service',
                 'type'  => 'tab',
             ],
 
             [
-                'key'           => 'field_ao_serves_nationwide',
+                'key'           => 'field_aorg_serves_nationwide',
                 'label'         => 'Serves All U.S. Jurisdictions',
                 'name'          => 'ws_aorg_serves_nationwide',
                 'type'          => 'true_false',
@@ -196,7 +197,7 @@ function ws_register_acf_assist_org() {
             ],
 
             [
-                'key'           => 'field_ao_jurisdiction',
+                'key'           => 'field_aorg_jurisdiction',
                 'label'         => 'Jurisdictions Served',
                 'name'          => WS_JURISDICTION_TERM_ID,
                 'type'          => 'taxonomy',
@@ -212,7 +213,7 @@ function ws_register_acf_assist_org() {
             ],
 
             [
-                'key'           => 'field_ao_disclosure_type',
+                'key'           => 'field_aorg_disclosure_type',
                 'label'         => 'Misconduct Categories Handled',
                 'name'          => 'ws_aorg_disclosure_type',
                 'type'          => 'taxonomy',
@@ -227,7 +228,7 @@ function ws_register_acf_assist_org() {
             ],
 
             [
-                'key'          => 'field_ao_services',
+                'key'          => 'field_aorg_services',
                 'label'        => 'Services Offered',
                 'name'         => 'ws_aorg_services',
                 'type'         => 'checkbox',
@@ -249,7 +250,7 @@ function ws_register_acf_assist_org() {
             ],
 
             [
-                'key'          => 'field_ao_employment_sectors',
+                'key'          => 'field_aorg_employment_sectors',
                 'label'        => 'Employment Sectors Served',
                 'name'         => 'ws_aorg_employment_sectors',
                 'type'         => 'checkbox',
@@ -276,13 +277,13 @@ function ws_register_acf_assist_org() {
             // ────────────────────────────────────────────────────────────────
 
             [
-                'key'   => 'field_ao_contact_tab',
+                'key'   => 'field_aorg_contact_tab',
                 'label' => 'Contact & Intake',
                 'type'  => 'tab',
             ],
 
             [
-                'key'          => 'field_ao_website_url',
+                'key'          => 'field_aorg_website_url',
                 'label'        => 'Official Website',
                 'name'         => 'ws_aorg_website_url',
                 'type'         => 'url',
@@ -291,7 +292,7 @@ function ws_register_acf_assist_org() {
             ],
 
             [
-                'key'          => 'field_ao_intake_url',
+                'key'          => 'field_aorg_intake_url',
                 'label'        => 'Intake / Contact Form URL',
                 'name'         => 'ws_aorg_intake_url',
                 'type'         => 'url',
@@ -299,7 +300,7 @@ function ws_register_acf_assist_org() {
             ],
 
             [
-                'key'          => 'field_ao_phone',
+                'key'          => 'field_aorg_phone',
                 'label'        => 'Phone Number',
                 'name'         => 'ws_aorg_phone',
                 'type'         => 'text',
@@ -308,7 +309,7 @@ function ws_register_acf_assist_org() {
             ],
 
             [
-                'key'          => 'field_ao_email',
+                'key'          => 'field_aorg_email',
                 'label'        => 'Contact Email',
                 'name'         => 'ws_aorg_email',
                 'type'         => 'email',
@@ -316,7 +317,7 @@ function ws_register_acf_assist_org() {
             ],
 
             [
-                'key'          => 'field_ao_mailing_address',
+                'key'          => 'field_aorg_mailing_address',
                 'label'        => 'Mailing Address',
                 'name'         => 'ws_aorg_mailing_address',
                 'type'         => 'textarea',
@@ -325,7 +326,7 @@ function ws_register_acf_assist_org() {
             ],
 
             [
-                'key'           => 'field_ao_languages',
+                'key'           => 'field_aorg_languages',
                 'label'         => 'Languages Served',
                 'name'          => 'ws_languages',
                 'type'          => 'taxonomy',
@@ -339,7 +340,7 @@ function ws_register_acf_assist_org() {
             ],
 
             [
-                'key'          => 'field_ao_additional_languages',
+                'key'          => 'field_aorg_additional_languages',
                 'label'        => 'Additional Languages',
                 'name'         => 'ws_aorg_additional_languages',
                 'type'         => 'text',
@@ -356,13 +357,13 @@ function ws_register_acf_assist_org() {
             // ────────────────────────────────────────────────────────────────
 
             [
-                'key'   => 'field_ao_eligibility_tab',
+                'key'   => 'field_aorg_eligibility_tab',
                 'label' => 'Eligibility & Cost',
                 'type'  => 'tab',
             ],
 
             [
-                'key'           => 'field_ao_cost_model',
+                'key'           => 'field_aorg_cost_model',
                 'label'         => 'Cost Structure',
                 'name'          => 'ws_aorg_cost_model',
                 'type'          => 'select',
@@ -381,7 +382,7 @@ function ws_register_acf_assist_org() {
             ],
 
             [
-                'key'           => 'field_ao_income_limit',
+                'key'           => 'field_aorg_income_limit',
                 'label'         => 'Income Eligibility Required?',
                 'name'          => 'ws_aorg_income_limit',
                 'type'          => 'true_false',
@@ -393,21 +394,21 @@ function ws_register_acf_assist_org() {
             ],
 
             [
-                'key'          => 'field_ao_income_limit_notes',
+                'key'          => 'field_aorg_income_limit_notes',
                 'label'        => 'Income Eligibility Details',
                 'name'         => 'ws_aorg_income_limit_notes',
                 'type'         => 'textarea',
                 'instructions' => 'Describe the income thresholds or financial eligibility criteria — e.g., "Income must be below 200% of the federal poverty level."',
                 'rows'         => 3,
                 'conditional_logic' => [ [ [
-                    'field'    => 'field_ao_income_limit',
+                    'field'    => 'field_aorg_income_limit',
                     'operator' => '==',
                     'value'    => '1',
                 ] ] ],
             ],
 
             [
-                'key'           => 'field_ao_accepts_anonymous',
+                'key'           => 'field_aorg_accepts_anonymous',
                 'label'         => 'Can Assist Anonymous Clients?',
                 'name'          => 'ws_aorg_accepts_anonymous',
                 'type'          => 'true_false',
@@ -419,7 +420,7 @@ function ws_register_acf_assist_org() {
             ],
 
             [
-                'key'          => 'field_ao_eligibility_notes',
+                'key'          => 'field_aorg_eligibility_notes',
                 'label'        => 'Additional Eligibility Requirements',
                 'name'         => 'ws_aorg_eligibility_notes',
                 'type'         => 'textarea',
@@ -435,13 +436,13 @@ function ws_register_acf_assist_org() {
             // ────────────────────────────────────────────────────────────────
 
             [
-                'key'   => 'field_ao_credentials_tab',
+                'key'   => 'field_aorg_credentials_tab',
                 'label' => 'Credentials',
                 'type'  => 'tab',
             ],
 
             [
-                'key'           => 'field_ao_licensed_attorneys',
+                'key'           => 'field_aorg_licensed_attorneys',
                 'label'         => 'Licensed Attorneys on Staff?',
                 'name'          => 'ws_aorg_licensed_attorneys',
                 'type'          => 'true_false',
@@ -453,7 +454,7 @@ function ws_register_acf_assist_org() {
             ],
 
             [
-                'key'          => 'field_ao_accreditation',
+                'key'          => 'field_aorg_accreditation',
                 'label'        => 'Accreditations & Certifications',
                 'name'         => 'ws_aorg_accreditation',
                 'type'         => 'text',
@@ -461,7 +462,7 @@ function ws_register_acf_assist_org() {
             ],
 
             [
-                'key'          => 'field_ao_bar_states',
+                'key'          => 'field_aorg_bar_states',
                 'label'        => 'State Bar Memberships',
                 'name'         => 'ws_aorg_bar_states',
                 'type'         => 'text',
@@ -469,7 +470,7 @@ function ws_register_acf_assist_org() {
             ],
 
             [
-                'key'          => 'field_ao_verify_url',
+                'key'          => 'field_aorg_verify_url',
                 'label'        => 'Verification / Transparency URL',
                 'name'         => 'ws_aorg_verify_url',
                 'type'         => 'url',
@@ -486,7 +487,7 @@ function ws_register_acf_assist_org() {
             // assist-org's own group.
 
             [
-                'key'            => 'field_ao_last_reviewed',
+                'key'            => 'field_aorg_last_reviewed',
                 'label'          => 'Last Verified Date',
                 'name'           => 'ws_aorg_last_reviewed',
                 'type'           => 'date_picker',

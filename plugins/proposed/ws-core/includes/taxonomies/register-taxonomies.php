@@ -57,6 +57,9 @@
  * 3.1.1  Bug fix: corrected 'ws-jurisdiction' to 'jurisdiction' in ws_jurisdiction
  *        taxonomy object type array. Mismatch prevented ws_jurisdiction (and all
  *        other taxonomies) from appearing on jurisdiction post edit screens.
+ * 3.2.0  Added ws_employer_defense taxonomy stub (jx-statute). No seeder —
+ *        terms to be defined once the taxonomy table is validated against
+ *        real statute data.
  *
  * @todo  After deploying 3.1.0: run a one-time migration to re-assign any
  *        posts previously tagged under ws_coverage_scope, ws_retaliation_forms,
@@ -116,7 +119,7 @@ function ws_register_taxonomies() {
     if ( ! taxonomy_exists( 'ws_process_type' ) ) {
         register_taxonomy(
             'ws_process_type',
-            [ 'jx-statute', 'ws-agency', 'jx-interpretation' ],
+            [ 'jx-statute', 'ws-agency', 'ws-assist-org', 'jx-interpretation' ],
             [
                 'label'             => 'Process Types',
                 'labels'            => [
@@ -400,6 +403,38 @@ function ws_register_taxonomies() {
         );
     }
 
+    // ── 11. Employer Defense ──────────────────────────────────────────────
+    //
+    // New in 3.2.0. Flat taxonomy describing the defense standard(s) available
+    // to the employer under a statute. Applied to jx-statute only.
+
+    if ( ! taxonomy_exists( 'ws_employer_defense' ) ) {
+        register_taxonomy(
+            'ws_employer_defense',
+            [ 'jx-statute' ],
+            [
+                'label'             => 'Employer Defense Standards',
+                'labels'            => [
+                    'name'          => 'Employer Defense Standards',
+                    'singular_name' => 'Employer Defense Standard',
+                    'search_items'  => 'Search Employer Defense Standards',
+                    'all_items'     => 'All Employer Defense Standards',
+                    'edit_item'     => 'Edit Employer Defense Standard',
+                    'update_item'   => 'Update Employer Defense Standard',
+                    'add_new_item'  => 'Add New Employer Defense Standard',
+                    'new_item_name' => 'New Employer Defense Standard Name',
+                    'menu_name'     => 'Employer Defense',
+                ],
+                'public'            => false,
+                'hierarchical'      => false,
+                'show_ui'           => true,
+                'show_in_rest'      => true,
+                'show_admin_column' => true,
+                'capabilities'      => ws_get_taxonomy_caps(),
+            ]
+        );
+    }
+
     // ════════════════════════════════════════════════════════════════════
     // DEPRECATED REGISTRATIONS
     //
@@ -566,6 +601,10 @@ add_action( 'admin_init', function() {
     if ( get_option( 'ws_seeded_fee_shifting' ) !== '1.0.0' ) {
         ws_seed_fee_shifting_taxonomy();
         update_option( 'ws_seeded_fee_shifting', '1.0.0' );
+    }
+    if ( get_option( 'ws_seeded_employer_defense' ) !== '1.0.0' ) {
+        ws_seed_employer_defense_taxonomy();
+        update_option( 'ws_seeded_employer_defense', '1.0.0' );
     }
 
 } );
@@ -981,6 +1020,27 @@ function ws_seed_fee_shifting_taxonomy() {
         'bilateral-loser-pays'     => 'Bilateral (Loser Pays)',
         'discretionary'            => 'Discretionary',
         'none-american-rule'       => 'None (American Rule)',
+    ];
+    foreach ( $terms as $slug => $name ) {
+        if ( ! term_exists( $slug, $taxonomy ) ) {
+            wp_insert_term( $name, $taxonomy, [ 'slug' => $slug ] );
+        }
+    }
+}
+
+
+/**
+ * Seeds ws_employer_defense with its flat term structure.
+ *
+ * New in 3.2.0.
+ */
+function ws_seed_employer_defense_taxonomy() {
+    $taxonomy = 'ws_employer_defense';
+    $terms    = [
+        'same-decision-defense'            => 'Same-Decision Defense',
+        'legitimate-non-retaliatory-reason' => 'Legitimate Non-Retaliatory Reason',
+        'good-faith-compliance'            => 'Good-Faith Compliance',
+        'must-establish-statutory-exception' => 'Must Establish Statutory Exception',
     ];
     foreach ( $terms as $slug => $name ) {
         if ( ! term_exists( $slug, $taxonomy ) ) {

@@ -23,31 +23,31 @@
 
     var filterNav = document.querySelector( '.ws-jx-filter-nav' );
 
-    if ( filterNav ) {
+    if ( ! filterNav ) { return; }
 
-        var buttons = filterNav.querySelectorAll( '.ws-jx-filter-btn' );
-        var cards   = document.querySelectorAll( '.ws-jx-card' );
+    var buttons = filterNav.querySelectorAll( '.ws-jx-filter-btn' );
+    var cards   = document.querySelectorAll( '.ws-jx-card' );
 
-        buttons.forEach( function ( btn ) {
-            btn.addEventListener( 'click', function () {
+    if ( ! buttons.length || ! cards.length ) { return; }
 
-                var filter = btn.dataset.filter;
+    buttons.forEach( function ( btn ) {
+        btn.addEventListener( 'click', function () {
 
-                // Update active state
-                buttons.forEach( function ( b ) {
-                    b.classList.remove( 'ws-active' );
-                } );
-                btn.classList.add( 'ws-active' );
+            var filter = btn.dataset.filter;
 
-                // Show/hide cards
-                cards.forEach( function ( card ) {
-                    var match = ( filter === 'all' || card.dataset.type === filter );
-                    card.style.display = match ? 'flex' : 'none';
-                } );
-
+            // Update active state
+            buttons.forEach( function ( b ) {
+                b.classList.remove( 'ws-active' );
             } );
-        } );
+            btn.classList.add( 'ws-active' );
 
-    }
+            // Show/hide cards
+            cards.forEach( function ( card ) {
+                var match = ( filter === 'all' || card.dataset.type === filter );
+                card.style.display = match ? 'flex' : 'none';
+            } );
+
+        } );
+    } );
 
 } )();

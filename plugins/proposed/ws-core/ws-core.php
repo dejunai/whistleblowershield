@@ -23,7 +23,7 @@
  * Description: Core architecture for WhistleblowerShield. Proposed replacement
  *              plugin — radical refactor of v2.3.1. Not an upgrade of the live plugin.
  *              Assembles public whistleblower protection pages for 57 U.S. jurisdictions.
- * Version:     3.3.2
+ * Version:     3.5.0
  * Author:      Whistleblower Shield
  * Author URI:  https://whistleblowershield.org
  *
@@ -88,6 +88,12 @@
  *      `field_tab_foo` or `tab_foo` → `field_foo_tab`.
  *      `field_` prefix is required on all tab keys.
  *
+ *   4. Field key = `field_` + meta name with `ws_` prefix stripped.
+ *      e.g., name `ws_jx_statute_official_name` → key `field_jx_statute_official_name`.
+ *      For fields whose meta name appears in multiple groups (e.g. `ws_attach_flag`,
+ *      `ws_display_order`, `ws_ref_materials`), prepend CPT context to disambiguate:
+ *      `field_{cpt_context}_{name_without_ws_prefix}`.
+ *
  * NOTE: These rules apply to ACF `key` values only — not `name` (meta key),
  * `label`, or any other property. Meta key names are governed separately below.
  *
@@ -146,13 +152,59 @@
  * collisions in wp_postmeta. Inside a PHP return array there is no
  * collision risk, and the prefix adds noise that makes shortcode
  * authoring unnecessarily verbose.
+ *
+ * ADMIN LAYER UPDATE PASS (v3.4.0)
+ * ----------------------------------
+ * Coordinated audit of admin-only files:
+ *
+ *   1. Query-layer comment enforcement: admin files that read post meta
+ *      directly (admin-columns.php, admin-hooks.php, admin-url-monitor.php,
+ *      admin-interpretation-metabox.php, admin-major-edit-hook.php) now carry
+ *      inline comments explaining why direct meta reads are used rather than
+ *      the query layer.
+ *
+ *   2. ACF field key convention enforcement: all field keys corrected to
+ *      follow rule 4 above. Files updated: acf-assist-orgs.php
+ *      (field_ao_* → field_aorg_*), acf-jx-citations.php,
+ *      acf-jx-interpretations.php, acf-jx-statutes.php.
+ *
+ *   3. Stale meta key fix: ws_ao_additional_languages →
+ *      ws_aorg_additional_languages in admin-hooks.php. Stale key caused
+ *      the additional-language term sync for ws-assist-org to silently fail.
+ *
+ *   4. Matrix seeder taxonomy coverage: matrix-fed-statutes.php and
+ *      matrix-assist-orgs.php now assign taxonomy terms per record via
+ *      ws_matrix_assign_terms(). Both seeders bumped to gate 1.1.0.
+ *
+ * JX-STATUTE INGEST ALIGNMENT (v3.5.0)
+ * --------------------------------------
+ * Full refactor of jx-statute ACF fields, query layer, and matrix seeder
+ * to support AI-assisted ingest of structured statute data:
+ *
+ *   1. ACF overhaul (acf-jx-statutes.php 3.5.0): meta key renames
+ *      (limit_* → sol_*, burden_of_proof → bop_standard,
+ *      exhaustion_required → has_exhaustion), new tabs (Enforcement, Burden
+ *      of Proof, Reward, Links), new fields across all tabs, toggle+conditional
+ *      pattern applied to sol, tolling, exhaustion, bop, rebuttable, and reward.
+ *
+ *   2. New taxonomy: ws_employer_defense (flat, jx-statute only). Seeded with
+ *      four initial terms. Registered in register-taxonomies.php v3.2.0.
+ *
+ *   3. Query layer (query-jurisdiction.php 3.5.0): ws_get_jx_statute_data()
+ *      return array rebuilt to match new ACF field set. Pre-existing bug fixed:
+ *      remedies were read via get_post_meta() and therefore invisible when
+ *      assigned by the matrix seeder via wp_set_object_terms().
+ *
+ *   4. Matrix seeder (matrix-fed-statutes.php 3.2.0): meta key renames applied,
+ *      ws_employer_defense taxonomy assignment added, pre-existing
+ *      ws_jx_statute_trigger key mismatch corrected. Gate bumped to 1.2.0.
  */
 
 defined( 'ABSPATH' ) || exit;
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
-define( 'WS_CORE_VERSION', '3.3.2' );
+define( 'WS_CORE_VERSION', '3.5.0' );
 define( 'WS_CORE_PATH',    plugin_dir_path( __FILE__ ) );
 define( 'WS_CORE_URL',     plugin_dir_url( __FILE__ ) );
 

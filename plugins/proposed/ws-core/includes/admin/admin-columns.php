@@ -4,8 +4,8 @@
  *
  * Adds dataset status columns to the Jurisdiction list table
  * in the WordPress admin. Each column shows a visual indicator
- * for whether the corresponding addendum (summary, statutes,
- * resources) exists and is published.
+ * for whether the corresponding addendum (summary, statutes)
+ * exists and is published.
  *
  * VERSION
  * -------
@@ -15,6 +15,13 @@
  * 2.3.1  Added Citations column. Uses ws_get_attached_citation_count()
  *        (defined in admin-navigation.php, which loads first).
  *        Badge shows count with red/orange/green thresholds (0/1-2/3+).
+ * 3.0.0  Removed Resources column (CPT deleted). Replaced ACF relationship
+ *        field lookups (ws_related_summary, ws_related_statutes) with
+ *        taxonomy queries on ws_jurisdiction — matches admin-navigation.php.
+ * 3.1.0  Added columns for jx-statute, jx-citation, jx-interpretation,
+ *        ws-legal-update, ws-agency, and ws-assist-org list tables.
+ * 3.1.1  Added inline comments to direct meta reads explaining why the
+ *        query layer is not used in admin list table context.
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit;
@@ -31,7 +38,6 @@ function ws_add_jx_status_columns( $columns ) {
         if ( $key === 'title' ) {
             $new['summary']   = 'Summary';
             $new['statutes']  = 'Statutes';
-            $new['resources'] = 'Resources';
             $new['citations'] = 'Citations';
         }
     }
@@ -44,13 +50,7 @@ function ws_add_jx_status_columns( $columns ) {
 add_action( 'manage_jurisdiction_posts_custom_column', 'ws_render_jx_status_column', 10, 2 );
 function ws_render_jx_status_column( $column, $post_id ) {
 
-    $map = [
-        'summary'  => 'ws_related_summary',
-        'statutes' => 'ws_related_statutes',
-        'resources' => '',
-    ];
-
-    // Citations column uses count-based display, not an ACF relationship field.
+    // Citations column uses count-based display.
     if ( $column === 'citations' ) {
         $count = ws_get_attached_citation_count( $post_id );
         if ( $count === 0 ) {
@@ -63,12 +63,35 @@ function ws_render_jx_status_column( $column, $post_id ) {
         return;
     }
 
-    if ( ! isset( $map[ $column ] ) ) return;
+    $cpt_map = [
+        'summary'  => 'jx-summary',
+        'statutes' => 'jx-statute',
+    ];
 
-    $related = get_field( $map[ $column ], $post_id );
+    if ( ! isset( $cpt_map[ $column ] ) ) return;
 
-    if ( $related ) {
-        $status = get_post_status( $related->ID );
+    // Resolve jurisdiction term for this post.
+    $terms   = wp_get_post_terms( $post_id, WS_JURISDICTION_TERM_ID );
+    $term_id = ( ! is_wp_error( $terms ) && ! empty( $terms ) ) ? $terms[0]->term_id : 0;
+
+    $related_id = 0;
+    if ( $term_id ) {
+        $ids = get_posts( [
+            'post_type'      => $cpt_map[ $column ],
+            'post_status'    => [ 'publish', 'draft', 'pending' ],
+            'posts_per_page' => 1,
+            'fields'         => 'ids',
+            'tax_query'      => [ [
+                'taxonomy' => WS_JURISDICTION_TERM_ID,
+                'field'    => 'term_id',
+                'terms'    => $term_id,
+            ] ],
+        ] );
+        $related_id = ! empty( $ids ) ? $ids[0] : 0;
+    }
+
+    if ( $related_id ) {
+        $status = get_post_status( $related_id );
         if ( $status === 'publish' ) {
             echo '<span class="dashicons dashicons-yes" style="color:#46b450;" title="Published"></span>';
         } else {
@@ -82,3 +105,262 @@ function ws_render_jx_status_column( $column, $post_id ) {
 
 // ── Make columns sortable (optional — non-sortable by default) ────────────────
 // These columns are status indicators, not data fields, so sorting is omitted.
+
+
+// ════════════════════════════════════════════════════════════════════════════
+// jx-statute columns: Jurisdiction, Attach, Disclosure Type
+// ════════════════════════════════════════════════════════════════════════════
+
+add_filter( 'manage_jx-statute_posts_columns', 'ws_add_statute_columns' );
+function ws_add_statute_columns( $columns ) {
+    $new = [];
+    foreach ( $columns as $key => $label ) {
+        $new[ $key ] = $label;
+        if ( $key === 'title' ) {
+            $new['ws_jx']            = 'Jurisdiction';
+            $new['ws_attach']        = 'Attached';
+            $new['ws_disclosure']    = 'Disclosure Type';
+        }
+    }
+    return $new;
+}
+
+add_action( 'manage_jx-statute_posts_custom_column', 'ws_render_statute_column', 10, 2 );
+function ws_render_statute_column( $column, $post_id ) {
+    if ( $column === 'ws_jx' ) {
+        $terms = get_the_terms( $post_id, WS_JURISDICTION_TERM_ID );
+        if ( $terms && ! is_wp_error( $terms ) ) {
+            echo esc_html( implode( ', ', wp_list_pluck( $terms, 'name' ) ) );
+        } else {
+            echo '<span style="color:#dc3232;">—</span>';
+        }
+    } elseif ( $column === 'ws_attach' ) {
+        // Direct meta read — admin list table display only; query layer is for front-end shortcode rendering.
+        $flag = get_post_meta( $post_id, 'ws_attach_flag', true );
+        echo $flag ? '<span class="dashicons dashicons-yes" style="color:#46b450;"></span>'
+                   : '<span class="dashicons dashicons-minus" style="color:#999;"></span>';
+    } elseif ( $column === 'ws_disclosure' ) {
+        $terms = get_the_terms( $post_id, 'ws_disclosure_type' );
+        if ( $terms && ! is_wp_error( $terms ) ) {
+            echo esc_html( implode( ', ', wp_list_pluck( $terms, 'name' ) ) );
+        } else {
+            echo '<span style="color:#999;">—</span>';
+        }
+    }
+}
+
+
+// ════════════════════════════════════════════════════════════════════════════
+// jx-citation columns: Jurisdiction, Attach, Type
+// ════════════════════════════════════════════════════════════════════════════
+
+add_filter( 'manage_jx-citation_posts_columns', 'ws_add_citation_columns' );
+function ws_add_citation_columns( $columns ) {
+    $new = [];
+    foreach ( $columns as $key => $label ) {
+        $new[ $key ] = $label;
+        if ( $key === 'title' ) {
+            $new['ws_jx']     = 'Jurisdiction';
+            $new['ws_attach'] = 'Attached';
+            $new['ws_type']   = 'Type';
+        }
+    }
+    return $new;
+}
+
+add_action( 'manage_jx-citation_posts_custom_column', 'ws_render_citation_column', 10, 2 );
+function ws_render_citation_column( $column, $post_id ) {
+    if ( $column === 'ws_jx' ) {
+        $terms = get_the_terms( $post_id, WS_JURISDICTION_TERM_ID );
+        if ( $terms && ! is_wp_error( $terms ) ) {
+            echo esc_html( implode( ', ', wp_list_pluck( $terms, 'name' ) ) );
+        } else {
+            echo '<span style="color:#dc3232;">—</span>';
+        }
+    } elseif ( $column === 'ws_attach' ) {
+        // Direct meta read — admin list table display only; query layer is for front-end shortcode rendering.
+        $flag = get_post_meta( $post_id, 'ws_attach_flag', true );
+        echo $flag ? '<span class="dashicons dashicons-yes" style="color:#46b450;"></span>'
+                   : '<span class="dashicons dashicons-minus" style="color:#999;"></span>';
+    } elseif ( $column === 'ws_type' ) {
+        // Direct meta read — admin list table display only.
+        $type = get_post_meta( $post_id, 'ws_jx_citation_type', true );
+        echo $type ? esc_html( $type ) : '<span style="color:#999;">—</span>';
+    }
+}
+
+
+// ════════════════════════════════════════════════════════════════════════════
+// jx-interpretation columns: Jurisdiction, Court, Year, Favorable
+// ════════════════════════════════════════════════════════════════════════════
+
+add_filter( 'manage_jx-interpretation_posts_columns', 'ws_add_interp_columns' );
+function ws_add_interp_columns( $columns ) {
+    $new = [];
+    foreach ( $columns as $key => $label ) {
+        $new[ $key ] = $label;
+        if ( $key === 'title' ) {
+            $new['ws_jx']        = 'Jurisdiction';
+            $new['ws_court']     = 'Court';
+            $new['ws_year']      = 'Year';
+            $new['ws_favorable'] = 'Favorable';
+        }
+    }
+    return $new;
+}
+
+add_action( 'manage_jx-interpretation_posts_custom_column', 'ws_render_interp_column', 10, 2 );
+function ws_render_interp_column( $column, $post_id ) {
+    if ( $column === 'ws_jx' ) {
+        $terms = get_the_terms( $post_id, WS_JURISDICTION_TERM_ID );
+        if ( $terms && ! is_wp_error( $terms ) ) {
+            echo esc_html( implode( ', ', wp_list_pluck( $terms, 'name' ) ) );
+        } else {
+            echo '<span style="color:#dc3232;">—</span>';
+        }
+    } elseif ( $column === 'ws_court' ) {
+        // Direct meta reads — admin list table display only; query layer is for front-end shortcode rendering.
+        $court = get_post_meta( $post_id, 'ws_jx_interp_court', true );
+        echo $court ? esc_html( $court ) : '<span style="color:#999;">—</span>';
+    } elseif ( $column === 'ws_year' ) {
+        $year = get_post_meta( $post_id, 'ws_jx_interp_year', true );
+        echo $year ? esc_html( $year ) : '<span style="color:#999;">—</span>';
+    } elseif ( $column === 'ws_favorable' ) {
+        $favorable = get_post_meta( $post_id, 'ws_jx_interp_favorable', true );
+        if ( $favorable === '' ) {
+            echo '<span style="color:#999;">—</span>';
+        } elseif ( $favorable ) {
+            echo '<span class="dashicons dashicons-yes" style="color:#46b450;" title="Favorable"></span>';
+        } else {
+            echo '<span class="dashicons dashicons-no-alt" style="color:#dc3232;" title="Unfavorable"></span>';
+        }
+    }
+}
+
+
+// ════════════════════════════════════════════════════════════════════════════
+// ws-legal-update columns: Jurisdiction, Update Type, Date
+// ════════════════════════════════════════════════════════════════════════════
+
+add_filter( 'manage_ws-legal-update_posts_columns', 'ws_add_legal_update_columns' );
+function ws_add_legal_update_columns( $columns ) {
+    $new = [];
+    foreach ( $columns as $key => $label ) {
+        $new[ $key ] = $label;
+        if ( $key === 'title' ) {
+            $new['ws_jx']          = 'Jurisdiction';
+            $new['ws_update_type'] = 'Type';
+            $new['ws_update_date'] = 'Update Date';
+        }
+    }
+    return $new;
+}
+
+add_action( 'manage_ws-legal-update_posts_custom_column', 'ws_render_legal_update_column', 10, 2 );
+function ws_render_legal_update_column( $column, $post_id ) {
+    if ( $column === 'ws_jx' ) {
+        $terms = get_the_terms( $post_id, WS_JURISDICTION_TERM_ID );
+        if ( $terms && ! is_wp_error( $terms ) ) {
+            echo esc_html( implode( ', ', wp_list_pluck( $terms, 'name' ) ) );
+        } else {
+            echo '<span style="color:#dc3232;">—</span>';
+        }
+    } elseif ( $column === 'ws_update_type' ) {
+        // Direct meta reads — admin list table display only; query layer is for front-end shortcode rendering.
+        $type = get_post_meta( $post_id, 'ws_legal_update_type', true );
+        echo $type ? esc_html( ucfirst( str_replace( '_', ' ', $type ) ) ) : '<span style="color:#999;">—</span>';
+    } elseif ( $column === 'ws_update_date' ) {
+        $date = get_post_meta( $post_id, 'ws_legal_update_date', true );
+        echo $date ? esc_html( $date ) : '<span style="color:#999;">—</span>';
+    }
+}
+
+
+// ════════════════════════════════════════════════════════════════════════════
+// ws-agency columns: Jurisdiction, Process Types, Languages
+// ════════════════════════════════════════════════════════════════════════════
+
+add_filter( 'manage_ws-agency_posts_columns', 'ws_add_agency_columns' );
+function ws_add_agency_columns( $columns ) {
+    $new = [];
+    foreach ( $columns as $key => $label ) {
+        $new[ $key ] = $label;
+        if ( $key === 'title' ) {
+            $new['ws_jx']           = 'Jurisdiction';
+            $new['ws_process_type'] = 'Process Types';
+            $new['ws_languages']    = 'Languages';
+        }
+    }
+    return $new;
+}
+
+add_action( 'manage_ws-agency_posts_custom_column', 'ws_render_agency_column', 10, 2 );
+function ws_render_agency_column( $column, $post_id ) {
+    if ( $column === 'ws_jx' ) {
+        $terms = get_the_terms( $post_id, WS_JURISDICTION_TERM_ID );
+        if ( $terms && ! is_wp_error( $terms ) ) {
+            echo esc_html( implode( ', ', wp_list_pluck( $terms, 'name' ) ) );
+        } else {
+            echo '<span style="color:#dc3232;">—</span>';
+        }
+    } elseif ( $column === 'ws_process_type' ) {
+        $terms = get_the_terms( $post_id, 'ws_process_type' );
+        if ( $terms && ! is_wp_error( $terms ) ) {
+            echo esc_html( implode( ', ', wp_list_pluck( $terms, 'name' ) ) );
+        } else {
+            echo '<span style="color:#999;">—</span>';
+        }
+    } elseif ( $column === 'ws_languages' ) {
+        $terms = get_the_terms( $post_id, 'ws_languages' );
+        if ( $terms && ! is_wp_error( $terms ) ) {
+            echo esc_html( implode( ', ', wp_list_pluck( $terms, 'name' ) ) );
+        } else {
+            echo '<span style="color:#999;">—</span>';
+        }
+    }
+}
+
+
+// ════════════════════════════════════════════════════════════════════════════
+// ws-assist-org columns: Jurisdiction, Case Stages, Languages
+// ════════════════════════════════════════════════════════════════════════════
+
+add_filter( 'manage_ws-assist-org_posts_columns', 'ws_add_assist_org_columns' );
+function ws_add_assist_org_columns( $columns ) {
+    $new = [];
+    foreach ( $columns as $key => $label ) {
+        $new[ $key ] = $label;
+        if ( $key === 'title' ) {
+            $new['ws_jx']         = 'Jurisdiction';
+            $new['ws_case_stage'] = 'Case Stages';
+            $new['ws_languages']  = 'Languages';
+        }
+    }
+    return $new;
+}
+
+add_action( 'manage_ws-assist-org_posts_custom_column', 'ws_render_assist_org_column', 10, 2 );
+function ws_render_assist_org_column( $column, $post_id ) {
+    if ( $column === 'ws_jx' ) {
+        $terms = get_the_terms( $post_id, WS_JURISDICTION_TERM_ID );
+        if ( $terms && ! is_wp_error( $terms ) ) {
+            echo esc_html( implode( ', ', wp_list_pluck( $terms, 'name' ) ) );
+        } else {
+            echo '<span style="color:#dc3232;">—</span>';
+        }
+    } elseif ( $column === 'ws_case_stage' ) {
+        $terms = get_the_terms( $post_id, 'ws_case_stage' );
+        if ( $terms && ! is_wp_error( $terms ) ) {
+            echo esc_html( implode( ', ', wp_list_pluck( $terms, 'name' ) ) );
+        } else {
+            echo '<span style="color:#999;">—</span>';
+        }
+    } elseif ( $column === 'ws_languages' ) {
+        $terms = get_the_terms( $post_id, 'ws_languages' );
+        if ( $terms && ! is_wp_error( $terms ) ) {
+            echo esc_html( implode( ', ', wp_list_pluck( $terms, 'name' ) ) );
+        } else {
+            echo '<span style="color:#999;">—</span>';
+        }
+    }
+}

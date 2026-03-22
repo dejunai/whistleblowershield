@@ -128,6 +128,11 @@
  *          for source_method and source_name via ws_hide_source_fields_for_non_admins().
  *        - Plain English stamp keys ws_auto_ prefixed: plain_english_by,
  *          plain_english_date, plain_english_reviewed_by.
+ * 3.5.1  Bug fix: ws_ao_additional_languages → ws_aorg_additional_languages in
+ *        ws_sync_additional_languages_term(). Stale key caused additional-language
+ *        term sync for ws-assist-org to silently fail.
+ *        Added inline comments to direct meta reads explaining why the query
+ *        layer is not used in save/filter hook context.
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit;
@@ -274,6 +279,8 @@ add_filter( 'acf/load_value/name=last_reviewed', 'ws_acf_autofill_today', 10, 3 
  * @return mixed
  */
 function ws_acf_autofill_today( $value, $post_id, $field ) {
+    // Direct meta read — acf/load_value fires before ACF renders the field; get_post_meta()
+    // is the correct way to read sibling field state in this filter context.
     if ( empty( $value ) && $post_id > 0 && get_post_meta( $post_id, 'ws_plain_english_reviewed', true ) ) {
         $value = current_time( 'Y-m-d' );
     }
@@ -624,7 +631,7 @@ function ws_acf_stamp_summarized_fields( $post_id ) {
 
 // ── Auto-assign ws_languages "additional" term ────────────────────────────────
 //
-// When ws_agency_additional_languages (ws-agency) or ws_ao_additional_languages
+// When ws_agency_additional_languages (ws-agency) or ws_aorg_additional_languages
 // (ws-assist-org) is non-empty, the "additional" ws_languages term is assigned
 // automatically so the taxonomy filter can surface these records.
 // When the field is cleared, the term is removed.
@@ -646,7 +653,7 @@ function ws_sync_additional_languages_term( $post_id ) {
     if ( $post_type === 'ws-agency' ) {
         $meta_key = 'ws_agency_additional_languages';
     } elseif ( $post_type === 'ws-assist-org' ) {
-        $meta_key = 'ws_ao_additional_languages';
+        $meta_key = 'ws_aorg_additional_languages';
     } else {
         return;
     }

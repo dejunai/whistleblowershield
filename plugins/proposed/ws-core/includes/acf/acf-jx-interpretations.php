@@ -75,6 +75,7 @@
  * 3.1.1  Pass 2 ACF audit fix:
  *        - Renamed tab key tab_ws_interp_plain_language → field_ws_interp_plain_language
  *          for convention consistency.
+ * 3.1.2  Field keys corrected to match naming convention (field_ + meta name without ws_ prefix).
  * 3.4.0  Stamp field centralization:
  *        - Removed Authorship & Review tab and all stamp fields — now registered
  *          centrally in acf-stamp-fields.php (group_stamp_metadata, menu_order 90).
@@ -125,7 +126,7 @@ function ws_register_acf_jx_interpretations() {
             ],
 
             [
-                'key'           => 'field_interp_court',
+                'key'           => 'field_jx_interp_court',
                 'label'         => 'Court',
                 'name'          => 'ws_jx_interp_court',
                 'type'          => 'select',
@@ -139,7 +140,7 @@ function ws_register_acf_jx_interpretations() {
             ],
 
             [
-                'key'          => 'field_interp_year',
+                'key'          => 'field_jx_interp_year',
                 'label'        => 'Decision Year',
                 'name'         => 'ws_jx_interp_year',
                 'type'         => 'number',
@@ -152,7 +153,7 @@ function ws_register_acf_jx_interpretations() {
             ],
 
             [
-                'key'           => 'field_interp_favorable',
+                'key'           => 'field_jx_interp_favorable',
                 'label'         => 'Favorable to Whistleblower?',
                 'name'          => 'ws_jx_interp_favorable',
                 'type'          => 'true_false',
@@ -165,7 +166,7 @@ function ws_register_acf_jx_interpretations() {
             ],
 
             [
-                'key'          => 'field_interp_case_name',
+                'key'          => 'field_jx_interp_official_name',
                 'label'        => 'Official Name',
                 'name'         => 'ws_jx_interp_official_name',
                 'type'         => 'text',
@@ -175,7 +176,7 @@ function ws_register_acf_jx_interpretations() {
             ],
 
             [
-                'key'          => 'field_interp_common_name',
+                'key'          => 'field_jx_interp_common_name',
                 'label'        => 'Common Name',
                 'name'         => 'ws_jx_interp_common_name',
                 'type'         => 'text',
@@ -185,7 +186,7 @@ function ws_register_acf_jx_interpretations() {
             ],
 
             [
-                'key'          => 'field_interp_citation',
+                'key'          => 'field_jx_interp_case_citation',
                 'label'        => 'Citation',
                 'name'         => 'ws_jx_interp_case_citation',
                 'type'         => 'text',
@@ -195,7 +196,7 @@ function ws_register_acf_jx_interpretations() {
             ],
 
             [
-                'key'          => 'field_interp_url',
+                'key'          => 'field_jx_interp_url',
                 'label'        => 'Opinion URL',
                 'name'         => 'ws_jx_interp_url',
                 'type'         => 'url',
@@ -216,7 +217,7 @@ function ws_register_acf_jx_interpretations() {
             ],
 
             [
-                'key'          => 'field_interp_summary',
+                'key'          => 'field_jx_interp_summary',
                 'label'        => 'Summary',
                 'name'         => 'ws_jx_interp_summary',
                 'type'         => 'textarea',
@@ -226,7 +227,7 @@ function ws_register_acf_jx_interpretations() {
             ],
 
             [
-                'key'           => 'field_interp_process_type',
+                'key'           => 'field_jx_interp_process_type',
                 'label'         => 'Process Type',
                 'name'          => 'ws_process_type',
                 'type'          => 'taxonomy',
@@ -240,7 +241,7 @@ function ws_register_acf_jx_interpretations() {
             ],
 
             [
-                'key'           => 'field_interp_attach_flag',
+                'key'           => 'field_jx_interp_attach_flag',
                 'label'         => 'Attach to Jurisdiction Page',
                 'name'          => 'ws_attach_flag',
                 'type'          => 'true_false',
@@ -252,7 +253,7 @@ function ws_register_acf_jx_interpretations() {
             ],
 
             [
-                'key'               => 'field_interp_order',
+                'key'               => 'field_jx_interp_display_order',
                 'label'             => 'Display Order',
                 'name'              => 'ws_display_order',
                 'type'              => 'number',
@@ -260,7 +261,7 @@ function ws_register_acf_jx_interpretations() {
                 'min'               => 1,
                 'step'              => 1,
                 'conditional_logic' => [ [ [
-                    'field'    => 'field_interp_attach_flag',
+                    'field'    => 'field_jx_interp_attach_flag',
                     'operator' => '==',
                     'value'    => '1',
                 ] ] ],
@@ -280,7 +281,7 @@ function ws_register_acf_jx_interpretations() {
             ],
 
             [
-                'key'           => 'field_interp_statute_id',
+                'key'           => 'field_jx_interp_statute_id',
                 'label'         => 'Parent Statute',
                 'name'          => 'ws_jx_interp_statute_id',
                 'type'          => 'post_object',
@@ -303,7 +304,7 @@ function ws_register_acf_jx_interpretations() {
             // interpretation's own group.
 
             [
-                'key'          => 'field_interp_last_reviewed',
+                'key'          => 'field_jx_interp_last_reviewed',
                 'label'        => 'Last Verified Date',
                 'name'         => 'ws_jx_interp_last_reviewed',
                 'type'         => 'text',
@@ -327,7 +328,7 @@ function ws_register_acf_jx_interpretations() {
             ],
 
             [
-                'key'           => 'field_interp_ref_materials',
+                'key'           => 'field_jx_interp_ref_materials',
                 'label'         => 'Reference Materials',
                 'name'          => 'ws_ref_materials',
                 'type'          => 'relationship',
@@ -351,7 +352,7 @@ function ws_register_acf_jx_interpretations() {
 // 'US' or is null (SCOTUS). Sorted by level ascending (SCOTUS first, then
 // appellate, then district).
 
-add_filter( 'acf/load_field/key=field_interp_court', 'ws_interp_load_court_choices' );
+add_filter( 'acf/load_field/key=field_jx_interp_court', 'ws_interp_load_court_choices' );
 
 function ws_interp_load_court_choices( $field ) {
     global $ws_court_matrix;
@@ -390,7 +391,7 @@ function ws_interp_load_court_choices( $field ) {
 // ACF renders the statute pre-selected. On saved posts, or when no URL
 // parameter is present, we return $value unchanged.
 
-add_filter( 'acf/load_value/key=field_interp_statute_id', 'ws_interp_prefill_statute_id', 5, 3 );
+add_filter( 'acf/load_value/key=field_jx_interp_statute_id', 'ws_interp_prefill_statute_id', 5, 3 );
 
 function ws_interp_prefill_statute_id( $value, $post_id, $field ) {
 

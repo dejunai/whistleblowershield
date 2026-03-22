@@ -8,40 +8,58 @@ defined( 'ABSPATH' ) || exit;
  *
  * PURPOSE
  * -------
- * Provides structured metadata for individual statutes, moving away from
- * the "blob" model. This enables granular queries for deadlines,
- * enforcement agencies, and misconduct categories.
+ * Provides structured metadata for individual statutes, enabling granular
+ * queries for deadlines, enforcement agencies, burden of proof standards,
+ * and misconduct categories.
  *
  * FIELD SUMMARY
  * -------------
  * Legal Basis tab:
- *   ws_jx_statute_official_name   Official name (text, required)
- *   ws_jx_statute_common_name     Common/informal name (text, optional)
- *   ws_jx_statute_disclosure_type Disclosure Categories taxonomy (multi_select)
- *   attach_flag                   Attach to jurisdiction page (true_false)
- *   order                         Render order (number, conditional on attach_flag)
+ *   ws_jx_statute_official_name      Official name (text, required)
+ *   ws_jx_statute_common_name        Common/informal name (text, optional)
+ *   ws_jx_statute_disclosure_type    Disclosure Categories taxonomy (multi_select)
+ *   ws_jx_statute_protected_class    Protected Class taxonomy (multi_select)
+ *   ws_jx_statute_disclosure_targets Disclosure Targets taxonomy (multi_select)
+ *   ws_jx_statute_adverse_action_scope Free-text scope of covered adverse actions
+ *   ws_attach_flag                   Attach to jurisdiction page (true_false)
+ *   ws_display_order                 Render order (number, conditional on attach_flag)
  *
  * Jurisdiction scope is provided by the ws_jurisdiction taxonomy — the
  * taxonomy term is assigned via the WordPress taxonomy UI, not via an ACF field.
  *
- * Statutes of Limitations tab:
- *   ws_jx_statute_limit_value         Filing Window Value (number)
- *   ws_jx_statute_limit_unit          Time Unit (select)
- *   ws_jx_statute_trigger             Deadline Trigger (select)
- *   ws_jx_statute_tolling_notes       Tolling & Extension Notes (textarea)
- *   ws_jx_statute_exhaustion_required Administrative Exhaustion Required? (true_false)
- *   ws_jx_statute_exhaustion_details  Exhaustion Procedure & Deadline (textarea)
- *   ws_statute_burden_of_proof        Burden of Proof (select)
- *   ws_jx_statute_remedies            Available Remedies (taxonomy checkbox)
+ * Statute of Limitations tab:
+ *   ws_jx_statute_sol_value          Filing Window Value (number)
+ *   ws_jx_statute_sol_unit           Time Unit (select)
+ *   ws_jx_statute_sol_trigger        Deadline Trigger (select)
+ *   ws_jx_statute_sol_has_details    SOL has supplementary detail (true_false)
+ *   ws_jx_statute_sol_details        SOL detail (textarea, conditional)
+ *   ws_jx_statute_tolling_has_details Tolling provisions exist (true_false)
+ *   ws_jx_statute_tolling_details    Tolling & Extension Details (textarea, conditional)
+ *   ws_jx_statute_has_exhaustion     Exhaustion Required? (true_false)
+ *   ws_jx_statute_exhaustion_details Exhaustion Procedure & Deadline (textarea, conditional)
  *
- * Relationships tab:
- *   ws_jx_statute_related_agencies    Primary Oversight Agencies (post_object)
+ * Enforcement tab:
+ *   ws_jx_statute_process_type       Process Types taxonomy (checkbox)
+ *   ws_jx_statute_adverse_action     Adverse Action Types taxonomy (checkbox)
+ *   ws_jx_statute_fee_shifting       Fee Shifting taxonomy (checkbox)
+ *   ws_jx_statute_remedies           Available Remedies taxonomy (checkbox)
+ *   ws_jx_statute_related_agencies   Primary Oversight Agencies (post_object)
  *
- * Authorship & Review tab:
- *   ws_jx_statute_last_edited_author  Last edited by (user, readonly non-admins)
- *   ws_jx_statute_date_created        Date created (text, readonly)
- *   ws_jx_statute_last_edited         Last edited (text, readonly)
- *   ws_jx_statute_last_reviewed       Last reviewed (text)
+ * Burden of Proof tab:
+ *   ws_jx_statute_bop_standard       Employee burden standard (select)
+ *   ws_jx_statute_employer_defense   Employer Defense taxonomy (checkbox)
+ *   ws_jx_statute_rebuttable_has_details Rebuttable presumption exists (true_false)
+ *   ws_jx_statute_rebuttable_details Rebuttable Presumption Details (textarea, conditional)
+ *   ws_jx_statute_bop_has_details    BOP has supplementary detail (true_false)
+ *   ws_jx_statute_bop_details        BOP detail (textarea, conditional)
+ *
+ * Reward tab:
+ *   ws_jx_statute_has_reward         Reward available (true_false)
+ *   ws_jx_statute_reward_details     Reward Details (textarea, conditional)
+ *
+ * Links tab:
+ *   ws_jx_statute_url                Statute URL (url)
+ *   ws_jx_statute_url_is_pdf         PDF link toggle (true_false)
  *
  * @package    WhistleblowerShield
  * @since      2.0.0
@@ -61,17 +79,32 @@ defined( 'ABSPATH' ) || exit;
  *          to ws_remedies.
  *        - Renamed tab key tab_jx_statute_plain_language_tab → field_jx_statute_plain_language_tab
  *          for convention consistency.
- *        - Removed resolved @todo scaffold comments from disclosure_type,
- *          remedies, burden_of_proof, and last_reviewed fields.
+ *        - Removed resolved @todo scaffold comments.
  * 3.4.0  Stamp field centralization:
- *        - Removed Authorship & Review tab and all stamp fields (last_edited_author,
- *          date_created, last_edited, create_author) — now registered centrally
- *          in acf-stamp-fields.php (group_ws_stamp_fields, menu_order 90).
- *        - Removed Plain Language tab and all plain English fields (has_plain_english,
- *          plain_english_wysiwyg, plain_english_reviewed, plain_english_reviewed_by,
- *          plain_english_by, plain_english_date) — now registered centrally in
- *          acf-plain-english-fields.php (group_ws_plain_english_fields, menu_order 85).
+ *        - Removed Authorship & Review tab and all stamp fields — now registered
+ *          centrally in acf-stamp-fields.php (group_stamp_metadata, menu_order 90).
+ *        - Removed Plain Language tab and all plain English fields — now registered
+ *          centrally in acf-plain-english-fields.php (group_plain_english_metadata, menu_order 85).
  * 3.4.1  Added defined( 'ABSPATH' ) || exit; guard at top of file.
+ * 3.4.2  Field keys corrected: trigger → limit_trigger, order → display_order,
+ *        statute_ref → jx_statute_ref.
+ * 3.5.0  Full ACF overhaul to align with AI-assisted ingest schema:
+ *        - Meta key renames: limit_* → sol_*, burden_of_proof → bop_standard,
+ *          exhaustion_required → has_exhaustion (label retained: "Exhaustion Required?").
+ *        - tolling_notes retired; replaced by tolling_has_details / tolling_details.
+ *        - New tab: Enforcement — process_type, adverse_action, fee_shifting,
+ *          remedies, related_agencies (moved from former Relationships tab).
+ *        - New tab: Burden of Proof — bop_standard, employer_defense (new
+ *          ws_employer_defense taxonomy stub), rebuttable_has_details /
+ *          rebuttable_details, bop_has_details / bop_details.
+ *        - New tab: Reward — has_reward / reward_details.
+ *        - New tab: Links — statute_url, url_is_pdf.
+ *        - New Legal Basis fields: protected_class, disclosure_targets,
+ *          adverse_action_scope.
+ *        - SOL supplementary detail pattern: sol_has_details / sol_details.
+ *        - ws_employer_defense taxonomy stub registered in register-taxonomies.php.
+ *        - Downstream consumers (query layer, matrix seeder, admin hooks) are
+ *          deferred to a follow-up pass.
  */
 
 add_action( 'acf/init', 'ws_register_acf_jx_statutes' );
@@ -84,7 +117,7 @@ function ws_register_acf_jx_statutes() {
 
     acf_add_local_field_group( [
         'key'                   => 'group_jx_statute_metadata',
-        'title'                 => 'Statute Details & Deadlines',
+        'title'                 => 'Statute Details',
         'menu_order'            => 0,
         'position'              => 'normal',
         'style'                 => 'default',
@@ -102,9 +135,6 @@ function ws_register_acf_jx_statutes() {
 
             // ────────────────────────────────────────────────────────────────
             // Tab: Legal Basis
-            //
-            // Identifies the official name of the law and links it to the
-            // canonical jurisdiction code and misconduct taxonomy.
             // ────────────────────────────────────────────────────────────────
 
             [
@@ -132,17 +162,55 @@ function ws_register_acf_jx_statutes() {
             ],
 
             [
-                'key'          => 'field_jx_statute_disclosure_type',
-                'label'        => 'Disclosure Categories',
-                'name'         => 'ws_jx_statute_disclosure_type',
-                'type'         => 'taxonomy',
-                'taxonomy'     => 'ws_disclosure_type',
-                'field_type'   => 'multi_select',
-                'instructions' => 'Classify the types of misconduct this law protects.',
-                'add_term'     => 0,
-                'save_terms'   => 0,
-                'load_terms'   => 1,
+                'key'           => 'field_jx_statute_disclosure_type',
+                'label'         => 'Disclosure Categories',
+                'name'          => 'ws_jx_statute_disclosure_type',
+                'type'          => 'taxonomy',
+                'taxonomy'      => 'ws_disclosure_type',
+                'field_type'    => 'multi_select',
+                'instructions'  => 'Classify the types of misconduct this law protects.',
+                'add_term'      => 0,
+                'save_terms'    => 0,
+                'load_terms'    => 1,
                 'return_format' => 'id',
+            ],
+
+            [
+                'key'           => 'field_jx_statute_protected_class',
+                'label'         => 'Protected Class',
+                'name'          => 'ws_jx_statute_protected_class',
+                'type'          => 'taxonomy',
+                'taxonomy'      => 'ws_protected_class',
+                'field_type'    => 'multi_select',
+                'instructions'  => 'Select the employee types or worker classifications protected by this statute.',
+                'add_term'      => 0,
+                'save_terms'    => 0,
+                'load_terms'    => 1,
+                'return_format' => 'id',
+            ],
+
+            [
+                'key'           => 'field_jx_statute_disclosure_targets',
+                'label'         => 'Disclosure Targets',
+                'name'          => 'ws_jx_statute_disclosure_targets',
+                'type'          => 'taxonomy',
+                'taxonomy'      => 'ws_disclosure_targets',
+                'field_type'    => 'multi_select',
+                'instructions'  => 'Who must the disclosure be made to for protection to apply under this statute?',
+                'add_term'      => 0,
+                'save_terms'    => 0,
+                'load_terms'    => 1,
+                'return_format' => 'id',
+            ],
+
+            [
+                'key'          => 'field_jx_statute_adverse_action_scope',
+                'label'        => 'Adverse Action Scope',
+                'name'         => 'ws_jx_statute_adverse_action_scope',
+                'type'         => 'textarea',
+                'rows'         => 3,
+                'instructions' => 'Describe the specific workplace actions this statute considers adverse, where the taxonomy terms do not fully capture the statutory scope or nuance.',
+                'required'     => 0,
             ],
 
             [
@@ -158,7 +226,7 @@ function ws_register_acf_jx_statutes() {
             ],
 
             [
-                'key'               => 'field_jx_statute_order',
+                'key'               => 'field_jx_statute_display_order',
                 'label'             => 'Display Order',
                 'name'              => 'ws_display_order',
                 'type'              => 'number',
@@ -173,22 +241,19 @@ function ws_register_acf_jx_statutes() {
             ],
 
             // ────────────────────────────────────────────────────────────────
-            // Tab: Statutes of Limitations
-            //
-            // Structured data for critical filing deadlines. This replaces
-            // prose with queryable time units and triggers.
+            // Tab: Statute of Limitations
             // ────────────────────────────────────────────────────────────────
 
             [
                 'key'   => 'field_jx_statute_deadlines_tab',
-                'label' => 'Statutes of Limitations',
+                'label' => 'Statute of Limitations',
                 'type'  => 'tab',
             ],
 
             [
-                'key'          => 'field_jx_statute_limit_value',
+                'key'          => 'field_jx_statute_sol_value',
                 'label'        => 'Filing Window Value',
-                'name'         => 'ws_jx_statute_limit_value',
+                'name'         => 'ws_jx_statute_sol_value',
                 'type'         => 'number',
                 'instructions' => 'The numeric count for the deadline.',
                 'min'          => 1,
@@ -197,9 +262,9 @@ function ws_register_acf_jx_statutes() {
             ],
 
             [
-                'key'           => 'field_jx_statute_limit_unit',
+                'key'           => 'field_jx_statute_sol_unit',
                 'label'         => 'Time Unit',
-                'name'          => 'ws_jx_statute_limit_unit',
+                'name'          => 'ws_jx_statute_sol_unit',
                 'type'          => 'select',
                 'choices'       => [
                     'days'   => 'Days',
@@ -214,9 +279,9 @@ function ws_register_acf_jx_statutes() {
             ],
 
             [
-                'key'           => 'field_jx_statute_trigger',
+                'key'           => 'field_jx_statute_sol_trigger',
                 'label'         => 'Deadline Trigger',
-                'name'          => 'ws_jx_statute_limit_trigger',
+                'name'          => 'ws_jx_statute_sol_trigger',
                 'type'          => 'select',
                 'instructions'  => 'When does the clock start ticking?',
                 'choices'       => [
@@ -231,22 +296,61 @@ function ws_register_acf_jx_statutes() {
             ],
 
             [
-                'key'          => 'field_jx_statute_tolling_notes',
-                'label'        => 'Tolling & Extension Notes',
-                'name'         => 'ws_jx_statute_tolling_notes',
-                'type'         => 'textarea',
-                'rows'         => 3,
-                'instructions' => 'Describe specific conditions that pause the statutory clock.',
+                'key'           => 'field_jx_statute_sol_has_details',
+                'label'         => 'SOL Has Supplementary Detail',
+                'name'          => 'ws_jx_statute_sol_has_details',
+                'type'          => 'true_false',
+                'instructions'  => 'Enable to add a detail note — e.g., the deadline is derived from a general civil procedure statute rather than stated in this law.',
+                'ui'            => 1,
+                'ui_on_text'    => 'Yes',
+                'ui_off_text'   => 'No',
+                'default_value' => 0,
             ],
 
-            // ────────────────────────────────────────────────────────────────
-            // Tab: Statutes of Limitations (Additions)
-            // ────────────────────────────────────────────────────────────────
+            [
+                'key'               => 'field_jx_statute_sol_details',
+                'label'             => 'SOL Details',
+                'name'              => 'ws_jx_statute_sol_details',
+                'type'              => 'textarea',
+                'rows'              => 3,
+                'instructions'      => 'Describe anything a reviewer should know about this deadline — derivation source, dual-period situations, or other nuance.',
+                'conditional_logic' => [ [ [
+                    'field'    => 'field_jx_statute_sol_has_details',
+                    'operator' => '==',
+                    'value'    => '1',
+                ] ] ],
+            ],
 
             [
-                'key'           => 'field_jx_statute_exhaustion_required',
-                'label'         => 'Administrative Exhaustion Required?',
-                'name'          => 'ws_jx_statute_exhaustion_required',
+                'key'           => 'field_jx_statute_tolling_has_details',
+                'label'         => 'Tolling Provisions Exist',
+                'name'          => 'ws_jx_statute_tolling_has_details',
+                'type'          => 'true_false',
+                'instructions'  => 'Enable if this statute has identified tolling or extension conditions.',
+                'ui'            => 1,
+                'ui_on_text'    => 'Yes',
+                'ui_off_text'   => 'No',
+                'default_value' => 0,
+            ],
+
+            [
+                'key'               => 'field_jx_statute_tolling_details',
+                'label'             => 'Tolling & Extension Details',
+                'name'              => 'ws_jx_statute_tolling_details',
+                'type'              => 'textarea',
+                'rows'              => 3,
+                'instructions'      => 'Describe specific conditions that pause or extend the statutory clock.',
+                'conditional_logic' => [ [ [
+                    'field'    => 'field_jx_statute_tolling_has_details',
+                    'operator' => '==',
+                    'value'    => '1',
+                ] ] ],
+            ],
+
+            [
+                'key'           => 'field_jx_statute_has_exhaustion',
+                'label'         => 'Exhaustion Required?',
+                'name'          => 'ws_jx_statute_has_exhaustion',
                 'type'          => 'true_false',
                 'instructions'  => 'Must the whistleblower file with an agency before going to court?',
                 'ui'            => 1,
@@ -257,41 +361,71 @@ function ws_register_acf_jx_statutes() {
             ],
 
             [
-                'key'           => 'field_jx_statute_exhaustion_details',
-                'label'         => 'Exhaustion Procedure & Deadline',
-                'name'          => 'ws_jx_statute_exhaustion_details',
-                'type'          => 'textarea',
-                'rows'          => 3,
-                'instructions'  => 'Describe the agency filing deadline (e.g., 90 days to OSHA).',
-                'required'      => 1,
-                'conditional_logic' => [
-                    [
-                        [
-                            'field'    => 'field_jx_statute_exhaustion_required',
-                            'operator' => '==',
-                            'value'    => '1',
-                        ],
-                    ],
-                ],
-                'wrapper'       => [ 'width' => '70' ],
+                'key'               => 'field_jx_statute_exhaustion_details',
+                'label'             => 'Exhaustion Procedure & Deadline',
+                'name'              => 'ws_jx_statute_exhaustion_details',
+                'type'              => 'textarea',
+                'rows'              => 3,
+                'instructions'      => 'Describe the agency filing deadline (e.g., 90 days to OSHA).',
+                'required'          => 1,
+                'conditional_logic' => [ [ [
+                    'field'    => 'field_jx_statute_has_exhaustion',
+                    'operator' => '==',
+                    'value'    => '1',
+                ] ] ],
+                'wrapper'           => [ 'width' => '70' ],
+            ],
+
+            // ────────────────────────────────────────────────────────────────
+            // Tab: Enforcement
+            // ────────────────────────────────────────────────────────────────
+
+            [
+                'key'   => 'field_jx_statute_enforcement_tab',
+                'label' => 'Enforcement',
+                'type'  => 'tab',
             ],
 
             [
-                'key'           => 'field_jx_statute_burden_of_proof',
-                'label'         => 'Burden of Proof',
-                'name'          => 'ws_jx_statute_burden_of_proof',
-                'type'          => 'select',
-                'instructions'  => 'What standard must the whistleblower meet to succeed? "Contributing Factor" is the most employee-friendly; "But-For" is employer-friendly.',
-                'choices'       => [
-                    'contributing_factor' => 'Contributing Factor (employee-friendly)',
-                    'motivating_factor'   => 'Motivating Factor',
-                    'but_for'             => 'But-For Causation (employer-friendly)',
-                    'preponderance'       => 'Preponderance of Evidence',
-                    'varies'              => 'Varies by Claim Type',
-                ],
-                'allow_null'    => 1,
-                'ui'            => 1,
-                'return_format' => 'value',
+                'key'           => 'field_jx_statute_process_type',
+                'label'         => 'Process Types',
+                'name'          => 'ws_jx_statute_process_type',
+                'type'          => 'taxonomy',
+                'taxonomy'      => 'ws_process_type',
+                'field_type'    => 'checkbox',
+                'instructions'  => 'Which whistleblower process areas does this statute address?',
+                'add_term'      => 0,
+                'save_terms'    => 0,
+                'load_terms'    => 1,
+                'return_format' => 'id',
+            ],
+
+            [
+                'key'           => 'field_jx_statute_adverse_action',
+                'label'         => 'Adverse Action Types',
+                'name'          => 'ws_jx_statute_adverse_action',
+                'type'          => 'taxonomy',
+                'taxonomy'      => 'ws_adverse_action_types',
+                'field_type'    => 'checkbox',
+                'instructions'  => 'Select the adverse actions covered by this statute.',
+                'add_term'      => 0,
+                'save_terms'    => 0,
+                'load_terms'    => 1,
+                'return_format' => 'id',
+            ],
+
+            [
+                'key'           => 'field_jx_statute_fee_shifting',
+                'label'         => 'Fee Shifting',
+                'name'          => 'ws_jx_statute_fee_shifting',
+                'type'          => 'taxonomy',
+                'taxonomy'      => 'ws_fee_shifting',
+                'field_type'    => 'checkbox',
+                'instructions'  => 'Select the fee shifting rule that applies to this statute.',
+                'add_term'      => 0,
+                'save_terms'    => 0,
+                'load_terms'    => 1,
+                'return_format' => 'id',
             ],
 
             [
@@ -308,19 +442,6 @@ function ws_register_acf_jx_statutes() {
                 'return_format' => 'id',
             ],
 
-            // ────────────────────────────────────────────────────────────────
-            // Tab: Relationships
-            //
-            // Links this statute to enforcement agencies and cross-references
-            // the parent jurisdiction record.
-            // ────────────────────────────────────────────────────────────────
-
-            [
-                'key'   => 'field_jx_statute_rel_tab',
-                'label' => 'Relationships',
-                'type'  => 'tab',
-            ],
-
             [
                 'key'           => 'field_jx_statute_related_agencies',
                 'label'         => 'Primary Oversight Agencies',
@@ -334,14 +455,181 @@ function ws_register_acf_jx_statutes() {
                 'return_format' => 'id',
             ],
 
-            // Authorship & Review tab removed — registered centrally in
-            // acf-stamp-fields.php (group_stamp_metadata, menu_order 90).
+            // ────────────────────────────────────────────────────────────────
+            // Tab: Burden of Proof
+            // ────────────────────────────────────────────────────────────────
+
+            [
+                'key'   => 'field_jx_statute_bop_tab',
+                'label' => 'Burden of Proof',
+                'type'  => 'tab',
+            ],
+
+            [
+                'key'           => 'field_jx_statute_bop_standard',
+                'label'         => 'Employee Standard',
+                'name'          => 'ws_jx_statute_bop_standard',
+                'type'          => 'select',
+                'instructions'  => 'What standard must the whistleblower meet to succeed? "Contributing Factor" is the most employee-friendly; "But-For" is employer-friendly.',
+                'choices'       => [
+                    'contributing_factor' => 'Contributing Factor (employee-friendly)',
+                    'motivating_factor'   => 'Motivating Factor',
+                    'but_for'             => 'But-For Causation (employer-friendly)',
+                    'preponderance'       => 'Preponderance of Evidence',
+                    'varies'              => 'Varies by Claim Type',
+                ],
+                'allow_null'    => 1,
+                'ui'            => 1,
+                'return_format' => 'value',
+            ],
+
+            [
+                'key'           => 'field_jx_statute_employer_defense',
+                'label'         => 'Employer Defense',
+                'name'          => 'ws_jx_statute_employer_defense',
+                'type'          => 'taxonomy',
+                'taxonomy'      => 'ws_employer_defense',
+                'field_type'    => 'checkbox',
+                'instructions'  => 'Select the defense standard(s) available to the employer under this statute.',
+                'add_term'      => 0,
+                'save_terms'    => 0,
+                'load_terms'    => 1,
+                'return_format' => 'id',
+            ],
+
+            [
+                'key'          => 'field_jx_statute_employer_defense_details',
+                'label'        => 'Employer Defense Details',
+                'name'         => 'ws_jx_statute_employer_defense_details',
+                'type'         => 'textarea',
+                'rows'         => 3,
+                'instructions' => 'Describe the specific defense standard — e.g., the evidentiary burden required, statutory language, or any procedural conditions attached to the defense.',
+                'required'     => 0,
+            ],
+
+            [
+                'key'           => 'field_jx_statute_rebuttable_has_details',
+                'label'         => 'Rebuttable Presumption Exists',
+                'name'          => 'ws_jx_statute_rebuttable_has_details',
+                'type'          => 'true_false',
+                'instructions'  => 'Enable if this statute creates a rebuttable presumption in favour of the whistleblower.',
+                'ui'            => 1,
+                'ui_on_text'    => 'Yes',
+                'ui_off_text'   => 'No',
+                'default_value' => 0,
+            ],
+
+            [
+                'key'               => 'field_jx_statute_rebuttable_details',
+                'label'             => 'Rebuttable Presumption Details',
+                'name'              => 'ws_jx_statute_rebuttable_details',
+                'type'              => 'textarea',
+                'rows'              => 3,
+                'instructions'      => 'Describe the presumption and what the employer must do to rebut it.',
+                'conditional_logic' => [ [ [
+                    'field'    => 'field_jx_statute_rebuttable_has_details',
+                    'operator' => '==',
+                    'value'    => '1',
+                ] ] ],
+            ],
+
+            [
+                'key'           => 'field_jx_statute_bop_has_details',
+                'label'         => 'BOP Has Supplementary Detail',
+                'name'          => 'ws_jx_statute_bop_has_details',
+                'type'          => 'true_false',
+                'instructions'  => 'Enable to add a note about a non-standard or otherwise notable burden of proof situation for this statute.',
+                'ui'            => 1,
+                'ui_on_text'    => 'Yes',
+                'ui_off_text'   => 'No',
+                'default_value' => 0,
+            ],
+
+            [
+                'key'               => 'field_jx_statute_bop_details',
+                'label'             => 'BOP Details',
+                'name'              => 'ws_jx_statute_bop_details',
+                'type'              => 'textarea',
+                'rows'              => 3,
+                'instructions'      => 'Describe the notable burden of proof situation — e.g., a burden shift, a split standard, or statutory language that modifies the general standard.',
+                'conditional_logic' => [ [ [
+                    'field'    => 'field_jx_statute_bop_has_details',
+                    'operator' => '==',
+                    'value'    => '1',
+                ] ] ],
+            ],
+
+            // ────────────────────────────────────────────────────────────────
+            // Tab: Reward
+            // ────────────────────────────────────────────────────────────────
+
+            [
+                'key'   => 'field_jx_statute_reward_tab',
+                'label' => 'Reward',
+                'type'  => 'tab',
+            ],
+
+            [
+                'key'           => 'field_jx_statute_has_reward',
+                'label'         => 'Reward Available',
+                'name'          => 'ws_jx_statute_has_reward',
+                'type'          => 'true_false',
+                'instructions'  => 'Enable if this statute provides a monetary reward or bounty to the whistleblower (distinct from compensatory remedies).',
+                'ui'            => 1,
+                'ui_on_text'    => 'Yes',
+                'ui_off_text'   => 'No',
+                'default_value' => 0,
+            ],
+
+            [
+                'key'               => 'field_jx_statute_reward_details',
+                'label'             => 'Reward Details',
+                'name'              => 'ws_jx_statute_reward_details',
+                'type'              => 'textarea',
+                'rows'              => 3,
+                'instructions'      => 'Describe the reward structure — e.g., percentage of collected sanctions, eligibility conditions, administering agency.',
+                'conditional_logic' => [ [ [
+                    'field'    => 'field_jx_statute_has_reward',
+                    'operator' => '==',
+                    'value'    => '1',
+                ] ] ],
+            ],
+
+            // ────────────────────────────────────────────────────────────────
+            // Tab: Links
+            // ────────────────────────────────────────────────────────────────
+
+            [
+                'key'   => 'field_jx_statute_links_tab',
+                'label' => 'Links',
+                'type'  => 'tab',
+            ],
+
+            [
+                'key'          => 'field_jx_statute_url',
+                'label'        => 'Statute URL',
+                'name'         => 'ws_jx_statute_url',
+                'type'         => 'url',
+                'instructions' => 'Link to the official legislature source or best available approved source for this statute.',
+            ],
+
+            [
+                'key'           => 'field_jx_statute_url_is_pdf',
+                'label'         => 'PDF Link',
+                'name'          => 'ws_jx_statute_url_is_pdf',
+                'type'          => 'true_false',
+                'instructions'  => 'Enable if the statute URL links directly to a PDF document.',
+                'ui'            => 1,
+                'ui_on_text'    => 'PDF',
+                'ui_off_text'   => 'No',
+                'default_value' => 0,
+            ],
 
             // ── Last Verified Date ────────────────────────────────────────
             //
             // Content-owned field — not a stamp. Editable by editors to
             // signal when the statute record was last meaningfully reviewed
-            // for accuracy. Retained here in the statute's own group.
+            // for accuracy. Retained outside tabs for visibility.
 
             [
                 'key'          => 'field_jx_statute_last_reviewed',
@@ -350,6 +638,9 @@ function ws_register_acf_jx_statutes() {
                 'type'         => 'text',
                 'instructions' => 'Update this date each time the statute record is meaningfully revised.',
             ],
+
+            // Authorship & Review tab removed — registered centrally in
+            // acf-stamp-fields.php (group_stamp_metadata, menu_order 90).
 
             // Plain Language tab removed — registered centrally in
             // acf-plain-english-fields.php (group_plain_english_metadata, menu_order 85).
@@ -367,15 +658,15 @@ function ws_register_acf_jx_statutes() {
             ],
 
             [
-                'key'          => 'field_statute_ref_materials',
-                'label'        => 'Reference Materials',
-                'name'         => 'ws_ref_materials',
-                'type'         => 'relationship',
-                'post_type'    => [ 'ws-reference' ],
-                'filters'      => [ 'search' ],
-                'instructions' => 'Attach external reference materials relevant to this record. Only approved references will display publicly. These are for researchers and legal professionals — not for primary users seeking guidance.',
-                'min'          => 0,
-                'max'          => 0,
+                'key'           => 'field_jx_statute_ref_materials',
+                'label'         => 'Reference Materials',
+                'name'          => 'ws_ref_materials',
+                'type'          => 'relationship',
+                'post_type'     => [ 'ws-reference' ],
+                'filters'       => [ 'search' ],
+                'instructions'  => 'Attach external reference materials relevant to this record. Only approved references will display publicly. These are for researchers and legal professionals — not for primary users seeking guidance.',
+                'min'           => 0,
+                'max'           => 0,
                 'return_format' => 'object',
             ],
 

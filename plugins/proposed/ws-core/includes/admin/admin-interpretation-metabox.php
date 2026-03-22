@@ -41,6 +41,8 @@
  *         'meta_key' / 'orderby' pair for the year sort.
  * 3.0.0  Phase 12.1: Replaced ws_jx_code meta check with has_term() against
  *         the ws_jurisdiction taxonomy. &ws_jx_code=US removed from add URL.
+ * 3.0.1  Added inline comment to direct meta reads in metabox render function
+ *        explaining why the query layer is not used in admin metabox context.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -157,6 +159,7 @@ function ws_render_interpretation_metabox( $post ) {
             <tbody>
                 <?php foreach ( $interpretations as $interp_id ) :
                     $case_name   = get_the_title( $interp_id );
+                    // Direct meta reads — admin metabox display only; query layer is for front-end shortcode rendering.
                     $court_key   = get_post_meta( $interp_id, 'ws_interp_court', true );
                     $year        = get_post_meta( $interp_id, 'ws_interp_year', true );
                     $favorable   = get_post_meta( $interp_id, 'ws_interp_favorable', true );

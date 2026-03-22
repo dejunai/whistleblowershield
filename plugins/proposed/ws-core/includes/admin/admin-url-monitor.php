@@ -64,6 +64,8 @@
  * VERSION
  * -------
  * 3.2.0  Initial release.
+ * 3.2.1  Added inline comment to direct meta read in monitor loop explaining
+ *        why the query layer is not used in WP-Cron context.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -89,8 +91,9 @@ $ws_url_monitor_map = [
         'ws_agency_reporting_url',
     ],
     'ws-assist-org' => [
-        'ws_ao_website_url',
-        'ws_ao_intake_url',
+        'ws_aorg_website_url',
+        'ws_aorg_intake_url',
+        'ws_aorg_verify_url',
     ],
 ];
 
@@ -196,6 +199,9 @@ function ws_run_url_health_check() {
 
             foreach ( $meta_keys as $meta_key ) {
 
+                // Direct meta read — URL monitor needs the raw stored value to perform HTTP
+                // validation. The query layer returns rendered shortcode output, not individual
+                // field values, and is not available in this WP-Cron context.
                 $url = get_post_meta( $post_id, $meta_key, true );
 
                 // Skip empty or non-string values.

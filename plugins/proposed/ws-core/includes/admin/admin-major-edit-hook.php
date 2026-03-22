@@ -54,6 +54,8 @@
 //        - ws_legal_update_law_name auto-filled from the source post's best naming
 //          field: ws_jx_statute_official_name, ws_jx_citation_official_name, ws_jx_interp_official_name,
 //          or post title for jx-summary (has no official name field).
+// 1.2.0  Added inline comment to direct meta reads in ws_acf_log_major_edit()
+//        explaining why direct reads are used on acf/save_post.
 // ════════════════════════════════════════════════════════════════════════════
 
 add_action( 'acf/save_post', 'ws_acf_log_major_edit', 20 );
@@ -73,6 +75,8 @@ function ws_acf_log_major_edit( $post_id ) {
 		return;
 	}
 
+	// Direct meta reads — this hook fires on acf/save_post after ACF has written the fields.
+	// Reading directly avoids a second ACF load cycle and is safe in this save context.
 	$is_major = (int) get_post_meta( $post_id, 'ws_is_major_edit', true );
 	if ( ! $is_major ) {
 		return;

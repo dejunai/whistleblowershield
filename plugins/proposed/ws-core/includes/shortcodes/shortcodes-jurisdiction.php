@@ -41,15 +41,14 @@
  *
  *   [ws_jx_case_law]
  *       Renders the ws-case-law section for the current jurisdiction.
- *       Queries published jx-citation records where ws_jx_code matches
- *       the current jurisdiction and ws_jx_cite_attach is true.
- *       Records are ordered by ws_jx_cite_position (ascending).
+ *       Queries published jx-citation records scoped by ws_jurisdiction
+ *       taxonomy with attach_flag = 1, ordered by display_order ascending.
  *       Outputs citation body content, footnote anchors, and Unicode
  *       return links. Returns empty string if no attached citations exist.
  *
  *   [ws_jx_limitations]
  *       Renders the ws-limitations section for the current jurisdiction.
- *       Reads ws_jx_limitations wysiwyg from the linked jx-summary post.
+ *       Reads the limitations key from ws_get_jx_summary_data().
  *       Returns empty string if the field is empty.
  *
  *   [ws_jurisdiction_index]
@@ -68,33 +67,28 @@
  * DATA SOURCES
  * ------------
  *
- * Summary content comes from ACF fields on the jx-summary post:
+ * All data is retrieved via the query layer (query-jurisdiction.php).
+ * Shortcodes never call get_field() or get_post_meta() directly.
  *
- *   ws_jurisdiction_summary      — WYSIWYG content (main body)
- *   ws_jx_summary_sources        — sources & citations textarea
- *   ws_jx_sum_date_created       — date created
- *   ws_jx_sum_last_reviewed      — last reviewed date (ws_last_reviewed)
- *   ws_jx_sum_author             — author user field
- *   ws_jx_sum_human_reviewed     — true/false toggle
- *   ws_jx_sum_legal_review_completed — true/false toggle
- *   ws_jx_sum_legal_reviewer     — conditional text field
+ * Key contracts (return array keys from the query layer):
  *
- * Case law content comes from published jx-citation records:
+ *   ws_get_jurisdiction_data()   → jx_term_id, name, gov{}, record{}
+ *   ws_get_jx_summary_data()     → content, sources, limitations, plain{},
+ *                                   record{}
+ *   ws_get_jx_statute_data()     → array of statute entries, each with
+ *                                   post_id, content, attach_flag,
+ *                                   display_order, is_fed, record{},
+ *                                   plain{}, ref_materials[]
+ *   ws_get_jx_citation_data()    → array of citation entries, each with
+ *                                   post_id, content, attach_flag,
+ *                                   display_order, is_fed, record{},
+ *                                   ref_materials[]
+ *   ws_get_legal_updates_data()  → array of update entries, each with
+ *                                   post_id, update_date, update_type,
+ *                                   law_name, source_url, summary,
+ *                                   source_post_id, source_post_type
  *
- *   ws_jx_code               — jurisdiction code (query key)
- *   ws_jx_cite_attach        — attach toggle (true = render)
- *   ws_jx_cite_position      — display order (numeric, ascending)
- *   ws_jx_cite_type          — citation type
- *   ws_jx_cite_label         — display label
- *   ws_jx_cite_url           — source URL
- *   ws_jx_cite_is_pdf        — PDF toggle (appends "(PDF)" to link)
- *
- * Limitations content comes from the jx-summary ACF field:
- *
- *   ws_jx_limitations        — wysiwyg content
- *
- * Statutes and resources content comes from the post_content field of
- * their respective addendum CPTs, processed through the_content filters.
+ * See query-jurisdiction.php file header for full return-array contracts.
  *
  *
  * VERSION

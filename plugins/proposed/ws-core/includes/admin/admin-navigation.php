@@ -24,10 +24,9 @@
  * ------------
  *
  * jurisdiction (core record)
- *      ├── jx-summary      (one-to-one, ACF relationship)
- *      ├── jx-statute      (one-to-one, ACF relationship)
- *      ├── s    (one-to-one, ACF relationship)
- *      └── jx-citation     (many-to-one, scoped by ws_jurisdiction taxonomy)
+ *      ├── jx-summary      (one-to-one, scoped by ws_jurisdiction taxonomy)
+ *      ├── jx-statute      (one-to-many, scoped by ws_jurisdiction taxonomy)
+ *      └── jx-citation     (many-to-one, scoped by ws_jurisdiction taxonomy + attach_flag)
  *
  *
  * SHARED HELPER
@@ -60,6 +59,8 @@
  *          arg to ws_jx_term (taxonomy term slug).
  *        - ws_get_attached_citation_count() migrated from ws_jx_code meta
  *          query to ws_jurisdiction taxonomy query with attach_flag meta.
+ * 3.1.0  Added Legal Updates, Agencies, and Assist-Orgs count rows.
+ *        All three use taxonomy-scoped count queries with View All links.
  */
 if (!defined('ABSPATH')) {
     exit;
@@ -137,6 +138,9 @@ function ws_render_jx_navigation_box($post) {
     ws_render_admin_link('Statutes', $statutes_post, 'jx-statute', $post->ID);
 
     ws_render_citation_row( $post->ID );
+    ws_render_cpt_count_row( $post->ID, $term_slug, 'ws-legal-update', 'Legal Updates' );
+    ws_render_cpt_count_row( $post->ID, $term_slug, 'ws-agency',       'Agencies' );
+    ws_render_cpt_count_row( $post->ID, $term_slug, 'ws-assist-org',   'Assist Orgs' );
 
     echo '</div>';
 }
@@ -221,6 +225,58 @@ function ws_get_attached_citation_count( $post_id ) {
     ] );
 
     return (int) $query->found_posts;
+}
+
+
+/*
+---------------------------------------------------------
+Render: CPT Count Row
+---------------------------------------------------------
+Generic count row for CPTs that are scoped by ws_jurisdiction
+taxonomy but don't use the attach_flag pattern (legal updates,
+agencies, assist-orgs). Shows a count badge and a View All link
+filtered by taxonomy term.
+
+    0 records → red badge
+    1+ records → green badge
+---------------------------------------------------------
+*/
+
+function ws_render_cpt_count_row( $post_id, $term_slug, $post_type, $label ) {
+
+    $terms   = wp_get_post_terms( $post_id, WS_JURISDICTION_TERM_ID );
+    $term_id = ( ! is_wp_error( $terms ) && ! empty( $terms ) ) ? (int) $terms[0]->term_id : 0;
+
+    $count = 0;
+    if ( $term_id ) {
+        $results = get_posts( [
+            'post_type'      => $post_type,
+            'post_status'    => 'publish',
+            'posts_per_page' => -1,
+            'fields'         => 'ids',
+            'tax_query'      => [ [
+                'taxonomy' => WS_JURISDICTION_TERM_ID,
+                'field'    => 'term_id',
+                'terms'    => $term_id,
+            ] ],
+        ] );
+        $count = count( $results );
+    }
+
+    $badge_color = $count > 0 ? '#46b450' : '#dc3232';
+
+    $all_url = add_query_arg( [
+        'post_type'            => $post_type,
+        WS_JURISDICTION_TERM_ID => $term_slug,
+    ], admin_url( 'edit.php' ) );
+
+    echo '<div style="margin-bottom: 12px; padding: 8px; border: 1px solid #ccd0d4; border-radius: 4px; background: #fff;">';
+    echo '<strong style="display: block; margin-bottom: 5px;">' . esc_html( $label ) . '</strong>';
+    echo '<span style="font-size: 11px; color: ' . esc_attr( $badge_color ) . ';">● ' . (int) $count . ' published</span><br>';
+    echo '<div style="margin-top: 5px;">';
+    echo '<a class="button button-small" href="' . esc_url( $all_url ) . '">View All</a>';
+    echo '</div>';
+    echo '</div>';
 }
 
 

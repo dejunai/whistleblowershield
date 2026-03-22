@@ -66,6 +66,8 @@
  *          admin-hooks.php field locking loop.
  */
 
+defined( 'ABSPATH' ) || exit;
+
 add_action( 'acf/init', 'ws_register_acf_ws_reference' );
 
 function ws_register_acf_ws_reference() {

@@ -184,6 +184,15 @@
  *           is always cached; callers requesting fewer records receive a slice.
  *         - save_post_ws-legal-update hook added to invalidate the cache on
  *           every legal update save.
+ * 3.5.0  ws_get_jx_statute_data() rebuilt to match ACF 3.5.0 ingest alignment:
+ *        - Renamed keys: limit_value/unit/trigger → sol_*, burden_of_proof →
+ *          bop_standard, exhaustion_required → has_exhaustion.
+ *        - tolling_notes retired; replaced by tolling_has_details / tolling_details.
+ *        - New fields added across Legal Basis, Enforcement, Burden of Proof,
+ *          Reward, and Links sections. See acf-jx-statutes.php v3.5.0 for full
+ *          field inventory.
+ *        - remedies switched from get_post_meta() to get_field() — fixes pre-existing
+ *          bug where matrix-seeded remedy terms were invisible to the query layer.
  */
 
 
@@ -616,26 +625,54 @@ function ws_get_jx_statute_data( $jx_term_id ) {
                 'content' => get_post_field( 'post_content', $sid ),
                 'order'   => (int) get_post_meta( $sid, 'ws_display_order', true ),
                 'is_fed'  => $is_fed,
-                // Statute-specific structured fields
-                'official_name'       => get_post_meta( $sid, 'ws_jx_statute_official_name',                      true ),
-                'common_name'         => get_post_meta( $sid, 'ws_jx_statute_common_name',                         true ),
-                'disclosure_type'     => get_field( 'ws_jx_statute_disclosure_type', $sid ),
-                'attach_flag'         => (bool) get_post_meta( $sid, 'ws_attach_flag',                    true ),
-                'limit_value'         => get_post_meta( $sid, 'ws_jx_statute_limit_value',                true ),
-                'limit_unit'          => get_post_meta( $sid, 'ws_jx_statute_limit_unit',                 true ),
-                'trigger'             => get_post_meta( $sid, 'ws_jx_statute_limit_trigger',              true ),
-                'tolling_notes'       => get_post_meta( $sid, 'ws_jx_statute_tolling_notes',              true ),
-                'exhaustion_required' => (bool) get_post_meta( $sid, 'ws_jx_statute_exhaustion_required', true ),
-                'exhaustion_details'  => get_post_meta( $sid, 'ws_jx_statute_exhaustion_details',         true ),
-                'burden_of_proof'     => get_post_meta( $sid, 'ws_jx_statute_burden_of_proof',            true ),
-                // ws_jx_statute_burden_of_proof_details: no ACF field is defined for
-                // this key. Previously present with an incorrect meta key (missing
-                // jx_ infix). Removed pending a decision on whether to add the ACF
-                // field or drop the concept entirely.
-                'remedies'            => get_post_meta( $sid, 'ws_jx_statute_remedies',                   true ),
-                'related_agencies'    => get_field( 'ws_jx_statute_related_agencies', $sid ),
-                'last_reviewed'       => get_post_meta( $sid, 'ws_jx_statute_last_reviewed',              true ),
-                'ref_materials'       => ws_get_ref_materials( $sid ),
+
+                // ── Legal Basis ───────────────────────────────────────────
+                'official_name'        => get_post_meta( $sid, 'ws_jx_statute_official_name',       true ),
+                'common_name'          => get_post_meta( $sid, 'ws_jx_statute_common_name',          true ),
+                'disclosure_type'      => get_field( 'ws_jx_statute_disclosure_type',      $sid ),
+                'protected_class'      => get_field( 'ws_jx_statute_protected_class',      $sid ),
+                'disclosure_targets'   => get_field( 'ws_jx_statute_disclosure_targets',   $sid ),
+                'adverse_action_scope' => get_post_meta( $sid, 'ws_jx_statute_adverse_action_scope', true ),
+                'attach_flag'          => (bool) get_post_meta( $sid, 'ws_attach_flag',              true ),
+
+                // ── Statute of Limitations ────────────────────────────────
+                'sol_value'           => get_post_meta( $sid, 'ws_jx_statute_sol_value',           true ),
+                'sol_unit'            => get_post_meta( $sid, 'ws_jx_statute_sol_unit',            true ),
+                'sol_trigger'         => get_post_meta( $sid, 'ws_jx_statute_sol_trigger',         true ),
+                'sol_has_details'     => (bool) get_post_meta( $sid, 'ws_jx_statute_sol_has_details',     true ),
+                'sol_details'         => get_post_meta( $sid, 'ws_jx_statute_sol_details',         true ),
+                'tolling_has_details' => (bool) get_post_meta( $sid, 'ws_jx_statute_tolling_has_details', true ),
+                'tolling_details'     => get_post_meta( $sid, 'ws_jx_statute_tolling_details',     true ),
+                'has_exhaustion'      => (bool) get_post_meta( $sid, 'ws_jx_statute_has_exhaustion',      true ),
+                'exhaustion_details'  => get_post_meta( $sid, 'ws_jx_statute_exhaustion_details',  true ),
+
+                // ── Enforcement ───────────────────────────────────────────
+                'process_type'     => get_field( 'ws_jx_statute_process_type',     $sid ),
+                'adverse_action'   => get_field( 'ws_jx_statute_adverse_action',   $sid ),
+                'fee_shifting'     => get_field( 'ws_jx_statute_fee_shifting',     $sid ),
+                'remedies'         => get_field( 'ws_jx_statute_remedies',         $sid ),
+                'related_agencies' => get_field( 'ws_jx_statute_related_agencies', $sid ),
+
+                // ── Burden of Proof ───────────────────────────────────────
+                'bop_standard'             => get_post_meta( $sid, 'ws_jx_statute_bop_standard',             true ),
+                'employer_defense'         => get_field( 'ws_jx_statute_employer_defense', $sid ),
+                'employer_defense_details' => get_post_meta( $sid, 'ws_jx_statute_employer_defense_details', true ),
+                'rebuttable_has_details'   => (bool) get_post_meta( $sid, 'ws_jx_statute_rebuttable_has_details', true ),
+                'rebuttable_details'       => get_post_meta( $sid, 'ws_jx_statute_rebuttable_details',       true ),
+                'bop_has_details'          => (bool) get_post_meta( $sid, 'ws_jx_statute_bop_has_details',   true ),
+                'bop_details'              => get_post_meta( $sid, 'ws_jx_statute_bop_details',              true ),
+
+                // ── Reward ────────────────────────────────────────────────
+                'has_reward'     => (bool) get_post_meta( $sid, 'ws_jx_statute_has_reward',     true ),
+                'reward_details' => get_post_meta( $sid, 'ws_jx_statute_reward_details', true ),
+
+                // ── Links ─────────────────────────────────────────────────
+                'statute_url' => get_post_meta( $sid, 'ws_jx_statute_url',        true ),
+                'url_is_pdf'  => (bool) get_post_meta( $sid, 'ws_jx_statute_url_is_pdf', true ),
+
+                'last_reviewed' => get_post_meta( $sid, 'ws_jx_statute_last_reviewed', true ),
+                'ref_materials' => ws_get_ref_materials( $sid ),
+
                 // Plain language fields
                 'plain'  => ws_build_plain_english_array( $sid ),
                 // Source & verification
