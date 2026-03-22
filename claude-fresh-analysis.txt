@@ -1,0 +1,200 @@
+## Deep Dive Review — `ws-core` v3.5.0
+
+This is a remarkably mature codebase for a solo developer project. The architecture is sound, the documentation is thorough, and the naming convention discipline is impressive. That said, I found several real bugs and a handful of structural concerns worth addressing. Here's the full report, organized by severity.
+
+---
+
+## 🔴 Bugs — These will cause silent failures in production
+
+### 1. `ws_auto_verified_by` type mismatch — **verified_by will always resolve to empty string**
+
+**In `admin-hooks.php`** (both `ws_default_verification_status()` and `ws_stamp_verified_by_date()`), the meta is written as a **display name string**:
+```php
+update_post_meta( $post_id, 'ws_auto_verified_by', $current_user->display_name );
+```
+
+**In `query-jurisdiction.php`** (`ws_build_source_verify_array()`), it's read and cast to `int`:
+```php
+$verified_by_id = (int) get_post_meta( $post_id, 'ws_auto_verified_by', true );
+```
+Casting a display name string to int gives `0`. Then `ws_resolve_display_name(0)` returns `''`. So `verified_by` is always `0` and `verified_by_name` is always `''`.
+
+**Fix:** Either store the user ID (matching every other stamp field) and resolve to name in the query layer, or store the name and read it directly. The user-ID pattern is consistent with all other stamp fields, so store the user ID:
+```php
+update_post_meta( $post_id, 'ws_auto_verified_by', get_current_user_id() );
+```
+
+---
+
+### 2. `ws_legal_update_summary` meta key mismatch — **major edits write to a key nobody reads**
+
+**In `admin-major-edit-hook.php`**, the legal update is written to:
+```php
+update_post_meta( $update_id, 'ws_legal_update_summary', $description );
+```
+
+**In `query-jurisdiction.php`** (and matching the ACF field registration in `acf-legal-updates.php`), the field is read from:
+```php
+get_post_meta( $uid, 'ws_legal_update_summary_wysiwyg', true )
+```
+
+The ACF field is registered with `name => 'ws_legal_update_summary_wysiwyg'`. The major-edit hook writes to `ws_legal_update_summary` (no `_wysiwyg` suffix). These are different keys — legal update entries created via the major-edit flow will have an empty summary on the front end.
+
+**Fix in `admin-major-edit-hook.php`:**
+```php
+update_post_meta( $update_id, 'ws_legal_update_summary_wysiwyg', $description );
+```
+Also update the comment block at line 28 which still says `ws_legal_update_summary`.
+
+---
+
+### 3. `ws_get_jurisdiction_matrix()` is called but never defined
+
+**In `admin-hooks.php`** (the Identity Field Enforcement `acf/save_post` hook at priority 1), this function is called:
+```php
+$matrix = ws_get_jurisdiction_matrix();
+```
+
+Searching the entire codebase, this function is **never defined anywhere**. This will produce a fatal `Call to undefined function` error whenever a jurisdiction post is saved. The matrix data lives in `matrix-jurisdictions.php` but there is no public accessor function wrapping it.
+
+**Fix:** Either define `ws_get_jurisdiction_matrix()` in `matrix-jurisdictions.php` that returns the `$ws_jurisdiction_matrix` array, or refactor the identity enforcement hook to use a different approach.
+
+---
+
+### 4. `ws_auto_verified_date` format inconsistency
+
+All other date stamp fields use `current_time( 'Y-m-d' )` (returning a formatted local date string). `ws_auto_verified_date` uses `current_time( 'mysql' )` (returning a full datetime string like `2025-03-22 14:30:00`). This inconsistency will cause display issues in the render layer if it ever tries to format the date.
+
+**Fix:** Change both occurrences in `admin-hooks.php` to `current_time( 'Y-m-d' )`.
+
+---
+
+## 🟠 Structural Issues — Won't crash, but will cause confusion or future bugs
+
+### 5. `ws_stamp_source_method()` — dead ternary branch
+
+In `admin-hooks.php`, the ternary is meaningless:
+```php
+$method = ( get_post_type( $post_id ) === 'jx-summary' )
+    ? WS_SOURCE_HUMAN_CREATED
+    : WS_SOURCE_HUMAN_CREATED; // Default for all manual admin creates.
+```
+Both branches return the same constant. The comment correctly explains the intent — the jx-summary branch was meant to be distinct — but the code is identical. This is currently harmless, but it looks like a placeholder that was meant to stay placeholder and got left unresolved. If the right side ever needs to change (e.g. to allow different defaults for different CPTs), this will be overlooked.
+
+**Fix:** Simplify to a direct assignment:
+```php
+// All manual admin creates default to human_created. jx-summary is locked
+// to this by policy regardless of context.
+$method = WS_SOURCE_HUMAN_CREATED;
+```
+
+---
+
+### 6. `admin-hooks.php` has a duplicate `if ( ! defined( 'ABSPATH' ) ) exit;` at line 851
+
+The file has this guard at line 138 (correct) and again at line 851. This appears to be a seam where the source-verify hook block was appended to the file wholesale, including its own opening guard, rather than being integrated cleanly. The second one is harmless but signals a file composition issue — the block's `PURPOSE`, `VERSION`, and opening guard are all still present as if it's a separate file.
+
+**Fix:** Remove the second `if ( ! defined( 'ABSPATH' ) ) exit;` at line 851 and its surrounding docblock preamble. The source-verify section should have a section banner comment (`// ── Source & Verification Hooks ──`) in the style of the rest of the file, not a standalone file header.
+
+---
+
+### 7. Double query in the assembler (`render-jurisdiction.php`) for statutes and citations
+
+The assembler calls `ws_get_jx_statute_data()` to check whether any records exist (the gate check), then `do_shortcode('[ws_jx_statutes]')` which calls `ws_get_jx_statute_data()` again internally. Same pattern for citations via `ws_get_jx_citation_data()`. These queries run twice per page load with no caching.
+
+This isn't a bug today (the queries are correct both times), but for statutes especially — which can include a full US federal append — it's two `WP_Query` runs. The pattern is architecturally inconsistent: the assembler uses query-layer calls for the gate, but the shortcodes are closed boxes that re-query internally.
+
+**Longer-term fix:** Add simple transient or static caching inside the statute/citation data functions (matching the `ws_get_all_jurisdictions()` / `ws_get_jurisdiction_index_data()` pattern), or restructure the assembler to pass data through to shortcodes. The static-cache approach is lower-impact for now.
+
+---
+
+### 8. `ws_jx_summary` shortcode — content not run through `apply_filters('the_content')`
+
+Statute content is run through the filter:
+```php
+$html = apply_filters( 'the_content', $statute['content'] );
+```
+
+But summary content bypasses it:
+```php
+return ws_render_jx_summary_section( wp_kses_post( $data['content'] ), $footer_html );
+```
+
+This means embeds, shortcodes inside the summary WYSIWYG, and paragraph auto-formatting won't apply to the summary but will apply to statutes. If the content is purely hand-typed prose this may be intentional, but it should be a documented decision, not a silent inconsistency.
+
+---
+
+### 9. `ws_matrix_assign_terms()` is defined inside `matrix-fed-statutes.php` with a `function_exists` guard — but agencies and assist-orgs matrix files also call it
+
+The function is defined with:
+```php
+if ( ! function_exists( 'ws_matrix_assign_terms' ) ) {
+    function ws_matrix_assign_terms(...) { ... }
+}
+```
+
+This works only because `matrix-fed-statutes.php` loads before `matrix-agencies.php` and `matrix-assist-orgs.php` in the loader. If the load order ever changes, or if a matrix file is loaded in isolation, the agencies/assist-orgs seeders will throw a fatal error. This shared helper should be moved to a dedicated utility file (e.g. `matrix-helpers.php`) that loads first.
+
+---
+
+## 🟡 Minor / Documentation Issues
+
+### 10. `ws_get_jx_summary_data()` includes `'plain'` sub-array but jx-summary is excluded from the plain English workflow
+
+The function correctly notes in its comment that jx-summary "carries no has_plain_english toggle" and returns `ws_build_plain_english_array( $sid )` anyway. The data will be all-empty defaults, which is harmless, but it adds noise to the return array and contradicts the stated design. The comment block says it's intentionally excluded; the code silently includes the sub-array anyway.
+
+This should either be removed (return no `plain` key for jx-summary) or the comment updated to say the sub-array is included as an empty stub for shape consistency.
+
+---
+
+### 11. `ws_get_jx_term_id()` is called on every page load without any caching
+
+This function runs `wp_get_post_terms()` on every jurisdiction page load (from the assembler, then again from individual shortcodes). The `ws_jx_term_id` post meta already exists on every jurisdiction post for exactly this purpose, but the function doesn't use it. The post-meta approach is a single `get_post_meta()` call vs. a full taxonomy query.
+
+**Fix:**
+```php
+function ws_get_jx_term_id( $post_id ) {
+    // Fast path: read from post meta written by save_post_jurisdiction hook.
+    $cached = (int) get_post_meta( $post_id, 'ws_jx_term_id', true );
+    if ( $cached ) return $cached;
+    // Fallback for posts pre-dating the meta write.
+    $terms = wp_get_post_terms( $post_id, WS_JURISDICTION_TERM_ID );
+    if ( empty( $terms ) || is_wp_error( $terms ) ) return 0;
+    return (int) $terms[0]->term_id;
+}
+```
+
+---
+
+## ✅ What's Working Well
+
+To balance this out — a lot is genuinely solid:
+
+- The **naming convention discipline** (`ws_auto_` for system keys, `_ws_auto_` for hidden, CPT infix in content keys) is consistent and well-documented. This is the kind of thing that prevents entire categories of bugs.
+- The **query-layer compliance** in shortcodes is clean — zero `get_field()` or `get_post_meta()` calls in either shortcode file. That rule is being honored.
+- The **option-gate pattern** across all four seeders is consistent and idempotent.
+- The **plain English guard cascade** (priority 5 → 10 → 20 → 25) is logically correct and well-commented.
+- The **`WS_MATRIX_SEEDING_IN_PROGRESS` constant pattern** is correctly implemented across all seeder files.
+- The **`ws_get_us_term_id()` static cache** is the right approach — one DB read per request for the most-called lookup.
+- The **render-jurisdiction.php loop guard** (`static $is_rendering`) prevents `the_content` filter recursion correctly.
+- The **docblock version changelog** discipline is excellent — a future contributor can trace every architectural decision through history.
+
+---
+
+## Priority Order for Fixes
+
+| # | Issue | Severity | Where |
+|---|-------|----------|-------|
+| 2 | `ws_legal_update_summary` key mismatch | 🔴 Silent data loss | `admin-major-edit-hook.php` line 145 |
+| 3 | `ws_get_jurisdiction_matrix()` undefined | 🔴 Fatal on jurisdiction save | `admin-hooks.php` line 743 |
+| 1 | `ws_auto_verified_by` stores string, read as int | 🔴 Silent empty | `admin-hooks.php` lines 983, 1022 |
+| 4 | `ws_auto_verified_date` wrong format | 🟠 Future display bug | `admin-hooks.php` lines 984, 1023 |
+| 9 | `ws_matrix_assign_terms()` load-order fragile | 🟠 Latent fatal | `matrix-fed-statutes.php` |
+| 6 | Duplicate ABSPATH guard in admin-hooks | 🟠 Composition seam | `admin-hooks.php` line 851 |
+| 5 | Dead ternary in `ws_stamp_source_method` | 🟡 Misleading | `admin-hooks.php` line 908–910 |
+| 11 | `ws_get_jx_term_id()` ignores post-meta fast path | 🟡 Performance | `query-jurisdiction.php` |
+| 7 | Double query in assembler | 🟡 Performance | `render-jurisdiction.php` |
+| 8 | Summary not run through `the_content` filter | 🟡 Inconsistency | `shortcodes-jurisdiction.php` |
+| 10 | jx-summary returns `plain` sub-array it shouldn't use | 🟡 Noise | `query-jurisdiction.php` |
+
+Want me to produce corrected files for any or all of the 🔴 bugs?

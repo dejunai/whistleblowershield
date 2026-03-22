@@ -61,11 +61,6 @@
  *        terms to be defined once the taxonomy table is validated against
  *        real statute data.
  *
- * @todo  After deploying 3.1.0: run a one-time migration to re-assign any
- *        posts previously tagged under ws_coverage_scope, ws_retaliation_forms,
- *        and ws_remedy_type to the new taxonomy slugs before removing the old
- *        registrations from this file. Old registrations are retained below
- *        with a DEPRECATED comment until migration is confirmed complete.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -1037,10 +1032,12 @@ function ws_seed_fee_shifting_taxonomy() {
 function ws_seed_employer_defense_taxonomy() {
     $taxonomy = 'ws_employer_defense';
     $terms    = [
-        'same-decision-defense'            => 'Same-Decision Defense',
+        'same-decision-defense'             => 'Same-Decision Defense',
         'legitimate-non-retaliatory-reason' => 'Legitimate Non-Retaliatory Reason',
-        'good-faith-compliance'            => 'Good-Faith Compliance',
-        'must-establish-statutory-exception' => 'Must Establish Statutory Exception',
+        'good-faith-compliance'             => 'Good-Faith Compliance',
+        'statutory-exception-claim'         => 'Statutory Exception Claim',
+        'mixed-motive-defense'              => 'Mixed Motive Defense',
+        'no-protected-activity'             => 'Disclosure was not Protected',
     ];
     foreach ( $terms as $slug => $name ) {
         if ( ! term_exists( $slug, $taxonomy ) ) {

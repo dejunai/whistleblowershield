@@ -1,6 +1,6 @@
 WHISTLEBLOWERSHIELD TAXONOMY TABLES
 ====================================
-Source: register-taxonomies.php v3.1.0
+Source: register-taxonomies.php v3.2.0
 Use these slug values in all JSON record arrays.
 Hierarchical taxonomies show PARENT > child relationships.
 Use child slugs in JSON records — not parent slugs.
@@ -218,6 +218,21 @@ va    Virginia        wa    Washington      wv    West Virginia
 wi    Wisconsin       wy    Wyoming
 as    American Samoa  gu    Guam            mp    Northern Mariana Islands
 pr    Puerto Rico     vi    U.S. Virgin Islands
+
+
+────────────────────────────────────────────────────────────────────────────
+TAXONOMY: ws_employer_defense
+Applies to: jx-statute
+Hierarchical: NO — flat list
+Description: Affirmative defenses available to an employer under a statute.
+────────────────────────────────────────────────────────────────────────────
+
+same-decision-defense                Same-Decision Defense
+legitimate-non-retaliatory-reason    Legitimate Non-Retaliatory Reason
+good-faith-compliance                Good-Faith Compliance
+statutory-exception-claim            Statutory Exception Claim
+mixed-motive-defense                 Mixed Motive Defense
+no-protected-activity                Disclosure was not Protected
 
 
 ────────────────────────────────────────────────────────────────────────────

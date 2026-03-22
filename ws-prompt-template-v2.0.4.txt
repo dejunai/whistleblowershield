@@ -42,6 +42,7 @@ absence is never penalized:
   - exhaustion_details
   - rebuttable_presumption
   - burden_of_proof_details
+  - employer_defense_details
   - reward_details
   - statute_url
   - attached_citations
@@ -65,6 +66,7 @@ the array empty — do not invent a slug and insert it into the record.
   enforcement.adverse_action       → ws_adverse_action_types
   enforcement.remedies             → ws_remedies
   enforcement.fee_shifting         → ws_fee_shifting
+  burden_of_proof.employer_defense → ws_employer_defense
 
 ---
 
@@ -339,7 +341,6 @@ RECORD SCHEMA
 
   "legal_basis": {
     "statute_citation":     "[FORMAL CITATION e.g. Cal. Lab. Code § 1102.5]",
-	"statute_common_name":  "[COMMONLY USED NAME TO REFRENCE STATUTE]",
     "disclosure_types":     [],
     "protected_class":      [],
     "disclosure_targets":   [],
@@ -368,7 +369,7 @@ RECORD SCHEMA
   "burden_of_proof": {
     "employee_standard":        "[omit if unknown]",
     "employer_defense":         [],
-    "employer_defense_details": "[omit unless a refinement of defense is necessary]",
+    "employer_defense_details": "[omit unless a single-sentence refinement is necessary]",
     "rebuttable_presumption":   "[omit if none identified]",
     "burden_of_proof_details":  "[omit if none]",
     "burden_of_proof_flag":     "[omit unless a meaningful burden shift is identified]"
@@ -407,11 +408,23 @@ protections are scattered across sections and cannot be summarized under
 a single real section number, describe them in json_run_notes instead of
 creating a pseudo-record.
 
+common_name: The plain language name most commonly used to refer to this
+statute (e.g., "California Whistleblower Protection Act"). Omit if no
+widely recognized common name exists. Do not invent one.
+
 limit_ambiguous: If limit_value is 0 and the actual deadline is genuinely
 unknown or not stated in the statute text, set limit_ambiguous to true.
 A zero limit_value with limit_ambiguous false implies the deadline is
 verifiably zero — use this only when that is literally correct. Any record
 with limit_ambiguous: true requires a corresponding entry in error_details.
+
+employer_defense: Use slugs from ws_employer_defense only. Multiple slugs
+are permitted when more than one defense applies. If no slug fits, leave
+the array empty and note the gap in json_run_notes.
+
+employer_defense_details: One sentence only. Use only when the jurisdiction
+states the defense in a materially specific way that the taxonomy slug alone
+does not capture. Omit in all other cases.
 
 burden_of_proof_flag: Omit this field entirely unless a meaningful or
 non-standard burden shift is identified for this statute. Do not include
