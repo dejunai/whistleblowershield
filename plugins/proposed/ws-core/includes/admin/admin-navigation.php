@@ -25,7 +25,7 @@
  *
  * jurisdiction (core record)
  *      ├── jx-summary      (one-to-one, ACF relationship)
- *      ├── jx-statutes     (one-to-one, ACF relationship)
+ *      ├── jx-statute      (one-to-one, ACF relationship)
  *      ├── s    (one-to-one, ACF relationship)
  *      └── jx-citation     (many-to-one, scoped by ws_jurisdiction taxonomy)
  *
@@ -98,9 +98,9 @@ Render Navigation Box
 function ws_render_jx_navigation_box($post) {
 
     // Resolve taxonomy term slug for this jurisdiction (used to scope addendum queries).
-    $jx_slugs  = wp_get_post_terms( $post->ID, 'ws_jurisdiction', [ 'fields' => 'slugs' ] );
+    $jx_slugs  = wp_get_post_terms( $post->ID, WS_JURISDICTION_TERM_ID, [ 'fields' => 'slugs' ] );
     $term_slug = ( ! is_wp_error( $jx_slugs ) && ! empty( $jx_slugs ) ) ? $jx_slugs[0] : '';
-    $term      = $term_slug ? get_term_by( 'slug', $term_slug, 'ws_jurisdiction' ) : null;
+    $term      = $term_slug ? get_term_by( 'slug', $term_slug, WS_JURISDICTION_TERM_ID ) : null;
     $term_id   = ( $term && ! is_wp_error( $term ) ) ? $term->term_id : 0;
 
     // Look up existing addendum posts via taxonomy (replaces get_field on relationship fields).
@@ -113,7 +113,7 @@ function ws_render_jx_navigation_box($post) {
             'post_status'    => [ 'publish', 'draft', 'pending' ],
             'posts_per_page' => 1,
             'fields'         => 'ids',
-            'tax_query'      => [ [ 'taxonomy' => 'ws_jurisdiction', 'field' => 'term_id', 'terms' => $term_id ] ],
+            'tax_query'      => [ [ 'taxonomy' => WS_JURISDICTION_TERM_ID, 'field' => 'term_id', 'terms' => $term_id ] ],
         ] );
         if ( ! empty( $summary_ids ) ) {
             $summary_post = get_post( $summary_ids[0] );
@@ -124,7 +124,7 @@ function ws_render_jx_navigation_box($post) {
             'post_status'    => [ 'publish', 'draft', 'pending' ],
             'posts_per_page' => 1,
             'fields'         => 'ids',
-            'tax_query'      => [ [ 'taxonomy' => 'ws_jurisdiction', 'field' => 'term_id', 'terms' => $term_id ] ],
+            'tax_query'      => [ [ 'taxonomy' => WS_JURISDICTION_TERM_ID, 'field' => 'term_id', 'terms' => $term_id ] ],
         ] );
         if ( ! empty( $statute_ids ) ) {
             $statutes_post = get_post( $statute_ids[0] );
@@ -162,7 +162,7 @@ function ws_render_admin_link($label, $related, $post_type, $parent_id) {
         // new-post screen auto-assigns the ws_jurisdiction taxonomy term via
         // the wp_insert_post hook in admin-hooks.php.
         $parent_name = get_the_title( $parent_id );
-        $jx_slugs    = wp_get_post_terms( $parent_id, 'ws_jurisdiction', [ 'fields' => 'slugs' ] );
+        $jx_slugs    = wp_get_post_terms( $parent_id, WS_JURISDICTION_TERM_ID, [ 'fields' => 'slugs' ] );
         $term_slug   = ( ! is_wp_error( $jx_slugs ) && ! empty( $jx_slugs ) ) ? $jx_slugs[0] : '';
         $create_url  = add_query_arg( [
             'post_type'  => $post_type,
@@ -193,7 +193,7 @@ Shared by:
 
 function ws_get_attached_citation_count( $post_id ) {
 
-    $terms = wp_get_post_terms( $post_id, 'ws_jurisdiction' );
+    $terms = wp_get_post_terms( $post_id, WS_JURISDICTION_TERM_ID );
 
     if ( empty( $terms ) || is_wp_error( $terms ) ) {
         return 0;
@@ -208,13 +208,13 @@ function ws_get_attached_citation_count( $post_id ) {
         'fields'         => 'ids',
         'meta_query'     => [
             [
-                'key'     => 'attach_flag',
+                'key'     => 'ws_attach_flag',
                 'value'   => '1',
                 'compare' => '=',
             ],
         ],
         'tax_query' => [ [
-            'taxonomy' => 'ws_jurisdiction',
+            'taxonomy' => WS_JURISDICTION_TERM_ID,
             'field'    => 'term_id',
             'terms'    => $term_id,
         ] ],
@@ -242,7 +242,7 @@ threshold badge, plus Add Citation and View All buttons.
 
 function ws_render_citation_row( $post_id ) {
 
-    $jx_slugs  = wp_get_post_terms( $post_id, 'ws_jurisdiction', [ 'fields' => 'slugs' ] );
+    $jx_slugs  = wp_get_post_terms( $post_id, WS_JURISDICTION_TERM_ID, [ 'fields' => 'slugs' ] );
     $term_slug = ( ! is_wp_error( $jx_slugs ) && ! empty( $jx_slugs ) ) ? $jx_slugs[0] : '';
     $count     = ws_get_attached_citation_count( $post_id );
 
@@ -261,7 +261,7 @@ function ws_render_citation_row( $post_id ) {
 
     $all_url = add_query_arg( [
         'post_type'      => 'jx-citation',
-        'ws_jurisdiction' => $term_slug,
+        WS_JURISDICTION_TERM_ID => $term_slug,
     ], admin_url( 'edit.php' ) );
 
     echo '<div style="margin-bottom: 12px; padding: 8px; border: 1px solid #ccd0d4; border-radius: 4px; background: #fff;">';

@@ -80,7 +80,7 @@ function ws_render_interpretation_metabox( $post ) {
     // Federal statutes carry the 'us' ws_jurisdiction term. Only federal
     // statutes receive court interpretation records.
 
-    if ( ! has_term( 'us', 'ws_jurisdiction', $post->ID ) ) {
+    if ( ! has_term( 'us', WS_JURISDICTION_TERM_ID, $post->ID ) ) {
         echo '<p style="color:#666;font-style:italic;">Court interpretation records are only tracked for federal (US) statutes.</p>';
         return;
     }

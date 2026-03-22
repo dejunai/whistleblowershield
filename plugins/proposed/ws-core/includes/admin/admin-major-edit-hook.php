@@ -52,8 +52,8 @@
 //        - ws_legal_update_date written (Y-m-d local) alongside effective_date.
 //        - ws_legal_update_type derived from source CPT slug (jx-statute→statute, etc.).
 //        - ws_legal_update_law_name auto-filled from the source post's best naming
-//          field: ws_jx_statute_official_name, ws_jx_citation_label, ws_jx_interp_case_name,
-//          or post title for jx-summary.
+//          field: ws_jx_statute_official_name, ws_jx_citation_official_name, ws_jx_interp_official_name,
+//          or post title for jx-summary (has no official name field).
 // ════════════════════════════════════════════════════════════════════════════
 
 add_action( 'acf/save_post', 'ws_acf_log_major_edit', 20 );
@@ -73,20 +73,20 @@ function ws_acf_log_major_edit( $post_id ) {
 		return;
 	}
 
-	$is_major = (int) get_post_meta( $post_id, 'is_major_edit', true );
+	$is_major = (int) get_post_meta( $post_id, 'ws_is_major_edit', true );
 	if ( ! $is_major ) {
 		return;
 	}
 
-	$description = trim( (string) get_post_meta( $post_id, 'major_edit_description', true ) );
+	$description = trim( (string) get_post_meta( $post_id, 'ws_major_edit_description', true ) );
 
 	// ── Always reset the flag and description field ───────────────────────
 	//
 	// Reset unconditionally so a second save never double-logs even if the
 	// notice was dismissed without being seen.
 
-	update_post_meta( $post_id, 'is_major_edit',            0  );
-	update_post_meta( $post_id, 'major_edit_description',   '' );
+	update_post_meta( $post_id, 'ws_is_major_edit',            0  );
+	update_post_meta( $post_id, 'ws_major_edit_description',   '' );
 
 	// ── Bail with warning if description is empty ─────────────────────────
 
@@ -145,9 +145,9 @@ function ws_acf_log_major_edit( $post_id ) {
 
 	// ── Attach jurisdiction from source post ─────────────────────────────────────
 	// Write to taxonomy table (save_terms=1 on the ACF field) so tax_query works.
-	$jx_terms = wp_get_post_terms( $post_id, 'ws_jurisdiction', [ 'fields' => 'ids' ] );
+	$jx_terms = wp_get_post_terms( $post_id, WS_JURISDICTION_TERM_ID, [ 'fields' => 'ids' ] );
 	if ( ! is_wp_error( $jx_terms ) && ! empty( $jx_terms ) ) {
-		wp_set_post_terms( $update_id, [ (int) $jx_terms[0] ], 'ws_jurisdiction' );
+		wp_set_post_terms( $update_id, [ (int) $jx_terms[0] ], WS_JURISDICTION_TERM_ID );
 	}
 
 	// ── Update date and type ──────────────────────────────────────────────────
@@ -156,15 +156,16 @@ function ws_acf_log_major_edit( $post_id ) {
 	update_post_meta( $update_id, 'ws_legal_update_type', $update_type );
 
 	// ── Law name — pull from the source post's best naming field ─────────────
-	$name_key_map = [
-		'jx-statute'        => 'ws_jx_statute_official_name',
-		'jx-citation'       => 'ws_jx_citation_label',
-		'jx-interpretation' => 'ws_jx_interp_case_name',
-		// jx-summary has no naming field — fall through to post title
-	];
-	$law_name = isset( $name_key_map[ $post_type ] )
-		? get_post_meta( $post_id, $name_key_map[ $post_type ], true )
-		: get_the_title( $post_id );
+	// Each law CPT has its own official_name field; try each in order, falling back to post title.
+	// jx-summary has no naming field — fall back to post title.
+	$law_name = ( $post_type !== 'jx-summary' )
+		? get_post_meta( $post_id, 'ws_jx_statute_official_name', true ) 
+		?: get_post_meta( $post_id, 'ws_jx_citation_official_name', true )
+		?: get_post_meta( $post_id, 'ws_jx_interp_official_name', true )
+		: '';
+	if ( ! $law_name ) {
+		$law_name = get_the_title( $post_id );
+	}
 	if ( $law_name ) {
 		update_post_meta( $update_id, 'ws_legal_update_law_name', $law_name );
 	}

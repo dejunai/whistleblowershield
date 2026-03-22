@@ -132,7 +132,7 @@ function ws_seed_agency_matrix() {
     global $_ws_agency_matrix;
 
     // Resolve the US jurisdiction term ID.
-    $us_term = get_term_by( 'slug', 'us', 'ws_jurisdiction' );
+    $us_term = get_term_by( 'slug', 'us', WS_JURISDICTION_TERM_ID );
     if ( ! $us_term || is_wp_error( $us_term ) ) {
         return; // Taxonomy terms not yet seeded — bail.
     }
@@ -181,7 +181,7 @@ function ws_seed_agency_matrix() {
         }
 
         // Assign US jurisdiction term.
-        wp_set_object_terms( $post_id, $us_term_id, 'ws_jurisdiction' );
+        wp_set_object_terms( $post_id, $us_term_id, WS_JURISDICTION_TERM_ID );
 
         // Mark as seeded.
         update_post_meta( $post_id, 'ws_matrix_source', 'agency-matrix' );

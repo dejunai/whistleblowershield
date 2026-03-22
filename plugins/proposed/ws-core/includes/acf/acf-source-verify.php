@@ -213,7 +213,7 @@ function ws_register_source_verify_field_group() {
             [
                 'key'               => 'field_verification_status',
                 'label'             => 'Verification Status',
-                'name'              => 'verification_status',
+                'name'              => 'ws_verification_status',
                 'type'              => 'select',
                 'instructions'      => 'Authors and above may mark as Verified. Only admins may revert to Unverified. Requires Source Name to be set.',
                 'required'          => 0,
@@ -242,7 +242,7 @@ function ws_register_source_verify_field_group() {
             [
                 'key'           => 'field_needs_review',
                 'label'         => 'Needs Review',
-                'name'          => 'needs_review',
+                'name'          => 'ws_needs_review',
                 'type'          => 'true_false',
                 'instructions'  => 'Admin only. When enabled, this post is blocked from front-end rendering regardless of verification status. Clear this flag once the review is complete.',
                 'required'      => 0,

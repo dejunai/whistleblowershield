@@ -16,7 +16,8 @@
  *   ws_interp_court      Court (select, populated by ws_interp_load_court_choices)
  *   ws_interp_year       Decision Year (number)
  *   ws_interp_favorable  Favorable to Whistleblower? (true_false)
- *   ws_interp_case_name  Case Name (text)
+ *   ws_jx_interp_official_name   Official name — full case name (text, required)
+ *   ws_jx_interp_common_name     Common/informal name (text, optional)
  *   ws_interp_citation   Citation (text)
  *   ws_interp_url        Opinion URL (url)
  *
@@ -165,12 +166,22 @@ function ws_register_acf_jx_interpretations() {
 
             [
                 'key'          => 'field_interp_case_name',
-                'label'        => 'Case Name',
-                'name'         => 'ws_jx_interp_case_name',
+                'label'        => 'Official Name',
+                'name'         => 'ws_jx_interp_official_name',
                 'type'         => 'text',
                 'instructions' => 'Full case name, e.g., "Bechtel v. Administrative Review Board".',
                 'required'     => 1,
                 'wrapper'      => [ 'width' => '70' ],
+            ],
+
+            [
+                'key'          => 'field_interp_common_name',
+                'label'        => 'Common Name',
+                'name'         => 'ws_jx_interp_common_name',
+                'type'         => 'text',
+                'instructions' => 'Shortened or colloquial name if this case is commonly cited by a shorter title — e.g., "Bechtel". Leave blank if no common name applies.',
+                'required'     => 0,
+                'wrapper'      => [ 'width' => '30' ],
             ],
 
             [
@@ -231,7 +242,7 @@ function ws_register_acf_jx_interpretations() {
             [
                 'key'           => 'field_interp_attach_flag',
                 'label'         => 'Attach to Jurisdiction Page',
-                'name'          => 'attach_flag',
+                'name'          => 'ws_attach_flag',
                 'type'          => 'true_false',
                 'instructions'  => 'Enable to include this interpretation in the rendered section on the jurisdiction page. Disable to store for reference only.',
                 'ui'            => 1,
@@ -243,7 +254,7 @@ function ws_register_acf_jx_interpretations() {
             [
                 'key'               => 'field_interp_order',
                 'label'             => 'Display Order',
-                'name'              => 'order',
+                'name'              => 'ws_display_order',
                 'type'              => 'number',
                 'instructions'      => 'Set the order in which this interpretation appears on the jurisdiction page. Lower numbers appear first.',
                 'min'               => 1,

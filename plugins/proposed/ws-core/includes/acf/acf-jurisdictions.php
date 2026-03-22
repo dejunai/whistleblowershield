@@ -188,7 +188,7 @@ function ws_register_acf_jurisdiction_fields() {
                 'label'         => 'Jurisdiction USPS Code',
                 'name'          => 'ws_jurisdiction_term_id',
                 'type'          => 'taxonomy',
-                'taxonomy'      => 'ws_jurisdiction',
+                'taxonomy'      => WS_JURISDICTION_TERM_ID,
                 'field_type'    => 'select',
                 'instructions'  => 'Internal taxonomy field. Seeder-populated. Drives the ws_jurisdiction term assignment for this jurisdiction record.',
 				'required'      => 1,

@@ -50,11 +50,11 @@
  *
  *   jurisdiction
  *   jx-summary
- *   jx-statutes
+ *   jx-statute
  *   jx-citation
  *   jx-interpretation
  *   ws-legal-update
- *   ws-agencies
+ *   ws-agency
  *
  * RETRIEVAL
  * ---------
@@ -76,7 +76,7 @@
  * 2.1.0  Refactored for ws-core architecture. Renamed from audit-trail.php
  *         to admin-audit-trail.php. Relationship sync logic moved to
  *         admin-relationships.php. Header and inline comments added.
- * 2.3.1  Added jx-citation and ws-agencies to audited post types.
+ * 2.3.1  Added jx-citation and ws-agency to audited post types.
  */
 
 defined( 'ABSPATH' ) || exit;

@@ -15,7 +15,8 @@ defined( 'ABSPATH' ) || exit;
  * FIELD SUMMARY
  * -------------
  * Legal Basis tab:
- *   ws_jx_statute_official_name   Official statutory name (text, required)
+ *   ws_jx_statute_official_name   Official name (text, required)
+ *   ws_jx_statute_common_name     Common/informal name (text, optional)
  *   ws_jx_statute_disclosure_type Disclosure Categories taxonomy (multi_select)
  *   attach_flag                   Attach to jurisdiction page (true_false)
  *   order                         Render order (number, conditional on attach_flag)
@@ -114,11 +115,20 @@ function ws_register_acf_jx_statutes() {
 
             [
                 'key'          => 'field_jx_statute_official_name',
-                'label'        => 'Official Statutory Name',
+                'label'        => 'Official Name',
                 'name'         => 'ws_jx_statute_official_name',
                 'type'         => 'text',
                 'instructions' => 'Use standard legal notation, e.g., "California Labor Code § 1102.5" or "5 U.S.C. § 2302".',
                 'required'     => 1,
+            ],
+
+            [
+                'key'          => 'field_jx_statute_common_name',
+                'label'        => 'Common Name',
+                'name'         => 'ws_jx_statute_common_name',
+                'type'         => 'text',
+                'instructions' => 'Informal or widely-used name for this statute, if one exists — e.g., "Sarbanes-Oxley" or "False Claims Act". Leave blank if no common name applies.',
+                'required'     => 0,
             ],
 
             [
@@ -138,7 +148,7 @@ function ws_register_acf_jx_statutes() {
             [
                 'key'           => 'field_jx_statute_attach_flag',
                 'label'         => 'Attach to Jurisdiction Page',
-                'name'          => 'attach_flag',
+                'name'          => 'ws_attach_flag',
                 'type'          => 'true_false',
                 'instructions'  => 'Enable to include this statute in the rendered statutes section on the jurisdiction page. Disable to store for reference only.',
                 'ui'            => 1,
@@ -150,7 +160,7 @@ function ws_register_acf_jx_statutes() {
             [
                 'key'               => 'field_jx_statute_order',
                 'label'             => 'Display Order',
-                'name'              => 'order',
+                'name'              => 'ws_display_order',
                 'type'              => 'number',
                 'instructions'      => 'Set the order in which this statute appears on the jurisdiction page. Lower numbers appear first.',
                 'min'               => 1,

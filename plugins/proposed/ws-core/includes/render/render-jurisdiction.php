@@ -26,7 +26,8 @@
  *      ├── jx-summary
  *      ├── jx-statute
  *      ├── jx-citation
- *      └── 
+ *      ├── jx-interpretation
+ *      └── ws-legal-update
  *
  * Each dataset is stored as a separate Custom Post Type and linked
  * to the jurisdiction using ACF relationship fields defined in:
@@ -55,10 +56,10 @@
  * exists and is published. Draft or unpublished datasets will
  * never appear on the public site.
  *
- * NOTE: Addendum CPTs (jx-summary, s, etc.) store
- * their content in ACF fields, not post_content. The published
- * status of the addendum post is the correct gate — the section
- * shortcode is responsible for reading and rendering field content.
+ * NOTE: Addendum CPTs (jx-summary, jx-statute, jx-citation,
+ * jx-interpretation) store their content in ACF fields, not
+ * post_content. The published status of the addendum post is the
+ * correct gate — the section shortcode reads and renders field content.
  *
  *
  * WORKFLOW BENEFIT

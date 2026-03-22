@@ -402,7 +402,7 @@ function ws_feed_ingest_item( $guid ) {
     // ── Resolve ws_jurisdiction term ──────────────────────────────────────
 
     $jx_code = strtolower( sanitize_text_field( $entry['jx_code'] ?? 'us' ) );
-    $term    = get_term_by( 'slug', $jx_code, 'ws_jurisdiction' );
+    $term    = get_term_by( 'slug', $jx_code, WS_JURISDICTION_TERM_ID );
 
     // ── Create post ───────────────────────────────────────────────────────
 
@@ -420,7 +420,7 @@ function ws_feed_ingest_item( $guid ) {
     // ── Assign taxonomy term ──────────────────────────────────────────────
 
     if ( $term && ! is_wp_error( $term ) ) {
-        wp_set_object_terms( $post_id, $term->term_id, 'ws_jurisdiction' );
+        wp_set_object_terms( $post_id, $term->term_id, WS_JURISDICTION_TERM_ID );
         update_post_meta( $post_id, 'ws_jx_term_id', $term->term_id );
     }
 
@@ -437,8 +437,8 @@ function ws_feed_ingest_item( $guid ) {
 
     // ── Plain English defaults ────────────────────────────────────────────
 
-    update_post_meta( $post_id, 'has_plain_english', 0 );
-    update_post_meta( $post_id, 'plain_english_reviewed', 0 );
+    update_post_meta( $post_id, 'ws_has_plain_english', 0 );
+    update_post_meta( $post_id, 'ws_plain_english_reviewed', 0 );
 
     // ── Reviewer notes → post excerpt ─────────────────────────────────────
 

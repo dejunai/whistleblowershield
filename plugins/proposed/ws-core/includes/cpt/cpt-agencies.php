@@ -102,7 +102,7 @@ function ws_agencies_column_data( $column, $post_id ) {
             echo esc_html( get_post_meta( $post_id, 'ws_agency_code', true ) );
             break;
         case 'ws_jurisdiction_col':
-            $terms = wp_get_post_terms( $post_id, 'ws_jurisdiction', [ 'fields' => 'slugs' ] );
+            $terms = wp_get_post_terms( $post_id, WS_JURISDICTION_TERM_ID, [ 'fields' => 'slugs' ] );
             if ( ! is_wp_error( $terms ) && ! empty( $terms ) ) {
                 echo esc_html( implode( ', ', array_map( 'strtoupper', $terms ) ) );
             }

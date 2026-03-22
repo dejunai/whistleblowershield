@@ -80,6 +80,12 @@
  *        added post_id, update_date, update_type, multi_jurisdiction,
  *        source_post_id, source_post_type, record; removed stale
  *        fmt_effective key. Return key renamed summary_html → summary_wysiwyg.
+ * 3.3.2  ws_render_jx_summary_footer() updated to match simplified query
+ *        layer return keys (query-jurisdiction.php v3.3.2). Expected keys
+ *        updated: author_name → created_by_name, create_date → created_date,
+ *        ws_plain_english_reviewed → is_reviewed,
+ *        plain_english_reviewed_name → reviewed_by_name.
+ *        Stale fmt_created and fmt_reviewed @param entries removed from docblock.
  */
 
 
@@ -386,11 +392,12 @@ function ws_render_plain_english_reviewed_badge( $plain_reviewed, $reviewer_name
  * as $review_html to ws_render_jx_summary_section().
  *
  * @param  array $data {
- *     @type string $author_name    Display name of the content author.
- *     @type string $fmt_created    Formatted creation date string, or empty.
- *     @type string $fmt_reviewed   Formatted last-reviewed date string, or empty.
- *     @type bool   $plain_english_reviewed True if plain-language review is complete.
- *     @type string $sources        Sources & citations raw text, or empty.
+ *     @type string $created_by_name  Display name of the content author.
+ *     @type string $created_date     Creation date (Y-m-d), or empty.
+ *     @type bool   $is_reviewed      True if plain-language review is complete.
+ *     @type string $reviewed_by_name Display name of the plain-language reviewer.
+ *     @type string $written_date     Date the plain-language version was written (Y-m-d).
+ *     @type string $sources          Sources & citations raw text, or empty.
  * }
  * @return string  HTML footer block.
  */
@@ -398,22 +405,22 @@ function ws_render_jx_summary_footer( $data ) {
     ob_start(); ?>
     <div class="ws-jx-summary-footer">
 
-        <?php if ( $data['author_name'] ) : ?>
+        <?php if ( $data['created_by_name'] ) : ?>
         <p class="ws-jx-summary-author">
-            <strong>Author:</strong> <?php echo esc_html( $data['author_name'] ); ?>
+            <strong>Author:</strong> <?php echo esc_html( $data['created_by_name'] ); ?>
         </p>
         <?php endif; ?>
 
-        <?php if ( $data['create_date'] ) : ?>
+        <?php if ( $data['created_date'] ) : ?>
         <p class="ws-jx-summary-date-created">
-            <strong>Date Created:</strong> <?php echo esc_html( $data['create_date'] ); ?>
+            <strong>Date Created:</strong> <?php echo esc_html( $data['created_date'] ); ?>
         </p>
         <?php endif; ?>
 
         <?php echo ws_render_plain_english_reviewed_badge(
-			! empty( $data['plain_english_reviewed'] ),
-			$data['plain_english_reviewed_name'] ?? '',
-			$data['plain_english_date'] ?? ''
+			! empty( $data['is_reviewed'] ),
+			$data['reviewed_by_name'] ?? '',
+			$data['written_date'] ?? ''
 		); ?>
 
         <?php if ( $data['sources'] ) : ?>
@@ -572,9 +579,9 @@ function ws_render_legal_updates( $items ) {
             </p>
             <?php endif; ?>
 
-            <?php if ( $item['fmt_effective'] ) : ?>
+            <?php if ( $item['effective_date'] ) : ?>
             <p class="ws-legal-update-effective">
-                <strong>Effective:</strong> <?php echo esc_html( $item['fmt_effective'] ); ?>
+                <strong>Effective:</strong> <?php echo esc_html( date_i18n( get_option( 'date_format' ), strtotime( $item['effective_date'] ) ) ); ?>
             </p>
             <?php endif; ?>
 

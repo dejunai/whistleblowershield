@@ -2,7 +2,7 @@
 /**
  * acf-agencies.php
  *
- * Registers ACF Pro fields for the `ws-agencies` CPT.
+ * Registers ACF Pro fields for the `ws-agency` CPT.
  *
  * FIELD GROUPS
  * ------------
@@ -26,7 +26,7 @@
  *        Jurisdiction choices now populated dynamically via acf/load_field
  *        instead of a hardcoded static list.
  *        Added ws_process_type taxonomy field (Process Types Handled).
- *        ws-agencies added to ws_disclosure_cat object types in
+ *        ws-agency added to ws_disclosure_cat object types in
  *        register-taxonomies.php so save_terms functions correctly.
  * 3.0.0  Phase 8: ws_jx_code multi-select replaced by ws_jurisdiction taxonomy
  *        field. Dynamic choice filter removed. Plain Language tab added (9.2).
@@ -118,9 +118,9 @@ function ws_register_acf_agencies() {
             [
                 'key'           => 'field_agency_jurisdiction',
                 'label'         => 'Jurisdiction(s)',
-                'name'          => 'ws_jurisdiction',
+                'name'          => WS_JURISDICTION_TERM_ID,
                 'type'          => 'taxonomy',
-                'taxonomy'      => 'ws_jurisdiction',
+                'taxonomy'      => WS_JURISDICTION_TERM_ID,
                 'field_type'    => 'multi_select',
                 'instructions'  => 'Assign all jurisdictions this agency has authority over. Use US for federal/nationwide agencies.',
                 'add_term'      => 0,

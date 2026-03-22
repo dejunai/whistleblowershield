@@ -117,7 +117,7 @@ function ws_register_acf_legal_update() {
 				'name'          => 'ws_legal_update_jurisdiction',
 				'type'          => 'taxonomy',
 				'instructions'  => 'Select the jurisdiction affected by this legal update.',
-				'taxonomy'      => 'ws_jurisdiction',
+				'taxonomy'      => WS_JURISDICTION_TERM_ID,
 				'field_type'    => 'select',
 				'return_format' => 'id',
 				'save_terms'    => 1,

@@ -185,7 +185,7 @@ function ws_register_acf_jx_summary() {
             [
                 'key'           => 'field_plain_english_reviewed',
                 'label'         => 'Plain Language Reviewed',
-                'name'          => 'plain_english_reviewed',
+                'name'          => 'ws_plain_english_reviewed',
                 'type'          => 'true_false',
                 'instructions'  => 'Check when a human has reviewed and approved this plain-language summary.',
                 'ui'            => 1,
@@ -196,7 +196,7 @@ function ws_register_acf_jx_summary() {
             [
                 'key'           => 'field_plain_english_by',
                 'label'         => 'Summarized By',
-                'name'          => 'plain_english_by',
+                'name'          => 'ws_auto_plain_english_by',
                 'type'          => 'user',
                 'instructions'  => 'Auto-stamped on first save after plain language content is created.',
                 'role'          => [ 'author', 'editor', 'administrator' ],
@@ -207,7 +207,7 @@ function ws_register_acf_jx_summary() {
             [
                 'key'           => 'field_plain_english_reviewed_by',
                 'label'         => 'Reviewed By',
-                'name'          => 'plain_english_reviewed_by',
+                'name'          => 'ws_auto_plain_english_reviewed_by',
                 'type'          => 'user',
                 'instructions'  => 'Auto-stamped when Plain Language Reviewed is first enabled.',
                 'role'          => [ 'author', 'editor', 'administrator' ],

@@ -306,9 +306,9 @@ function ws_register_taxonomies() {
     // Private taxonomy — terms are canonical USPS-code slugs (e.g. 'us', 'ca', 'tx').
     // Terms are seeded in jurisdiction-matrix.php via ws_seeded_jurisdiction_taxonomy gate.
 
-    if ( ! taxonomy_exists( 'ws_jurisdiction' ) ) {
+    if ( ! taxonomy_exists( WS_JURISDICTION_TERM_ID ) ) {
         register_taxonomy(
-            'ws_jurisdiction',
+            WS_JURISDICTION_TERM_ID,
             [ 'jurisdiction', 'jx-statute', 'jx-summary', 'jx-citation', 'jx-interpretation', 'ws-agency', 'ws-assist-org' ],
             [
                 'label'             => 'Jurisdictions',
@@ -844,7 +844,7 @@ function ws_seed_case_stage_taxonomy() {
  * Display order: Federal first, DC second, states alphabetical, territories alphabetical.
  */
 function ws_seed_jurisdiction_taxonomy() {
-    $taxonomy = 'ws_jurisdiction';
+    $taxonomy = WS_JURISDICTION_TERM_ID;
     $terms    = [
         'us' => 'Federal',
         'dc' => 'District of Columbia',

@@ -168,7 +168,7 @@ function ws_register_acf_plain_english_fields() {
             [
                 'key'           => 'field_has_plain_english',
                 'label'         => 'Has Plain Language Version',
-                'name'          => 'has_plain_english',
+                'name'          => 'ws_has_plain_english',
                 'type'          => 'true_false',
                 'instructions'  => 'Enable when a plain-language version of this record has been written below.',
                 'ui'            => 1,
@@ -185,7 +185,7 @@ function ws_register_acf_plain_english_fields() {
             [
                 'key'               => 'field_plain_english_wysiwyg',
                 'label'             => 'Plain Language Content',
-                'name'              => 'plain_english_wysiwyg',
+                'name'              => 'ws_plain_english_wysiwyg',
                 'type'              => 'wysiwyg',
                 'instructions'      => 'Plain-language explanation of this record for non-experts.',
                 'tabs'              => 'all',
@@ -207,7 +207,7 @@ function ws_register_acf_plain_english_fields() {
             [
                 'key'           => 'field_plain_english_reviewed',
                 'label'         => 'Plain Language Reviewed',
-                'name'          => 'plain_english_reviewed',
+                'name'          => 'ws_plain_english_reviewed',
                 'type'          => 'true_false',
                 'instructions'  => 'Check when a human has reviewed and approved the plain-language content.',
                 'ui'            => 1,

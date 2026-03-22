@@ -83,7 +83,7 @@ function ws_register_acf_major_edit() {
 			[
 				'key'           => 'field_is_major_edit',
 				'label'         => 'Flag as Major Edit',
-				'name'          => 'is_major_edit',
+				'name'          => 'ws_is_major_edit',
 				'type'          => 'true_false',
 				'instructions'  => 'Check this box if this save represents a significant content change that should be logged in the site-wide Legal Updates changelog. You must provide a description below — saving without one will clear this flag and show a warning.',
 				'default_value' => 0,
@@ -96,7 +96,7 @@ function ws_register_acf_major_edit() {
 			[
 				'key'               => 'field_major_edit_description',
 				'label'             => 'Describe the Change',
-				'name'              => 'major_edit_description',
+				'name'              => 'ws_major_edit_description',
 				'type'              => 'textarea',
 				'instructions'      => 'Briefly describe what changed and why. This text will appear as the summary in the Legal Updates changelog entry. Both this field and the flag above are automatically cleared after saving.',
 				'rows'              => 4,

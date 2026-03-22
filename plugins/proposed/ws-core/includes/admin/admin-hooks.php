@@ -148,9 +148,9 @@ add_action( 'wp_insert_post', function( $post_id, $post, $update ) {
     if ( ! in_array( $post->post_type, $addendum_types, true ) ) return;
 
     $term_slug = sanitize_key( $_GET['ws_jx_term'] );
-    $term      = get_term_by( 'slug', $term_slug, 'ws_jurisdiction' );
+    $term      = get_term_by( 'slug', $term_slug, WS_JURISDICTION_TERM_ID );
     if ( $term && ! is_wp_error( $term ) ) {
-        wp_set_object_terms( $post_id, $term->term_id, 'ws_jurisdiction' );
+        wp_set_object_terms( $post_id, $term->term_id, WS_JURISDICTION_TERM_ID );
     }
 }, 10, 3 );
 
@@ -274,7 +274,7 @@ add_filter( 'acf/load_value/name=last_reviewed', 'ws_acf_autofill_today', 10, 3 
  * @return mixed
  */
 function ws_acf_autofill_today( $value, $post_id, $field ) {
-    if ( empty( $value ) && $post_id > 0 && get_post_meta( $post_id, 'plain_english_reviewed', true ) ) {
+    if ( empty( $value ) && $post_id > 0 && get_post_meta( $post_id, 'ws_plain_english_reviewed', true ) ) {
         $value = current_time( 'Y-m-d' );
     }
     return $value;
@@ -367,13 +367,13 @@ function ws_acf_plain_english_guards( $post_id ) {
         if ( ! $field_obj ) continue;
 
         switch ( $field_obj['name'] ) {
-            case 'plain_english_wysiwyg':
+            case 'ws_plain_english_wysiwyg':
                 $submitted_plain_english = trim( (string) $field_value );
                 break;
-            case 'has_plain_english':
+            case 'ws_has_plain_english':
                 $submitted_has_plain = (int) $field_value;
                 break;
-            case 'plain_english_reviewed':
+            case 'ws_plain_english_reviewed':
                 $submitted_plain_reviewed = (int) $field_value;
                 break;
         }
@@ -384,7 +384,7 @@ function ws_acf_plain_english_guards( $post_id ) {
     if ( $submitted_has_plain && $submitted_plain_english === '' ) {
         foreach ( $_POST['acf'] as $field_key => $field_value ) {
             $field_obj = acf_get_field( $field_key );
-            if ( $field_obj && $field_obj['name'] === 'has_plain_english' ) {
+            if ( $field_obj && $field_obj['name'] === 'ws_has_plain_english' ) {
                 $_POST['acf'][ $field_key ] = 0;
                 $submitted_has_plain        = 0;
                 break;
@@ -398,7 +398,7 @@ function ws_acf_plain_english_guards( $post_id ) {
         foreach ( $_POST['acf'] as $field_key => $field_value ) {
             $field_obj = acf_get_field( $field_key );
             if ( ! $field_obj ) continue;
-            if ( in_array( $field_obj['name'], [ 'plain_english_reviewed', 'ws_auto_plain_english_reviewed_by' ], true ) ) {
+            if ( in_array( $field_obj['name'], [ 'ws_plain_english_reviewed', 'ws_auto_plain_english_reviewed_by' ], true ) ) {
                 $_POST['acf'][ $field_key ] = 0;
             }
         }
@@ -407,13 +407,13 @@ function ws_acf_plain_english_guards( $post_id ) {
 
     // ── Rule 3: has_plain_english toggle-off clears plain_reviewed fields ─────
 
-    $stored_has_plain = (int) get_post_meta( $post_id, 'has_plain_english', true );
+    $stored_has_plain = (int) get_post_meta( $post_id, 'ws_has_plain_english', true );
 
     if ( $stored_has_plain && ! $submitted_has_plain ) {
         foreach ( $_POST['acf'] as $field_key => $field_value ) {
             $field_obj = acf_get_field( $field_key );
             if ( ! $field_obj ) continue;
-            if ( in_array( $field_obj['name'], [ 'plain_english_reviewed', 'ws_auto_plain_english_reviewed_by' ], true ) ) {
+            if ( in_array( $field_obj['name'], [ 'ws_plain_english_reviewed', 'ws_auto_plain_english_reviewed_by' ], true ) ) {
                 $_POST['acf'][ $field_key ] = 0;
             }
         }
@@ -560,7 +560,7 @@ function ws_acf_stamp_plain_reviewed_by( $post_id ) {
         return;
     }
 
-    if ( ! get_post_meta( $post_id, 'plain_english_reviewed', true ) ) {
+    if ( ! get_post_meta( $post_id, 'ws_plain_english_reviewed', true ) ) {
         return;
     }
 
@@ -609,7 +609,7 @@ function ws_acf_stamp_summarized_fields( $post_id ) {
         return;
     }
 
-    if ( ! get_post_meta( $post_id, 'has_plain_english', true ) ) {
+    if ( ! get_post_meta( $post_id, 'ws_has_plain_english', true ) ) {
         return;
     }
 
@@ -844,29 +844,10 @@ add_filter( 'acf/prepare_field/key=field_jx_flag_source_url', function( $field )
 if ( ! defined( 'ABSPATH' ) ) exit;
 
 
-// ════════════════════════════════════════════════════════════════════════════
-// CONSTANTS — Source Method values
-//
-// Use these constants everywhere source_method values are written or
-// compared. Never use bare strings — changes to a value only need
-// updating here.
-//
-// The method table is intentionally stable. Prefer adding a new
-// source_name to an existing method over adding a new constant here.
-// ════════════════════════════════════════════════════════════════════════════
-
-define( 'WS_SOURCE_MATRIX_SEED',   'matrix_seed'   );
-define( 'WS_SOURCE_AI_ASSISTED',   'ai_assisted'   );
-define( 'WS_SOURCE_BULK_IMPORT',   'bulk_import'   );
-define( 'WS_SOURCE_FEED_IMPORT',   'feed_import'   );
-define( 'WS_SOURCE_HUMAN_CREATED', 'human_created' );
-
-/**
- * The source_name value auto-assigned to matrix_seed and human_created
- * posts. Signals that the source and the method are one and the same —
- * no external or secondary source is involved.
- */
-define( 'WS_SOURCE_NAME_DIRECT', 'Direct' );
+// WS_SOURCE_* and WS_SOURCE_NAME_DIRECT constants are defined in ws-core.php
+// so they are available to matrix files that load before this file. See the
+// "Source Method Constants" block there for the full method table and
+// source_name convention documentation.
 
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -983,19 +964,19 @@ function ws_default_verification_status( $post_id ) {
     }
 
     // First save only.
-    if ( get_post_meta( $post_id, 'verification_status', true ) !== '' ) {
+    if ( get_post_meta( $post_id, 'ws_verification_status', true ) !== '' ) {
         return;
     }
 
     $source = get_post_meta( $post_id, 'ws_auto_source_method', true );
 
     if ( $source === WS_SOURCE_HUMAN_CREATED ) {
-        update_post_meta( $post_id, 'verification_status', 'verified' );
+        update_post_meta( $post_id, 'ws_verification_status', 'verified' );
         $current_user = wp_get_current_user();
         update_post_meta( $post_id, 'ws_auto_verified_by',   $current_user->display_name );
         update_post_meta( $post_id, 'ws_auto_verified_date', current_time( 'mysql' ) );
     } else {
-        update_post_meta( $post_id, 'verification_status', 'unverified' );
+        update_post_meta( $post_id, 'ws_verification_status', 'unverified' );
     }
 }
 
@@ -1024,7 +1005,7 @@ function ws_stamp_verified_by_date( $post_id ) {
         return;
     }
 
-    $previous = get_post_meta( $post_id, 'verification_status', true );
+    $previous = get_post_meta( $post_id, 'ws_verification_status', true );
 
     if ( $previous === 'verified' ) {
         return; // Already verified — not a transition, do not re-stamp.
@@ -1064,19 +1045,19 @@ function ws_enforce_source_verify_roles( $post_id ) {
 
     // ── 1. needs_review: admin only ───────────────────────────────────────
     if ( ! $is_admin ) {
-        $previous_needs_review = get_post_meta( $post_id, 'needs_review', true );
-        update_post_meta( $post_id, 'needs_review', $previous_needs_review );
+        $previous_needs_review = get_post_meta( $post_id, 'ws_needs_review', true );
+        update_post_meta( $post_id, 'ws_needs_review', $previous_needs_review );
     }
 
     // ── 2. verification_status: non-admins cannot revert to 'unverified' ─
     if ( ! $is_admin ) {
-        $previous_status = get_post_meta( $post_id, 'verification_status', true );
+        $previous_status = get_post_meta( $post_id, 'ws_verification_status', true );
         $incoming_status = isset( $_POST['acf']['field_verification_status'] )
             ? sanitize_text_field( $_POST['acf']['field_verification_status'] )
             : $previous_status;
 
         if ( $previous_status === 'verified' && $incoming_status !== 'verified' ) {
-            update_post_meta( $post_id, 'verification_status', 'verified' );
+            update_post_meta( $post_id, 'ws_verification_status', 'verified' );
         }
     }
 
@@ -1087,7 +1068,7 @@ function ws_enforce_source_verify_roles( $post_id ) {
         : '';
 
     if ( $incoming_status === 'verified' && $source_name === '' ) {
-        update_post_meta( $post_id, 'verification_status', 'unverified' );
+        update_post_meta( $post_id, 'ws_verification_status', 'unverified' );
     }
 }
 

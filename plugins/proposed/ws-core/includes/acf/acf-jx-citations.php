@@ -17,7 +17,8 @@
  * Content tab:
  *   ws_jx_cite_type          Citation type (select)
  *   ws_disclosure_type       Disclosure Categories taxonomy (checkbox)
- *   ws_jx_cite_label         Display label (text)
+ *   ws_jx_citation_official_name  Official name — full citation label (text, required)
+ *   ws_jx_citation_common_name    Common/informal name (text, optional)
  *   ws_jx_cite_url           Source URL (url)
  *   ws_jx_cite_is_pdf        PDF link toggle (true_false)
  *   attach_flag              Attach to jurisdiction page (true_false)
@@ -149,11 +150,20 @@ function ws_register_acf_jx_citations() {
 			],
             [
                 'key'          => 'field_jx_cite_label',
-                'label'        => 'Display Label',
-                'name'         => 'ws_jx_citation_label',
+                'label'        => 'Official Name',
+                'name'         => 'ws_jx_citation_official_name',
                 'type'         => 'text',
                 'required'     => 1,
                 'instructions' => 'The full citation as it will appear in the footnote — e.g., Lawson v. PPG Architectural Finishes, Inc., 12 Cal. 5th 703 (2022).',
+            ],
+
+            [
+                'key'          => 'field_jx_cite_common_name',
+                'label'        => 'Common Name',
+                'name'         => 'ws_jx_citation_common_name',
+                'type'         => 'text',
+                'instructions' => 'Shortened or colloquial name for this citation if commonly referenced — e.g., "Lawson". Leave blank if no common name applies.',
+                'required'     => 0,
             ],
             [
                 'key'          => 'field_jx_cite_url',
@@ -176,7 +186,7 @@ function ws_register_acf_jx_citations() {
             [
                 'key'           => 'field_jx_cite_attach',
                 'label'         => 'Attach to Jurisdiction Page',
-                'name'          => 'attach_flag',
+                'name'          => 'ws_attach_flag',
                 'type'          => 'true_false',
                 'instructions'  => 'Enable to include this citation in the rendered case law section on the jurisdiction page. Disable to store for reference only.',
                 'ui'            => 1,
@@ -187,7 +197,7 @@ function ws_register_acf_jx_citations() {
             [
                 'key'               => 'field_jx_cite_position',
                 'label'             => 'Display Order',
-                'name'              => 'order',
+                'name'              => 'ws_display_order',
                 'type'              => 'number',
                 'instructions'      => 'Set the order in which this citation appears in the footnote list. Lower numbers appear first.',
                 'min'               => 1,
@@ -278,7 +288,7 @@ function ws_jx_cite_no_citations_notice() {
     if ( ! $post ) return;
 
     // Get the ws_jurisdiction taxonomy term assigned to this jx-summary.
-    $terms = wp_get_post_terms( $post->ID, 'ws_jurisdiction' );
+    $terms = wp_get_post_terms( $post->ID, WS_JURISDICTION_TERM_ID );
     if ( empty( $terms ) || is_wp_error( $terms ) ) return;
 
     $term_id = $terms[0]->term_id;
@@ -291,12 +301,12 @@ function ws_jx_cite_no_citations_notice() {
         'fields'         => 'ids',
         'meta_query'     => [
             [
-                'key'   => 'attach_flag',
+                'key'   => 'ws_attach_flag',
                 'value' => '1',
             ],
         ],
         'tax_query' => [ [
-            'taxonomy' => 'ws_jurisdiction',
+            'taxonomy' => WS_JURISDICTION_TERM_ID,
             'field'    => 'term_id',
             'terms'    => $term_id,
         ] ],

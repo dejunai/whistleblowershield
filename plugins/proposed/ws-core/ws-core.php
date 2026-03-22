@@ -23,7 +23,7 @@
  * Description: Core architecture for WhistleblowerShield. Proposed replacement
  *              plugin — radical refactor of v2.3.1. Not an upgrade of the live plugin.
  *              Assembles public whistleblower protection pages for 57 U.S. jurisdictions.
- * Version:     3.2.0
+ * Version:     3.3.2
  * Author:      Whistleblower Shield
  * Author URI:  https://whistleblowershield.org
  *
@@ -117,15 +117,92 @@
  *
  *   5. Data-type suffixes: _url (URL string), _wysiwyg (rich-text content),
  *      _id (integer foreign key or term ID).
+ *
+ * QUERY LAYER RETURN KEYS (v3.3.2)
+ * ----------------------------------
+ * The query layer (query-jurisdiction.php) strips all ws_ and ws_auto_
+ * meta key prefixes from PHP array return keys. Meta key naming rules
+ * above govern what is stored in the database; they do not govern what
+ * is exposed through the query layer API.
+ *
+ * Within each sub-array the keys are scoped to their context and carry
+ * no plugin-namespace prefix:
+ *
+ *   record  — created_by, created_by_name, created_date,
+ *              edited_by,  edited_by_name,  edited_date
+ *
+ *   plain   — has_content, plain_content, written_by, written_by_name,
+ *              written_date, is_reviewed, reviewed_by, reviewed_by_name
+ *
+ *   verify  — source_method, source_name, verified_by, verified_by_name,
+ *              verified_date, verify_status, needs_review
+ *
+ * Top-level CPT-type prefixes (agency_, ao_) are also dropped where the
+ * caller is already inside the CPT’s own data array. See the DATASET
+ * RETURN FORMAT section in query-jurisdiction.php for the complete
+ * per-function key reference.
+ *
+ * Rationale: the ws_ / ws_auto_ prefix prevents WordPress meta key
+ * collisions in wp_postmeta. Inside a PHP return array there is no
+ * collision risk, and the prefix adds noise that makes shortcode
+ * authoring unnecessarily verbose.
  */
 
 defined( 'ABSPATH' ) || exit;
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
-define( 'WS_CORE_VERSION', '3.2.0' );
+define( 'WS_CORE_VERSION', '3.3.2' );
 define( 'WS_CORE_PATH',    plugin_dir_path( __FILE__ ) );
 define( 'WS_CORE_URL',     plugin_dir_url( __FILE__ ) );
+
+// Taxonomy slug for the jurisdiction vocabulary. Used everywhere a taxonomy
+// argument is required — wp_get_post_terms(), tax_query, get_term_by(), etc.
+define( 'WS_JURISDICTION_TERM_ID', 'ws_jurisdiction' );
+
+// Transient keys for the two jurisdiction-level query caches. Both are
+// invalidated together by ws_invalidate_jurisdiction_caches() whenever a
+// jurisdiction post is saved or deleted.
+define( 'WS_CACHE_ALL_JURISDICTIONS', 'ws_all_jurisdictions_cache' );
+define( 'WS_CACHE_JX_INDEX',          'ws_jx_index_cache'          );
+
+// Base transient key for the sitewide legal updates cache. The full key is
+// this value suffixed with the fetch count (e.g. ws_legal_updates_sitewide_100).
+// Only sitewide calls ($jx_id = 0) requesting 50 or more records are cached.
+// Callers requesting fewer than 50 records, or any per-jurisdiction call,
+// skip the cache entirely. Invalidated on every ws-legal-update save.
+define( 'WS_CACHE_LEGAL_UPDATES_SITEWIDE', 'ws_legal_updates_sitewide' );
+
+// CPT slugs that can carry a reference parent relationship. Statutes,
+// citations, and interpretations all support ws_jx_*_ref_id parent linking;
+// summaries do not. Used by ws_get_reference_parent_data() to gate lookups.
+define( 'WS_REF_PARENT_TYPES', [ 'jx-statute', 'jx-citation', 'jx-interpretation' ] );
+
+// ── Source Method Constants ────────────────────────────────────────────────────
+//
+// Values written to the ws_auto_source_method meta key. Defined here so they
+// are available to all modules — including matrix files that load before
+// admin-hooks.php. See admin-hooks.php for the full source method table and
+// source_name convention documentation.
+//
+// The method set is intentionally stable. Prefer adding a new source_name
+// under an existing method over introducing a new constant.
+define( 'WS_SOURCE_MATRIX_SEED',   'matrix_seed'   );
+define( 'WS_SOURCE_AI_ASSISTED',   'ai_assisted'   );
+define( 'WS_SOURCE_BULK_IMPORT',   'bulk_import'   );
+define( 'WS_SOURCE_FEED_IMPORT',   'feed_import'   );
+define( 'WS_SOURCE_HUMAN_CREATED', 'human_created' );
+
+// source_name value auto-assigned to matrix_seed and human_created posts.
+// Signals that source and method are the same — no external origin involved.
+define( 'WS_SOURCE_NAME_DIRECT', 'Direct' );
+
+// Legal update types that are visible on public-facing pages and jurisdiction
+// shortcodes. 'internal' and 'other' are intentionally excluded. When a new
+// type is added to the ws_legal_update_type ACF select in acf-legal-updates.php,
+// add it here to make it public. The query layer reads this constant when
+// $public_only = true is passed to ws_get_legal_updates_data().
+define( 'WS_LEGAL_UPDATE_PUBLIC_TYPES', [ 'statute', 'citation', 'summary', 'interpretation', 'regulation', 'policy' ] );
 
 
 // ── Deactivation Hooks ────────────────────────────────────────────────────────
