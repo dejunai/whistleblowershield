@@ -262,8 +262,8 @@ function ws_build_record_array( $post_id ) {
 // Keys: has_content, plain_content, written_by, written_by_name, written_date,
 //       is_reviewed, reviewed_by, reviewed_by_name.
 //
-// Does not apply to jx-summary, which is inherently plain English and
-// carries no has_plain_english toggle.
+// jx-summary calls this function but ignores has_plain_english —
+// it is inherently plain English and uses the reviewed fields only.
 // ════════════════════════════════════════════════════════════════════════════
 
 /**
