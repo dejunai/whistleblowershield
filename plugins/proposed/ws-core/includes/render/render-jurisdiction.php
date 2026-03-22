@@ -27,6 +27,7 @@
  *      ├── jx-statute
  *      ├── jx-citation
  *      ├── jx-interpretation
+ *      └── ws-assist-org
  *      └── ws-legal-update
  *
  * Each dataset is stored as a separate Custom Post Type and linked

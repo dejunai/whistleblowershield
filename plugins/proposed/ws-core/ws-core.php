@@ -124,6 +124,17 @@
  *   5. Data-type suffixes: _url (URL string), _wysiwyg (rich-text content),
  *      _id (integer foreign key or term ID).
  *
+ * DATE STAMP CONVENTION
+ * ----------------------
+ * All date values written to post meta by plugin code use:
+ *
+ *   current_time( 'Y-m-d' )   — local site date, date-only (no time component)
+ *
+ * GMT audit timestamps (hidden _ws_auto_*_gmt keys) use gmdate( 'Y-m-d' ).
+ * The full MySQL datetime current_time( 'mysql' ) is reserved for
+ * wp_insert_post / wp_update_post post_date arguments only — never for
+ * custom meta keys.
+ *
  * QUERY LAYER RETURN KEYS (v3.3.2)
  * ----------------------------------
  * The query layer (query-jurisdiction.php) strips all ws_ and ws_auto_

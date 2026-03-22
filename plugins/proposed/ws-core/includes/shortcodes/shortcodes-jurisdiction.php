@@ -200,6 +200,14 @@ add_shortcode( 'ws_jx_summary', function() {
         'sources'                => $data['sources'] ?: '',
     ] );
 
+    // wp_kses_post() is correct here — do not replace with apply_filters('the_content', ...).
+    // Summary content comes from an ACF WYSIWYG meta field (ws_jurisdiction_summary_wysiwyg),
+    // not from post_content. The HTML is already fully formed by the ACF editor. Running
+    // the_content filters would double-wrap paragraphs via wpautop, expand any shortcodes
+    // embedded in the legal text, and trigger block rendering — none of which is appropriate
+    // for a meta-stored WYSIWYG field. wp_kses_post() sanitizes without over-processing.
+    // Statute content uses apply_filters('the_content', ...) because it reads post_content
+    // directly, which requires block rendering and wpautop.
     return ws_render_jx_summary_section( wp_kses_post( $data['content'] ), $footer_html );
 
 } );
@@ -425,6 +433,8 @@ function ws_shortcode_jx_limitations() {
     $data = ws_get_jx_summary_data( $term_id );
     if ( ! $data || empty( $data['limitations'] ) ) return '';
 
+    // wp_kses_post() is correct here for the same reason as ws_shortcode_jx_summary() —
+    // limitations content is an ACF WYSIWYG meta field, not post_content.
     return ws_render_jx_limitations( wp_kses_post( $data['limitations'] ) );
 }
 

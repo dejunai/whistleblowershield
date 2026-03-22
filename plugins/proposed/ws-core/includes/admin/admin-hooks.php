@@ -722,38 +722,6 @@ add_filter( 'acf/prepare_field/key=field_jurisdiction_class', function( $field )
     $field['disabled'] = true;
     return $field;
 } );
-// ---------------------------------------------------------------
-// Jurisdiction CPT — Enforce Manual Editing Restrictions
-// ---------------------------------------------------------------
-// Direct get_post_meta() call is intentional here. ws_matrix_source is an
-// administrative flag written by the seeder and consumed exclusively by admin
-// tooling. It is not jurisdiction content and does not belong in the query layer.
-
-add_action( 'acf/save_post', function( $post_id ) {
-
-    if ( get_post_type( $post_id ) !== 'jurisdiction' ) {
-        return;
-    }
-
-    $matrix_source = get_post_meta( $post_id, 'ws_matrix_source', true );
-    if ( ! $matrix_source ) {
-        return;
-    }
-
-    $matrix = ws_get_jurisdiction_matrix();
-    $key    = strtoupper( $matrix_source );
-
-    if ( ! isset( $matrix[ $key ] ) ) {
-        return;
-    }
-
-    $entry = $matrix[ $key ];
-
-    update_field( 'field_jx_code',            $entry['ws_jx_code'],            $post_id );
-    update_field( 'field_jurisdiction_class', $entry['ws_jurisdiction_class'], $post_id );
-    update_field( 'field_jurisdiction_name',  $entry['ws_jurisdiction_name'],  $post_id );
-
-}, 1 );
 // ── Jurisdiction CPT — Conditional Button to Wikimedia Flag when URL is present
 // ---------------------------------------------------------------
 // Direct get_post_meta() call is intentional here. ws_matrix_source is an
@@ -769,92 +737,17 @@ add_filter( 'acf/prepare_field/key=field_jx_flag_source_url', function( $field )
     }
     return $field;
 } );
-/**
- * Additions to: admin-hooks.php
- *
- * WhistleblowerShield Core Plugin
- *
- * PURPOSE
- * -------
- * Hook logic supporting the Source & Verification field group defined
- * in acf-source-verify.php. Add these functions and constants to
- * admin-hooks.php in a clearly labelled section banner.
- *
- * HOOKS REGISTERED
- * ----------------
- *   acf/save_post  priority 5   ws_stamp_source_method()
- *                               ws_stamp_source_name()
- *                               ws_default_verification_status()
- *   acf/save_post  priority 20  ws_stamp_verified_by_date()
- *                               ws_enforce_source_verify_roles()
- *
- * REGISTRATION ORDER NOTE
- * -----------------------
- * Within the same priority, hooks fire in registration order. The
- * sequence at priority 5 must be:
- *   1. ws_stamp_source_method()    — writes source_method first
- *   2. ws_stamp_source_name()      — reads source_method to decide 'Direct'
- *   3. ws_default_verification_status() — reads both fields
- *
- * Ensure these are added to admin-hooks.php in this order.
- *
- * SOURCE METHOD TABLE
- * -------------------
- * The method table is intentionally small and stable. Adding a new
- * source_method value should be rare and deliberate. New ingest sources
- * should be expressed as a new source_name under an existing method
- * rather than a new method constant.
- *
- *   WS_SOURCE_MATRIX_SEED    Posts generated programmatically by the
- *                            plugin installer or seed functions.
- *   WS_SOURCE_AI_ASSISTED    Posts originating from AI model output,
- *                            requiring human verification.
- *   WS_SOURCE_BULK_IMPORT    Posts ingested from a structured data file
- *                            (JSON, CSV) in a single batch operation.
- *   WS_SOURCE_FEED_IMPORT    Posts ingested from a live feed source
- *                            (news feed, newsletter, RSS). Distinct from
- *                            bulk_import in that it is typically
- *                            recurring and automated.
- *   WS_SOURCE_HUMAN_CREATED  Posts created manually through the WP admin
- *                            by a human editor. Verification is implicit.
- *
- * SOURCE NAME CONVENTION
- * ----------------------
- * source_name provides a secondary specifier within a method:
- *
- *   matrix_seed   → 'Direct'   (auto-set, never changes)
- *   human_created → 'Direct'   (auto-set, never changes)
- *   ai_assisted   → e.g. 'Claude AI', 'Gemini', 'ChatGPT'
- *   bulk_import   → e.g. 'JSON Import', 'CSV Import'
- *   feed_import   → e.g. 'News Feed', 'Newsletter', 'RSS'
- *
- * JSON ingest files should declare source_method and source_name in a
- * top-level "meta" header block so the ingest tooling can stamp every
- * record in the batch consistently:
- *
- *   {
- *     "meta": {
- *       "source_method": "ai_assisted",
- *       "source_name":   "Claude AI",
- *       ...
- *     },
- *     "records": [ ... ]
- *   }
- *
- * VERSION
- * -------
- * 1.0.0  Initial implementation
- * 1.1.0  Added WS_SOURCE_FEED_IMPORT constant; added source_name stamping;
- *        added ws_set_source_name() public API; updated Direct auto-population
- */
-
-if ( ! defined( 'ABSPATH' ) ) exit;
-
-
-// WS_SOURCE_* and WS_SOURCE_NAME_DIRECT constants are defined in ws-core.php
-// so they are available to matrix files that load before this file. See the
-// "Source Method Constants" block there for the full method table and
-// source_name convention documentation.
+// ════════════════════════════════════════════════════════════════════════════
+// SOURCE & VERIFICATION HOOKS (5 of 5)
+//
+// Hook logic for the Source & Verification field group (acf-source-verify.php).
+// Fire order at priority 5: stamp_source_method → stamp_source_name →
+// default_verification_status. Priority 20: stamp_verified_by_date,
+// enforce_source_verify_roles.
+//
+// WS_SOURCE_* constants are defined in ws-core.php — see the Source Method
+// Constants block there for the full method table and source_name convention.
+// ════════════════════════════════════════════════════════════════════════════
 
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -905,9 +798,10 @@ function ws_stamp_source_method( $post_id ) {
     }
 
     // jx-summary is always human_created by policy.
-    $method = ( get_post_type( $post_id ) === 'jx-summary' )
-        ? WS_SOURCE_HUMAN_CREATED
-        : WS_SOURCE_HUMAN_CREATED; // Default for all manual admin creates.
+    // All posts created through the admin UI are always human_created.
+    // jx-summary is called out explicitly in the comment above for clarity,
+    // but the method is the same for all types covered by this hook.
+    $method = WS_SOURCE_HUMAN_CREATED;
 
     update_post_meta( $post_id, 'ws_auto_source_method', $method );
 }
@@ -979,9 +873,8 @@ function ws_default_verification_status( $post_id ) {
 
     if ( $source === WS_SOURCE_HUMAN_CREATED ) {
         update_post_meta( $post_id, 'ws_verification_status', 'verified' );
-        $current_user = wp_get_current_user();
-        update_post_meta( $post_id, 'ws_auto_verified_by',   $current_user->display_name );
-        update_post_meta( $post_id, 'ws_auto_verified_date', current_time( 'mysql' ) );
+        update_post_meta( $post_id, 'ws_auto_verified_by',   get_current_user_id() );
+        update_post_meta( $post_id, 'ws_auto_verified_date', current_time( 'Y-m-d' ) );
     } else {
         update_post_meta( $post_id, 'ws_verification_status', 'unverified' );
     }
@@ -1018,9 +911,8 @@ function ws_stamp_verified_by_date( $post_id ) {
         return; // Already verified — not a transition, do not re-stamp.
     }
 
-    $current_user = wp_get_current_user();
-    update_post_meta( $post_id, 'ws_auto_verified_by',   $current_user->display_name );
-    update_post_meta( $post_id, 'ws_auto_verified_date', current_time( 'mysql' ) );
+    update_post_meta( $post_id, 'ws_auto_verified_by',   get_current_user_id() );
+    update_post_meta( $post_id, 'ws_auto_verified_date', current_time( 'Y-m-d' ) );
 }
 
 

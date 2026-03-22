@@ -435,6 +435,17 @@ function ws_feed_ingest_item( $guid ) {
     update_post_meta( $post_id, 'ws_ingest_guid',   $entry['guid'] );
     update_post_meta( $post_id, 'ws_ingest_url',    $entry['url'] );
 
+    // ── Source & verification stamps ──────────────────────────────────────
+    //
+    // Feed-ingested posts are created programmatically, not by a human editor.
+    // ws_auto_source_method is set here (not by ws_stamp_source_method() in
+    // admin-hooks.php) because wp_insert_post() above bypasses acf/save_post.
+    // ws_needs_review is set to 1 so the post surfaces in the review queue
+    // pending editorial acceptance.
+
+    update_post_meta( $post_id, 'ws_auto_source_method', WS_SOURCE_FEED_IMPORT );
+    update_post_meta( $post_id, 'ws_needs_review',       1 );
+
     // ── Plain English defaults ────────────────────────────────────────────
 
     update_post_meta( $post_id, 'ws_has_plain_english', 0 );

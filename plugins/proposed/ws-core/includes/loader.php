@@ -177,6 +177,7 @@ if ( is_admin() ) {
 	//
 	// MATRIX Layer: Loaded from /includes/admin/matrix/
 	$matrix_files = [
+		'matrix-helpers',      // Shared helpers — must load before all seeders.
 		'matrix-jurisdictions', 'matrix-fed-statutes', 'matrix-courts', 'matrix-assist-orgs',
 		'matrix-agencies', 'admin-matrix-watch',
 	];

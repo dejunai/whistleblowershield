@@ -25,7 +25,7 @@
 // ---------------------------------------
 // post_title                        — "[Source Title] — [CPT Label] Update"
 // post_date / post_author           — current time / current user (WP core)
-// ws_legal_update_summary           — the description text
+// ws_legal_update_summary_wysiwyg   — the description text
 // ws_legal_update_effective_date    — today (Y-m-d local)
 // ws_legal_update_source_post_id    — source post ID
 // ws_legal_update_source_post_type  — source post type slug
@@ -142,7 +142,7 @@ function ws_acf_log_major_edit( $post_id ) {
 
 	// ── Write meta on the new update post ────────────────────────────────
 
-	update_post_meta( $update_id, 'ws_legal_update_summary',          $description  );
+	update_post_meta( $update_id, 'ws_legal_update_summary_wysiwyg',  $description  );
 	update_post_meta( $update_id, 'ws_legal_update_effective_date',   $now_local    );
 	update_post_meta( $update_id, 'ws_legal_update_source_post_id',   $post_id      );
 	update_post_meta( $update_id, 'ws_legal_update_source_post_type', $post_type    );

@@ -306,34 +306,6 @@ function ws_seed_fed_statutes_matrix() {
 }
 
 
-// ════════════════════════════════════════════════════════════════════════════
-// Helper: ws_matrix_assign_terms
-// ════════════════════════════════════════════════════════════════════════════
-//
-// Resolves an array of term slugs to term IDs and calls wp_set_object_terms().
-// Silently skips any slug that does not exist in the taxonomy — the seeder
-// will not fatal if a term hasn't been created yet.
-//
-// @param int    $post_id  Post to assign terms to.
-// @param array  $slugs    Term slugs to resolve.
-// @param string $taxonomy Taxonomy slug.
-
-if ( ! function_exists( 'ws_matrix_assign_terms' ) ) {
-    function ws_matrix_assign_terms( $post_id, array $slugs, $taxonomy ) {
-        $term_ids = [];
-        foreach ( $slugs as $slug ) {
-            $term = get_term_by( 'slug', $slug, $taxonomy );
-            if ( $term && ! is_wp_error( $term ) ) {
-                $term_ids[] = (int) $term->term_id;
-            }
-        }
-        if ( ! empty( $term_ids ) ) {
-            wp_set_object_terms( $post_id, $term_ids, $taxonomy );
-        }
-    }
-}
-
-
 // ── Gate ──────────────────────────────────────────────────────────────────────
 
 add_action( 'admin_init', function() {
