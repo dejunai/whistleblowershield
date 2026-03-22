@@ -45,6 +45,9 @@
  *        - PURPOSE docblock: updated to remove reference to deleted
  *          admin-relationships.php; clarified ws_update_jurisdictions
  *          as a taxonomy field with save_terms=0.
+ * 3.4.0  Stamp field centralization:
+ *        - Removed Authorship & Review tab and all stamp fields — now
+ *          registered centrally in acf-stamp-fields.php (menu_order 90).
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -184,54 +187,8 @@ function ws_register_acf_legal_update() {
             ],
 
             // ── Tab: Authorship & Review ──────────────────────────────────
-
-            [
-                'key'   => 'field_authorship_tab',
-                'label' => 'Authorship & Review',
-                'type'  => 'tab',
-            ],
-            [
-                'key'           => 'field_last_edited_author',
-                'label'         => 'Last Edited By',
-                'name'          => 'last_edited_author',
-                'type'          => 'user',
-                'instructions'  => 'Stamped automatically on every save. Editable by administrators only.',
-                'role'          => [ 'author', 'editor', 'administrator' ],
-                'return_format' => 'array',
-                'wrapper'       => [ 'width' => '34' ],
-            ],
-            [
-                'key'          => 'field_date_created',
-                'label'        => 'Date Created',
-                'name'         => 'date_created',
-                'type'         => 'text',
-                'instructions' => 'Set automatically on first save. Read only.',
-                'readonly'     => 1,
-                'disabled'     => 1,
-                'wrapper'      => [ 'width' => '33' ],
-            ],
-            [
-                'key'          => 'field_last_edited',
-                'label'        => 'Last Edited',
-                'name'         => 'last_edited',
-                'type'         => 'text',
-                'instructions' => 'Stamped automatically on every save. Read only.',
-                'readonly'     => 1,
-                'disabled'     => 1,
-                'wrapper'      => [ 'width' => '33' ],
-            ],
-            [
-                'key'           => 'field_create_author',
-                'label'         => 'Created By',
-                'name'          => 'create_author',
-                'type'          => 'user',
-                'instructions'  => 'Stamped automatically on first save. Read only.',
-                'role'          => [ 'author', 'editor', 'administrator' ],
-                'return_format' => 'id',
-                'readonly'      => 1,
-                'disabled'      => 1,
-                'wrapper'       => [ 'width' => '33' ],
-            ],
+            // Removed — registered centrally in acf-stamp-fields.php
+            // (group_ws_stamp_fields, menu_order 90).
 
         ], // end fields
 

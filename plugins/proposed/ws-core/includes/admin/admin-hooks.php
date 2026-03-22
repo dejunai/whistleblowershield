@@ -109,6 +109,13 @@
  *        in Restrict Manual Creation hooks and Identity Field Enforcement save hook.
  *        Slug mismatch caused Add New removal, manual-creation block, and identity
  *        field re-enforcement to silently not fire.
+ * 3.4.0  Stamp field centralization:
+ *        - Updated $ws_stamp_cpts entry for ws-reference: author_acf_key changed
+ *          from field_ws_ref_last_edited_author to field_last_edited_author.
+ *          Unique key retired; ws-reference now uses shared field keys.
+ *        - Removed ws_ref_approved from field locking foreach loop.
+ *          ws_ref_approved field retired entirely — Approval tab removed from
+ *          acf-references.php.
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit;
@@ -169,7 +176,7 @@ add_filter( 'default_title', function( $title ) {
 // All CPTs share these field names (unprefixed), so a single filter registration
 // per name applies across every post type that carries the field.
 
-foreach ( [ 'date_created', 'last_edited', 'last_edited_author', 'create_author', 'plain_english_by', 'plain_english_date', 'ws_ref_approved' ] as $_ws_f ) {
+foreach ( [ 'date_created', 'last_edited', 'last_edited_author', 'create_author', 'plain_english_by', 'plain_english_date' ] as $_ws_f ) {
     add_filter( "acf/load_field/name={$_ws_f}", 'ws_acf_lock_for_non_admins' );
 }
 unset( $_ws_f );
@@ -423,8 +430,8 @@ $ws_stamp_cpts = [
     'ws-agency'         => [ 'author_acf_key' => 'field_last_edited_author' ],
     'ws-legal-update'   => [ 'author_acf_key' => 'field_last_edited_author' ],
     'ws-assist-org'     => [ 'author_acf_key' => 'field_last_edited_author' ],
-    // ws-reference uses a unique ACF key to avoid acf_get_field() lookup ambiguity.
-    'ws-reference'      => [ 'author_acf_key' => 'field_ws_ref_last_edited_author' ],
+    // ws-reference uses shared field keys — unique key retired in v3.4.0.
+    'ws-reference'      => [ 'author_acf_key' => 'field_last_edited_author' ],
 ];
 
 add_action( 'acf/save_post', 'ws_acf_write_stamp_fields', 20 );

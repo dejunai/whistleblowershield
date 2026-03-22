@@ -66,6 +66,9 @@
  * 2.4.0  Added acf-jx-interpretations to ACF load list (Bug #6 fix).
  * 2.4.1  Added error reporting to loading calls, see /logs/ws-core-error.log
  * 3.0.0  Added acf-source-verify to ACF load list (was registered but never loaded).
+ * 3.4.0  Added acf-stamp-fields and acf-plain-english-fields to ACF load list.
+ *        These centralize stamp and plain language fields previously duplicated
+ *        across individual CPT ACF files.
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit;
@@ -205,6 +208,7 @@ if ( is_admin() ) {
         'acf-jurisdictions', 'acf-jx-summaries', 'acf-jx-statutes', 'acf-legal-updates',
         'acf-jx-citations', 'acf-agencies', 'acf-assist-orgs', 'acf-major-edit',
         'acf-source-verify', 'acf-jx-interpretations', 'acf-references',
+        'acf-stamp-fields', 'acf-plain-english-fields',
     ];
 	
 	foreach ( $acf_files as $file ) {

@@ -1,0 +1,319 @@
+{
+  "meta": {
+    "json_format_version": "2.0",
+    "source_method": "ai_assisted",
+    "source_name": "Grok",
+    "jurisdiction_id": "DE",
+    "generated_date": "2026-03-21",
+    "generated_by": "Grok by xAI (continuously updated model)",
+    "record_count": 5,
+    "proposed_count": 0,
+    "new_terms_proposed": [],
+    "json_run_notes": "Batch prioritizes the comprehensive Delaware Whistleblowers' Protection Act (Title 19, Chapter 17), which covers both private and public sectors after 2004 amendments. Title 29 §5115 (public employees reporting to elected officials) is included but may be largely subsumed; confirm overlap with reviewer. False Claims Act retaliation provision included for fraud-related whistleblowing. No new taxonomy terms proposed—existing child slugs sufficient. No verifiable appellate citations from approved sources found. SOL explicit in §1704 for main Act; others ambiguous/derived.",
+    "batch_completed": "2026-03-21 12:00 UTC"
+  },
+  "records": [
+    {
+      "jurisdiction_id": "DE",
+      "statute_id": "DE-1701",
+      "official_name": "Whistleblowers’ Protection",
+      "common_name": "Delaware Whistleblowers' Protection Act",
+      "legal_basis": {
+        "statute_citation": "Del. Code Ann. tit. 19, §§ 1701–1708",
+        "disclosure_types": [
+          "workplace-employment"
+        ],
+        "protected_class": [
+          "corporate-staff",
+          "state-employee",
+          "local-gov-staff",
+          "contractor-gig"
+        ],
+        "disclosure_targets": [
+          "internal-supervisor",
+          "agency-state",
+          "agency-federal",
+          "agency-local",
+          "public-media"
+        ],
+        "adverse_action_scope": "Prohibits discharge, threat, or discrimination regarding compensation, terms, conditions, location, or privileges of employment, including threats related to immigration status"
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": false,
+        "limit_value": 3,
+        "limit_unit": "years",
+        "trigger": "occurrence of the alleged violation",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "primary_agency": "courts (civil action)",
+        "process_type": [
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "constructive-discharge",
+          "demotion",
+          "suspension",
+          "pay-reduction",
+          "harassment"
+        ],
+        "remedies": [
+          "reinstatement",
+          "back-pay",
+          "compensatory-damages",
+          "attorney-fees",
+          "injunctive-relief"
+        ],
+        "fee_shifting": [
+          "discretionary"
+        ]
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://delcode.delaware.gov/title19/c017/index.html",
+        "is_official": true,
+        "is_pdf": false
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      "_review_notes": "Broad whistleblower retaliation protection covering public and private employees (including independent contractors). Protects good-faith reports of violations of law/regulation to public bodies, employers/supervisors, or refusals to participate in violations. Immigration-status retaliation threats explicitly prohibited. Civil action allowed with explicit 3-year SOL from violation. Reviewer should confirm any post-2022 amendments (e.g., HB 354 additions) via official site."
+    },
+    {
+      "jurisdiction_id": "DE",
+      "statute_id": "DE-5115",
+      "official_name": "Protection of employees reporting violations to elected officials",
+      "common_name": "Public Employee Whistleblower Protection (pre-2004 legacy)",
+      "legal_basis": {
+        "statute_citation": "Del. Code Ann. tit. 29, § 5115",
+        "disclosure_types": [
+          "government-accountability"
+        ],
+        "protected_class": [
+          "state-employee",
+          "local-gov-staff"
+        ],
+        "disclosure_targets": [
+          "legislative-state"
+        ],
+        "adverse_action_scope": "Prohibits discharge, threat, or discrimination for reporting suspected violation of law/regulation to elected official"
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": true,
+        "limit_value": 0,
+        "limit_unit": "years",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "primary_agency": "courts",
+        "process_type": [
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "demotion",
+          "suspension"
+        ],
+        "remedies": [
+          "reinstatement",
+          "back-pay",
+          "compensatory-damages"
+        ],
+        "fee_shifting": []
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://delcode.delaware.gov/title29/c051/sc01/index.html#5115",
+        "is_official": true,
+        "is_pdf": false
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      "_review_notes": "Protects public employees reporting violations to elected officials. Narrower than Title 19 Ch. 17; may be largely superseded by broader 2004 Act amendments extending protections statewide. Include for completeness but flag potential redundancy. No explicit SOL in text—likely general civil period; ambiguous."
+    },
+    {
+      "jurisdiction_id": "DE",
+      "statute_id": "DE-1205",
+      "official_name": "Delaware False Claims and Reporting Act - Retaliation Protection",
+      "common_name": "Delaware False Claims Act Whistleblower Provision",
+      "legal_basis": {
+        "statute_citation": "Del. Code Ann. tit. 6, § 1205",
+        "disclosure_types": [
+          "procurement-spending-fraud",
+          "financial-corporate"
+        ],
+        "protected_class": [
+          "corporate-staff",
+          "state-employee"
+        ],
+        "disclosure_targets": [
+          "agency-state",
+          "agency-federal",
+          "court-filing"
+        ],
+        "adverse_action_scope": "Prohibits retaliation (discharge, demotion, suspension, threats, harassment, discrimination) for lawful acts in furtherance of FCA action or disclosures of false claims"
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": true,
+        "limit_value": 0,
+        "limit_unit": "years",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "primary_agency": "courts / Attorney General (qui tam)",
+        "process_type": [
+          "qui-tam",
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "demotion",
+          "suspension",
+          "harassment"
+        ],
+        "remedies": [
+          "reinstatement",
+          "double-back-pay",
+          "compensatory-damages",
+          "attorney-fees"
+        ],
+        "fee_shifting": [
+          "unilateral-pro-plaintiff"
+        ]
+      },
+      "reward": {
+        "available": true,
+        "reward_details": "Qui tam relators may receive 15-30% of recovery depending on intervention"
+      },
+      "links": {
+        "statute_url": "https://delcode.delaware.gov/title6/c012/index.html",
+        "is_official": true,
+        "is_pdf": false
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      "_review_notes": "Anti-retaliation section within Delaware False Claims Act for fraud against state government. Includes qui tam bounty. Narrower scope (fraud-specific) but important complement to general WPA. SOL not specified in retaliation subsection—likely borrows from general civil or FCA periods; ambiguous. Reviewer to confirm current text."
+    },
+    {
+      "jurisdiction_id": "DE",
+      "statute_id": "DE-1708",
+      "official_name": "Whistleblowers’ Protection - Remedies and Damages",
+      "common_name": "",
+      "legal_basis": {
+        "statute_citation": "Del. Code Ann. tit. 19, § 1708",
+        "disclosure_types": [],
+        "protected_class": [],
+        "disclosure_targets": [],
+        "adverse_action_scope": "Supports enforcement of Chapter 17 protections (remedies section)"
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": false,
+        "limit_value": 3,
+        "limit_unit": "years",
+        "trigger": "occurrence of the alleged violation",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "primary_agency": "courts",
+        "process_type": [
+          "civil-lawsuit"
+        ],
+        "adverse_action": [],
+        "remedies": [
+          "actual-damages",
+          "attorney-fees"
+        ],
+        "fee_shifting": []
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://delcode.delaware.gov/title19/c017/index.html#1708",
+        "is_official": true,
+        "is_pdf": false
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      "_review_notes": "Remedies provision under main Whistleblowers' Protection Act allowing civil action for declaratory relief, actual damages, etc. Reinforces §1704. Included as supportive but not standalone protection. 3-year SOL applies here as part of Chapter 17."
+    },
+    {
+      "jurisdiction_id": "DE",
+      "statute_id": "DE-HEALTHCARE",
+      "official_name": "Health Care Whistleblower Protections (various sections)",
+      "common_name": "",
+      "legal_basis": {
+        "statute_citation": "Del. Code Ann. tit. 16 (various health facility sections)",
+        "disclosure_types": [
+          "healthcare-medicare-fraud",
+          "public-health-safety"
+        ],
+        "protected_class": [
+          "clinical-staff"
+        ],
+        "disclosure_targets": [
+          "agency-state",
+          "internal-supervisor"
+        ],
+        "adverse_action_scope": "Limited protections against retaliation for reporting patient safety or quality-of-care violations in health care settings"
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": true,
+        "limit_value": 0,
+        "limit_unit": "years",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "primary_agency": "Department of Health and Social Services / courts",
+        "process_type": [
+          "administrative-complaint",
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "harassment"
+        ],
+        "remedies": [
+          "reinstatement",
+          "back-pay"
+        ],
+        "fee_shifting": []
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://delcode.delaware.gov/title16/index.html",
+        "is_official": true,
+        "is_pdf": false
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      "_review_notes": "Narrow protections in Title 16 for health care workers reporting violations affecting patient health/safety (scattered sections). Less comprehensive than general WPA; include as sector-specific. SOL not explicit—likely general civil; ambiguous. Confirm specific sections via official code."
+    }
+  ],
+  "integrity": {
+    "with_errors": true,
+    "error_details": [
+      "No qualifying appellate case citations included due to inability to locate stable URLs from approved sources (official courts, courtlistener.com, etc.) with specific impact on DE statutes.",
+      "Statute of limitations ambiguous for records other than main WPA (DE-1701/DE-1708); derived from general civil rules or absent in text.",
+      "Potential overlap/redundancy between Title 19 Ch. 17 and Title 29 §5115; reviewer to assess if latter remains operative post-2004 amendments.",
+      "Health care-specific protections (DE-HEALTHCARE) drawn from Title 16 structure but lack single unified section; may require further pinpointing."
+    ],
+    "error_count": 4
+  }
+}

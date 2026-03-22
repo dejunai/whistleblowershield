@@ -78,6 +78,14 @@
  *          ('Auto-stamped when Plain Language Reviewed is first enabled.').
  *        - plain_english_by instructions: aligned with other CPTs
  *          ('Auto-stamped on first save after plain language content is created.').
+ * 3.4.0  Stamp field centralization:
+ *        - Removed stamp fields (last_edited_author, date_created, last_edited,
+ *          create_author) from Authorship & Review tab — now registered centrally
+ *          in acf-stamp-fields.php (group_ws_stamp_fields, menu_order 90).
+ *        - Renamed field key field_ws_jx_sum_plain_english_reviewed_by to
+ *          field_plain_english_reviewed_by for consistency with all other CPTs.
+ *          No downstream impact — admin-hooks.php references this field by meta
+ *          name not ACF key; query and render layers read post meta directly.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -159,20 +167,20 @@ function ws_register_acf_jx_summary() {
             ],
 
             // ── Tab: Authorship & Review ──────────────────────────────────
+            //
+            // jx-summary is the plain language document — it does not use
+            // the has_plain_english / plain_english_reviewed pathway used
+            // by other CPTs. Instead it carries its own reviewed fields here
+            // with semantics appropriate to summary review (not translation).
+            //
+            // Stamp fields (last_edited_author, date_created, last_edited,
+            // create_author) are registered centrally in acf-stamp-fields.php
+            // and appear via that group's Authorship & Review tab (menu_order 90).
 
             [
                 'key'   => 'field_ws_jx_sum_authorship_tab',
-                'label' => 'Authorship & Review',
+                'label' => 'Summary Review',
                 'type'  => 'tab',
-            ],
-            [
-                'key'           => 'field_last_edited_author',
-                'label'         => 'Last Edited By',
-                'name'          => 'last_edited_author',
-                'type'          => 'user',
-                'instructions'  => 'Stamped automatically on every save. Editable by administrators only.',
-                'role'          => [ 'author', 'editor', 'administrator' ],
-                'return_format' => 'array',
             ],
             [
                 'key'           => 'field_plain_english_reviewed',
@@ -185,7 +193,6 @@ function ws_register_acf_jx_summary() {
                 'ui_off_text'   => 'Pending',
                 'default_value' => 0,
             ],
-			
             [
                 'key'           => 'field_plain_english_by',
                 'label'         => 'Summarized By',
@@ -198,55 +205,15 @@ function ws_register_acf_jx_summary() {
                 'disabled'      => 1,
             ],
             [
-                'key'          => 'field_ws_jx_sum_plain_english_reviewed_by',
-                'label'        => 'Reviewed By',
-                'name'         => 'plain_english_reviewed_by',
-                'type'         => 'user',
-                'instructions' => 'Auto-stamped when Plain Language Reviewed is first enabled.',
-                'role'         => [ 'author', 'editor', 'administrator' ],
-                'return_format' => 'id',
-                'readonly'     => 1,
-                'disabled'     => 1,
-            ],
-
-            // ── Dates (bottom of Authorship & Review) ─────────────────────
-            //
-            // All date fields are text type to support readonly rendering.
-            // date_created is stamped once on first save.
-            // last_edited is stamped on every save.
-            // GMT variants are written server-side only and do not appear in the form.
-
-            [
-                'key'          => 'field_date_created',
-                'label'        => 'Date Created',
-                'name'         => 'date_created',
-                'type'         => 'text',
-                'instructions' => 'Set automatically on first save. Read only.',
-                'readonly'     => 1,
-                'disabled'     => 1,
-                'wrapper'      => [ 'width' => '33' ],
-            ],
-            [
-                'key'          => 'field_last_edited',
-                'label'        => 'Last Edited',
-                'name'         => 'last_edited',
-                'type'         => 'text',
-                'instructions' => 'Stamped automatically on every save. Read only.',
-                'readonly'     => 1,
-                'disabled'     => 1,
-                'wrapper'      => [ 'width' => '33' ],
-            ],
-            [
-                'key'           => 'field_create_author',
-                'label'         => 'Created By',
-                'name'          => 'create_author',
+                'key'           => 'field_plain_english_reviewed_by',
+                'label'         => 'Reviewed By',
+                'name'          => 'plain_english_reviewed_by',
                 'type'          => 'user',
-                'instructions'  => 'Stamped automatically on first save. Read only.',
+                'instructions'  => 'Auto-stamped when Plain Language Reviewed is first enabled.',
                 'role'          => [ 'author', 'editor', 'administrator' ],
                 'return_format' => 'id',
                 'readonly'      => 1,
                 'disabled'      => 1,
-                'wrapper'       => [ 'width' => '33' ],
             ],
 
 

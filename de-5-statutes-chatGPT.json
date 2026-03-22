@@ -1,0 +1,217 @@
+{
+  "meta": {
+    "json_format_version": "2.0",
+    "source_method": "ai_assisted",
+    "source_name": "ChatGPT",
+    "jurisdiction_id": "DE",
+    "generated_date": "2026-03-20",
+    "generated_by": "GPT-5.3",
+    "record_count": 3,
+    "proposed_count": 0,
+    "new_terms_proposed": [],
+    "json_run_notes": "Delaware has relatively limited standalone whistleblower statutes compared to larger jurisdictions. Primary coverage centers on the Delaware Whistleblowers’ Protection Act and select sector-specific protections. Additional statutes may exist in niche regulatory contexts but were excluded due to insufficient confidence. Batch truncated for quality control to avoid speculative entries.",
+    "batch_completed": "2026-03-20 10:25 UTC"
+  },
+  "records": [
+    {
+      "jurisdiction_id": "DE",
+      "statute_id": "DE-1703",
+      "official_name": "Delaware Whistleblowers’ Protection Act",
+      "common_name": "Delaware Whistleblower Act",
+      "legal_basis": {
+        "statute_citation": "19 Del. C. § 1703",
+        "disclosure_types": [
+          "public-corruption-ethics",
+          "environmental-protection",
+          "occupational-health-safety"
+        ],
+        "protected_class": [
+          "corporate-staff",
+          "former-employee"
+        ],
+        "disclosure_targets": [
+          "internal-supervisor",
+          "agency-state",
+          "law-enforcement"
+        ],
+        "adverse_action_scope": "Prohibits employer retaliation against employees who report violations of law or refuse to participate in illegal activities."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": true,
+        "limit_value": 2,
+        "limit_unit": "years",
+        "limit_details": "Derived from general civil limitations period; statute text does not clearly specify.",
+        "trigger": "date of retaliatory act",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "process_type": [
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "demotion",
+          "harassment",
+          "pay-reduction"
+        ],
+        "remedies": [
+          "reinstatement",
+          "back-pay",
+          "compensatory-damages",
+          "attorney-fees"
+        ],
+        "fee_shifting": [
+          "discretionary"
+        ]
+      },
+      "burden_of_proof": {
+        "employee_standard": "preponderance of evidence",
+        "employer_defense": "legitimate non-retaliatory reason"
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://delcode.delaware.gov/title19/c017/index.html",
+        "is_official": true,
+        "is_pdf": false
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      "_review_notes": "Primary private-sector whistleblower protection in Delaware. Covers both reporting and refusal to engage in illegal conduct. Statute of limitations appears derived from general civil law and should be verified."
+    },
+    {
+      "jurisdiction_id": "DE",
+      "statute_id": "DE-5115",
+      "official_name": "Delaware False Claims and Reporting Act",
+      "common_name": "Delaware False Claims Act",
+      "legal_basis": {
+        "statute_citation": "6 Del. C. § 1201 et seq.",
+        "disclosure_types": [
+          "procurement-spending-fraud"
+        ],
+        "protected_class": [
+          "corporate-staff",
+          "contractor-gig"
+        ],
+        "disclosure_targets": [
+          "agency-state",
+          "law-enforcement",
+          "court-filing"
+        ],
+        "adverse_action_scope": "Protects individuals from retaliation for lawful acts in furtherance of a false claims action."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": false,
+        "limit_value": 3,
+        "limit_unit": "years",
+        "trigger": "date of retaliation",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "process_type": [
+          "qui-tam",
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "demotion",
+          "harassment"
+        ],
+        "remedies": [
+          "reinstatement",
+          "double-back-pay",
+          "compensatory-damages",
+          "attorney-fees"
+        ],
+        "fee_shifting": [
+          "unilateral-pro-plaintiff"
+        ]
+      },
+      "burden_of_proof": {
+        "employee_standard": "protected activity contributing factor",
+        "employer_defense": "same decision absent protected conduct"
+      },
+      "reward": {
+        "available": true,
+        "reward_details": "Qui tam relators may receive a percentage of recovered funds."
+      },
+      "links": {
+        "statute_url": "https://delcode.delaware.gov/title6/c120/index.html",
+        "is_official": true,
+        "is_pdf": false
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      "_review_notes": "State false claims act includes anti-retaliation protections and financial incentives. Applies broadly to fraud against the state. Reviewer should confirm statutory citation formatting and remedies."
+    },
+    {
+      "jurisdiction_id": "DE",
+      "statute_id": "DE-4004",
+      "official_name": "Delaware Healthcare Whistleblower Protection",
+      "legal_basis": {
+        "statute_citation": "16 Del. C. § 4004",
+        "disclosure_types": [
+          "healthcare-medicare-fraud"
+        ],
+        "protected_class": [
+          "clinical-staff"
+        ],
+        "disclosure_targets": [
+          "agency-state",
+          "internal-supervisor"
+        ],
+        "adverse_action_scope": "Protects healthcare workers who report unsafe patient care or regulatory violations."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": true,
+        "limit_value": 0,
+        "limit_unit": "years",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "process_type": [
+          "administrative-complaint"
+        ],
+        "adverse_action": [
+          "termination",
+          "disciplinary-action"
+        ],
+        "remedies": [
+          "reinstatement",
+          "back-pay"
+        ],
+        "fee_shifting": [
+          "discretionary"
+        ]
+      },
+      "burden_of_proof": {},
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "is_official": false,
+        "is_pdf": false
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      "_review_notes": "Applies to healthcare personnel reporting patient safety concerns. Statutory structure and enforcement mechanisms require verification. SOL not clearly identified in statute text."
+    }
+  ],
+  "integrity": {
+    "with_errors": true,
+    "error_details": [
+      "Batch truncated for quality control — only 3 of 5 requested records produced due to limited high-confidence statutes in scope",
+      "DE-1703 statute of limitations derived from general civil law — marked ambiguous",
+      "DE-4004 statute identification and structure require verification — low confidence in citation and scope",
+      "No case citations included for well-litigated statutes (e.g., DE-1703) due to inability to verify approved-source URLs"
+    ],
+    "error_count": 4
+  }
+}

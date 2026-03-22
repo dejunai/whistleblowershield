@@ -1,0 +1,11 @@
+ws-core v3.0.0 — Pre-Launch Cleanup
+query-jurisdiction.php: Fix ws_get_legal_updates_data() — change 'tax_query' to 'meta_query' and correct field name from 'ws_update_jurisdiction' (singular) to 'ws_update_jurisdictions' (plural)
+query-jurisdiction.php: Fix source_post_id and source_post_type — change get_post_field() to get_post_meta() for both keys in ws_get_legal_updates_data()
+query-jurisdiction.php: Add date_created_gmt and last_edited_gmt to ws_build_record_array() return value to match documented contract in file header
+shortcodes-jurisdiction.php + section-renderer.php: Fix key mismatch — align 'date_created' (shortcode) vs 'create_date' (renderer) in ws_render_jx_summary_footer() call
+shortcodes-jurisdiction.php + section-renderer.php: Fix key mismatch — align 'reviewer_name' (shortcode) vs 'plain_english_reviewed_name' (renderer) in ws_render_jx_summary_footer() call
+shortcodes-jurisdiction.php: Rewrite the DATA SOURCES docblock — remove all v2.x field names (ws_jx_code, ws_jx_cite_attach, ws_jx_cite_position, ws_jx_sum_*) and replace with a description of the v3 query layer contract
+render-jurisdiction.php: Complete the architecture diagram — fill in the blank '└──' node with jx-interpretation
+admin-audit-trail.php: Fix docblock CPT names — 'jx-statutes' → 'jx-statute' and 'ws-agencies' → 'ws-agency'
+section-renderer.php: Update ws_render_jx_summary_footer() docblock — remove fmt_created and fmt_reviewed keys which were removed in v3.1.0
+shortcodes-general.php: Evaluate moving ws_get_reference_page_url() out of the shortcodes file and into the query layer where it logically belongs

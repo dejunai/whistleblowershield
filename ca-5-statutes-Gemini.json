@@ -1,0 +1,359 @@
+{
+  "meta": {
+    "json_format_version": "2.0",
+    "source_method": "ai_assisted",
+    "source_name": "Gemini",
+    "jurisdiction_id": "CA",
+    "generated_date": "2026-03-20",
+    "generated_by": "Gemini 3 Flash",
+    "record_count": 5,
+    "proposed_count": 0,
+    "new_terms_proposed": [],
+    "json_run_notes": "This batch covers core California whistleblower protections including the general whistleblower statute (1102.5), the False Claims Act, and specific industry protections for healthcare and public employees. All URLs are from official or approved secondary sources.",
+    "batch_completed": "2026-03-20 20:59 UTC"
+  },
+  "records": [
+    {
+      "jurisdiction_id": "CA",
+      "statute_id": "CA-1102.5",
+      "official_name": "California Labor Code Section 1102.5",
+      "common_name": "General Whistleblower Protection Law",
+      "legal_basis": {
+        "statute_citation": "Cal. Lab. Code § 1102.5",
+        "disclosure_types": [
+          "public-corruption-ethics",
+          "occupational-health-safety",
+          "environmental-protection"
+        ],
+        "protected_class": [
+          "corporate-staff",
+          "state-employee",
+          "local-gov-staff"
+        ],
+        "disclosure_targets": [
+          "agency-state",
+          "agency-federal",
+          "law-enforcement",
+          "internal-supervisor"
+        ],
+        "adverse_action_scope": "Any rule, regulation, or policy preventing disclosure; retaliation for disclosing or refusing to participate in illegal activity."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": false,
+        "limit_value": 3,
+        "limit_unit": "years",
+        "trigger": "Date of the adverse employment action",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "primary_agency": "Labor Commissioner's Office (DLSE)",
+        "process_type": [
+          "administrative-complaint",
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "demotion",
+          "suspension",
+          "pay-reduction"
+        ],
+        "remedies": [
+          "reinstatement",
+          "back-pay",
+          "civil-penalty",
+          "attorney-fees"
+        ],
+        "fee_shifting": [
+          "unilateral-pro-plaintiff"
+        ]
+      },
+      "burden_of_proof": {
+        "employee_standard": "Preponderance of the evidence that whistleblowing was a contributing factor.",
+        "employer_defense": "Clear and convincing evidence that the action would have occurred for legitimate, independent reasons.",
+        "burden_of_proof_details": "Codifies the burden-shifting framework from Lawson v. PPG Architectural Finishes, Inc."
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=1102.5.&lawCode=LAB",
+        "is_official": true
+      },
+      "citations": {
+        "attached_citations": [
+          "Lawson v. PPG Architectural Finishes, Inc. || clarifies legal standard || https://casetext.com/case/lawson-v-ppg-architectural-finishes-inc-1 || casetext.com || high"
+        ],
+        "citation_count": 1
+      },
+      "_review_notes": "This is California's primary 'catch-all' whistleblower statute. It protects employees who report suspected violations of state or federal law to government agencies or supervisors. Note the favorable burden-shifting standard for employees confirmed by the CA Supreme Court in 2022."
+    },
+    {
+      "jurisdiction_id": "CA",
+      "statute_id": "CA-12650",
+      "official_name": "California False Claims Act",
+      "common_name": "CFCA",
+      "legal_basis": {
+        "statute_citation": "Cal. Gov. Code § 12650 et seq.",
+        "disclosure_types": [
+          "procurement-spending-fraud",
+          "tax-evasion-fraud"
+        ],
+        "protected_class": [
+          "corporate-staff",
+          "contractor-gig"
+        ],
+        "disclosure_targets": [
+          "agency-state",
+          "court-filing",
+          "attorney-counsel"
+        ],
+        "adverse_action_scope": "Retaliation because of lawful acts done in furtherance of an action under this section."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": false,
+        "limit_value": 3,
+        "limit_unit": "years",
+        "trigger": "Date the retaliation occurred",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "primary_agency": "California Attorney General",
+        "process_type": [
+          "qui-tam",
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "demotion",
+          "harassment",
+          "blacklisting"
+        ],
+        "remedies": [
+          "reinstatement",
+          "double-back-pay",
+          "compensatory-damages",
+          "attorney-fees",
+          "bounty-qui-tam-award"
+        ],
+        "fee_shifting": [
+          "unilateral-pro-plaintiff"
+        ]
+      },
+      "burden_of_proof": {
+        "employee_standard": "Preponderance of the evidence."
+      },
+      "reward": {
+        "available": true,
+        "reward_details": "Qui tam plaintiffs may receive 15% to 33% of the proceeds of the action or settlement."
+      },
+      "links": {
+        "statute_url": "https://leginfo.legislature.ca.gov/faces/codes_displayText.xhtml?division=3.&part=2.&lawCode=GOV&title=2.&chapter=9.",
+        "is_official": true
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      "_review_notes": "The CFCA includes a specific anti-retaliation provision (§ 12653). It protects employees, contractors, or agents who are retaliated against for trying to stop a violation of the False Claims Act."
+    },
+    {
+      "jurisdiction_id": "CA",
+      "statute_id": "CA-1278.5",
+      "official_name": "California Health and Safety Code Section 1278.5",
+      "common_name": "Healthcare Facility Whistleblower Protection",
+      "legal_basis": {
+        "statute_citation": "Cal. Health & Safety Code § 1278.5",
+        "disclosure_types": [
+          "healthcare-medicare-fraud",
+          "food-drug-safety"
+        ],
+        "protected_class": [
+          "clinical-staff",
+          "medical-student"
+        ],
+        "disclosure_targets": [
+          "agency-state",
+          "internal-supervisor",
+          "internal-compliance"
+        ],
+        "adverse_action_scope": "Discriminatory treatment of patients, health care workers, or medical staff for reporting concerns about patient safety or care."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": false,
+        "limit_value": 2,
+        "limit_unit": "years",
+        "trigger": "Date of discriminatory action",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "process_type": [
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "demotion",
+          "privilege-revocation",
+          "disciplinary-action"
+        ],
+        "remedies": [
+          "reinstatement",
+          "lost-wages",
+          "attorney-fees",
+          "civil-penalties"
+        ],
+        "fee_shifting": [
+          "unilateral-pro-plaintiff"
+        ]
+      },
+      "burden_of_proof": {
+        "rebuttable_presumption": "A rebuttable presumption of retaliation exists if adverse action occurs within 120 days of the protected disclosure.",
+        "burden_of_proof_details": "The 120-day window is a strong statutory presumption that shifts the initial burden to the facility."
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=1278.5.&lawCode=HSC",
+        "is_official": true
+      },
+      "citations": {
+        "attached_citations": [
+          "Fahlen v. Sutter Central Valley Hospitals || confirms legal principle || https://casetext.com/case/fahlen-v-sutter-central-valley-hospitals || casetext.com || high"
+        ],
+        "citation_count": 1
+      },
+      "_review_notes": "Specific protection for healthcare workers. The 120-day rebuttable presumption is a unique and powerful feature of this statute that helps plaintiffs establish a prima facie case."
+    },
+    {
+      "jurisdiction_id": "CA",
+      "statute_id": "CA-6310",
+      "official_name": "California Labor Code Section 6310",
+      "common_name": "Cal/OSHA Whistleblower Protection",
+      "legal_basis": {
+        "statute_citation": "Cal. Lab. Code § 6310",
+        "disclosure_types": [
+          "occupational-health-safety"
+        ],
+        "protected_class": [
+          "corporate-staff",
+          "agricultural-worker"
+        ],
+        "disclosure_targets": [
+          "agency-state",
+          "internal-supervisor"
+        ],
+        "adverse_action_scope": "Retaliation for filing a complaint regarding unsafe working conditions or work practices."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": false,
+        "limit_value": 1,
+        "limit_unit": "years",
+        "trigger": "Date of the violation/retaliation",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "primary_agency": "Division of Occupational Safety and Health (Cal/OSHA)",
+        "process_type": [
+          "state-agency-complaint",
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "demotion",
+          "suspension"
+        ],
+        "remedies": [
+          "reinstatement",
+          "back-pay",
+          "benefits-restoration"
+        ],
+        "fee_shifting": [
+          "none-american-rule"
+        ]
+      },
+      "burden_of_proof": {
+        "employee_standard": "Preponderance of the evidence."
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=6310.&lawCode=LAB",
+        "is_official": true
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      "_review_notes": "Focuses strictly on workplace safety. While workers can file a lawsuit, they are encouraged to file an administrative complaint with the Labor Commissioner within one year."
+    },
+    {
+      "jurisdiction_id": "CA",
+      "statute_id": "CA-8547",
+      "official_name": "California Whistleblower Protection Act",
+      "common_name": "CWPA",
+      "legal_basis": {
+        "statute_citation": "Cal. Gov. Code § 8547 et seq.",
+        "disclosure_types": [
+          "public-corruption-ethics",
+          "procurement-spending-fraud"
+        ],
+        "protected_class": [
+          "state-employee"
+        ],
+        "disclosure_targets": [
+          "agency-state"
+        ],
+        "adverse_action_scope": "Retaliation against state employees for reporting improper governmental activity."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": false,
+        "limit_value": 1,
+        "limit_unit": "years",
+        "trigger": "Date of retaliation",
+        "exhaustion_required": true,
+        "exhaustion_details": "Must file an administrative complaint with the State Personnel Board before filing a civil action."
+      },
+      "enforcement": {
+        "primary_agency": "California State Auditor / State Personnel Board",
+        "process_type": [
+          "administrative-complaint",
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "demotion",
+          "disciplinary-action"
+        ],
+        "remedies": [
+          "reinstatement",
+          "back-pay",
+          "punitive-damages",
+          "attorney-fees"
+        ],
+        "fee_shifting": [
+          "unilateral-pro-plaintiff"
+        ]
+      },
+      "burden_of_proof": {
+        "employee_standard": "Preponderance of the evidence.",
+        "employer_defense": "Clear and convincing evidence."
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://leginfo.legislature.ca.gov/faces/codes_displayText.xhtml?division=1.&part=1.&lawCode=GOV&title=2.&chapter=6.5.",
+        "is_official": true
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      "_review_notes": "Specifically for state employees reporting 'improper governmental activity.' Note the mandatory administrative exhaustion requirement with the State Personnel Board."
+    }
+  ],
+  "integrity": {
+    "with_errors": false
+  }
+}

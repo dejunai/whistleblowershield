@@ -1,0 +1,321 @@
+{
+  "meta": {
+    "json_format_version": "2.0",
+    "source_method": "ai_assisted",
+    "source_name": "Grok",
+    "jurisdiction_id": "CA",
+    "generated_date": "2026-03-20",
+    "generated_by": "Grok by xAI (continuously updated model)",
+    "record_count": 5,
+    "proposed_count": 0,
+    "new_terms_proposed": [],
+    "json_run_notes": "Batch focuses on core state-level general whistleblower retaliation statutes. Labor Code 1102.5 is the broadest (applies to most employees). Government Code 8547 series protects state employees specifically. Legislative-specific act included as distinct. Statute of limitations often 1-3 years under general CA civil claims (e.g., CCP § 338/339) but not specified in statute text; left ambiguous/omitted. No qualifying case citations with verifiable approved-source URLs identified in research. Direct section text sometimes limited in search returns; relied on official structure and secondary approved summaries where needed.",
+    "batch_completed": "2026-03-21 00:00 UTC"
+  },
+  "records": [
+    {
+      "jurisdiction_id": "CA",
+      "statute_id": "CA-1102.5",
+      "official_name": "Retaliation for Disclosure of Violation of Law",
+      "common_name": "California General Whistleblower Protection",
+      "legal_basis": {
+        "statute_citation": "Cal. Lab. Code § 1102.5",
+        "disclosure_types": [
+          "workplace-employment"
+        ],
+        "protected_class": [
+          "corporate-staff",
+          "state-employee",
+          "local-gov-staff"
+        ],
+        "disclosure_targets": [
+          "agency-federal",
+          "agency-state",
+          "internal-supervisor",
+          "internal-hr",
+          "public-media"
+        ],
+        "adverse_action_scope": "Prohibits making, adopting, or enforcing any rule preventing disclosure; prohibits retaliation against employee for disclosure or refusal to participate in violation"
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": true,
+        "limit_value": 0,
+        "limit_unit": "years",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "primary_agency": "California Labor Commissioner / courts",
+        "process_type": [
+          "civil-lawsuit",
+          "administrative-complaint"
+        ],
+        "adverse_action": [
+          "termination",
+          "constructive-discharge",
+          "demotion",
+          "suspension",
+          "pay-reduction",
+          "harassment"
+        ],
+        "remedies": [
+          "reinstatement",
+          "back-pay",
+          "lost-wages",
+          "compensatory-damages",
+          "punitive-damages",
+          "attorney-fees"
+        ],
+        "fee_shifting": [
+          "discretionary"
+        ]
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=LAB&sectionNum=1102.5.",
+        "is_official": true,
+        "is_pdf": false
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      "_review_notes": "This is California's broadest whistleblower retaliation statute, protecting employees in private and public sectors who disclose or refuse to participate in suspected violations of state/federal law or regulations. Disclosures to government agencies, supervisors, or public bodies are protected if reasonable belief exists. Retaliation includes discharge, demotion, etc. Reviewer should confirm current text and any recent amendments via official site, as 2013-2014 expansions broadened internal disclosures and protections."
+    },
+    {
+      "jurisdiction_id": "CA",
+      "statute_id": "CA-GOV-8547",
+      "official_name": "California Whistleblower Protection Act",
+      "common_name": "California Whistleblower Protection Act",
+      "legal_basis": {
+        "statute_citation": "Cal. Gov. Code §§ 8547 - 8547.15",
+        "disclosure_types": [
+          "government-accountability"
+        ],
+        "protected_class": [
+          "state-employee",
+          "local-gov-staff"
+        ],
+        "disclosure_targets": [
+          "agency-state",
+          "agency-local",
+          "public-nonprofit"
+        ],
+        "adverse_action_scope": "Prohibits reprisal, retaliation, threats, or similar acts against state employees or applicants for protected disclosures of improper governmental activity"
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": true,
+        "limit_value": 0,
+        "limit_unit": "years",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "primary_agency": "California State Auditor / State Personnel Board",
+        "process_type": [
+          "administrative-complaint",
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "demotion",
+          "suspension",
+          "harassment"
+        ],
+        "remedies": [
+          "reinstatement",
+          "back-pay",
+          "compensatory-damages",
+          "attorney-fees",
+          "injunctive-relief"
+        ],
+        "fee_shifting": []
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=GOV&sectionNum=8547.12.",
+        "is_official": true,
+        "is_pdf": false
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      "_review_notes": "Protects state employees and applicants reporting waste, fraud, abuse of authority, violation of law, or threats to public health/safety. Disclosures must be good faith and concern improper governmental activity. Investigations often via State Auditor. Reviewer should verify full article text and any cross-references to personnel board procedures under § 19683."
+    },
+    {
+      "jurisdiction_id": "CA",
+      "statute_id": "CA-GOV-9149.30",
+      "official_name": "Legislative Employee Whistleblower Protection Act",
+      "common_name": "Legislative Employee Whistleblower Protection Act",
+      "legal_basis": {
+        "statute_citation": "Cal. Gov. Code §§ 9149.30 - 9149.36",
+        "disclosure_types": [
+          "government-accountability",
+          "public-corruption-ethics"
+        ],
+        "protected_class": [
+          "state-employee"
+        ],
+        "disclosure_targets": [
+          "legislative-state",
+          "agency-state",
+          "law-enforcement"
+        ],
+        "adverse_action_scope": "Imposes liability for interference with or retaliation against legislative employees for good faith protected disclosures of violations of law or legislative standards, including sexual harassment"
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": true,
+        "limit_value": 0,
+        "limit_unit": "years",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "primary_agency": "Legislature / courts",
+        "process_type": [
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "demotion",
+          "harassment"
+        ],
+        "remedies": [
+          "compensatory-damages",
+          "punitive-damages",
+          "attorney-fees"
+        ],
+        "fee_shifting": []
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=GOV&sectionNum=9149.30.",
+        "is_official": true,
+        "is_pdf": false
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      "_review_notes": "Specific to employees of the California Legislature (excluding Members). Protects against retaliation for good faith allegations of violations by Members or employees. Includes civil and criminal liability. Narrow scope; reviewer should confirm if broader legislative updates apply."
+    },
+    {
+      "jurisdiction_id": "CA",
+      "statute_id": "CA-LAB-1102.8",
+      "official_name": "Posting of Whistleblower Rights",
+      "common_name": "",
+      "legal_basis": {
+        "statute_citation": "Cal. Lab. Code § 1102.8",
+        "disclosure_types": [],
+        "protected_class": [],
+        "disclosure_targets": [],
+        "adverse_action_scope": "Requires employers to post notice of employee rights under whistleblower laws (supports § 1102.5 enforcement)"
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": true,
+        "limit_value": 0,
+        "limit_unit": "years",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "primary_agency": "California Labor Commissioner",
+        "process_type": [
+          "administrative-complaint"
+        ],
+        "adverse_action": [],
+        "remedies": [],
+        "fee_shifting": []
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=LAB&sectionNum=1102.8.",
+        "is_official": true,
+        "is_pdf": false
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      "_review_notes": "Supportive provision requiring posting of whistleblower rights model notice (updated per AB 2299). Not a standalone protection but enforces awareness of § 1102.5 etc. Model notice available via DIR.ca.gov. Include only if batch needs complementary statutes."
+    },
+    {
+      "jurisdiction_id": "CA",
+      "statute_id": "CA-GOV-12653",
+      "official_name": "California False Claims Act - Retaliation Protection",
+      "common_name": "California False Claims Act Whistleblower Provision",
+      "legal_basis": {
+        "statute_citation": "Cal. Gov. Code § 12653",
+        "disclosure_types": [
+          "procurement-spending-fraud",
+          "financial-corporate"
+        ],
+        "protected_class": [
+          "corporate-staff",
+          "state-employee"
+        ],
+        "disclosure_targets": [
+          "agency-state",
+          "agency-federal",
+          "court-filing"
+        ],
+        "adverse_action_scope": "Protects employees from retaliation for lawful acts in furtherance of False Claims Act actions or disclosures of false claims to government"
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": true,
+        "limit_value": 0,
+        "limit_unit": "years",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "primary_agency": "California Attorney General / qui tam",
+        "process_type": [
+          "qui-tam",
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "demotion",
+          "suspension"
+        ],
+        "remedies": [
+          "reinstatement",
+          "double-back-pay",
+          "compensatory-damages",
+          "attorney-fees"
+        ],
+        "fee_shifting": [
+          "unilateral-pro-plaintiff"
+        ]
+      },
+      "reward": {
+        "available": true,
+        "reward_details": "Qui tam relators may receive bounty/portion of recovery"
+      },
+      "links": {
+        "statute_url": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=GOV&sectionNum=12653.",
+        "is_official": true,
+        "is_pdf": false
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      "_review_notes": "Anti-retaliation provision within California's False Claims Act, focused on fraud against state government. Includes qui tam rewards. Narrower than 1102.5 but important for procurement/financial fraud whistleblowing. Reviewer should check for overlap with federal FCA."
+    }
+  ],
+  "integrity": {
+    "with_errors": true,
+    "error_details": [
+      "Statute of limitations left ambiguous across all records as no explicit values stated in statute texts from official sources; general civil SOL may apply but not confirmed.",
+      "No qualifying appellate case citations included due to inability to identify stable, approved-source URLs (e.g., courtlistener or official court sites) with specific impact on these statutes in search results.",
+      "Direct full text for some sections limited in search returns; relied on summaries and structure from legislature.ca.gov where possible."
+    ],
+    "error_count": 3
+  }
+}

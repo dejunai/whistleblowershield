@@ -1,0 +1,349 @@
+{
+  "meta": {
+    "json_format_version": "2.0",
+    "source_method": "ai_assisted",
+    "source_name": "Gemini",
+    "jurisdiction_id": "DE",
+    "generated_date": "2026-03-20",
+    "generated_by": "Gemini 1.5 Pro",
+    "record_count": 5,
+    "proposed_count": 0,
+    "new_terms_proposed": [],
+    "json_run_notes": "This batch focuses on Delaware's primary whistleblower protections, including the Delaware Whistleblowers' Protection Act, the False Claims Act, and sector-specific protections for healthcare and public employees. Note that the SOL for several statutes is derived from Delaware's general personal injury statute (10 Del. C. § 8119) as the whistleblower statutes themselves are silent on the matter.",
+    "batch_completed": "2026-03-20 22:14 UTC"
+  },
+  "records": [
+    {
+      "jurisdiction_id": "DE",
+      "statute_id": "DE-1701",
+      "official_name": "Delaware Whistleblowers' Protection Act",
+      "common_name": "DWPA",
+      "legal_basis": {
+        "statute_citation": "19 Del. C. § 1701 et seq.",
+        "disclosure_types": [
+          "retaliation-protection",
+          "public-corruption-ethics",
+          "occupational-health-safety"
+        ],
+        "protected_class": [
+          "corporate-staff",
+          "state-employee",
+          "local-gov-staff"
+        ],
+        "disclosure_targets": [
+          "agency-state",
+          "internal-supervisor",
+          "law-enforcement"
+        ],
+        "adverse_action_scope": "Discharge, threaten, or otherwise discriminate against an employee regarding compensation, terms, conditions, locations or privileges of employment."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": true,
+        "limit_value": 2,
+        "limit_unit": "years",
+        "trigger": "Date of the alleged violation",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "primary_agency": "Delaware Department of Labor",
+        "process_type": [
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "disciplinary-action",
+          "pay-reduction"
+        ],
+        "remedies": [
+          "reinstatement",
+          "back-pay",
+          "compensatory-damages",
+          "attorney-fees"
+        ],
+        "fee_shifting": [
+          "unilateral-pro-plaintiff"
+        ]
+      },
+      "burden_of_proof": {
+        "employee_standard": "Preponderance of the evidence that the protected activity was a motivating factor.",
+        "employer_defense": "The action was for a legitimate, non-retaliatory reason."
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://delcode.delaware.gov/title19/c017/index.html",
+        "is_official": true
+      },
+      "citations": {
+        "attached_citations": [
+          "Smith v. Delaware State University || clarifies motivating factor standard || https://www.courtlistener.com/opinion/1894464/smith-v-delaware-state-university/ || courtlistener.com || high"
+        ],
+        "citation_count": 1
+      },
+      "_review_notes": "Delaware's primary private and public sector whistleblower law. The 2-year SOL is derived from the state's general personal injury statute (10 Del. C. § 8119) as the Act itself does not specify a deadline."
+    },
+    {
+      "jurisdiction_id": "DE",
+      "statute_id": "DE-1201",
+      "official_name": "Delaware False Claims and Reporting Act",
+      "common_name": "DFCRA",
+      "legal_basis": {
+        "statute_citation": "6 Del. C. § 1201 et seq.",
+        "disclosure_types": [
+          "procurement-spending-fraud",
+          "tax-evasion-fraud"
+        ],
+        "protected_class": [
+          "corporate-staff",
+          "contractor-gig"
+        ],
+        "disclosure_targets": [
+          "agency-state",
+          "court-filing",
+          "attorney-counsel"
+        ],
+        "adverse_action_scope": "Any discrimination in terms and conditions of employment because of lawful acts done in furtherance of a CFCA action."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": false,
+        "limit_value": 3,
+        "limit_unit": "years",
+        "trigger": "Date the retaliation occurred",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "primary_agency": "Delaware Department of Justice",
+        "process_type": [
+          "qui-tam",
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "demotion",
+          "suspension",
+          "harassment"
+        ],
+        "remedies": [
+          "reinstatement",
+          "double-back-pay",
+          "compensatory-damages",
+          "attorney-fees",
+          "bounty-qui-tam-award"
+        ],
+        "fee_shifting": [
+          "unilateral-pro-plaintiff"
+        ]
+      },
+      "burden_of_proof": {
+        "employee_standard": "Preponderance of the evidence."
+      },
+      "reward": {
+        "available": true,
+        "reward_details": "Qui tam plaintiffs may receive 15% to 30% of the proceeds."
+      },
+      "links": {
+        "statute_url": "https://delcode.delaware.gov/title6/c012/index.html",
+        "is_official": true
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      "_review_notes": "Mirroring the federal FCA, this covers fraud against the state. The anti-retaliation provision is found at § 1208."
+    },
+    {
+      "jurisdiction_id": "DE",
+      "statute_id": "DE-1135",
+      "official_name": "Delaware Nursing Home Residents' Rights Act",
+      "common_name": "Nursing Home Whistleblower Protection",
+      "legal_basis": {
+        "statute_citation": "16 Del. C. § 1135",
+        "disclosure_types": [
+          "healthcare-medicare-fraud",
+          "public-health-safety"
+        ],
+        "protected_class": [
+          "clinical-staff"
+        ],
+        "disclosure_targets": [
+          "agency-state",
+          "internal-supervisor"
+        ],
+        "adverse_action_scope": "Retaliation against any person who in good faith reports any violation of resident rights or provides information for an investigation."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": true,
+        "limit_value": 2,
+        "limit_unit": "years",
+        "trigger": "Date of retaliation",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "primary_agency": "Department of Health and Social Services",
+        "process_type": [
+          "administrative-complaint",
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "disciplinary-action",
+          "harassment"
+        ],
+        "remedies": [
+          "reinstatement",
+          "lost-wages",
+          "attorney-fees"
+        ],
+        "fee_shifting": [
+          "discretionary"
+        ]
+      },
+      "burden_of_proof": {
+        "rebuttable_presumption": "Presumption of retaliation if adverse action occurs within 90 days of the report."
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://delcode.delaware.gov/title16/c011/sc03/index.html",
+        "is_official": true
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      "_review_notes": "Protects healthcare workers reporting abuse or rights violations in long-term care facilities. The 90-day rebuttable presumption is a key protection here."
+    },
+    {
+      "jurisdiction_id": "DE",
+      "statute_id": "DE-5115",
+      "official_name": "Delaware Public School Employment Relations Act",
+      "common_name": "Education Whistleblower Protection",
+      "legal_basis": {
+        "statute_citation": "14 Del. C. § 5115",
+        "disclosure_types": [
+          "public-corruption-ethics",
+          "government-accountability"
+        ],
+        "protected_class": [
+          "k12-education-staff"
+        ],
+        "disclosure_targets": [
+          "agency-state",
+          "legislative-state"
+        ],
+        "adverse_action_scope": "Retaliation against an employee for disclosing information to a state official or body."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": true,
+        "limit_value": 2,
+        "limit_unit": "years",
+        "trigger": "Date of adverse action",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "primary_agency": "Public Employment Relations Board",
+        "process_type": [
+          "administrative-complaint",
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "demotion",
+          "suspension"
+        ],
+        "remedies": [
+          "reinstatement",
+          "back-pay",
+          "attorney-fees"
+        ],
+        "fee_shifting": [
+          "unilateral-pro-plaintiff"
+        ]
+      },
+      "burden_of_proof": {
+        "employee_standard": "Preponderance of the evidence."
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://delcode.delaware.gov/title14/c051/index.html",
+        "is_official": true
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      "_review_notes": "Specific protections for school employees. As with the general DWPA, the 2-year SOL is derived from general civil statutes."
+    },
+    {
+      "jurisdiction_id": "DE",
+      "statute_id": "DE-1311",
+      "official_name": "Delaware Public Employment Relations Act",
+      "common_name": "Public Employee Retaliation Protection",
+      "legal_basis": {
+        "statute_citation": "19 Del. C. § 1311",
+        "disclosure_types": [
+          "collective-bargaining",
+          "retaliation-protection"
+        ],
+        "protected_class": [
+          "state-employee",
+          "local-gov-staff"
+        ],
+        "disclosure_targets": [
+          "internal-supervisor",
+          "agency-state"
+        ],
+        "adverse_action_scope": "Discrimination against any employee because such employee has signed or filed an affidavit, petition or complaint or given any information or testimony."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": true,
+        "limit_value": 2,
+        "limit_unit": "years",
+        "trigger": "Date of retaliation",
+        "exhaustion_required": true,
+        "exhaustion_details": "May require exhaustion of administrative remedies through the Public Employment Relations Board."
+      },
+      "enforcement": {
+        "primary_agency": "Public Employment Relations Board",
+        "process_type": [
+          "administrative-complaint"
+        ],
+        "adverse_action": [
+          "termination",
+          "demotion",
+          "disciplinary-action"
+        ],
+        "remedies": [
+          "cease-and-desist",
+          "reinstatement",
+          "back-pay"
+        ],
+        "fee_shifting": [
+          "none-american-rule"
+        ]
+      },
+      "burden_of_proof": {
+        "employee_standard": "Preponderance of the evidence."
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://delcode.delaware.gov/title19/c013/index.html",
+        "is_official": true
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      "_review_notes": "Focuses on retaliation in the context of public sector labor relations and protected concerted activities."
+    }
+  ],
+  "integrity": {
+    "with_errors": false
+  }
+}

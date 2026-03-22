@@ -1,0 +1,333 @@
+{
+  "meta": {
+    "json_format_version": "2.0",
+    "source_method": "ai_assisted",
+    "source_name": "ChatGPT",
+    "jurisdiction_id": "CA",
+    "generated_date": "2026-03-20",
+    "generated_by": "GPT-5.3",
+    "record_count": 5,
+    "proposed_count": 0,
+    "new_terms_proposed": [],
+    "json_run_notes": "Selected core California whistleblower and retaliation statutes covering private and public sectors. Some statute URLs sourced from secondary providers due to lack of direct official links. Certain procedural and burden details may require human verification against current legislative text.",
+    "batch_completed": "2026-03-20 10:00 UTC"
+  },
+  "records": [
+    {
+      "jurisdiction_id": "CA",
+      "statute_id": "CA-1102.5",
+      "official_name": "California Labor Code Section 1102.5",
+      "common_name": "California Whistleblower Protection Act",
+      "legal_basis": {
+        "statute_citation": "Cal. Lab. Code § 1102.5",
+        "disclosure_types": [
+          "public-corruption-ethics",
+          "environmental-protection",
+          "workplace-employment"
+        ],
+        "protected_class": [
+          "corporate-staff",
+          "former-employee"
+        ],
+        "disclosure_targets": [
+          "internal-supervisor",
+          "agency-state",
+          "law-enforcement"
+        ],
+        "adverse_action_scope": "Prohibits retaliation for disclosing information about violations of state or federal law."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": false,
+        "limit_value": 3,
+        "limit_unit": "years",
+        "trigger": "date of retaliatory action",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "process_type": [
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "demotion",
+          "harassment"
+        ],
+        "remedies": [
+          "reinstatement",
+          "back-pay",
+          "compensatory-damages",
+          "attorney-fees"
+        ],
+        "fee_shifting": [
+          "unilateral-pro-plaintiff"
+        ]
+      },
+      "burden_of_proof": {
+        "employee_standard": "preponderance of evidence",
+        "employer_defense": "clear and convincing evidence same decision",
+        "burden_of_proof_flag": "burden-shifting"
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://law.justia.com/codes/california/code-lab/division-2/part-3/chapter-5/article-3/section-1102-5/",
+        "is_official": false,
+        "url_source": "law.justia.com",
+        "is_pdf": false
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      "_review_notes": "Primary California whistleblower statute covering private-sector employees. Broad protections for internal and external disclosures. Reviewer should confirm current statute of limitations and burden-shifting standards."
+    },
+    {
+      "jurisdiction_id": "CA",
+      "statute_id": "CA-6310",
+      "official_name": "California Labor Code Section 6310",
+      "common_name": "Occupational Safety Whistleblower Protection",
+      "legal_basis": {
+        "statute_citation": "Cal. Lab. Code § 6310",
+        "disclosure_types": [
+          "occupational-health-safety"
+        ],
+        "protected_class": [
+          "corporate-staff"
+        ],
+        "disclosure_targets": [
+          "agency-state",
+          "internal-supervisor"
+        ],
+        "adverse_action_scope": "Protects employees who report unsafe working conditions or file safety complaints."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": false,
+        "limit_value": 6,
+        "limit_unit": "months",
+        "trigger": "date of violation",
+        "exhaustion_required": true,
+        "exhaustion_details": "Complaint filed with California Labor Commissioner"
+      },
+      "enforcement": {
+        "primary_agency": "California Labor Commissioner",
+        "process_type": [
+          "administrative-complaint"
+        ],
+        "adverse_action": [
+          "termination",
+          "disciplinary-action"
+        ],
+        "remedies": [
+          "reinstatement",
+          "back-pay"
+        ],
+        "fee_shifting": [
+          "discretionary"
+        ]
+      },
+      "burden_of_proof": {},
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://law.justia.com/codes/california/code-lab/division-5/part-1/chapter-2/article-1/section-6310/",
+        "is_official": false,
+        "url_source": "law.justia.com",
+        "is_pdf": false
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      "_review_notes": "Focuses specifically on workplace safety complaints. Requires administrative exhaustion. Reviewer should verify filing deadlines and procedural requirements."
+    },
+    {
+      "jurisdiction_id": "CA",
+      "statute_id": "CA-98.6",
+      "official_name": "California Labor Code Section 98.6",
+      "common_name": "Retaliation for Labor Complaints",
+      "legal_basis": {
+        "statute_citation": "Cal. Lab. Code § 98.6",
+        "disclosure_types": [
+          "wage-hour-violations"
+        ],
+        "protected_class": [
+          "corporate-staff"
+        ],
+        "disclosure_targets": [
+          "agency-state",
+          "internal-supervisor"
+        ],
+        "adverse_action_scope": "Prohibits retaliation for filing wage or labor complaints."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": false,
+        "limit_value": 6,
+        "limit_unit": "months",
+        "trigger": "date of retaliation",
+        "exhaustion_required": true,
+        "exhaustion_details": "Administrative complaint required"
+      },
+      "enforcement": {
+        "process_type": [
+          "administrative-complaint"
+        ],
+        "adverse_action": [
+          "termination",
+          "pay-reduction"
+        ],
+        "remedies": [
+          "reinstatement",
+          "lost-wages"
+        ],
+        "fee_shifting": [
+          "discretionary"
+        ]
+      },
+      "burden_of_proof": {},
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://law.justia.com/codes/california/code-lab/division-1/chapter-4/section-98-6/",
+        "is_official": false,
+        "url_source": "law.justia.com",
+        "is_pdf": false
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      "_review_notes": "Covers retaliation tied to wage and labor law enforcement. Often overlaps with other whistleblower statutes. Reviewer should verify interplay with 1102.5."
+    },
+    {
+      "jurisdiction_id": "CA",
+      "statute_id": "CA-1102.6",
+      "official_name": "California Labor Code Section 1102.6",
+      "common_name": "Whistleblower Burden of Proof",
+      "legal_basis": {
+        "statute_citation": "Cal. Lab. Code § 1102.6",
+        "disclosure_types": [
+          "public-corruption-ethics"
+        ],
+        "protected_class": [
+          "corporate-staff"
+        ],
+        "disclosure_targets": [
+          "agency-state"
+        ],
+        "adverse_action_scope": "Establishes burden-shifting framework in whistleblower retaliation claims."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": true,
+        "limit_value": 0,
+        "limit_unit": "years"
+      },
+      "enforcement": {
+        "process_type": [
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "demotion"
+        ],
+        "remedies": [
+          "compensatory-damages"
+        ],
+        "fee_shifting": [
+          "unilateral-pro-plaintiff"
+        ]
+      },
+      "burden_of_proof": {
+        "employee_standard": "contributing factor",
+        "employer_defense": "clear and convincing evidence",
+        "burden_of_proof_flag": "burden-shifting"
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://law.justia.com/codes/california/code-lab/division-2/part-3/chapter-5/article-3/section-1102-6/",
+        "is_official": false,
+        "url_source": "law.justia.com",
+        "is_pdf": false
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      "_review_notes": "Procedural statute defining burden of proof in whistleblower cases. Works in tandem with 1102.5. Reviewer should confirm scope and applicability."
+    },
+    {
+      "jurisdiction_id": "CA",
+      "statute_id": "CA-8547",
+      "official_name": "California Government Code Section 8547",
+      "common_name": "California Whistleblower Protection Act (State Employees)",
+      "legal_basis": {
+        "statute_citation": "Cal. Gov. Code § 8547",
+        "disclosure_types": [
+          "public-corruption-ethics"
+        ],
+        "protected_class": [
+          "state-employee"
+        ],
+        "disclosure_targets": [
+          "agency-state",
+          "law-enforcement"
+        ],
+        "adverse_action_scope": "Protects state employees who report improper governmental activities."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": false,
+        "limit_value": 12,
+        "limit_unit": "months",
+        "trigger": "date of retaliation",
+        "exhaustion_required": true,
+        "exhaustion_details": "Complaint filed with State Personnel Board"
+      },
+      "enforcement": {
+        "primary_agency": "California State Personnel Board",
+        "process_type": [
+          "state-agency-complaint"
+        ],
+        "adverse_action": [
+          "termination",
+          "disciplinary-action"
+        ],
+        "remedies": [
+          "reinstatement",
+          "back-pay"
+        ],
+        "fee_shifting": [
+          "discretionary"
+        ]
+      },
+      "burden_of_proof": {},
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://law.justia.com/codes/california/code-gov/title-2/division-5/part-2-5/chapter-6-5/article-1/section-8547/",
+        "is_official": false,
+        "url_source": "law.justia.com",
+        "is_pdf": false
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      "_review_notes": "Applies specifically to California state employees. Includes administrative process through State Personnel Board. Reviewer should confirm deadlines and scope."
+    }
+  ],
+  "integrity": {
+    "with_errors": true,
+    "error_details": [
+      "Some disclosure_types entries (e.g., workplace-employment) used parent-level concept instead of strict child slug compliance",
+      "Statute URLs rely on secondary sources; official legislature URLs not verified",
+      "Statute of limitations values for CA-1102.5 and CA-8547 may require confirmation from primary sources",
+      "No case citations included due to inability to verify URLs from approved case law sources"
+    ],
+    "error_count": 4
+  }
+}

@@ -69,6 +69,8 @@
  *        - Added ws_jx_flag_source_url to seeder $meta_fields write block.
  */
 
+ //@todo - entry_points array reserved for prompt generator use — populate from production review data.
+
 defined( 'ABSPATH' ) || exit;
 
 $_ws_jx_matrix = [

@@ -74,6 +74,12 @@
  * 3.1.1  Pass 2 ACF audit fix:
  *        - Renamed tab key tab_ws_interp_plain_language → field_ws_interp_plain_language
  *          for convention consistency.
+ * 3.4.0  Stamp field centralization:
+ *        - Removed Authorship & Review tab and all stamp fields — now registered
+ *          centrally in acf-stamp-fields.php (group_ws_stamp_fields, menu_order 90).
+ *        - Removed Plain Language tab and all plain English fields — now registered
+ *          centrally in acf-plain-english-fields.php (menu_order 85).
+ *        - ws_interp_last_reviewed retained as a content-owned field.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -276,61 +282,14 @@ function ws_register_acf_jx_interpretations() {
                 'return_format' => 'id',
             ],
 
-            // ────────────────────────────────────────────────────────────────
-            // Tab: Authorship & Review
-            // ────────────────────────────────────────────────────────────────
+            // ── Tab: Authorship & Review ──────────────────────────────────
+            // Removed — registered centrally in acf-stamp-fields.php
+            // (group_ws_stamp_fields, menu_order 90).
 
-            [
-                'key'   => 'field_interp_tab_authorship',
-                'label' => 'Authorship & Review',
-                'type'  => 'tab',
-            ],
-
-            [
-                'key'           => 'field_last_edited_author',
-                'label'         => 'Last Edited By',
-                'name'          => 'last_edited_author',
-                'type'          => 'user',
-                'instructions'  => 'Stamped automatically on every save. Editable by administrators only.',
-                'role'          => [ 'author', 'editor', 'administrator' ],
-                'return_format' => 'array',
-                'wrapper'       => [ 'width' => '34' ],
-            ],
-
-            [
-                'key'          => 'field_date_created',
-                'label'        => 'Date Created',
-                'name'         => 'date_created',
-                'type'         => 'text',
-                'instructions' => 'Set automatically on first save. Read only.',
-                'readonly'     => 1,
-                'disabled'     => 1,
-                'wrapper'      => [ 'width' => '33' ],
-            ],
-
-            [
-                'key'          => 'field_last_edited',
-                'label'        => 'Last Edited',
-                'name'         => 'last_edited',
-                'type'         => 'text',
-                'instructions' => 'Stamped automatically on every save. Read only.',
-                'readonly'     => 1,
-                'disabled'     => 1,
-                'wrapper'      => [ 'width' => '33' ],
-            ],
-
-            [
-                'key'           => 'field_create_author',
-                'label'         => 'Created By',
-                'name'          => 'create_author',
-                'type'          => 'user',
-                'instructions'  => 'Stamped automatically on first save. Read only.',
-                'role'          => [ 'author', 'editor', 'administrator' ],
-                'return_format' => 'id',
-                'readonly'      => 1,
-                'disabled'      => 1,
-                'wrapper'       => [ 'width' => '33' ],
-            ],
+            // ── Last Verified Date ────────────────────────────────────────
+            //
+            // Content-owned field — not a stamp. Retained here in the
+            // interpretation's own group.
 
             [
                 'key'          => 'field_ws_interp_last_reviewed',
@@ -340,81 +299,9 @@ function ws_register_acf_jx_interpretations() {
                 'instructions' => 'Update this date each time the record is meaningfully revised.',
             ],
 
-            // ── Tab: Plain Language (Phase 9.2) ───────────────────────────
-
-            [
-                'key'   => 'field_ws_interp_plain_language',
-                'label' => 'Plain Language',
-                'type'  => 'tab',
-            ],
-            [
-                'key'           => 'field_has_plain_english',
-                'label'         => 'Has Plain Language Version',
-                'name'          => 'has_plain_english',
-                'type'          => 'true_false',
-                'instructions'  => 'Enable when a plain-language version of this interpretation has been written below.',
-                'ui'            => 1,
-                'ui_on_text'    => 'Yes',
-                'ui_off_text'   => 'No',
-                'default_value' => 0,
-            ],
-            [
-                'key'               => 'field_plain_english_wysiwyg',
-                'label'             => 'Plain Language Content',
-                'name'              => 'plain_english_wysiwyg',
-                'type'              => 'wysiwyg',
-                'instructions'      => 'Plain-language explanation of this court interpretation for non-experts.',
-                'tabs'              => 'all',
-                'toolbar'           => 'full',
-                'media_upload'      => 0,
-                'conditional_logic' => [ [ [
-                    'field'    => 'field_has_plain_english',
-                    'operator' => '==',
-                    'value'    => '1',
-                ] ] ],
-            ],
-            [
-                'key'           => 'field_plain_english_reviewed',
-                'label'         => 'Plain Language Reviewed',
-                'name'          => 'plain_english_reviewed',
-                'type'          => 'true_false',
-                'instructions'  => 'Check when a human has reviewed and approved the plain-language content.',
-                'ui'            => 1,
-                'ui_on_text'    => 'Reviewed',
-                'ui_off_text'   => 'Pending',
-                'default_value' => 0,
-            ],
-            [
-                'key'           => 'field_plain_english_reviewed_by',
-                'label'         => 'Reviewed By',
-                'name'          => 'plain_english_reviewed_by',
-                'type'          => 'user',
-                'instructions'  => 'Auto-stamped when Plain Language Reviewed is first enabled.',
-                'role'          => [ 'author', 'editor', 'administrator' ],
-                'return_format' => 'id',
-                'readonly'      => 1,
-                'disabled'      => 1,
-            ],
-            [
-                'key'           => 'field_plain_english_by',
-                'label'         => 'Summarized By',
-                'name'          => 'plain_english_by',
-                'type'          => 'user',
-                'instructions'  => 'Auto-stamped on first save after plain language content is created.',
-                'role'          => [ 'author', 'editor', 'administrator' ],
-                'return_format' => 'id',
-                'readonly'      => 1,
-                'disabled'      => 1,
-            ],
-            [
-                'key'          => 'field_plain_english_date',
-                'label'        => 'Summarized Date',
-                'name'         => 'plain_english_date',
-                'type'         => 'text',
-                'instructions' => 'Auto-stamped on first save after plain language content is created. Read only.',
-                'readonly'     => 1,
-                'disabled'     => 1,
-            ],
+            // ── Tab: Plain Language ───────────────────────────────────────
+            // Removed — registered centrally in acf-plain-english-fields.php
+            // (group_ws_plain_english_fields, menu_order 85).
 
             // ── Tab: Reference Materials ───────────────────────────────────
             //
