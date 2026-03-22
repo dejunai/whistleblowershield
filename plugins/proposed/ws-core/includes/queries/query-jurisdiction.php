@@ -46,18 +46,19 @@
  *
  * STAMP META KEYS
  * ---------------
- * All CPTs share identical unprefixed stamp meta key names:
+ * All CPTs share identical ws_auto_ prefixed stamp meta keys (see ws-core.php
+ * META KEY NAMING RULES). The GMT audit keys are private (_ws_auto_*) and are
+ * not exposed through the query layer:
  *
- *      date_created        — local date (Y-m-d), written once
- *      date_created_gmt    — GMT date (Y-m-d), written once
- *      create_author       — WP user ID, written once
- *      last_edited         — local date (Y-m-d), written every save
- *      last_edited_gmt     — GMT date (Y-m-d), written every save
- *      last_edited_author  — WP user ID, written every save (admin-overridable)
+ *      ws_auto_date_created        — local date (Y-m-d), written once
+ *      ws_auto_create_author       — WP user ID, written once
+ *      ws_auto_last_edited         — local date (Y-m-d), written every save
+ *      ws_auto_last_edited_author  — WP user ID, written every save (admin-overridable)
  *
  * DATASET RETURN FORMAT
  * ---------------------
- * All dataset functions return a consistent base array:
+ * All dataset functions return a consistent base array. Note: 'record' keys
+ * use short aliases — they are PHP array keys, not meta key names:
  *
  *      [
  *          'id'      => int,
@@ -66,14 +67,12 @@
  *          'status'  => string,
  *          'content' => string,  // raw post_content — apply the_content in render layer
  *          'record'  => [
- *              'create_author'      => int,    // WP user ID
- *              'author_name'        => string, // display name for shortcode use
- *              'date_created'       => string, // Y-m-d local
- *              'date_created_gmt'   => string, // Y-m-d GMT
- *              'last_edited_author' => int,    // WP user ID
- *              'editor_name'        => string, // display name for shortcode use
- *              'last_edited'        => string, // Y-m-d local
- *              'last_edited_gmt'    => string, // Y-m-d GMT
+ *              'create_author'      => int,    // WP user ID (ws_auto_create_author)
+ *              'author_name'        => string, // display name resolved from create_author
+ *              'date_created'       => string, // Y-m-d local (ws_auto_date_created)
+ *              'last_edited_author' => int,    // WP user ID (ws_auto_last_edited_author)
+ *              'editor_name'        => string, // display name resolved from last_edited_author
+ *              'last_edited'        => string, // Y-m-d local (ws_auto_last_edited)
  *          ],
  *      ]
  *
@@ -133,6 +132,25 @@
  *        returns raw effective_date and post_date; formatting removed.
  *        save_post_jurisdiction hook consolidated: cache invalidation and
  *        ws_jx_term_id write combined in one callback.
+ * 3.2.0  Legal update system overhaul and field name audit:
+ *        - Fixed 8 get_field() calls missing the jx_ infix (ws_gov_portal_url,
+ *          ws_executive_url, etc. → ws_jx_gov_portal_url, ws_jx_executive_url, etc.)
+ *          to match acf-jurisdictions.php field names.
+ *        - ws_jurisdiction_type → ws_jurisdiction_class throughout, matching the
+ *          ACF field name as of acf-jurisdictions.php v3.0+.
+ *        - ws_get_legal_updates_data(): new $public_only parameter; excludes
+ *          update_type 'internal' and 'other' when true — for public shortcodes.
+ *        - Jurisdiction filter replaced: meta_query on ws_update_jurisdiction term ID
+ *          → tax_query on ws_jurisdiction taxonomy. Requires save_terms=1 (ACF v3.5.0)
+ *          and wp_set_post_terms() in the hook (v1.1.0).
+ *        - Return array expanded: added post_id, update_date, update_type,
+ *          multi_jurisdiction; source_post_id and source_post_type moved from
+ *          get_post_field() to get_post_meta() (correct function for custom meta).
+ *        - ws_update_source_url renamed from ws_update_source to comply with
+ *          project convention that all URL-valued meta keys end in _url.
+ *        - Return key renamed summary_html → summary_wysiwyg to accurately
+ *          reflect that the field is a wysiwyg ACF type (content is sanitized
+ *          via wp_kses_post before return; safe to echo directly).
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -178,14 +196,14 @@ function ws_resolve_display_name( $user_id ) {
  */
 function ws_build_record_array( $post_id ) {
 
-    $create_author_id      = (int) get_post_meta( $post_id, 'create_author',      true );
-    $last_edited_author_id = (int) get_post_meta( $post_id, 'last_edited_author', true );
+    $create_author_id      = (int) get_post_meta( $post_id, 'ws_auto_create_author',      true );
+    $last_edited_author_id = (int) get_post_meta( $post_id, 'ws_auto_last_edited_author', true );
 
     return [
         'create_author'      => $create_author_id,
         'author_name'        => ws_resolve_display_name( $create_author_id ),
-        'date_created'       => get_post_meta( $post_id, 'date_created',     true ),
-        'last_edited'        => get_post_meta( $post_id, 'last_edited',      true ),
+        'date_created'       => get_post_meta( $post_id, 'ws_auto_date_created', true ),
+        'last_edited'        => get_post_meta( $post_id, 'ws_auto_last_edited',  true ),
         'last_edited_author' => $last_edited_author_id,
         'editor_name'        => ws_resolve_display_name( $last_edited_author_id ),
 		];
@@ -210,15 +228,15 @@ function ws_build_record_array( $post_id ) {
  */
 function ws_build_plain_english_array( $post_id ) {
 
-    $plain_english_reviewed_by_id = (int) get_post_meta( $post_id, 'plain_english_reviewed_by', true );
-    $plain_english_by_id          = (int) get_post_meta( $post_id, 'plain_english_by',          true );
+    $plain_english_reviewed_by_id = (int) get_post_meta( $post_id, 'ws_auto_plain_english_reviewed_by', true );
+    $plain_english_by_id          = (int) get_post_meta( $post_id, 'ws_auto_plain_english_by',          true );
 
     return [
         'has_plain_english'             => (bool) get_post_meta( $post_id, 'has_plain_english', true ),
         'plain_english_wysiwyg'         => get_post_meta( $post_id, 'plain_english_wysiwyg', true ),
         'plain_english_by'              => $plain_english_by_id,
         'plain_english_by_name'         => ws_resolve_display_name( $plain_english_by_id ),
-        'plain_english_date'            => get_post_meta( $post_id, 'plain_english_date', true ),
+        'plain_english_date'            => get_post_meta( $post_id, 'ws_auto_plain_english_date', true ),
         'plain_english_reviewed'        => (bool) get_post_meta( $post_id, 'plain_english_reviewed', true ),
         'plain_english_reviewed_by'     => $plain_english_reviewed_by_id,
         'plain_english_reviewed_name'   => ws_resolve_display_name( $plain_english_reviewed_by_id ),
@@ -343,14 +361,14 @@ function ws_get_jurisdiction_data( $input = null ) {
 
         // ── Government Links ─────────────────────────────────────────────────
         'gov' => [
-            'portal_url'        => get_field( 'ws_gov_portal_url',     $post_id ),
-            'portal_label'      => get_field( 'ws_gov_portal_label',   $post_id ),
-            'executive_url'     => get_field( 'ws_executive_url',      $post_id ),
-            'executive_label'   => get_field( 'ws_executive_label',    $post_id ),
-            'wb_auth_url'       => get_field( 'ws_wb_authority_url',   $post_id ),
-            'wb_auth_label'     => get_field( 'ws_wb_authority_label', $post_id ),
-            'legislature_url'   => get_field( 'ws_legislature_url',    $post_id ),
-            'legislature_label' => get_field( 'ws_legislature_label',  $post_id ),
+            'portal_url'        => get_field( 'ws_jx_gov_portal_url',     $post_id ),
+            'portal_label'      => get_field( 'ws_jx_gov_portal_label',   $post_id ),
+            'executive_url'     => get_field( 'ws_jx_executive_url',      $post_id ),
+            'executive_label'   => get_field( 'ws_jx_executive_label',    $post_id ),
+            'wb_auth_url'       => get_field( 'ws_jx_wb_authority_url',   $post_id ),
+            'wb_auth_label'     => get_field( 'ws_jx_wb_authority_label', $post_id ),
+            'legislature_url'   => get_field( 'ws_jx_legislature_url',    $post_id ),
+            'legislature_label' => get_field( 'ws_jx_legislature_label',  $post_id ),
         ],
 
         // ── Record Management ─────────────────────────────────────────────────
@@ -408,9 +426,9 @@ function ws_get_jx_summary_data( $jx_term_id ) {
         'url'           => get_permalink( $sid ),
         'status'        => get_post_status( $sid ),
         // Content fields
-        'content'       => get_post_meta( $sid, 'ws_jurisdiction_summary', true ),
+        'content'       => get_post_meta( $sid, 'ws_jurisdiction_summary_wysiwyg', true ),
         'sources'       => get_post_meta( $sid, 'ws_jx_summary_sources',   true ),
-        'limitations'   => get_post_meta( $sid, 'ws_jx_limitations',       true ),
+        'limitations'   => get_post_meta( $sid, 'ws_jx_limitations_wysiwyg',       true ),
         // Review field — jx-summary uses last_reviewed directly (no has_plain_english gate)
 		// 'has_plain_english' is always true for jx-summary no meta flag required
         // 'last_reviewed' => get_post_meta( $sid, 'last_reviewed', true ), // - depreciated
@@ -479,11 +497,11 @@ function ws_get_jx_statute_data( $jx_term_id ) {
                 'official_name'           => get_post_meta( $sid, 'ws_jx_statute_official_name',              true ),
                 'limit_value'             => get_post_meta( $sid, 'ws_jx_statute_limit_value',                true ),
                 'limit_unit'              => get_post_meta( $sid, 'ws_jx_statute_limit_unit',                 true ),
-                'trigger'                 => get_post_meta( $sid, 'ws_jx_statute_trigger',                    true ),
+                'trigger'                 => get_post_meta( $sid, 'ws_jx_statute_limit_trigger',               true ),
                 'tolling_notes'           => get_post_meta( $sid, 'ws_jx_statute_tolling_notes',              true ),
                 'exhaustion_required'     => (bool) get_post_meta( $sid, 'ws_jx_statute_exhaustion_required', true ),
                 'exhaustion_details'      => get_post_meta( $sid, 'ws_jx_statute_exhaustion_details',         true ),
-                'burden_of_proof'         => get_post_meta( $sid, 'ws_statute_burden_of_proof',               true ),
+                'burden_of_proof'         => get_post_meta( $sid, 'ws_jx_statute_burden_of_proof',            true ),
                 'burden_of_proof_details' => get_post_meta( $sid, 'ws_statute_burden_of_proof_details',       true ),
                 // Plain language fields
                 'plain'  => ws_build_plain_english_array( $sid ),
@@ -607,10 +625,10 @@ function ws_get_jx_citation_data( $jx_term_id ) {
                 'content' => get_post_field( 'post_content', $cid ),
                 'is_fed'  => $is_fed,
                 // Citation-specific fields
-                'type'     => get_post_meta( $cid, 'ws_jx_cite_type',   true ),
-                'label'    => get_post_meta( $cid, 'ws_jx_cite_label',  true ),
-                'cite_url' => get_post_meta( $cid, 'ws_jx_cite_url',    true ),
-                'is_pdf'   => (bool) get_post_meta( $cid, 'ws_jx_cite_is_pdf', true ),
+                'type'     => get_post_meta( $cid, 'ws_jx_citation_type',   true ),
+                'label'    => get_post_meta( $cid, 'ws_jx_citation_label',  true ),
+                'cite_url' => get_post_meta( $cid, 'ws_jx_citation_url',    true ),
+                'is_pdf'   => (bool) get_post_meta( $cid, 'ws_jx_citation_is_pdf', true ),
                 'order'    => (int)  get_post_meta( $cid, 'order',             true ),
                 // Plain language fields
                 'plain'  => ws_build_plain_english_array( $cid ),
@@ -686,14 +704,14 @@ function ws_get_jx_interpretation_data( $jx_term_id ) {
                 'order'   => (int) get_post_meta( $iid, 'order', true ),
                 'is_fed'  => $is_fed,
                 // Interpretation-specific fields
-                'case_name'   => get_post_meta( $iid, 'ws_interp_case_name', true ),
-                'citation'    => get_post_meta( $iid, 'ws_interp_citation',  true ),
-                'opinion_url' => get_post_meta( $iid, 'ws_interp_url',       true ),
-                'court'       => get_post_meta( $iid, 'ws_interp_court',     true ),
-                'year'        => get_post_meta( $iid, 'ws_interp_year',      true ),
-                'favorable'   => (bool) get_post_meta( $iid, 'ws_interp_favorable', true ),
-                'summary'     => get_post_meta( $iid, 'ws_interp_summary',   true ),
-                'statute_id'  => (int) get_post_meta( $iid, 'ws_statute_id', true ),
+                'case_name'   => get_post_meta( $iid, 'ws_jx_interp_case_name',     true ),
+                'citation'    => get_post_meta( $iid, 'ws_jx_interp_case_citation', true ),
+                'opinion_url' => get_post_meta( $iid, 'ws_jx_interp_url',           true ),
+                'court'       => get_post_meta( $iid, 'ws_jx_interp_court',         true ),
+                'year'        => get_post_meta( $iid, 'ws_jx_interp_year',          true ),
+                'favorable'   => (bool) get_post_meta( $iid, 'ws_jx_interp_favorable', true ),
+                'summary'     => get_post_meta( $iid, 'ws_jx_interp_summary',       true ),
+                'statute_id'  => (int) get_post_meta( $iid, 'ws_jx_interp_statute_id', true ),
                 // Plain language fields
                 'plain'  => ws_build_plain_english_array( $iid ),
                 // Record management
@@ -759,7 +777,7 @@ function ws_get_agency_data( $jx_term_id ) {
             'agency_url'    => get_post_meta( $aid, 'ws_agency_url',             true ),
             'reporting_url' => get_post_meta( $aid, 'ws_agency_reporting_url',   true ),
             'phone'         => get_post_meta( $aid, 'ws_agency_phone',           true ),
-            'anonymous'     => (bool) get_post_meta( $aid, 'ws_agency_anonymous_allowed', true ),
+            'anonymous'     => (bool) get_post_meta( $aid, 'ws_agency_accepts_anonymous', true ),
             'reward'        => (bool) get_post_meta( $aid, 'ws_agency_reward_program',    true ),
             // Plain language fields
             'plain'  => ws_build_plain_english_array( $aid ),
@@ -813,14 +831,14 @@ function ws_get_assist_org_data( $jx_term_id ) {
             'url'           => get_permalink( $oid ),
             'status'        => get_post_status( $oid ),
             // Assist-org fields
-            'ao_name'       => get_post_meta( $oid, 'ws_ao_name',          true ),
-            'ao_url'        => get_post_meta( $oid, 'ws_ao_website_url',   true ),
-            'ao_intake_url' => get_post_meta( $oid, 'ws_ao_intake_url',    true ),
-            'ao_phone'      => get_post_meta( $oid, 'ws_ao_phone',         true ),
-            'ao_mission'    => get_post_meta( $oid, 'ws_ao_mission',       true ),
-            'ao_provides'   => get_post_meta( $oid, 'ws_ao_provides',      true ),
-            'ao_cost_model' => get_post_meta( $oid, 'ws_ao_cost_model',    true ),
-            'ao_anonymous'  => (bool) get_post_meta( $oid, 'ws_ao_accepts_anonymous', true ),
+            'ao_name'       => get_post_meta( $oid, 'ws_aorg_name',             true ),
+            'ao_url'        => get_post_meta( $oid, 'ws_aorg_website_url',      true ),
+            'ao_intake_url' => get_post_meta( $oid, 'ws_aorg_intake_url',       true ),
+            'ao_phone'      => get_post_meta( $oid, 'ws_aorg_phone',            true ),
+            'ao_mission'    => get_post_meta( $oid, 'ws_aorg_mission',          true ),
+            'ao_provides'   => get_post_meta( $oid, 'ws_aorg_provides',         true ),
+            'ao_cost_model' => get_post_meta( $oid, 'ws_aorg_cost_model',       true ),
+            'ao_anonymous'  => (bool) get_post_meta( $oid, 'ws_aorg_accepts_anonymous', true ),
             // Plain language fields
             'plain'  => ws_build_plain_english_array( $oid ),
             // Record management
@@ -913,7 +931,7 @@ function ws_get_jurisdiction_index_data() {
         if ( $query->have_posts() ) {
             foreach ( $query->posts as $post ) {
 
-                $type     = get_field( 'ws_jurisdiction_type', $post->ID ) ?: 'state';
+                $type     = get_field( 'ws_jurisdiction_class', $post->ID ) ?: 'state';
                 $jx_slugs = wp_get_post_terms( $post->ID, 'ws_jurisdiction', [ 'fields' => 'slugs' ] );
                 $code     = ( ! is_wp_error( $jx_slugs ) && ! empty( $jx_slugs ) ) ? strtoupper( $jx_slugs[0] ) : '';
 
@@ -950,15 +968,22 @@ function ws_get_jurisdiction_index_data() {
 // Centralises all ws-legal-update field reads so the shortcode layer
 // never calls get_field() or get_post_meta() directly.
 //
+// Jurisdiction filtering uses a tax_query on ws_jurisdiction (not post_meta).
+// This requires save_terms=1 on the ACF jurisdiction field and wp_set_post_terms()
+// in the hook — both enforced as of acf-legal-updates.php v3.5.0 and
+// admin-major-edit-hook.php v1.1.0.
+//
 // Dates are returned as stored (Y-m-d / MySQL datetime). The render layer
 // is responsible for formatting dates for display.
 //
-// @param int $jx_id  Jurisdiction post ID to scope results. 0 = site-wide.
-// @param int $count  Maximum number of records to return.
-// @return array      Array of data items ready for the render layer.
+// @param int  $jx_id       Jurisdiction post ID to scope results. 0 = site-wide.
+// @param int  $count       Maximum number of records to return.
+// @param bool $public_only If true, excludes 'internal' and 'other' update types.
+//                          Pass true for all public-facing shortcode/render calls.
+// @return array            Array of data items ready for the render layer.
 // ════════════════════════════════════════════════════════════════════════════
 
-function ws_get_legal_updates_data( $jx_id = 0, $count = 5 ) {
+function ws_get_legal_updates_data( $jx_id = 0, $count = 5, $public_only = false ) {
 
     $query_args = [
         'post_type'      => 'ws-legal-update',
@@ -970,12 +995,23 @@ function ws_get_legal_updates_data( $jx_id = 0, $count = 5 ) {
     ];
 
     if ( $jx_id ) {
-        // ws_update_jurisdiction is a taxonomy field that
-        // serialises post IDs — LIKE with a quoted ID matches within it.
-        $query_args['tax_query'] = [ [
-            'key'     => 'ws_update_jurisdiction',
-            'value'   => '"' . (int) $jx_id . '"',
-            'compare' => 'LIKE',
+        // Convert jurisdiction post ID → ws_jurisdiction term ID.
+        // Legal updates are linked via the taxonomy table (save_terms=1).
+        $jx_terms = wp_get_post_terms( $jx_id, 'ws_jurisdiction', [ 'fields' => 'ids' ] );
+        if ( ! is_wp_error( $jx_terms ) && ! empty( $jx_terms ) ) {
+            $query_args['tax_query'] = [ [
+                'taxonomy' => 'ws_jurisdiction',
+                'field'    => 'term_id',
+                'terms'    => (int) $jx_terms[0],
+            ] ];
+        }
+    }
+
+    if ( $public_only ) {
+        $query_args['meta_query'] = [ [
+            'key'     => 'ws_legal_update_type',
+            'value'   => [ 'internal', 'other' ],
+            'compare' => 'NOT IN',
         ] ];
     }
 
@@ -989,16 +1025,30 @@ function ws_get_legal_updates_data( $jx_id = 0, $count = 5 ) {
     foreach ( $updates as $update ) {
         $uid     = $update->ID;
         $items[] = [
-            'title'          => get_the_title( $uid ),
-            'source_url'     => get_post_meta( $uid, 'ws_legal_update_source_url',    true ) ?: '',
-            'law_name'       => get_post_meta( $uid, 'ws_legal_update_law_name',      true ) ?: '',
-            'effective_date' => get_post_meta( $uid, 'ws_legal_update_effective_date', true ),
-            'post_date'      => get_post_field( 'post_date', $uid ),
-            'source_post_id'      => get_post_field( 'ws_legal_update_source_post_id', $uid ),
-            'source_post_type'      => get_post_field( 'ws_legal_update_source_post_type', $uid ),
-            'summary_html'   => wp_kses_post( get_post_meta( $uid, 'ws_legal_update_summary', true ) ?: '' ),
-            // Record management
-            'record' => ws_build_record_array( $uid ),
+            // ── Identity ──────────────────────────────────────────────────
+            'post_id'            => $uid,
+            'title'              => get_the_title( $uid ),
+
+            // ── Dates ─────────────────────────────────────────────────────
+            'update_date'        => get_post_meta( $uid, 'ws_legal_update_date',                    true ),
+            'effective_date'     => get_post_meta( $uid, 'ws_legal_update_effective_date',    true ),
+            'post_date'          => get_post_field( 'post_date', $uid ),
+
+            // ── Classification ────────────────────────────────────────────
+            'update_type'        => get_post_meta( $uid, 'ws_legal_update_type',                    true ),
+            'multi_jurisdiction' => (bool) get_post_meta( $uid, 'ws_legal_update_multi_jurisdiction', true ),
+
+            // ── Content ───────────────────────────────────────────────────
+            'law_name'           => get_post_meta( $uid, 'ws_legal_update_law_name',          true ) ?: '',
+            'source_url'         => get_post_meta( $uid, 'ws_legal_update_source_url',              true ) ?: '',
+            'summary_wysiwyg'    => wp_kses_post( get_post_meta( $uid, 'ws_legal_update_summary_wysiwyg', true ) ?: '' ),
+
+            // ── Source post backlink ──────────────────────────────────────
+            'source_post_id'     => (int) get_post_meta( $uid, 'ws_legal_update_source_post_id',   true ),
+            'source_post_type'   => get_post_meta(       $uid, 'ws_legal_update_source_post_type', true ),
+
+            // ── Record management ─────────────────────────────────────────
+            'record'             => ws_build_record_array( $uid ),
         ];
     }
 

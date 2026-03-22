@@ -29,11 +29,31 @@
 // ws_legal_update_effective_date    — today (Y-m-d local)
 // ws_legal_update_source_post_id    — source post ID
 // ws_legal_update_source_post_type  — source post type slug
-// stamp fields (date_created etc.)  — written by ws_acf_write_stamp_fields()
+// ws_legal_update_date              — today (Y-m-d local); mirrors effective_date
+// ws_legal_update_type              — derived from CPT slug (jx-statute→statute etc.)
+// ws_legal_update_law_name          — official name from source post's naming field;
+//                                     falls back to post title for jx-summary
+// ws_jurisdiction (taxonomy)        — term from source post; written via
+//                                     wp_set_post_terms() to taxonomy table
+// stamp fields (ws_auto_date_created etc.) — written by ws_acf_write_stamp_fields()
 //                                     at priority 20 on the new post's next
 //                                     acf/save_post — not triggered here since
 //                                     we use wp_insert_post directly. Stamp
 //                                     fields are written manually below.
+//
+// VERSION
+// -------
+// 1.0.0  Initial release — basic wp_insert_post + description/effective_date/
+//        source_post_id/source_post_type meta writes; stamp fields written manually.
+// 1.1.0  Legal update system overhaul:
+//        - Jurisdiction attached from source post via wp_set_post_terms() into
+//          ws_jurisdiction taxonomy table (not post_meta). Enables tax_query in
+//          the query layer.
+//        - ws_legal_update_date written (Y-m-d local) alongside effective_date.
+//        - ws_legal_update_type derived from source CPT slug (jx-statute→statute, etc.).
+//        - ws_legal_update_law_name auto-filled from the source post's best naming
+//          field: ws_jx_statute_official_name, ws_jx_citation_label, ws_jx_interp_case_name,
+//          or post title for jx-summary.
 // ════════════════════════════════════════════════════════════════════════════
 
 add_action( 'acf/save_post', 'ws_acf_log_major_edit', 20 );
@@ -123,14 +143,40 @@ function ws_acf_log_major_edit( $post_id ) {
 	update_post_meta( $update_id, 'ws_legal_update_source_post_id',   $post_id      );
 	update_post_meta( $update_id, 'ws_legal_update_source_post_type', $post_type    );
 
+	// ── Attach jurisdiction from source post ─────────────────────────────────────
+	// Write to taxonomy table (save_terms=1 on the ACF field) so tax_query works.
+	$jx_terms = wp_get_post_terms( $post_id, 'ws_jurisdiction', [ 'fields' => 'ids' ] );
+	if ( ! is_wp_error( $jx_terms ) && ! empty( $jx_terms ) ) {
+		wp_set_post_terms( $update_id, [ (int) $jx_terms[0] ], 'ws_jurisdiction' );
+	}
+
+	// ── Update date and type ──────────────────────────────────────────────────
+	update_post_meta( $update_id, 'ws_legal_update_date', $now_local );
+	$update_type = str_replace( 'jx-', '', $post_type );
+	update_post_meta( $update_id, 'ws_legal_update_type', $update_type );
+
+	// ── Law name — pull from the source post's best naming field ─────────────
+	$name_key_map = [
+		'jx-statute'        => 'ws_jx_statute_official_name',
+		'jx-citation'       => 'ws_jx_citation_label',
+		'jx-interpretation' => 'ws_jx_interp_case_name',
+		// jx-summary has no naming field — fall through to post title
+	];
+	$law_name = isset( $name_key_map[ $post_type ] )
+		? get_post_meta( $post_id, $name_key_map[ $post_type ], true )
+		: get_the_title( $post_id );
+	if ( $law_name ) {
+		update_post_meta( $update_id, 'ws_legal_update_law_name', $law_name );
+	}
+
 	// ── Stamp fields (written manually — wp_insert_post bypasses acf/save_post) ──
 
-	update_post_meta( $update_id, 'date_created',      $now_local );
-	update_post_meta( $update_id, 'date_created_gmt',  $now_gmt   );
-	update_post_meta( $update_id, 'create_author',     $user_id   );
-	update_post_meta( $update_id, 'last_edited',       $now_local );
-	update_post_meta( $update_id, 'last_edited_gmt',   $now_gmt   );
-	update_post_meta( $update_id, 'last_edited_author',$user_id   );
+	update_post_meta( $update_id, 'ws_auto_date_created',       $now_local );
+	update_post_meta( $update_id, '_ws_auto_date_created_gmt',  $now_gmt   );
+	update_post_meta( $update_id, 'ws_auto_create_author',      $user_id   );
+	update_post_meta( $update_id, 'ws_auto_last_edited',        $now_local );
+	update_post_meta( $update_id, '_ws_auto_last_edited_gmt',   $now_gmt   );
+	update_post_meta( $update_id, 'ws_auto_last_edited_author', $user_id   );
 
 	// ── Queue success notice ──────────────────────────────────────────────
 

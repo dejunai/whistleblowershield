@@ -81,7 +81,7 @@
  * 3.4.0  Stamp field centralization:
  *        - Removed stamp fields (last_edited_author, date_created, last_edited,
  *          create_author) from Authorship & Review tab — now registered centrally
- *          in acf-stamp-fields.php (group_ws_stamp_fields, menu_order 90).
+ *          in acf-stamp-fields.php (group_stamp_metadata, menu_order 90).
  *        - Renamed field key field_ws_jx_sum_plain_english_reviewed_by to
  *          field_plain_english_reviewed_by for consistency with all other CPTs.
  *          No downstream impact — admin-hooks.php references this field by meta
@@ -102,7 +102,7 @@ function ws_register_acf_jx_summary() {
 
     acf_add_local_field_group( [
 
-        'key'                   => 'group_jx_summary',
+        'key'                   => 'group_jx_summary_metadata',
         'title'                 => 'Jurisdiction Summary Metadata',
         'menu_order'            => 0,
         'position'              => 'normal',
@@ -122,14 +122,14 @@ function ws_register_acf_jx_summary() {
             // ── Tab: Content ──────────────────────────────────────────────
 
             [
-                'key'   => 'field_ws_jx_sum_content_tab',
+                'key'   => 'field_jx_sum_content_tab',
                 'label' => 'Content',
                 'type'  => 'tab',
             ],
             [
-                'key'          => 'field_ws_jurisdiction_summary',
+                'key'          => 'field_jurisdiction_summary',
                 'label'        => 'Jurisdiction Summary',
-                'name'         => 'ws_jurisdiction_summary',
+                'name'         => 'ws_jurisdiction_summary_wysiwyg',
                 'type'         => 'wysiwyg',
                 'instructions' => '<strong>IMPORTANT:</strong> Use the editor toolbar for all formatting. Do NOT paste raw Markdown (**, ##, ---). Content must be clean HTML. This field is rendered directly on the jurisdiction page.',
                 'required'     => 1,
@@ -139,7 +139,7 @@ function ws_register_acf_jx_summary() {
                 'delay'        => 0,
             ],
             [
-                'key'          => 'field_ws_jx_summary_sources',
+                'key'          => 'field_jx_summary_sources',
                 'label'        => 'Sources & Citations',
                 'name'         => 'ws_jx_summary_sources',
                 'type'         => 'textarea',
@@ -147,7 +147,7 @@ function ws_register_acf_jx_summary() {
                 'rows'         => 6,
             ],
             [
-                'key'          => 'field_ws_jx_summary_notes',
+                'key'          => 'field_jx_summary_notes',
                 'label'        => 'Internal Notes',
                 'name'         => 'ws_jx_summary_notes',
                 'type'         => 'textarea',
@@ -155,9 +155,9 @@ function ws_register_acf_jx_summary() {
                 'rows'         => 4,
             ],
             [
-                'key'          => 'field_ws_jx_limitations',
+                'key'          => 'field_jx_limitations',
                 'label'        => 'Limitations & Ramifications',
-                'name'         => 'ws_jx_limitations',
+                'name'         => 'ws_jx_limitations_wysiwyg',
                 'type'         => 'wysiwyg', // @todo - consider using 'repeater' type
                 'instructions' => 'Content for the Limitations and Ramifications section. Rendered automatically after the case law section on the jurisdiction page via [ws_jx_limitations]. Use the editor toolbar for all formatting — do NOT paste raw Markdown.',
                 'tabs'         => 'all',
@@ -178,7 +178,7 @@ function ws_register_acf_jx_summary() {
             // and appear via that group's Authorship & Review tab (menu_order 90).
 
             [
-                'key'   => 'field_ws_jx_sum_authorship_tab',
+                'key'   => 'field_jx_sum_authorship_tab',
                 'label' => 'Summary Review',
                 'type'  => 'tab',
             ],

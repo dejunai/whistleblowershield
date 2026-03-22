@@ -16,14 +16,18 @@
  *   Source & Verification (tab, side column)
  *
  *   Provenance cluster:
- *     source_method      Locked readonly text. Set at creation by hook.
- *                        Describes how the post originated at a process
- *                        level. Rendered publicly as a human phrase
- *                        linking to the methodology page anchor.
- *     source_name        Editable text. Identifies the specific source
- *                        within the method (e.g. 'Claude AI', 'Reuters').
- *                        Auto-populated as 'Direct' for matrix_seed and
- *                        human_created posts. Required before
+ *     source_method      Locked readonly. Auto-stamped at creation.
+ *                        Three write paths: ingest tooling calls
+ *                        ws_set_source_method(); manual admin creation
+ *                        defaults to human_created; matrix seeder writes
+ *                        matrix_seed directly. Admin-only visibility.
+ *     source_name        Locked readonly. Auto-stamped at creation.
+ *                        Identifies the specific source within the method
+ *                        (e.g. 'Claude AI', 'Direct'). Three write paths:
+ *                        ingest tooling calls ws_set_source_name();
+ *                        human_created and matrix_seed default to 'Direct';
+ *                        other methods leave empty until ingest sets it.
+ *                        Admin-only visibility. Required before
  *                        verification_status can be set to 'verified'.
  *     verified_by        Readonly text. Display name of the user who
  *                        first set verification_status to 'verified'.
@@ -74,16 +78,18 @@
  *   every record in the batch consistently without prompting.
  *   See ingest tooling documentation for the expected header schema.
  *
- * @todo  Grep codebase for 'source_method', 'source_name',
- *        'verification_status', 'verified_by', 'verified_date',
- *        'needs_review' to confirm no collision with existing post
- *        meta keys before deploying.
  *
  * VERSION
  * -------
  * 1.0.0  Initial implementation
  * 1.1.0  Added source_name field; conditional logic on verification_status;
- *        added feed_import constant; updated method table
+ *        added feed_import constant; updated method table.
+ * 1.2.0  ws_auto_ pass (ws-core v3.2.0): stamp field meta keys prefixed:
+ *        source_method → ws_auto_source_method, source_name → ws_auto_source_name,
+ *        verified_by → ws_auto_verified_by, verified_date → ws_auto_verified_date.
+ *        source_name locked readonly/disabled; both source fields hidden from
+ *        roles below administrator via ws_hide_source_fields_for_non_admins().
+ *        Docblock updated to reflect three-path ingest design.
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit;
@@ -96,7 +102,7 @@ function ws_register_source_verify_field_group() {
 
     acf_add_local_field_group( [
 
-        'key'      => 'group_source_verify',
+        'key'      => 'group_source_verify_metadata',
         'title'    => 'Source & Verification',
         'position' => 'side',
         'style'    => 'default',
@@ -143,7 +149,7 @@ function ws_register_source_verify_field_group() {
             [
                 'key'           => 'field_source_method',
                 'label'         => 'Source Method',
-                'name'          => 'source_method',
+                'name'          => 'ws_auto_source_method',
                 'type'          => 'text',
                 'instructions'  => 'Set automatically at post creation. Cannot be changed.',
                 'required'      => 0,
@@ -156,20 +162,20 @@ function ws_register_source_verify_field_group() {
             [
                 'key'           => 'field_source_name',
                 'label'         => 'Source Name',
-                'name'          => 'source_name',
+                'name'          => 'ws_auto_source_name',
                 'type'          => 'text',
-                'instructions'  => 'Identify the specific source within the method — e.g. "Claude AI", "Gemini", "Reuters", "Newsletter". Auto-set to "Direct" for matrix seed and manually created posts. Must be set before this post can be marked Verified.',
+                'instructions'  => 'Auto-set at creation: "Direct" for human and seeder posts; ingest tooling sets the tool or feed name. Admin-only.',
                 'required'      => 0,
                 'wrapper'       => [ 'class' => 'ws-source-name' ],
                 'default_value' => '',
-                'readonly'      => 0,
-                'disabled'      => 0,
+                'readonly'      => 1,
+                'disabled'      => 1,
             ],
 
             [
                 'key'           => 'field_verified_by',
                 'label'         => 'Verified By',
-                'name'          => 'verified_by',
+                'name'          => 'ws_auto_verified_by',
                 'type'          => 'text',
                 'instructions'  => 'Auto-stamped when verification status is set to Verified.',
                 'required'      => 0,
@@ -182,7 +188,7 @@ function ws_register_source_verify_field_group() {
             [
                 'key'           => 'field_verified_date',
                 'label'         => 'Verified Date',
-                'name'          => 'verified_date',
+                'name'          => 'ws_auto_verified_date',
                 'type'          => 'text',
                 'instructions'  => 'Auto-stamped when verification status is set to Verified.',
                 'required'      => 0,

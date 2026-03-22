@@ -74,7 +74,12 @@
  *
  * VERSION
  * -------
- * 2.1.0  Initial section renderer implementation
+ * 2.1.0  Initial section renderer implementation.
+ * 2.1.1  ws_render_legal_updates() @param docblock updated to match the
+ *        expanded return array from ws_get_legal_updates_data() v3.2.0:
+ *        added post_id, update_date, update_type, multi_jurisdiction,
+ *        source_post_id, source_post_type, record; removed stale
+ *        fmt_effective key. Return key renamed summary_html → summary_wysiwyg.
  */
 
 
@@ -520,19 +525,27 @@ function ws_render_footer( $data ) {
  * Renders the legal updates list.
  *
  * Outputs a .ws-legal-updates container with one .ws-legal-update-item
- * per update. All field data must be pre-fetched and pre-formatted by
- * the caller (ws_shortcode_legal_updates()).
+ * per update. All field data must be pre-fetched by the caller via
+ * ws_get_legal_updates_data(). Dates arrive as Y-m-d strings; format
+ * for display in the render layer before passing here.
  *
  * Called by the [ws_legal_updates] shortcode after data assembly.
  *
  * @param  array $items {
- *     Array of update data arrays, each containing:
- *     @type string $title         Update post title.
- *     @type string $source_url    Source URL, or empty string.
- *     @type string $law_name      Law / statute name, or empty string.
- *     @type string $fmt_effective Formatted effective date string, or empty.
- *     @type string $post_date     Formatted post date string.
- *     @type string $summary_html  Sanitized summary HTML, or empty string.
+ *     Array of update data arrays, each from ws_get_legal_updates_data():
+ *     @type int    $post_id          ws-legal-update post ID.
+ *     @type string $title            Update post title.
+ *     @type string $update_date      Date update was logged (Y-m-d local).
+ *     @type string $effective_date   Date the legal change takes effect (Y-m-d local).
+ *     @type string $post_date        MySQL post_date from WP core.
+ *     @type string $update_type      Update type slug (statute, citation, etc.).
+ *     @type bool   $multi_jurisdiction True if update affects more than one jurisdiction.
+ *     @type string $law_name         Official name of the affected law, or empty string.
+ *     @type string $source_url       Primary source URL, or empty string.
+ *     @type string $summary_wysiwyg  Sanitized wysiwyg HTML summary (wp_kses_post applied).
+ *     @type int    $source_post_id   Post ID of the source jx-* record, or 0.
+ *     @type string $source_post_type Post type slug of the source record, or empty string.
+ *     @type array  $record           Stamp fields — see ws_build_record_array().
  * }
  * @return string  HTML updates list block.
  */
@@ -569,9 +582,9 @@ function ws_render_legal_updates( $items ) {
                 <strong>Posted:</strong> <?php echo esc_html( $item['post_date'] ); ?>
             </p>
 
-            <?php if ( $item['summary_html'] ) : ?>
+            <?php if ( $item['summary_wysiwyg'] ) : ?>
             <div class="ws-legal-update-summary">
-                <?php echo $item['summary_html']; // Already passed through wp_kses_post ?>
+                <?php echo $item['summary_wysiwyg']; // Already passed through wp_kses_post ?>
             </div>
             <?php endif; ?>
 

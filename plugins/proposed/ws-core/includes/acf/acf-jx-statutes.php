@@ -1,4 +1,6 @@
 <?php
+defined( 'ABSPATH' ) || exit;
+
 /**
  * acf-jx-statutes.php
  *
@@ -68,6 +70,7 @@
  *          plain_english_wysiwyg, plain_english_reviewed, plain_english_reviewed_by,
  *          plain_english_by, plain_english_date) — now registered centrally in
  *          acf-plain-english-fields.php (group_ws_plain_english_fields, menu_order 85).
+ * 3.4.1  Added defined( 'ABSPATH' ) || exit; guard at top of file.
  */
 
 add_action( 'acf/init', 'ws_register_acf_jx_statutes' );
@@ -167,7 +170,7 @@ function ws_register_acf_jx_statutes() {
             // ────────────────────────────────────────────────────────────────
 
             [
-                'key'   => 'field_jx_tab_statute_deadlines',
+                'key'   => 'field_jx_statute_deadlines_tab',
                 'label' => 'Statutes of Limitations',
                 'type'  => 'tab',
             ],
@@ -203,7 +206,7 @@ function ws_register_acf_jx_statutes() {
             [
                 'key'           => 'field_jx_statute_trigger',
                 'label'         => 'Deadline Trigger',
-                'name'          => 'ws_jx_statute_trigger',
+                'name'          => 'ws_jx_statute_limit_trigger',
                 'type'          => 'select',
                 'instructions'  => 'When does the clock start ticking?',
                 'choices'       => [
@@ -266,7 +269,7 @@ function ws_register_acf_jx_statutes() {
             [
                 'key'           => 'field_jx_statute_burden_of_proof',
                 'label'         => 'Burden of Proof',
-                'name'          => 'ws_statute_burden_of_proof',
+                'name'          => 'ws_jx_statute_burden_of_proof',
                 'type'          => 'select',
                 'instructions'  => 'What standard must the whistleblower meet to succeed? "Contributing Factor" is the most employee-friendly; "But-For" is employer-friendly.',
                 'choices'       => [
@@ -303,7 +306,7 @@ function ws_register_acf_jx_statutes() {
             // ────────────────────────────────────────────────────────────────
 
             [
-                'key'   => 'field_jx_tab_statute_rel',
+                'key'   => 'field_jx_statute_rel_tab',
                 'label' => 'Relationships',
                 'type'  => 'tab',
             ],
@@ -322,7 +325,7 @@ function ws_register_acf_jx_statutes() {
             ],
 
             // Authorship & Review tab removed — registered centrally in
-            // acf-stamp-fields.php (group_ws_stamp_fields, menu_order 90).
+            // acf-stamp-fields.php (group_stamp_metadata, menu_order 90).
 
             // ── Last Verified Date ────────────────────────────────────────
             //
@@ -339,7 +342,7 @@ function ws_register_acf_jx_statutes() {
             ],
 
             // Plain Language tab removed — registered centrally in
-            // acf-plain-english-fields.php (group_ws_plain_english_fields, menu_order 85).
+            // acf-plain-english-fields.php (group_plain_english_metadata, menu_order 85).
 
             // ── Tab: Reference Materials ───────────────────────────────────
             //

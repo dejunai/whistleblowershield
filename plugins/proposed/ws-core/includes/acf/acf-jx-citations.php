@@ -73,7 +73,7 @@
  * 3.4.0  Stamp field centralization:
  *        - Removed Authorship & Review tab and all stamp fields (last_edited_author,
  *          date_created, last_edited, create_author) — now registered centrally
- *          in acf-stamp-fields.php (group_ws_stamp_fields, menu_order 90).
+ *          in acf-stamp-fields.php (group_stamp_metadata, menu_order 90).
  *        - Removed Plain Language tab and all plain English fields — now registered
  *          centrally in acf-plain-english-fields.php (menu_order 85).
  *        - ws_jx_cite_last_reviewed retained as a content-owned field.
@@ -93,7 +93,7 @@ function ws_register_acf_jx_citations() {
 
     acf_add_local_field_group( [
 
-        'key'                   => 'group_jx_citation',
+        'key'                   => 'group_jx_citation_metadata',
         'title'                 => 'Jurisdiction Citation',
         'menu_order'            => 0,
         'position'              => 'normal',
@@ -113,14 +113,14 @@ function ws_register_acf_jx_citations() {
             // ── Tab: Content ──────────────────────────────────────────────
 
             [
-                'key'   => 'field_ws_jx_cite_tab_content',
+                'key'   => 'field_jx_cite_content_tab',
                 'label' => 'Content',
                 'type'  => 'tab',
             ],
             [
-                'key'          => 'field_ws_jx_cite_type',
+                'key'          => 'field_jx_cite_type',
                 'label'        => 'Citation Type',
-                'name'         => 'ws_jx_cite_type',
+                'name'         => 'ws_jx_citation_type',
                 'type'         => 'select',
                 'required'     => 1,
                 'instructions' => 'Select the type of source this citation references.',
@@ -135,9 +135,9 @@ function ws_register_acf_jx_citations() {
                 'ui'            => 1,
             ],
 			[
-				'key'           => 'field_ws_jx_disclosure_cat',
+				'key'           => 'field_jx_disclosure_cat',
 				'label'         => 'Disclosure Category',
-				'name'          => 'ws_disclosure_type',
+				'name'          => 'ws_jx_citation_disclosure_type',
 				'type'          => 'taxonomy',
 				'taxonomy'      => 'ws_disclosure_type',
 				'field_type'    => 'checkbox', // Use checkboxes for multiple categories
@@ -148,24 +148,24 @@ function ws_register_acf_jx_citations() {
 				'multiple'      => 1,
 			],
             [
-                'key'          => 'field_ws_jx_cite_label',
+                'key'          => 'field_jx_cite_label',
                 'label'        => 'Display Label',
-                'name'         => 'ws_jx_cite_label',
+                'name'         => 'ws_jx_citation_label',
                 'type'         => 'text',
                 'required'     => 1,
                 'instructions' => 'The full citation as it will appear in the footnote — e.g., Lawson v. PPG Architectural Finishes, Inc., 12 Cal. 5th 703 (2022).',
             ],
             [
-                'key'          => 'field_ws_jx_cite_url',
+                'key'          => 'field_jx_cite_url',
                 'label'        => 'Source URL',
-                'name'         => 'ws_jx_cite_url',
+                'name'         => 'ws_jx_citation_url',
                 'type'         => 'url',
                 'instructions' => 'Direct link to the source document, case, or statute.',
             ],
             [
-                'key'           => 'field_ws_jx_cite_is_pdf',
+                'key'           => 'field_jx_cite_is_pdf',
                 'label'         => 'PDF Link',
-                'name'          => 'ws_jx_cite_is_pdf',
+                'name'          => 'ws_jx_citation_is_pdf',
                 'type'          => 'true_false',
                 'instructions'  => 'Enable if the source URL links directly to a PDF document. Appends "(PDF)" to the rendered link.',
                 'ui'            => 1,
@@ -174,7 +174,7 @@ function ws_register_acf_jx_citations() {
                 'default_value' => 0,
             ],
             [
-                'key'           => 'field_ws_jx_cite_attach',
+                'key'           => 'field_jx_cite_attach',
                 'label'         => 'Attach to Jurisdiction Page',
                 'name'          => 'attach_flag',
                 'type'          => 'true_false',
@@ -185,7 +185,7 @@ function ws_register_acf_jx_citations() {
                 'default_value' => 0,
             ],
             [
-                'key'               => 'field_ws_jx_cite_position',
+                'key'               => 'field_jx_cite_position',
                 'label'             => 'Display Order',
                 'name'              => 'order',
                 'type'              => 'number',
@@ -193,7 +193,7 @@ function ws_register_acf_jx_citations() {
                 'min'               => 1,
                 'step'              => 1,
                 'conditional_logic' => [ [ [
-                    'field'    => 'field_ws_jx_cite_attach',
+                    'field'    => 'field_jx_cite_attach',
                     'operator' => '==',
                     'value'    => '1',
                 ] ] ],
@@ -201,7 +201,7 @@ function ws_register_acf_jx_citations() {
 
             // ── Tab: Authorship & Review ──────────────────────────────────
             // Removed — registered centrally in acf-stamp-fields.php
-            // (group_ws_stamp_fields, menu_order 90).
+            // (group_stamp_metadata, menu_order 90).
 
             // ── Last Reviewed ─────────────────────────────────────────────
             //
@@ -209,16 +209,16 @@ function ws_register_acf_jx_citations() {
             // citation's own group.
 
             [
-                'key'          => 'field_ws_jx_cite_last_reviewed',
+                'key'          => 'field_jx_cite_last_reviewed',
                 'label'        => 'Last Reviewed',
-                'name'         => 'ws_jx_cite_last_reviewed',
+                'name'         => 'ws_jx_citation_last_reviewed',
                 'type'         => 'text',
                 'instructions' => 'Update this date each time the citation is meaningfully revised.',
             ],
 
             // ── Tab: Plain Language ───────────────────────────────────────
             // Removed — registered centrally in acf-plain-english-fields.php
-            // (group_ws_plain_english_fields, menu_order 85).
+            // (group_plain_english_metadata, menu_order 85).
 
             // ── Tab: Reference Materials ───────────────────────────────────
             //

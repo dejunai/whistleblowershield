@@ -15,7 +15,7 @@
  * FIELD SUMMARY
  * -------------
  * Identity tab:
- *   ws_ao_internal_id          Internal reference code (text, required)
+ *   ws_aorg_internal_id          Internal reference code (text, required)
  *   ws_ao_type                 Organization type (select, required)
  *   ws_ao_logo                 Logo image (image)
  *
@@ -76,7 +76,7 @@
  *         filter removed. Plain Language tab added (Phase 9.2).
  * 3.4.0  Stamp field centralization:
  *        - Removed Authorship & Review tab and all stamp fields — now registered
- *          centrally in acf-stamp-fields.php (group_ws_stamp_fields, menu_order 90).
+ *          centrally in acf-stamp-fields.php (group_stamp_metadata, menu_order 90).
  *        - Removed Plain Language tab entirely — ws-assist-org content is plain
  *          language by nature; the plain language workflow does not apply.
  *        - ws_ao_last_reviewed retained as a content-owned field.
@@ -94,7 +94,7 @@ function ws_register_acf_assist_org() {
 
     acf_add_local_field_group( [
 
-        'key'                   => 'group_ws_assist_org',
+        'key'                   => 'group_assist_org_metadata',
         'title'                 => 'Assistance Organization Details',
         'menu_order'            => 0,
         'position'              => 'normal',
@@ -119,15 +119,15 @@ function ws_register_acf_assist_org() {
             // ────────────────────────────────────────────────────────────────
 
             [
-                'key'   => 'field_ws_ao_tab_identity',
+                'key'   => 'field_ao_identity_tab',
                 'label' => 'Identity',
                 'type'  => 'tab',
             ],
 
             [
-                'key'          => 'field_ws_ao_internal_id',
+                'key'          => 'field_ao_internal_id',
                 'label'        => 'Internal Reference Code',
-                'name'         => 'ws_ao_internal_id',
+                'name'         => 'ws_aorg_internal_id',
                 'type'         => 'text',
                 'instructions' => 'Slug-safe internal identifier — lowercase, hyphens only. Examples: "aclu-national", "nwc-dc", "gp-ca". Used for programmatic lookups and deduplication.',
                 'required'     => 1,
@@ -135,9 +135,9 @@ function ws_register_acf_assist_org() {
             ],
 
             [
-                'key'           => 'field_ws_ao_type',
+                'key'           => 'field_ao_type',
                 'label'         => 'Organization Type',
-                'name'          => 'ws_ao_type',
+                'name'          => 'ws_aorg_type',
                 'type'          => 'select',
                 'instructions'  => 'Select the category that best describes this organization.',
                 'required'      => 1,
@@ -157,9 +157,9 @@ function ws_register_acf_assist_org() {
             ],
 
             [
-                'key'           => 'field_ws_ao_logo',
+                'key'           => 'field_ao_logo',
                 'label'         => 'Organization Logo',
-                'name'          => 'ws_ao_logo',
+                'name'          => 'ws_aorg_logo',
                 'type'          => 'image',
                 'instructions'  => 'Upload the organization\'s logo (PNG or SVG preferred).',
                 'return_format' => 'array',
@@ -178,15 +178,15 @@ function ws_register_acf_assist_org() {
             // ────────────────────────────────────────────────────────────────
 
             [
-                'key'   => 'field_ws_ao_tab_scope',
+                'key'   => 'field_ao_scope_tab',
                 'label' => 'Scope of Service',
                 'type'  => 'tab',
             ],
 
             [
-                'key'           => 'field_ws_ao_serves_nationwide',
+                'key'           => 'field_ao_serves_nationwide',
                 'label'         => 'Serves All U.S. Jurisdictions',
-                'name'          => 'ws_ao_serves_nationwide',
+                'name'          => 'ws_aorg_serves_nationwide',
                 'type'          => 'true_false',
                 'instructions'  => 'Enable if this organization operates in all 50 states, territories, and federal jurisdictions. If enabled, the Jurisdictions field below is not required.',
                 'ui'            => 1,
@@ -196,7 +196,7 @@ function ws_register_acf_assist_org() {
             ],
 
             [
-                'key'           => 'field_ws_ao_jurisdiction',
+                'key'           => 'field_ao_jurisdiction',
                 'label'         => 'Jurisdictions Served',
                 'name'          => 'ws_jurisdiction',
                 'type'          => 'taxonomy',
@@ -212,9 +212,9 @@ function ws_register_acf_assist_org() {
             ],
 
             [
-                'key'           => 'field_ws_ao_disclosure_type',
+                'key'           => 'field_ao_disclosure_type',
                 'label'         => 'Misconduct Categories Handled',
-                'name'          => 'ws_ao_disclosure_type',
+                'name'          => 'ws_aorg_disclosure_type',
                 'type'          => 'taxonomy',
                 'taxonomy'      => 'ws_disclosure_type',
                 'instructions'  => 'Select all types of misconduct this organization has experience assisting with.',
@@ -227,9 +227,9 @@ function ws_register_acf_assist_org() {
             ],
 
             [
-                'key'          => 'field_ws_ao_services',
+                'key'          => 'field_ao_services',
                 'label'        => 'Services Offered',
-                'name'         => 'ws_ao_services',
+                'name'         => 'ws_aorg_services',
                 'type'         => 'checkbox',
                 'instructions' => 'Select all services this organization provides to whistleblowers.',
                 'required'     => 1,
@@ -249,9 +249,9 @@ function ws_register_acf_assist_org() {
             ],
 
             [
-                'key'          => 'field_ws_ao_employment_sectors',
+                'key'          => 'field_ao_employment_sectors',
                 'label'        => 'Employment Sectors Served',
-                'name'         => 'ws_ao_employment_sectors',
+                'name'         => 'ws_aorg_employment_sectors',
                 'type'         => 'checkbox',
                 'instructions' => 'Select the employment sectors this organization serves. Leave blank if all sectors are accepted.',
                 'required'     => 0,
@@ -276,56 +276,56 @@ function ws_register_acf_assist_org() {
             // ────────────────────────────────────────────────────────────────
 
             [
-                'key'   => 'field_ws_ao_tab_contact',
+                'key'   => 'field_ao_contact_tab',
                 'label' => 'Contact & Intake',
                 'type'  => 'tab',
             ],
 
             [
-                'key'          => 'field_ws_ao_website_url',
+                'key'          => 'field_ao_website_url',
                 'label'        => 'Official Website',
-                'name'         => 'ws_ao_website_url',
+                'name'         => 'ws_aorg_website_url',
                 'type'         => 'url',
                 'instructions' => 'The organization\'s primary public website.',
                 'required'     => 1,
             ],
 
             [
-                'key'          => 'field_ws_ao_intake_url',
+                'key'          => 'field_ao_intake_url',
                 'label'        => 'Intake / Contact Form URL',
-                'name'         => 'ws_ao_intake_url',
+                'name'         => 'ws_aorg_intake_url',
                 'type'         => 'url',
                 'instructions' => 'Direct link to an intake form, referral request, or secure contact page — if different from the main website.',
             ],
 
             [
-                'key'          => 'field_ws_ao_phone',
+                'key'          => 'field_ao_phone',
                 'label'        => 'Phone Number',
-                'name'         => 'ws_ao_phone',
+                'name'         => 'ws_aorg_phone',
                 'type'         => 'text',
                 'instructions' => 'Public-facing phone number for whistleblower inquiries.',
                 'placeholder'  => '(555) 000-0000',
             ],
 
             [
-                'key'          => 'field_ws_ao_email',
+                'key'          => 'field_ao_email',
                 'label'        => 'Contact Email',
-                'name'         => 'ws_ao_email',
+                'name'         => 'ws_aorg_email',
                 'type'         => 'email',
                 'instructions' => 'Public contact email address for whistleblower inquiries.',
             ],
 
             [
-                'key'          => 'field_ws_ao_mailing_address',
+                'key'          => 'field_ao_mailing_address',
                 'label'        => 'Mailing Address',
-                'name'         => 'ws_ao_mailing_address',
+                'name'         => 'ws_aorg_mailing_address',
                 'type'         => 'textarea',
                 'instructions' => 'Physical or mailing address, if publicly available.',
                 'rows'         => 3,
             ],
 
             [
-                'key'           => 'field_ws_ao_languages',
+                'key'           => 'field_ao_languages',
                 'label'         => 'Languages Served',
                 'name'          => 'ws_languages',
                 'type'          => 'taxonomy',
@@ -339,9 +339,9 @@ function ws_register_acf_assist_org() {
             ],
 
             [
-                'key'          => 'field_ws_ao_additional_languages',
+                'key'          => 'field_ao_additional_languages',
                 'label'        => 'Additional Languages',
-                'name'         => 'ws_ao_additional_languages',
+                'name'         => 'ws_aorg_additional_languages',
                 'type'         => 'text',
                 'instructions' => 'List additional languages not in the checkbox list above (comma-separated). Saving a non-empty value here automatically assigns the "Additional" language term.',
             ],
@@ -356,15 +356,15 @@ function ws_register_acf_assist_org() {
             // ────────────────────────────────────────────────────────────────
 
             [
-                'key'   => 'field_ws_ao_tab_eligibility',
+                'key'   => 'field_ao_eligibility_tab',
                 'label' => 'Eligibility & Cost',
                 'type'  => 'tab',
             ],
 
             [
-                'key'           => 'field_ws_ao_cost_model',
+                'key'           => 'field_ao_cost_model',
                 'label'         => 'Cost Structure',
-                'name'          => 'ws_ao_cost_model',
+                'name'          => 'ws_aorg_cost_model',
                 'type'          => 'select',
                 'instructions'  => 'Select the primary cost model for whistleblower services at this organization.',
                 'required'      => 1,
@@ -381,9 +381,9 @@ function ws_register_acf_assist_org() {
             ],
 
             [
-                'key'           => 'field_ws_ao_income_limit',
+                'key'           => 'field_ao_income_limit',
                 'label'         => 'Income Eligibility Required?',
-                'name'          => 'ws_ao_income_limit',
+                'name'          => 'ws_aorg_income_limit',
                 'type'          => 'true_false',
                 'instructions'  => 'Enable if this organization requires clients to meet income or financial eligibility criteria.',
                 'ui'            => 1,
@@ -393,23 +393,23 @@ function ws_register_acf_assist_org() {
             ],
 
             [
-                'key'          => 'field_ws_ao_income_limit_notes',
+                'key'          => 'field_ao_income_limit_notes',
                 'label'        => 'Income Eligibility Details',
-                'name'         => 'ws_ao_income_limit_notes',
+                'name'         => 'ws_aorg_income_limit_notes',
                 'type'         => 'textarea',
                 'instructions' => 'Describe the income thresholds or financial eligibility criteria — e.g., "Income must be below 200% of the federal poverty level."',
                 'rows'         => 3,
                 'conditional_logic' => [ [ [
-                    'field'    => 'field_ws_ao_income_limit',
+                    'field'    => 'field_ao_income_limit',
                     'operator' => '==',
                     'value'    => '1',
                 ] ] ],
             ],
 
             [
-                'key'           => 'field_ws_ao_accepts_anonymous',
+                'key'           => 'field_ao_accepts_anonymous',
                 'label'         => 'Can Assist Anonymous Clients?',
-                'name'          => 'ws_ao_accepts_anonymous',
+                'name'          => 'ws_aorg_accepts_anonymous',
                 'type'          => 'true_false',
                 'instructions'  => 'Enable if this organization can provide meaningful assistance without requiring the client to disclose their identity.',
                 'ui'            => 1,
@@ -419,9 +419,9 @@ function ws_register_acf_assist_org() {
             ],
 
             [
-                'key'          => 'field_ws_ao_eligibility_notes',
+                'key'          => 'field_ao_eligibility_notes',
                 'label'        => 'Additional Eligibility Requirements',
-                'name'         => 'ws_ao_eligibility_notes',
+                'name'         => 'ws_aorg_eligibility_notes',
                 'type'         => 'textarea',
                 'instructions' => 'Describe any eligibility requirements not covered above — e.g., case type restrictions, geographic limits, employer size thresholds, or union membership requirements.',
                 'rows'         => 4,
@@ -435,15 +435,15 @@ function ws_register_acf_assist_org() {
             // ────────────────────────────────────────────────────────────────
 
             [
-                'key'   => 'field_ws_ao_tab_credentials',
+                'key'   => 'field_ao_credentials_tab',
                 'label' => 'Credentials',
                 'type'  => 'tab',
             ],
 
             [
-                'key'           => 'field_ws_ao_licensed_attorneys',
+                'key'           => 'field_ao_licensed_attorneys',
                 'label'         => 'Licensed Attorneys on Staff?',
-                'name'          => 'ws_ao_licensed_attorneys',
+                'name'          => 'ws_aorg_licensed_attorneys',
                 'type'          => 'true_false',
                 'instructions'  => 'Enable if this organization employs licensed attorneys who can provide formal legal advice and representation.',
                 'ui'            => 1,
@@ -453,32 +453,32 @@ function ws_register_acf_assist_org() {
             ],
 
             [
-                'key'          => 'field_ws_ao_accreditation',
+                'key'          => 'field_ao_accreditation',
                 'label'        => 'Accreditations & Certifications',
-                'name'         => 'ws_ao_accreditation',
+                'name'         => 'ws_aorg_accreditation',
                 'type'         => 'text',
                 'instructions' => 'Any relevant professional accreditations or certifications — e.g., "ABA-accredited", "NQAP member", "DOJ-recognized".',
             ],
 
             [
-                'key'          => 'field_ws_ao_bar_states',
+                'key'          => 'field_ao_bar_states',
                 'label'        => 'State Bar Memberships',
-                'name'         => 'ws_ao_bar_states',
+                'name'         => 'ws_aorg_bar_states',
                 'type'         => 'text',
                 'instructions' => 'States where attorneys at this organization are bar-admitted — e.g., "CA, NY, DC, Federal".',
             ],
 
             [
-                'key'          => 'field_ws_ao_verify_url',
+                'key'          => 'field_ao_verify_url',
                 'label'        => 'Verification / Transparency URL',
-                'name'         => 'ws_ao_verify_url',
+                'name'         => 'ws_aorg_verify_url',
                 'type'         => 'url',
                 'instructions' => 'Link to a page that verifies the organization\'s legitimacy — e.g., IRS Form 990, state bar directory, Charity Navigator, GuideStar.',
             ],
 
             // ── Tab: Authorship & Review ──────────────────────────────────
             // Removed — registered centrally in acf-stamp-fields.php
-            // (group_ws_stamp_fields, menu_order 90).
+            // (group_stamp_metadata, menu_order 90).
 
             // ── Last Verified Date ────────────────────────────────────────
             //
@@ -486,9 +486,9 @@ function ws_register_acf_assist_org() {
             // assist-org's own group.
 
             [
-                'key'            => 'field_ws_ao_last_reviewed',
+                'key'            => 'field_ao_last_reviewed',
                 'label'          => 'Last Verified Date',
-                'name'           => 'ws_ao_last_reviewed',
+                'name'           => 'ws_aorg_last_reviewed',
                 'type'           => 'date_picker',
                 'instructions'   => 'Update this date each time the organization record is verified for accuracy.',
                 'display_format' => 'F j, Y',

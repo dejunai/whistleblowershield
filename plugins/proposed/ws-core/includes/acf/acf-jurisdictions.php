@@ -150,7 +150,7 @@ function ws_register_acf_jurisdiction_fields() {
 
     acf_add_local_field_group( [
 
-        'key'                   => 'group_ws_jurisdiction_metadata',
+        'key'                   => 'group_jurisdiction_metadata',
         'title'                 => 'Jurisdiction Metadata',
         'menu_order'            => 0,
         'position'              => 'normal',
@@ -186,7 +186,7 @@ function ws_register_acf_jurisdiction_fields() {
             [
                 'key'           => 'field_jurisdiction_tax',
                 'label'         => 'Jurisdiction USPS Code',
-                'name'          => 'ws_jurisdiction_tax',
+                'name'          => 'ws_jurisdiction_term_id',
                 'type'          => 'taxonomy',
                 'taxonomy'      => 'ws_jurisdiction',
                 'field_type'    => 'select',
@@ -422,7 +422,7 @@ function ws_register_acf_jurisdiction_fields() {
             [
                 'key'           => 'field_create_author',
                 'label'         => 'Created By',
-                'name'          => 'create_author',
+                'name'          => 'ws_auto_create_author',
                 'type'          => 'user',
                 'instructions'  => 'Stamped automatically on first save. Read only.',
                 'role'          => [ 'author', 'editor', 'administrator' ],
@@ -435,7 +435,7 @@ function ws_register_acf_jurisdiction_fields() {
             [
                 'key'          => 'field_date_created',
                 'label'        => 'Date Created',
-                'name'         => 'date_created',
+                'name'         => 'ws_auto_date_created',
                 'type'         => 'text',
                 'instructions' => 'Date this record was created. Set automatically.',
                 'readonly'     => 1,
@@ -446,7 +446,7 @@ function ws_register_acf_jurisdiction_fields() {
             [
                 'key'          => 'field_date_created_gmt',
                 'label'        => 'Date Created (GMT)',
-                'name'         => 'date_created_gmt',
+                'name'         => '_ws_auto_date_created_gmt',
                 'type'         => 'text',
                 'instructions' => 'UTC date this record was created. Set automatically.',
                 'readonly'     => 1,
@@ -457,7 +457,7 @@ function ws_register_acf_jurisdiction_fields() {
             [
                 'key'          => 'field_last_edited_gmt',
                 'label'        => 'Date Last Edited (GMT)',
-                'name'         => 'last_edited_gmt',
+                'name'         => '_ws_auto_last_edited_gmt',
                 'type'         => 'text',
                 'readonly'     => 1,
                 'disabled'     => 1,
@@ -468,7 +468,7 @@ function ws_register_acf_jurisdiction_fields() {
 			[
                 'key'           => 'field_last_edited_author',
                 'label'         => 'Last Editor',
-                'name'          => 'last_edited_author',
+                'name'          => 'ws_auto_last_edited_author',
                 'type'          => 'user',
                 'instructions'  => 'User who last updated this record. Updated automatically. Admins can change to credit a different contributor.',
                 'role'          => [ 'author', 'editor', 'administrator' ],
@@ -478,7 +478,7 @@ function ws_register_acf_jurisdiction_fields() {
             [
                 'key'          => 'field_last_edited',
                 'label'        => 'Date Last Edited',
-                'name'         => 'last_edited',
+                'name'         => 'ws_auto_last_edited',
                 'type'         => 'text',
                 'readonly'     => 1,
                 'disabled'     => 1,

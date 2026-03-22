@@ -76,7 +76,7 @@
  *          for convention consistency.
  * 3.4.0  Stamp field centralization:
  *        - Removed Authorship & Review tab and all stamp fields — now registered
- *          centrally in acf-stamp-fields.php (group_ws_stamp_fields, menu_order 90).
+ *          centrally in acf-stamp-fields.php (group_stamp_metadata, menu_order 90).
  *        - Removed Plain Language tab and all plain English fields — now registered
  *          centrally in acf-plain-english-fields.php (menu_order 85).
  *        - ws_interp_last_reviewed retained as a content-owned field.
@@ -93,7 +93,7 @@ function ws_register_acf_jx_interpretations() {
     }
 
     acf_add_local_field_group( [
-        'key'                   => 'group_jx_interpretation_details',
+        'key'                   => 'group_jx_interpretation_metadata',
         'title'                 => 'Interpretation Details',
         'menu_order'            => 0,
         'position'              => 'normal',
@@ -118,15 +118,15 @@ function ws_register_acf_jx_interpretations() {
             // ────────────────────────────────────────────────────────────────
 
             [
-                'key'   => 'field_interp_tab_case_identity',
+                'key'   => 'field_interp_case_identity_tab',
                 'label' => 'Case Identity',
                 'type'  => 'tab',
             ],
 
             [
-                'key'           => 'field_ws_interp_court',
+                'key'           => 'field_interp_court',
                 'label'         => 'Court',
-                'name'          => 'ws_interp_court',
+                'name'          => 'ws_jx_interp_court',
                 'type'          => 'select',
                 'instructions'  => 'Select the federal court that issued this decision.',
                 'choices'       => [],  // populated by ws_interp_load_court_choices()
@@ -138,9 +138,9 @@ function ws_register_acf_jx_interpretations() {
             ],
 
             [
-                'key'          => 'field_ws_interp_year',
+                'key'          => 'field_interp_year',
                 'label'        => 'Decision Year',
-                'name'         => 'ws_interp_year',
+                'name'         => 'ws_jx_interp_year',
                 'type'         => 'number',
                 'instructions' => 'Four-digit year the decision was issued.',
                 'required'     => 1,
@@ -151,9 +151,9 @@ function ws_register_acf_jx_interpretations() {
             ],
 
             [
-                'key'           => 'field_ws_interp_favorable',
+                'key'           => 'field_interp_favorable',
                 'label'         => 'Favorable to Whistleblower?',
-                'name'          => 'ws_interp_favorable',
+                'name'          => 'ws_jx_interp_favorable',
                 'type'          => 'true_false',
                 'instructions'  => 'Does this ruling support the whistleblower\'s position?',
                 'ui'            => 1,
@@ -164,9 +164,9 @@ function ws_register_acf_jx_interpretations() {
             ],
 
             [
-                'key'          => 'field_ws_interp_case_name',
+                'key'          => 'field_interp_case_name',
                 'label'        => 'Case Name',
-                'name'         => 'ws_interp_case_name',
+                'name'         => 'ws_jx_interp_case_name',
                 'type'         => 'text',
                 'instructions' => 'Full case name, e.g., "Bechtel v. Administrative Review Board".',
                 'required'     => 1,
@@ -174,9 +174,9 @@ function ws_register_acf_jx_interpretations() {
             ],
 
             [
-                'key'          => 'field_ws_interp_citation',
+                'key'          => 'field_interp_citation',
                 'label'        => 'Citation',
-                'name'         => 'ws_interp_citation',
+                'name'         => 'ws_jx_interp_case_citation',
                 'type'         => 'text',
                 'instructions' => 'Standard legal citation, e.g., "710 F.3d 443 (1st Cir. 2013)".',
                 'required'     => 1,
@@ -184,9 +184,9 @@ function ws_register_acf_jx_interpretations() {
             ],
 
             [
-                'key'          => 'field_ws_interp_url',
+                'key'          => 'field_interp_url',
                 'label'        => 'Opinion URL',
-                'name'         => 'ws_interp_url',
+                'name'         => 'ws_jx_interp_url',
                 'type'         => 'url',
                 'instructions' => 'Link to the full opinion (CourtListener, Google Scholar, PACER, etc.).',
             ],
@@ -199,15 +199,15 @@ function ws_register_acf_jx_interpretations() {
             // ────────────────────────────────────────────────────────────────
 
             [
-                'key'   => 'field_interp_tab_summary',
+                'key'   => 'field_interp_summary_tab',
                 'label' => 'Summary',
                 'type'  => 'tab',
             ],
 
             [
-                'key'          => 'field_ws_interp_summary',
+                'key'          => 'field_interp_summary',
                 'label'        => 'Summary',
-                'name'         => 'ws_interp_summary',
+                'name'         => 'ws_jx_interp_summary',
                 'type'         => 'textarea',
                 'instructions' => 'Summarize what the court decided in plain language. One paragraph. Focus on what this ruling means for whistleblowers — not legal procedure. Citation is captured above.',
                 'required'     => 1,
@@ -215,7 +215,7 @@ function ws_register_acf_jx_interpretations() {
             ],
 
             [
-                'key'           => 'field_ws_interp_process_type',
+                'key'           => 'field_interp_process_type',
                 'label'         => 'Process Type',
                 'name'          => 'ws_process_type',
                 'type'          => 'taxonomy',
@@ -229,7 +229,7 @@ function ws_register_acf_jx_interpretations() {
             ],
 
             [
-                'key'           => 'field_ws_interp_attach_flag',
+                'key'           => 'field_interp_attach_flag',
                 'label'         => 'Attach to Jurisdiction Page',
                 'name'          => 'attach_flag',
                 'type'          => 'true_false',
@@ -241,7 +241,7 @@ function ws_register_acf_jx_interpretations() {
             ],
 
             [
-                'key'               => 'field_ws_interp_order',
+                'key'               => 'field_interp_order',
                 'label'             => 'Display Order',
                 'name'              => 'order',
                 'type'              => 'number',
@@ -249,7 +249,7 @@ function ws_register_acf_jx_interpretations() {
                 'min'               => 1,
                 'step'              => 1,
                 'conditional_logic' => [ [ [
-                    'field'    => 'field_ws_interp_attach_flag',
+                    'field'    => 'field_interp_attach_flag',
                     'operator' => '==',
                     'value'    => '1',
                 ] ] ],
@@ -263,15 +263,15 @@ function ws_register_acf_jx_interpretations() {
             // ────────────────────────────────────────────────────────────────
 
             [
-                'key'   => 'field_interp_tab_relationships',
+                'key'   => 'field_interp_relationships_tab',
                 'label' => 'Relationships',
                 'type'  => 'tab',
             ],
 
             [
-                'key'           => 'field_ws_interp_statute_id',
+                'key'           => 'field_interp_statute_id',
                 'label'         => 'Parent Statute',
-                'name'          => 'ws_statute_id',
+                'name'          => 'ws_jx_interp_statute_id',
                 'type'          => 'post_object',
                 'post_type'     => [ 'jx-statute' ],
                 'instructions'  => 'The federal statute this case interprets.',
@@ -284,7 +284,7 @@ function ws_register_acf_jx_interpretations() {
 
             // ── Tab: Authorship & Review ──────────────────────────────────
             // Removed — registered centrally in acf-stamp-fields.php
-            // (group_ws_stamp_fields, menu_order 90).
+            // (group_stamp_metadata, menu_order 90).
 
             // ── Last Verified Date ────────────────────────────────────────
             //
@@ -292,16 +292,16 @@ function ws_register_acf_jx_interpretations() {
             // interpretation's own group.
 
             [
-                'key'          => 'field_ws_interp_last_reviewed',
+                'key'          => 'field_interp_last_reviewed',
                 'label'        => 'Last Verified Date',
-                'name'         => 'ws_interp_last_reviewed',
+                'name'         => 'ws_jx_interp_last_reviewed',
                 'type'         => 'text',
                 'instructions' => 'Update this date each time the record is meaningfully revised.',
             ],
 
             // ── Tab: Plain Language ───────────────────────────────────────
             // Removed — registered centrally in acf-plain-english-fields.php
-            // (group_ws_plain_english_fields, menu_order 85).
+            // (group_plain_english_metadata, menu_order 85).
 
             // ── Tab: Reference Materials ───────────────────────────────────
             //
@@ -340,7 +340,7 @@ function ws_register_acf_jx_interpretations() {
 // 'US' or is null (SCOTUS). Sorted by level ascending (SCOTUS first, then
 // appellate, then district).
 
-add_filter( 'acf/load_field/key=field_ws_interp_court', 'ws_interp_load_court_choices' );
+add_filter( 'acf/load_field/key=field_interp_court', 'ws_interp_load_court_choices' );
 
 function ws_interp_load_court_choices( $field ) {
     global $ws_court_matrix;
@@ -379,7 +379,7 @@ function ws_interp_load_court_choices( $field ) {
 // ACF renders the statute pre-selected. On saved posts, or when no URL
 // parameter is present, we return $value unchanged.
 
-add_filter( 'acf/load_value/key=field_ws_interp_statute_id', 'ws_interp_prefill_statute_id', 5, 3 );
+add_filter( 'acf/load_value/key=field_interp_statute_id', 'ws_interp_prefill_statute_id', 5, 3 );
 
 function ws_interp_prefill_statute_id( $value, $post_id, $field ) {
 

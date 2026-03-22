@@ -32,7 +32,7 @@
  *        field. Dynamic choice filter removed. Plain Language tab added (9.2).
  * 3.4.0  Stamp field centralization:
  *        - Removed Authorship & Review tab and all stamp fields — now registered
- *          centrally in acf-stamp-fields.php (group_ws_stamp_fields, menu_order 90).
+ *          centrally in acf-stamp-fields.php (group_stamp_metadata, menu_order 90).
  *        - Removed Plain Language tab and all plain English fields — now registered
  *          centrally in acf-plain-english-fields.php (menu_order 85).
  *        - ws_agency_last_reviewed retained as a content-owned field.
@@ -53,7 +53,7 @@ function ws_register_acf_agencies() {
 
     acf_add_local_field_group( [
 
-        'key'                   => 'group_ws_agency',
+        'key'                   => 'group_agency_metadata',
         'title'                 => 'Agency Details & Reporting Protocols',
         'menu_order'            => 0,
         'position'              => 'normal',
@@ -73,12 +73,12 @@ function ws_register_acf_agencies() {
             // ── Tab: Agency Identity ──────────────────────────────────────
 
             [
-                'key'   => 'tab_agency_identity',
+                'key'   => 'field_agency_identity_tab',
                 'label' => 'Agency Identity',
                 'type'  => 'tab',
             ],
             [
-                'key'          => 'field_ws_agency_code',
+                'key'          => 'field_agency_code',
                 'label'        => 'Agency Reference Code',
                 'name'         => 'ws_agency_code',
                 'type'         => 'text',
@@ -86,7 +86,7 @@ function ws_register_acf_agencies() {
                 'required'     => 1,
             ],
             [
-                'key'          => 'field_ws_agency_name',
+                'key'          => 'field_agency_name',
                 'label'        => 'Full Agency Name',
                 'name'         => 'ws_agency_name',
                 'type'         => 'text',
@@ -94,7 +94,7 @@ function ws_register_acf_agencies() {
                 'instructions' => 'Example: U.S. Office of Special Counsel',
             ],
             [
-                'key'           => 'field_ws_agency_logo',
+                'key'           => 'field_agency_logo',
                 'label'         => 'Agency Logo',
                 'name'          => 'ws_agency_logo',
                 'type'          => 'image',
@@ -116,7 +116,7 @@ function ws_register_acf_agencies() {
             // reflects current taxonomy state in the admin UI.
 
             [
-                'key'           => 'field_ws_agency_jurisdiction',
+                'key'           => 'field_agency_jurisdiction',
                 'label'         => 'Jurisdiction(s)',
                 'name'          => 'ws_jurisdiction',
                 'type'          => 'taxonomy',
@@ -130,7 +130,7 @@ function ws_register_acf_agencies() {
                 'allow_null'    => 1,
             ],
             [
-                'key'        => 'field_ws_agency_disclosure_type',
+                'key'        => 'field_agency_disclosure_type',
                 'label'      => 'Disclosure Categories',
                 'name'       => 'ws_agency_disclosure_type',
                 'type'       => 'taxonomy',
@@ -152,7 +152,7 @@ function ws_register_acf_agencies() {
             // agencies that accept anonymous administrative complaints").
 
             [
-                'key'           => 'field_ws_agency_process_type',
+                'key'           => 'field_agency_process_type',
                 'label'         => 'Process Types Handled',
                 'name'          => 'ws_process_type',
                 'type'          => 'taxonomy',
@@ -169,31 +169,31 @@ function ws_register_acf_agencies() {
             // ── Tab: Contact & Reporting ──────────────────────────────────
 
             [
-                'key'   => 'tab_agency_contact',
+                'key'   => 'field_agency_contact_tab',
                 'label' => 'Contact & Reporting',
                 'type'  => 'tab',
             ],
             [
-                'key'   => 'field_ws_agency_url',
+                'key'   => 'field_agency_url',
                 'label' => 'Official Website URL',
                 'name'  => 'ws_agency_url',
                 'type'  => 'url',
             ],
             [
-                'key'          => 'field_ws_agency_reporting_url',
+                'key'          => 'field_agency_reporting_url',
                 'label'        => 'Secure Reporting Portal',
                 'name'         => 'ws_agency_reporting_url',
                 'type'         => 'url',
                 'instructions' => 'Direct link to the intake form or hotline page.',
             ],
             [
-                'key'   => 'field_ws_agency_phone',
+                'key'   => 'field_agency_phone',
                 'label' => 'Whistleblower Hotline',
                 'name'  => 'ws_agency_phone',
                 'type'  => 'text',
             ],
             [
-                'key'          => 'field_ws_agency_confidentiality_notes',
+                'key'          => 'field_agency_confidentiality_notes',
                 'label'        => 'Confidentiality & Privacy Notes',
                 'name'         => 'ws_agency_confidentiality_notes',
                 'type'         => 'textarea',
@@ -201,9 +201,9 @@ function ws_register_acf_agencies() {
                 'instructions' => 'Briefly describe how this agency handles identity protection.',
             ],
             [
-                'key'           => 'field_ws_agency_anonymous_allowed',
+                'key'           => 'field_agency_anonymous_allowed',
                 'label'         => 'Anonymous Reporting Allowed?',
-                'name'          => 'ws_agency_anonymous_allowed',
+                'name'          => 'ws_agency_accepts_anonymous',
                 'type'          => 'true_false',
                 'instructions'  => 'Enable if this agency accepts reports without requiring the reporter to identify themselves.',
                 'ui'            => 1,
@@ -212,7 +212,7 @@ function ws_register_acf_agencies() {
                 'default_value' => 0,
             ],
             [
-                'key'           => 'field_ws_agency_reward_program',
+                'key'           => 'field_agency_reward_program',
                 'label'         => 'Reward/Bounty Program Available?',
                 'name'          => 'ws_agency_reward_program',
                 'type'          => 'true_false',
@@ -226,7 +226,7 @@ function ws_register_acf_agencies() {
             // ── Languages ─────────────────────────────────────────────
 
             [
-                'key'           => 'field_ws_agency_languages',
+                'key'           => 'field_agency_languages',
                 'label'         => 'Languages Served',
                 'name'          => 'ws_languages',
                 'type'          => 'taxonomy',
@@ -240,7 +240,7 @@ function ws_register_acf_agencies() {
             ],
 
             [
-                'key'          => 'field_ws_agency_additional_languages',
+                'key'          => 'field_agency_additional_languages',
                 'label'        => 'Additional Languages',
                 'name'         => 'ws_agency_additional_languages',
                 'type'         => 'text',
@@ -249,7 +249,7 @@ function ws_register_acf_agencies() {
 
             // ── Tab: Authorship & Review ──────────────────────────────────
             // Removed — registered centrally in acf-stamp-fields.php
-            // (group_ws_stamp_fields, menu_order 90).
+            // (group_stamp_metadata, menu_order 90).
 
             // ── Last Verified Date ────────────────────────────────────────
             //
@@ -257,7 +257,7 @@ function ws_register_acf_agencies() {
             // agency's own group.
 
             [
-                'key'            => 'field_ws_agency_last_reviewed',
+                'key'            => 'field_agency_last_reviewed',
                 'label'          => 'Last Verified Date',
                 'name'           => 'ws_agency_last_reviewed',
                 'type'           => 'date_picker',
@@ -269,7 +269,7 @@ function ws_register_acf_agencies() {
 
             // ── Tab: Plain Language ───────────────────────────────────────
             // Removed — registered centrally in acf-plain-english-fields.php
-            // (group_ws_plain_english_fields, menu_order 85).
+            // (group_plain_english_metadata, menu_order 85).
 
         ], // end fields
 

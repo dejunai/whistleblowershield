@@ -19,7 +19,7 @@
  *   ws_ref_source_name Publishing organization or author name (text)
  *
  * Authorship & Review tab:
- *   Registered centrally in acf-stamp-fields.php (group_ws_stamp_fields,
+ *   Registered centrally in acf-stamp-fields.php (group_stamp_metadata,
  *   menu_order 90). Shared field keys used — unique keys retired in v3.4.0.
  *
  * STAMP FIELDS
@@ -75,7 +75,7 @@ function ws_register_acf_ws_reference() {
     }
 
     acf_add_local_field_group( [
-        'key'                   => 'group_ws_reference_metadata',
+        'key'                   => 'group_reference_metadata',
         'title'                 => 'Reference Details',
         'menu_order'            => 0,
         'position'              => 'normal',
@@ -100,13 +100,13 @@ function ws_register_acf_ws_reference() {
             // ────────────────────────────────────────────────────────────────
 
             [
-                'key'   => 'field_ws_ref_tab_content',
+                'key'   => 'field_ref_content_tab',
                 'label' => 'Content',
                 'type'  => 'tab',
             ],
 
             [
-                'key'          => 'field_ws_ref_title',
+                'key'          => 'field_ref_title',
                 'label'        => 'Resource Title',
                 'name'         => 'ws_ref_title',
                 'type'         => 'text',
@@ -115,7 +115,7 @@ function ws_register_acf_ws_reference() {
             ],
 
             [
-                'key'          => 'field_ws_ref_url',
+                'key'          => 'field_ref_url',
                 'label'        => 'Resource URL',
                 'name'         => 'ws_ref_url',
                 'type'         => 'url',
@@ -124,7 +124,7 @@ function ws_register_acf_ws_reference() {
             ],
 
             [
-                'key'          => 'field_ws_ref_description',
+                'key'          => 'field_ref_description',
                 'label'        => 'Description',
                 'name'         => 'ws_ref_description',
                 'type'         => 'textarea',
@@ -133,7 +133,7 @@ function ws_register_acf_ws_reference() {
             ],
 
             [
-                'key'           => 'field_ws_ref_type',
+                'key'           => 'field_ref_type',
                 'label'         => 'Resource Type',
                 'name'          => 'ws_ref_type',
                 'type'          => 'select',
@@ -152,7 +152,7 @@ function ws_register_acf_ws_reference() {
             ],
 
             [
-                'key'          => 'field_ws_ref_source_name',
+                'key'          => 'field_ref_source_name',
                 'label'        => 'Source / Author',
                 'name'         => 'ws_ref_source_name',
                 'type'         => 'text',
@@ -166,7 +166,7 @@ function ws_register_acf_ws_reference() {
 
             // ── Tab: Authorship & Review ──────────────────────────────────
             // Removed — registered centrally in acf-stamp-fields.php
-            // (group_ws_stamp_fields, menu_order 90).
+            // (group_stamp_metadata, menu_order 90).
             // Unique field keys (field_ws_ref_last_edited_author, etc.)
             // retired. ws-reference now uses shared field keys consistent
             // with all other CPTs.

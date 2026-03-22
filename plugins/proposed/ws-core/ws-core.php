@@ -23,7 +23,7 @@
  * Description: Core architecture for WhistleblowerShield. Proposed replacement
  *              plugin — radical refactor of v2.3.1. Not an upgrade of the live plugin.
  *              Assembles public whistleblower protection pages for 57 U.S. jurisdictions.
- * Version:     3.0.0
+ * Version:     3.2.0
  * Author:      Whistleblower Shield
  * Author URI:  https://whistleblowershield.org
  *
@@ -71,13 +71,59 @@
  *
  *  11. Fallback placeholder: if a jurisdiction page has no assembled content
  *      sections, a single .ws-section--placeholder notice is rendered.
+ *
+ * ACF KEY NAMING RULES (v3.1.0 sanity pass)
+ * ------------------------------------------
+ * Established during a consistency audit of all ACF registration files.
+ * These rules govern all current and future ACF field key values:
+ *
+ *   1. No ws_ prefix on field keys. The `field_` prefix is sufficient
+ *      namespacing. `field_ws_foo` → `field_foo`.
+ *
+ *   2. Group keys must be logically descriptive and end with `_metadata`.
+ *      `group_ws_foo` → `group_foo_metadata`.
+ *      `group_foo_fields` → `group_foo_metadata`.
+ *
+ *   3. Tab field keys: `_tab` appears only at the end of the key.
+ *      `field_tab_foo` or `tab_foo` → `field_foo_tab`.
+ *      `field_` prefix is required on all tab keys.
+ *
+ * NOTE: These rules apply to ACF `key` values only — not `name` (meta key),
+ * `label`, or any other property. Meta key names are governed separately below.
+ *
+ * META KEY NAMING RULES (v3.2.0 ws_auto_ pass)
+ * -----------------------------------------------
+ * Established during a full audit of all ACF field `name` values and their
+ * downstream consumers (hook layer, query layer). These rules govern all
+ * current and future post meta key values:
+ *
+ *   1. All custom meta keys carry a ws_ prefix. No bare unprefixed keys.
+ *
+ *   2. Auto-stamp keys — values written exclusively by hook logic, never
+ *      by human input — carry the ws_auto_ prefix:
+ *        ws_auto_date_created, ws_auto_last_edited, ws_auto_create_author,
+ *        ws_auto_last_edited_author, ws_auto_source_method, ws_auto_source_name,
+ *        ws_auto_verified_by, ws_auto_verified_date,
+ *        ws_auto_plain_english_by, ws_auto_plain_english_date,
+ *        ws_auto_plain_english_reviewed_by.
+ *      If a meta key is exclusively system-written, it belongs in this group.
+ *
+ *   3. Private audit-only keys (no ACF field, never read by render or query
+ *      layer) additionally carry a leading underscore per the WordPress
+ *      hidden-meta convention: _ws_auto_date_created_gmt, _ws_auto_last_edited_gmt.
+ *
+ *   4. Content CPT meta keys carry a CPT infix: ws_jx_*, ws_agency_*,
+ *      ws_aorg_*, ws_legal_update_*, ws_jx_interp_*, ws_jx_citation_*, etc.
+ *
+ *   5. Data-type suffixes: _url (URL string), _wysiwyg (rich-text content),
+ *      _id (integer foreign key or term ID).
  */
 
 defined( 'ABSPATH' ) || exit;
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
-define( 'WS_CORE_VERSION', '3.0.0' );
+define( 'WS_CORE_VERSION', '3.2.0' );
 define( 'WS_CORE_PATH',    plugin_dir_path( __FILE__ ) );
 define( 'WS_CORE_URL',     plugin_dir_url( __FILE__ ) );
 

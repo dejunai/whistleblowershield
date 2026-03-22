@@ -60,7 +60,7 @@ function ws_register_acf_major_edit() {
 	}
 
 	acf_add_local_field_group( [
-		'key'                   => 'group_ws_major_edit_metadata',
+		'key'                   => 'group_major_edit_metadata',
 		'title'                 => 'Major Edit Metadata',
 		'menu_order'            => 99,
 		'position'              => 'normal',
@@ -81,7 +81,7 @@ function ws_register_acf_major_edit() {
 
 			// ── is_major_edit ─────────────────────────────────────────────────
 			[
-				'key'           => 'field_ws_is_major_edit',
+				'key'           => 'field_is_major_edit',
 				'label'         => 'Flag as Major Edit',
 				'name'          => 'is_major_edit',
 				'type'          => 'true_false',
@@ -94,7 +94,7 @@ function ws_register_acf_major_edit() {
 
 			// ── major_edit_description ────────────────────────────────────────
 			[
-				'key'               => 'field_ws_major_edit_description',
+				'key'               => 'field_major_edit_description',
 				'label'             => 'Describe the Change',
 				'name'              => 'major_edit_description',
 				'type'              => 'textarea',
@@ -102,7 +102,7 @@ function ws_register_acf_major_edit() {
 				'rows'              => 4,
 				'placeholder'       => 'e.g. Updated filing deadline from 180 days to 300 days following the 2026 amendment to the State Whistleblower Act.',
 				'conditional_logic' => [ [ [
-					'field'    => 'field_ws_is_major_edit',
+					'field'    => 'field_is_major_edit',
 					'operator' => '==',
 					'value'    => '1',
 				] ] ],

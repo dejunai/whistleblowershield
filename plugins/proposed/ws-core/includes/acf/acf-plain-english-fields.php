@@ -54,15 +54,15 @@
  *                             the plain language content. Requires editor
  *                             rank or above (enforced in admin-hooks.php).
  *
- *   plain_english_reviewed_by WordPress user ID of the reviewer. Stamped
+ *   ws_auto_plain_english_reviewed_by  WP user ID of the reviewer. Stamped
  *                             once when plain_english_reviewed is first
  *                             enabled. Cleared on toggle-off.
  *
- *   plain_english_by          WordPress user ID of the summarizer. Stamped
- *                             once on first save after has_plain_english
- *                             is enabled and content exists.
+ *   ws_auto_plain_english_by  WP user ID of the summarizer. Stamped once
+ *                             on first save after has_plain_english is
+ *                             enabled and content exists.
  *
- *   plain_english_date        Local date (Y-m-d) the plain language content
+ *   ws_auto_plain_english_date  Local date (Y-m-d) the plain language content
  *                             was first saved. Stamped once. Cleared on
  *                             has_plain_english toggle-off.
  *
@@ -82,8 +82,8 @@
  *
  * STAMP WRITES
  * ------------
- * plain_english_reviewed_by — ws_acf_stamp_plain_reviewed_by() priority 25.
- * plain_english_by + plain_english_date — ws_acf_stamp_summarized_fields() priority 25.
+ * ws_auto_plain_english_reviewed_by — ws_acf_stamp_plain_reviewed_by() priority 25.
+ * ws_auto_plain_english_by + ws_auto_plain_english_date — ws_acf_stamp_summarized_fields() priority 25.
  * Both functions in admin-hooks.php. Neither references ACF field keys —
  * both read/write post meta directly by key name.
  *
@@ -104,6 +104,12 @@
  *        acf-jx-interpretations.php, and acf-agencies.php.
  *        ws-assist-org plain language tab retired — content is plain
  *        language by nature; feature does not apply.
+ * 3.5.0  Sanity pass (ws-core v3.1.0): group key renamed
+ *        group_ws_plain_english_fields → group_plain_english_metadata per new ACF key rules.
+ * 3.6.0  ws_auto_ pass (ws-core v3.2.0): stamp field meta keys prefixed:
+ *        plain_english_reviewed_by → ws_auto_plain_english_reviewed_by,
+ *        plain_english_by → ws_auto_plain_english_by,
+ *        plain_english_date → ws_auto_plain_english_date.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -121,7 +127,7 @@ function ws_register_acf_plain_english_fields() {
 
     acf_add_local_field_group( [
 
-        'key'                   => 'group_ws_plain_english_fields',
+        'key'                   => 'group_plain_english_metadata',
         'title'                 => 'Plain Language',
         'menu_order'            => 85,
         'position'              => 'normal',
@@ -148,7 +154,7 @@ function ws_register_acf_plain_english_fields() {
             // Major Edit (menu_order 99).
 
             [
-                'key'   => 'field_ws_plain_english_tab',
+                'key'   => 'field_plain_english_tab',
                 'label' => 'Plain Language',
                 'type'  => 'tab',
             ],
@@ -219,7 +225,7 @@ function ws_register_acf_plain_english_fields() {
             [
                 'key'           => 'field_plain_english_reviewed_by',
                 'label'         => 'Reviewed By',
-                'name'          => 'plain_english_reviewed_by',
+                'name'          => 'ws_auto_plain_english_reviewed_by',
                 'type'          => 'user',
                 'instructions'  => 'Auto-stamped when Plain Language Reviewed is first enabled.',
                 'role'          => [ 'author', 'editor', 'administrator' ],
@@ -237,7 +243,7 @@ function ws_register_acf_plain_english_fields() {
             [
                 'key'           => 'field_plain_english_by',
                 'label'         => 'Summarized By',
-                'name'          => 'plain_english_by',
+                'name'          => 'ws_auto_plain_english_by',
                 'type'          => 'user',
                 'instructions'  => 'Auto-stamped on first save after plain language content is created.',
                 'role'          => [ 'author', 'editor', 'administrator' ],
@@ -254,7 +260,7 @@ function ws_register_acf_plain_english_fields() {
             [
                 'key'          => 'field_plain_english_date',
                 'label'        => 'Summarized Date',
-                'name'         => 'plain_english_date',
+                'name'         => 'ws_auto_plain_english_date',
                 'type'         => 'text',
                 'instructions' => 'Auto-stamped on first save after plain language content is created. Read only.',
                 'readonly'     => 1,

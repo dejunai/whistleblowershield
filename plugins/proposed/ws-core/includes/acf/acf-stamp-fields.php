@@ -81,6 +81,12 @@
  *        ws-reference joins with shared field keys — the previously unique
  *        field_ws_ref_last_edited_author key is retired; $ws_stamp_cpts in
  *        admin-hooks.php updated to field_last_edited_author for ws-reference.
+ * 3.5.0  Sanity pass (ws-core v3.1.0): group key renamed
+ *        group_ws_stamp_fields → group_stamp_metadata per new ACF key rules.
+ * 3.6.0  ws_auto_ pass (ws-core v3.2.0): all four meta key names prefixed:
+ *        date_created → ws_auto_date_created, last_edited → ws_auto_last_edited,
+ *        last_edited_author → ws_auto_last_edited_author,
+ *        create_author → ws_auto_create_author.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -98,7 +104,7 @@ function ws_register_acf_stamp_fields() {
 
     acf_add_local_field_group( [
 
-        'key'                   => 'group_ws_stamp_fields',
+        'key'                   => 'group_stamp_metadata',
         'title'                 => 'Authorship & Review',
         'menu_order'            => 90,
         'position'              => 'normal',
@@ -128,7 +134,7 @@ function ws_register_acf_stamp_fields() {
             // content tabs but before acf-major-edit.php (menu_order 99).
 
             [
-                'key'   => 'field_ws_stamp_authorship_tab',
+                'key'   => 'field_stamp_authorship_tab',
                 'label' => 'Authorship & Review',
                 'type'  => 'tab',
             ],
@@ -143,7 +149,7 @@ function ws_register_acf_stamp_fields() {
             [
                 'key'           => 'field_last_edited_author',
                 'label'         => 'Last Edited By',
-                'name'          => 'last_edited_author',
+                'name'          => 'ws_auto_last_edited_author',
                 'type'          => 'user',
                 'instructions'  => 'Stamped automatically on every save. Editable by administrators only.',
                 'role'          => [ 'author', 'editor', 'administrator' ],
@@ -159,7 +165,7 @@ function ws_register_acf_stamp_fields() {
             [
                 'key'          => 'field_date_created',
                 'label'        => 'Date Created',
-                'name'         => 'date_created',
+                'name'         => 'ws_auto_date_created',
                 'type'         => 'text',
                 'instructions' => 'Set automatically on first save. Read only.',
                 'readonly'     => 1,
@@ -175,7 +181,7 @@ function ws_register_acf_stamp_fields() {
             [
                 'key'          => 'field_last_edited',
                 'label'        => 'Last Edited',
-                'name'         => 'last_edited',
+                'name'         => 'ws_auto_last_edited',
                 'type'         => 'text',
                 'instructions' => 'Stamped automatically on every save. Read only.',
                 'readonly'     => 1,
@@ -193,7 +199,7 @@ function ws_register_acf_stamp_fields() {
             [
                 'key'           => 'field_create_author',
                 'label'         => 'Created By',
-                'name'          => 'create_author',
+                'name'          => 'ws_auto_create_author',
                 'type'          => 'user',
                 'instructions'  => 'Stamped automatically on first save. Read only.',
                 'role'          => [ 'author', 'editor', 'administrator' ],
@@ -211,6 +217,6 @@ function ws_register_acf_stamp_fields() {
 
 
 // Field locking and stamp writes are handled centrally in admin-hooks.php.
-// ws_acf_lock_for_non_admins() applies to: date_created, last_edited,
-// last_edited_author, create_author (registered by field name, applies
+// ws_acf_lock_for_non_admins() applies to: ws_auto_date_created, ws_auto_last_edited,
+// ws_auto_last_edited_author, ws_auto_create_author (registered by field name, applies
 // to all CPTs carrying these field names — no per-file registration needed).

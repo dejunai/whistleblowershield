@@ -10,9 +10,10 @@
  *                             post title on new-post screens opened from the
  *                             "Create Now" links in admin-navigation.php.
  *
- *   2. Field locking        — makes date_created, last_edited, last_edited_author,
- *                             create_author, plain_english_by, plain_english_date,
- *                             and plain_english_reviewed_by readonly + disabled
+ *   2. Field locking        — makes ws_auto_date_created, ws_auto_last_edited,
+ *                             ws_auto_last_edited_author, ws_auto_create_author,
+ *                             ws_auto_plain_english_by, ws_auto_plain_english_date,
+ *                             and ws_auto_plain_english_reviewed_by readonly + disabled
  *                             for non-administrators or non-editors.
  *
  *   3. Auto-fill today      — fills last_reviewed with today's date when the
@@ -32,9 +33,9 @@
  *   6. Plain English guards — enforces has_plain_english / plain_reviewed /
  *                             plain_reviewed_by integrity rules on save.
  *
- *   7. Plain English stamps — writes plain_english_by / plain_english_date to
- *                             post meta once when plain English content is first
- *                             saved on supported CPTs.
+ *   7. Plain English stamps — writes ws_auto_plain_english_by /
+ *                             ws_auto_plain_english_date to post meta once when
+ *                             plain English content is first saved on supported CPTs.
  *
  *
  * JURISDICTION TAXONOMY
@@ -59,15 +60,15 @@
  * is scoped to post_id so there is no collision risk across CPTs. ACF field
  * keys follow the field_[meta_name] convention matching ws-jurisdiction.
  *
- *   date_created              — local date (Y-m-d), written once
- *   date_created_gmt          — GMT date (Y-m-d), written once
- *   create_author             — WP user ID, written once
- *   last_edited               — local date (Y-m-d), written every save
- *   last_edited_gmt           — GMT date (Y-m-d), written every save
- *   last_edited_author        — WP user ID, written every save (admin-overridable)
- *   plain_english_by          — WP user ID, written once on first plain English save
- *   plain_english_date        — local date (Y-m-d), written once on first plain English save
- *   plain_english_reviewed_by — WP user ID, written once when plain_reviewed first enabled
+ *   ws_auto_date_created              — local date (Y-m-d), written once
+ *   _ws_auto_date_created_gmt         — GMT date (Y-m-d), written once, private/hidden
+ *   ws_auto_create_author             — WP user ID, written once
+ *   ws_auto_last_edited               — local date (Y-m-d), written every save
+ *   _ws_auto_last_edited_gmt          — GMT date (Y-m-d), written every save, private/hidden
+ *   ws_auto_last_edited_author        — WP user ID, written every save (admin-overridable)
+ *   ws_auto_plain_english_by          — WP user ID, written once on first plain English save
+ *   ws_auto_plain_english_date        — local date (Y-m-d), written once on first plain English save
+ *   ws_auto_plain_english_reviewed_by — WP user ID, written once when plain_reviewed first enabled
  *
  *
  * VERSION
@@ -116,6 +117,17 @@
  *        - Removed ws_ref_approved from field locking foreach loop.
  *          ws_ref_approved field retired entirely — Approval tab removed from
  *          acf-references.php.
+ * 3.5.0  ws_auto_ prefix pass (ws-core v3.2.0):
+ *        - All stamp meta keys prefixed with ws_auto_ to signal system-only
+ *          writes: date_created → ws_auto_date_created, etc.
+ *        - GMT audit keys prefixed _ws_auto_ (leading underscore = WP hidden
+ *          meta convention): date_created_gmt → _ws_auto_date_created_gmt.
+ *        - Source-verify keys ws_auto_ prefixed: source_method, source_name,
+ *          verified_by, verified_date.
+ *        - source_name locked readonly/disabled; admin-only visibility added
+ *          for source_method and source_name via ws_hide_source_fields_for_non_admins().
+ *        - Plain English stamp keys ws_auto_ prefixed: plain_english_by,
+ *          plain_english_date, plain_english_reviewed_by.
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit;
@@ -158,13 +170,14 @@ add_filter( 'default_title', function( $title ) {
 // Stamp fields are system-managed and must not be altered through the ACF UI.
 // Two lock tiers apply:
 //
-//   Admin-only fields  — date_created, last_edited, last_edited_author,
-//                        create_author, plain_english_by, plain_english_date.
+//   Admin-only fields  — ws_auto_date_created, ws_auto_last_edited,
+//                        ws_auto_last_edited_author, ws_auto_create_author,
+//                        ws_auto_plain_english_by, ws_auto_plain_english_date.
 //                        Locked for any role below administrator.
-//                        last_edited_author is admin-overridable for attribution
-//                        correction on minor edits.
+//                        ws_auto_last_edited_author is admin-overridable for
+//                        attribution correction on minor edits.
 //
-//   Editor-only fields — last_reviewed, plain_english_reviewed_by.
+//   Editor-only fields — last_reviewed, ws_auto_plain_english_reviewed_by.
 //                        Locked for any role below editor. plain_reviewed is not
 //                        listed here because it is a checkbox that the toggle-off
 //                        guard clears automatically; the field itself is hidden
@@ -176,15 +189,39 @@ add_filter( 'default_title', function( $title ) {
 // All CPTs share these field names (unprefixed), so a single filter registration
 // per name applies across every post type that carries the field.
 
-foreach ( [ 'date_created', 'last_edited', 'last_edited_author', 'create_author', 'plain_english_by', 'plain_english_date' ] as $_ws_f ) {
+foreach ( [ 'ws_auto_date_created', 'ws_auto_last_edited', 'ws_auto_last_edited_author', 'ws_auto_create_author', 'ws_auto_plain_english_by', 'ws_auto_plain_english_date' ] as $_ws_f ) {
     add_filter( "acf/load_field/name={$_ws_f}", 'ws_acf_lock_for_non_admins' );
 }
 unset( $_ws_f );
 
-foreach ( [ 'last_reviewed', 'plain_english_reviewed_by' ] as $_ws_f ) {
+foreach ( [ 'last_reviewed', 'ws_auto_plain_english_reviewed_by' ] as $_ws_f ) {
     add_filter( "acf/load_field/name={$_ws_f}", 'ws_acf_lock_for_non_editors' );
 }
 unset( $_ws_f );
+
+// ── Source & Verification visibility — admin only ─────────────────────────────
+//
+// ws_auto_source_method and ws_auto_source_name are not visible to any role
+// below administrator. acf/prepare_field returning false hides the field
+// entirely from the ACF UI without affecting stored values.
+
+foreach ( [ 'ws_auto_source_method', 'ws_auto_source_name' ] as $_ws_f ) {
+    add_filter( "acf/prepare_field/name={$_ws_f}", 'ws_hide_source_fields_for_non_admins' );
+}
+unset( $_ws_f );
+
+/**
+ * Hides source_method and source_name fields from any user below administrator.
+ *
+ * @param  array $field  ACF field array.
+ * @return array|false   False hides the field entirely.
+ */
+function ws_hide_source_fields_for_non_admins( $field ) {
+    if ( ! current_user_can( 'manage_options' ) ) {
+        return false;
+    }
+    return $field;
+}
 
 /**
  * Sets a field to readonly and disabled for any user below administrator.
@@ -255,7 +292,7 @@ function ws_acf_autofill_today( $value, $post_id, $field ) {
 // Non-admins: field is locked (disabled) and never submitted; the stored
 // value is displayed for reference only.
 
-add_filter( 'acf/load_value/name=last_edited_author', 'ws_acf_autofill_current_editor', 10, 3 );
+add_filter( 'acf/load_value/name=ws_auto_last_edited_author', 'ws_acf_autofill_current_editor', 10, 3 );
 
 /**
  * Pre-fills last_edited_author with the current user for administrators.
@@ -361,7 +398,7 @@ function ws_acf_plain_english_guards( $post_id ) {
         foreach ( $_POST['acf'] as $field_key => $field_value ) {
             $field_obj = acf_get_field( $field_key );
             if ( ! $field_obj ) continue;
-            if ( in_array( $field_obj['name'], [ 'plain_english_reviewed', 'plain_english_reviewed_by' ], true ) ) {
+            if ( in_array( $field_obj['name'], [ 'plain_english_reviewed', 'ws_auto_plain_english_reviewed_by' ], true ) ) {
                 $_POST['acf'][ $field_key ] = 0;
             }
         }
@@ -376,13 +413,13 @@ function ws_acf_plain_english_guards( $post_id ) {
         foreach ( $_POST['acf'] as $field_key => $field_value ) {
             $field_obj = acf_get_field( $field_key );
             if ( ! $field_obj ) continue;
-            if ( in_array( $field_obj['name'], [ 'plain_english_reviewed', 'plain_english_reviewed_by' ], true ) ) {
+            if ( in_array( $field_obj['name'], [ 'plain_english_reviewed', 'ws_auto_plain_english_reviewed_by' ], true ) ) {
                 $_POST['acf'][ $field_key ] = 0;
             }
         }
         // Clear plain English stamp meta written by ws_acf_stamp_summarized_fields().
-        delete_post_meta( $post_id, 'plain_english_by' );
-        delete_post_meta( $post_id, 'plain_english_date' );
+        delete_post_meta( $post_id, 'ws_auto_plain_english_by' );
+        delete_post_meta( $post_id, 'ws_auto_plain_english_date' );
     }
 }
 
@@ -416,8 +453,8 @@ add_action( 'admin_notices', function() {
 //                    choice is preserved rather than overwriting with the
 //                    current user ID.
 //
-// All CPTs share identical unprefixed stamp meta key names. WordPress post meta
-// is scoped to post_id so there is no collision risk across post types.
+// All CPTs share identical ws_auto_ prefixed stamp meta key names. WordPress post
+// meta is scoped to post_id so there is no collision risk across post types.
 //
 // To add stamp support to a new CPT, add one entry to $ws_stamp_cpts.
 
@@ -469,16 +506,16 @@ function ws_acf_write_stamp_fields( $post_id ) {
 
     // ── Created stamps (once only) ────────────────────────────────────────
 
-    if ( ! get_post_meta( $post_id, 'date_created', true ) ) {
-        update_post_meta( $post_id, 'date_created',     $now_local );
-        update_post_meta( $post_id, 'date_created_gmt', $now_gmt );
-        update_post_meta( $post_id, 'create_author',    $user_id );
+    if ( ! get_post_meta( $post_id, 'ws_auto_date_created', true ) ) {
+        update_post_meta( $post_id, 'ws_auto_date_created',      $now_local );
+        update_post_meta( $post_id, '_ws_auto_date_created_gmt', $now_gmt );
+        update_post_meta( $post_id, 'ws_auto_create_author',     $user_id );
     }
 
     // ── Last-edited stamps (every save) ───────────────────────────────────
 
-    update_post_meta( $post_id, 'last_edited',     $now_local );
-    update_post_meta( $post_id, 'last_edited_gmt', $now_gmt );
+    update_post_meta( $post_id, 'ws_auto_last_edited',      $now_local );
+    update_post_meta( $post_id, '_ws_auto_last_edited_gmt', $now_gmt );
 
     // ── Last-edited author ────────────────────────────────────────────────
     // Honour admin attribution override; stamp current user in all other cases.
@@ -487,9 +524,9 @@ function ws_acf_write_stamp_fields( $post_id ) {
     $is_admin    = current_user_can( 'manage_options' );
 
     if ( $is_admin && $posted_user && $posted_user !== $user_id ) {
-        update_post_meta( $post_id, 'last_edited_author', $posted_user );
+        update_post_meta( $post_id, 'ws_auto_last_edited_author', $posted_user );
     } else {
-        update_post_meta( $post_id, 'last_edited_author', $user_id );
+        update_post_meta( $post_id, 'ws_auto_last_edited_author', $user_id );
     }
 }
 
@@ -527,7 +564,7 @@ function ws_acf_stamp_plain_reviewed_by( $post_id ) {
         return;
     }
 
-    if ( get_post_meta( $post_id, 'plain_english_reviewed_by', true ) ) {
+    if ( get_post_meta( $post_id, 'ws_auto_plain_english_reviewed_by', true ) ) {
         return;
     }
 
@@ -536,7 +573,7 @@ function ws_acf_stamp_plain_reviewed_by( $post_id ) {
         return;
     }
 
-    update_post_meta( $post_id, 'plain_english_reviewed_by', get_current_user_id() );
+    update_post_meta( $post_id, 'ws_auto_plain_english_reviewed_by', get_current_user_id() );
 }
 
 
@@ -576,12 +613,12 @@ function ws_acf_stamp_summarized_fields( $post_id ) {
         return;
     }
 
-    if ( get_post_meta( $post_id, 'plain_english_date', true ) ) {
+    if ( get_post_meta( $post_id, 'ws_auto_plain_english_date', true ) ) {
         return;
     }
 
-    update_post_meta( $post_id, 'plain_english_date', current_time( 'Y-m-d' ) );
-    update_post_meta( $post_id, 'plain_english_by',   get_current_user_id() );
+    update_post_meta( $post_id, 'ws_auto_plain_english_date', current_time( 'Y-m-d' ) );
+    update_post_meta( $post_id, 'ws_auto_plain_english_by',   get_current_user_id() );
 }
 
 
@@ -875,7 +912,7 @@ function ws_stamp_source_method( $post_id ) {
     }
 
     // First save only — never overwrite.
-    if ( get_post_meta( $post_id, 'source_method', true ) !== '' ) {
+    if ( get_post_meta( $post_id, 'ws_auto_source_method', true ) !== '' ) {
         return;
     }
 
@@ -884,7 +921,7 @@ function ws_stamp_source_method( $post_id ) {
         ? WS_SOURCE_HUMAN_CREATED
         : WS_SOURCE_HUMAN_CREATED; // Default for all manual admin creates.
 
-    update_post_meta( $post_id, 'source_method', $method );
+    update_post_meta( $post_id, 'ws_auto_source_method', $method );
 }
 
 
@@ -911,14 +948,14 @@ function ws_stamp_source_name( $post_id ) {
     }
 
     // First save only — never overwrite.
-    if ( get_post_meta( $post_id, 'source_name', true ) !== '' ) {
+    if ( get_post_meta( $post_id, 'ws_auto_source_name', true ) !== '' ) {
         return;
     }
 
-    $method = get_post_meta( $post_id, 'source_method', true );
+    $method = get_post_meta( $post_id, 'ws_auto_source_method', true );
 
     if ( in_array( $method, [ WS_SOURCE_MATRIX_SEED, WS_SOURCE_HUMAN_CREATED ], true ) ) {
-        update_post_meta( $post_id, 'source_name', WS_SOURCE_NAME_DIRECT );
+        update_post_meta( $post_id, 'ws_auto_source_name', WS_SOURCE_NAME_DIRECT );
     }
     // All other methods: leave empty — must be supplied externally.
 }
@@ -950,13 +987,13 @@ function ws_default_verification_status( $post_id ) {
         return;
     }
 
-    $source = get_post_meta( $post_id, 'source_method', true );
+    $source = get_post_meta( $post_id, 'ws_auto_source_method', true );
 
     if ( $source === WS_SOURCE_HUMAN_CREATED ) {
         update_post_meta( $post_id, 'verification_status', 'verified' );
         $current_user = wp_get_current_user();
-        update_post_meta( $post_id, 'verified_by',   $current_user->display_name );
-        update_post_meta( $post_id, 'verified_date', current_time( 'mysql' ) );
+        update_post_meta( $post_id, 'ws_auto_verified_by',   $current_user->display_name );
+        update_post_meta( $post_id, 'ws_auto_verified_date', current_time( 'mysql' ) );
     } else {
         update_post_meta( $post_id, 'verification_status', 'unverified' );
     }
@@ -994,8 +1031,8 @@ function ws_stamp_verified_by_date( $post_id ) {
     }
 
     $current_user = wp_get_current_user();
-    update_post_meta( $post_id, 'verified_by',   $current_user->display_name );
-    update_post_meta( $post_id, 'verified_date', current_time( 'mysql' ) );
+    update_post_meta( $post_id, 'ws_auto_verified_by',   $current_user->display_name );
+    update_post_meta( $post_id, 'ws_auto_verified_date', current_time( 'mysql' ) );
 }
 
 
@@ -1044,7 +1081,7 @@ function ws_enforce_source_verify_roles( $post_id ) {
     }
 
     // ── 3. source_name gate: no role may verify without a source_name ─────
-    $source_name     = trim( (string) get_post_meta( $post_id, 'source_name', true ) );
+    $source_name     = trim( (string) get_post_meta( $post_id, 'ws_auto_source_name', true ) );
     $incoming_status = isset( $_POST['acf']['field_verification_status'] )
         ? sanitize_text_field( $_POST['acf']['field_verification_status'] )
         : '';
@@ -1083,17 +1120,17 @@ function ws_set_source_method( $post_id, $method ) {
     }
 
     // Immutability guard.
-    if ( get_post_meta( $post_id, 'source_method', true ) !== '' ) {
+    if ( get_post_meta( $post_id, 'ws_auto_source_method', true ) !== '' ) {
         return;
     }
 
     // jx-summary policy lock.
     if ( get_post_type( $post_id ) === 'jx-summary' ) {
-        update_post_meta( $post_id, 'source_method', WS_SOURCE_HUMAN_CREATED );
+        update_post_meta( $post_id, 'ws_auto_source_method', WS_SOURCE_HUMAN_CREATED );
         return;
     }
 
-    update_post_meta( $post_id, 'source_method', $method );
+    update_post_meta( $post_id, 'ws_auto_source_method', $method );
 }
 
 
@@ -1121,9 +1158,9 @@ function ws_set_source_name( $post_id, $name ) {
     }
 
     // Immutability guard.
-    if ( get_post_meta( $post_id, 'source_name', true ) !== '' ) {
+    if ( get_post_meta( $post_id, 'ws_auto_source_name', true ) !== '' ) {
         return;
     }
 
-    update_post_meta( $post_id, 'source_name', $name );
+    update_post_meta( $post_id, 'ws_auto_source_name', $name );
 }
