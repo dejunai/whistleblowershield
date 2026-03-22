@@ -372,7 +372,14 @@ function ws_render_jx_summary_section( $content, $review_html = '' ) {
 
 function ws_render_plain_english_reviewed_badge( $plain_reviewed, $reviewer_name = '', $reviewed_date = '' ) {
     if ( $plain_reviewed ) {
-        $tooltip = 'Reviewed by ' . esc_attr( $reviewer_name ) . ' on ' . esc_attr( $reviewed_date );
+        $parts = [];
+        if ( $reviewer_name ) {
+            $parts[] = 'Reviewed by ' . esc_attr( $reviewer_name );
+        }
+        if ( $reviewed_date ) {
+            $parts[] = 'on ' . esc_attr( $reviewed_date );
+        }
+        $tooltip = ! empty( $parts ) ? implode( ' ', $parts ) : 'Reviewed';
         return '<span class="ws-trust-badge ws-trust-badge--reviewed" title="' . $tooltip . '">'
              . 'Editor Reviewed'
              . '</span>';
@@ -396,7 +403,7 @@ function ws_render_plain_english_reviewed_badge( $plain_reviewed, $reviewer_name
  *     @type string $created_date     Creation date (Y-m-d), or empty.
  *     @type bool   $is_reviewed      True if plain-language review is complete.
  *     @type string $reviewed_by_name Display name of the plain-language reviewer.
- *     @type string $written_date     Date the plain-language version was written (Y-m-d).
+ *     @type string $reviewed_date    Date the plain-language review was completed (Y-m-d), or empty.
  *     @type string $sources          Sources & citations raw text, or empty.
  * }
  * @return string  HTML footer block.
@@ -418,10 +425,10 @@ function ws_render_jx_summary_footer( $data ) {
         <?php endif; ?>
 
         <?php echo ws_render_plain_english_reviewed_badge(
-			! empty( $data['is_reviewed'] ),
-			$data['reviewed_by_name'] ?? '',
-			$data['written_date'] ?? ''
-		); ?>
+				! empty( $data['is_reviewed'] ),
+				$data['reviewed_by_name'] ?? '',
+				$data['reviewed_date'] ?? ''
+			); ?>
 
         <?php if ( $data['sources'] ) : ?>
         <div class="ws-jx-summary-sources">

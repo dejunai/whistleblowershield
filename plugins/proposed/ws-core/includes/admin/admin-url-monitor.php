@@ -30,7 +30,8 @@
  * WP-Cron fires on page load — interval is approximate on low-traffic sites.
  * For guaranteed timing, add a server-side crontab:
  *
- *   */5 * * * * curl -s https://your-site.com/wp-cron.php?doing_wp_cron > /dev/null
+ *   Every 5 minutes:
+ *   curl -s https://your-site.com/wp-cron.php?doing_wp_cron > /dev/null
  *
  * URL CONFIG MAP
  * --------------
