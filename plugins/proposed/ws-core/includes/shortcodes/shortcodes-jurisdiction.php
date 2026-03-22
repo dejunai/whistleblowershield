@@ -196,7 +196,7 @@ add_shortcode( 'ws_jx_summary', function() {
         'edited_date'            => $data['record']['edited_date'],
         'is_reviewed'            => $data['plain']['is_reviewed'],
         'reviewed_by_name'       => $data['plain']['reviewed_by_name'],
-        'written_date'           => $data['plain']['written_date'],
+        'reviewed_date'          => $data['plain']['reviewed_date'] ?? '',
         'sources'                => $data['sources'] ?: '',
     ] );
 
@@ -347,7 +347,7 @@ function ws_shortcode_jx_case_law() {
     if ( empty( $citations ) ) return '';
 
     // Helper: build an array of footnote item HTML strings from a citation slice.
-    $build_items = function( $slice, $fn_start ) {
+    $build_items = function( $slice, $fn_start, $id_prefix ) {
         $items    = [];
         $fn_index = $fn_start;
         foreach ( $slice as $citation ) {
@@ -356,8 +356,8 @@ function ws_shortcode_jx_case_law() {
             $is_pdf = $citation['is_pdf'];
 
             $pdf_suffix = $is_pdf ? ' (PDF)' : '';
-            $fn_id      = 'fn-' . $fn_index;
-            $fn_ref_id  = 'fn-ref-' . $fn_index;
+            $fn_id      = $id_prefix . '-fn-' . $fn_index;
+            $fn_ref_id  = $id_prefix . '-fn-ref-' . $fn_index;
 
             if ( $url ) {
                 $linked_label = '<a href="' . esc_url( $url ) . '" target="_blank">'
@@ -404,12 +404,13 @@ function ws_shortcode_jx_case_law() {
 
     if ( empty( $fed ) ) {
         // Single-group: no federal append.
-        return ws_render_jx_case_law( $build_items( $citations, 1 ) );
+        return ws_render_jx_case_law( $build_items( $citations, 1, 'all' ) );
     }
 
-    // Two-group: local citations numbered from 1; federal citations numbered from 1.
-    $out  = ws_render_jx_case_law( $build_items( $local, 1 ), 'ws-section--local' );
-    $out .= ws_render_jx_case_law( $build_items( $fed,   1 ), 'ws-section--federal' );
+    // Two-group: local and federal citations keep independent visible numbering
+    // but use distinct DOM ID prefixes so anchor targets remain unique.
+    $out  = ws_render_jx_case_law( $build_items( $local, 1, 'local' ), 'ws-section--local' );
+    $out .= ws_render_jx_case_law( $build_items( $fed,   1, 'fed' ), 'ws-section--federal' );
     return $out;
 }
 
@@ -686,4 +687,3 @@ add_shortcode( 'ws_jurisdiction_index', function() {
 //   parent_url    string  Permalink of the parent post
 //   references    array   Array of ref_materials items (see ws_get_ref_materials above)
 // ============================================================================
-

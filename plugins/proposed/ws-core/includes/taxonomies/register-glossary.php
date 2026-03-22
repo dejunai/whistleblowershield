@@ -422,7 +422,8 @@ function ws_apply_glossary_tooltips( $html ) {
 
 		} finally {
 			libxml_use_internal_errors( $prev_libxml );
-	}
+		}
+}
 
 
 // ════════════════════════════════════════════════════════════════════════════
