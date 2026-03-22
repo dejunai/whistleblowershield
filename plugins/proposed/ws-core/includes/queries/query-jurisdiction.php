@@ -286,7 +286,7 @@ function ws_build_plain_english_array( $post_id ) {
         'is_reviewed'          => (bool) get_post_meta( $post_id, 'ws_plain_english_reviewed',        true ),
         'reviewed_by'          => $plain_english_reviewed_by_id,
         'reviewed_by_name'     => ws_resolve_display_name( $plain_english_reviewed_by_id ),
-        'reviewed_date'        => '',
+        'reviewed_date'        => '', //@todo - ws_auto_plain_english_reviewed_date needs to be added upstream (ACF and Hooks pending)
     ];
 }
 
@@ -802,8 +802,8 @@ function ws_get_jx_citation_data( $jx_term_id ) {
                 'disclosure_type' => get_field( 'ws_jx_citation_disclosure_type', $cid ),
                 'official_name'   => get_post_meta( $cid, 'ws_jx_citation_official_name',           true ),
                 'common_name'     => get_post_meta( $cid, 'ws_jx_citation_common_name',             true ),
-                'label'           => get_post_meta( $cid, 'ws_jx_citation_official_name',           true )
-                                   ?: get_post_meta( $cid, 'ws_jx_citation_common_name',             true )
+                'label'           => get_post_meta( $cid, 'ws_jx_citation_common_name',           true )
+                                   ?: get_post_meta( $cid, 'ws_jx_citation_official_name',             true )
                                    ?: get_the_title( $cid ),
                 'cite_url'        => get_post_meta( $cid, 'ws_jx_citation_url',           true ),
                 'is_pdf'          => (bool) get_post_meta( $cid, 'ws_jx_citation_is_pdf', true ),
@@ -1294,7 +1294,7 @@ function ws_get_legal_updates_data( $jx_id = 0, $count = 0, $public_only = false
             // ── Content ───────────────────────────────────────────────────
             'law_name'           => get_post_meta( $uid, 'ws_legal_update_law_name',          true ) ?: '',
             'source_url'         => get_post_meta( $uid, 'ws_legal_update_source_url',              true ) ?: '',
-            'summary_wysiwyg'    => wp_kses_post( get_post_meta( $uid, 'ws_legal_update_summary_wysiwyg', true ) ?: '' ),
+            'summary'            => wp_kses_post( get_post_meta( $uid, 'ws_legal_update_summary_wysiwyg', true ) ?: '' ),
 
             // ── Source post backlink ──────────────────────────────────────
             'source_post_id'     => (int) get_post_meta( $uid, 'ws_legal_update_source_post_id',   true ),

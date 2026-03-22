@@ -556,7 +556,7 @@ function ws_render_footer( $data ) {
  *     @type bool   $multi_jurisdiction True if update affects more than one jurisdiction.
  *     @type string $law_name         Official name of the affected law, or empty string.
  *     @type string $source_url       Primary source URL, or empty string.
- *     @type string $summary_wysiwyg  Sanitized wysiwyg HTML summary (wp_kses_post applied).
+ *     @type string $summary          Sanitized wysiwyg HTML summary (wp_kses_post applied).
  *     @type int    $source_post_id   Post ID of the source jx-* record, or 0.
  *     @type string $source_post_type Post type slug of the source record, or empty string.
  *     @type array  $record           Stamp fields — see ws_build_record_array().
@@ -596,9 +596,9 @@ function ws_render_legal_updates( $items ) {
                 <strong>Posted:</strong> <?php echo esc_html( $item['post_date'] ); ?>
             </p>
 
-            <?php if ( $item['summary_wysiwyg'] ) : ?>
+            <?php if ( $item['summary'] ) : ?>
             <div class="ws-legal-update-summary">
-                <?php echo $item['summary_wysiwyg']; // Already passed through wp_kses_post ?>
+                <?php echo $item['summary']; // Already passed through wp_kses_post ?>
             </div>
             <?php endif; ?>
 
