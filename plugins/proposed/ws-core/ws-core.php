@@ -36,8 +36,12 @@
  *      slug = USPS code). Slugs are lowercase (e.g., 'ca', 'us').
  *
  *   2. Attach-flag pattern: jx-citation, jx-statute, jx-interpretation each have
- *      attach_flag (true_false) + order (number) fields. Only flagged records
- *      appear on the public jurisdiction page.
+ *      attach_flag (true_false) + order (number) fields. Flagged records are
+ *      editorially curated highlights — typically 3–5 items per section — that
+ *      the assembler surfaces on the jurisdiction summary page. This is NOT a
+ *      publish/visibility gate. Records without the flag are fully accessible
+ *      via taxonomy-driven user queries; the flag only controls what appears
+ *      on the curated summary view.
  *
  *   3. Federal append (is_fed): ws_get_jx_statute_data(), ws_get_jx_citation_data(),
  *      and ws_get_jx_interpretation_data() automatically append US-scoped records
@@ -123,6 +127,14 @@
  *
  *   5. Data-type suffixes: _url (URL string), _wysiwyg (rich-text content),
  *      _id (integer foreign key or term ID).
+ *
+ *   6. Plural vs. singular: PHP source filenames and directory names may be
+ *      plural (acf-assist-orgs.php, /admin/matrix/). Meta key infixes, CPT
+ *      slugs, and taxonomy slugs are always singular:
+ *        ws_aorg_*    (not ws_aorgs_*)
+ *        ws_agency_*  (not ws_agencies_*)
+ *        ws_jx_*      (not ws_jxs_*)
+ *      When in doubt, singular wins at the database layer.
  *
  * DATE STAMP CONVENTION
  * ----------------------
@@ -268,6 +280,19 @@ define( 'WS_SOURCE_NAME_DIRECT', 'Direct' );
 define( 'WS_LEGAL_UPDATE_PUBLIC_TYPES', [ 'statute', 'citation', 'summary', 'interpretation', 'regulation', 'policy' ] );
 
 
+// ── Activation Hook ───────────────────────────────────────────────────────────
+//
+// CPTs are registered on 'init', which has not fired when the activation hook
+// runs. Calling flush_rewrite_rules() here would flush against incomplete rules.
+// Instead, set a flag that ws_core_init() checks on the next admin_init and
+// flushes after CPTs are registered.
+
+register_activation_hook( __FILE__, 'ws_core_activate' );
+
+function ws_core_activate() {
+    update_option( 'ws_core_flush_rewrite_rules', true );
+}
+
 // ── Deactivation Hooks ────────────────────────────────────────────────────────
 
 register_deactivation_hook( __FILE__, 'ws_url_monitor_deactivate' );
@@ -294,6 +319,13 @@ function ws_core_init() {
     }
 
     require_once WS_CORE_PATH . 'includes/loader.php';
+
+    // Flush rewrite rules once after activation (deferred from activation hook
+    // so all CPTs are registered before the flush runs).
+    if ( is_admin() && get_option( 'ws_core_flush_rewrite_rules' ) ) {
+        flush_rewrite_rules();
+        delete_option( 'ws_core_flush_rewrite_rules' );
+    }
 }
 
 

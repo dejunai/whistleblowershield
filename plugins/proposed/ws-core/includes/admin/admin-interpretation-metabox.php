@@ -43,6 +43,8 @@
  *         the ws_jurisdiction taxonomy. &ws_jx_code=US removed from add URL.
  * 3.0.1  Added inline comment to direct meta reads in metabox render function
  *        explaining why the query layer is not used in admin metabox context.
+ * 3.6.0  Metabox now reads ws_jx_statute_interp_ids (reverse index maintained
+ *        by admin-hooks.php) — simple post__in query, no meta_query JOIN.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -89,43 +91,46 @@ function ws_render_interpretation_metabox( $post ) {
 
     // ── Auto-draft guard ──────────────────────────────────────────────────
 
-    $is_draft   = ( $post->post_status === 'auto-draft' );
-    $add_url    = admin_url( 'post-new.php?post_type=jx-interpretation&statute_id=' . $post->ID );
-    $post_title = esc_attr( get_the_title( $post ) );
+    $is_draft = ( $post->post_status === 'auto-draft' );
+
+    // ── Build "Add New Interpretation" URL ────────────────────────────────
+    //
+    // statute_id         — read by acf/load_value in acf-jx-interpretations.php
+    //                      to pre-select the ws_jx_interp_statute_id field.
+    // tax_input[...][]   — WordPress core pre-assigns the ws_jurisdiction taxonomy
+    //                      term on the new post screen without any ACF hook.
+    //                      Always 'us' for interpretations; resolved via get_term_by
+    //                      so the numeric term ID is used, not the slug.
+    // post_title         — WordPress core pre-fills the title field.
+
+    $us_term = get_term_by( 'slug', 'us', WS_JURISDICTION_TERM_ID );
+    $add_url = admin_url( 'post-new.php?post_type=jx-interpretation&statute_id=' . $post->ID );
+    if ( $us_term ) {
+        $add_url .= '&tax_input[' . WS_JURISDICTION_TERM_ID . '][]=' . $us_term->term_id;
+    }
+    $post_title = get_the_title( $post );
     if ( $post_title ) {
-        $add_url .= '&post_title=' . rawurlencode( 'Interpretation — ' . get_the_title( $post ) );
+        $add_url .= '&post_title=' . rawurlencode( 'Interpretation — ' . $post_title );
     }
 
     // ── Fetch linked interpretations ──────────────────────────────────────
     //
-    // Bug #7 fix: the original call had two 'meta_key' entries in the same
-    // flat array. PHP silently kept only the last ('ws_interp_year'), which
-    // discarded the 'meta_value' => $post->ID filter entirely. All
-    // interpretations across all statutes were returned.
-    //
-    // Fixed by separating the two concerns:
-    //   - meta_query handles the statute filter (ws_statute_id = $post->ID)
-    //   - 'meta_key' + 'orderby' handle the sort-by-year behaviour
-    //
-    // WP_Query resolves both independently when meta_query is present
-    // alongside a standalone meta_key for ordering.
+    // ws_jx_statute_interp_ids is the reverse index maintained by
+    // ws_rebuild_jx_statute_interp_index() in admin-hooks.php. Reading it
+    // here is a single get_post_meta() call; the post__in query that follows
+    // is a simple WHERE ID IN (...) sorted by decision year, no meta JOIN.
 
-    $interpretations = get_posts( [
+    $interp_ids = array_filter( array_map( 'intval', (array) get_post_meta( $post->ID, 'ws_jx_statute_interp_ids', true ) ) );
+
+    $interpretations = empty( $interp_ids ) ? [] : get_posts( [
         'post_type'      => 'jx-interpretation',
-        'post_status'    => [ 'publish', 'draft', 'pending' ],
+        'post_status'    => 'any',
         'posts_per_page' => -1,
         'fields'         => 'ids',
-        'meta_query'     => [
-            [
-                'key'     => 'ws_statute_id',
-                'value'   => $post->ID,
-                'compare' => '=',
-                'type'    => 'NUMERIC',
-            ],
-        ],
-        'meta_key' => 'ws_interp_year',
-        'orderby'  => 'meta_value_num',
-        'order'    => 'DESC',
+        'post__in'       => $interp_ids,
+        'meta_key'       => 'ws_jx_interp_year',
+        'orderby'        => 'meta_value_num',
+        'order'          => 'DESC',
     ] );
 
     // ── Render ────────────────────────────────────────────────────────────
@@ -160,9 +165,9 @@ function ws_render_interpretation_metabox( $post ) {
                 <?php foreach ( $interpretations as $interp_id ) :
                     $case_name   = get_the_title( $interp_id );
                     // Direct meta reads — admin metabox display only; query layer is for front-end shortcode rendering.
-                    $court_key   = get_post_meta( $interp_id, 'ws_interp_court', true );
-                    $year        = get_post_meta( $interp_id, 'ws_interp_year', true );
-                    $favorable   = get_post_meta( $interp_id, 'ws_interp_favorable', true );
+                    $court_key   = get_post_meta( $interp_id, 'ws_jx_interp_court', true );
+                    $year        = get_post_meta( $interp_id, 'ws_jx_interp_year', true );
+                    $favorable   = get_post_meta( $interp_id, 'ws_jx_interp_favorable', true );
                     $court_label = ( $court_key && ! empty( $ws_court_matrix[ $court_key ] ) )
                         ? esc_html( $ws_court_matrix[ $court_key ]['short'] )
                         : esc_html( $court_key );

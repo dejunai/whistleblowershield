@@ -193,140 +193,16 @@
  *          field inventory.
  *        - remedies switched from get_post_meta() to get_field() — fixes pre-existing
  *          bug where matrix-seeded remedy terms were invisible to the query layer.
+ * 3.6.0  Query layer split into three files:
+ *        - query-helpers.php  — pure utilities (ws_resolve_display_name).
+ *        - query-shared.php   — cross-CPT sub-array builders (ws_build_record_array,
+ *                               ws_build_plain_english_array, ws_build_source_verify_array).
+ *        - query-jurisdiction.php — jurisdiction-specific dataset functions (this file).
+ *        Load order is non-negotiable: helpers → shared → jurisdiction.
  */
 
 
 defined( 'ABSPATH' ) || exit;
-
-
-// ════════════════════════════════════════════════════════════════════════════
-// Private Helper: Resolve Display Name
-//
-// Resolves a WordPress user ID to the user's display name.
-// Returns an empty string if the user ID is falsy or the user does not exist.
-// Used by all dataset functions so the render layer never calls get_userdata().
-// ════════════════════════════════════════════════════════════════════════════
-
-/**
- * Returns the display name for a given WP user ID.
- *
- * @param  int    $user_id  WordPress user ID.
- * @return string           Display name, or empty string if not resolvable.
- */
-function ws_resolve_display_name( $user_id ) {
-    $user_id = (int) $user_id;
-    if ( ! $user_id ) {
-        return '';
-    }
-    $user = get_userdata( $user_id );
-    return $user ? $user->display_name : '';
-}
-
-
-// ════════════════════════════════════════════════════════════════════════════
-// Private Helper: Build Record Array
-//
-// Constructs the standard 'record' sub-array from stamp meta.
-// Keys: created_by, created_by_name, created_date, edited_date, edited_by, edited_by_name.
-// Used by every dataset function to guarantee a consistent return shape.
-// ════════════════════════════════════════════════════════════════════════════
-
-/**
- * Builds the standard stamp record sub-array for a given post.
- *
- *
- * @param  int   $post_id  Post ID.
- * @return array
- */
-function ws_build_record_array( $post_id ) {
-
-    $create_author_id      = (int) get_post_meta( $post_id, 'ws_auto_create_author',      true );
-    $last_edited_author_id = (int) get_post_meta( $post_id, 'ws_auto_last_edited_author', true );
-
-    return [
-        'created_by'         => $create_author_id,
-        'created_by_name'    => ws_resolve_display_name( $create_author_id ),
-        'created_date'       => get_post_meta( $post_id, 'ws_auto_date_created', true ),
-        'edited_date'        => get_post_meta( $post_id, 'ws_auto_last_edited',  true ),
-        'edited_by'          => $last_edited_author_id,
-        'edited_by_name'     => ws_resolve_display_name( $last_edited_author_id ),
-		];
-}
-
-
-// ════════════════════════════════════════════════════════════════════════════
-// Private Helper: Build Plain English Array
-//
-// Constructs the standard 'plain' sub-array for CPTs that carry the
-// has_plain_english / plain_reviewed workflow fields.
-// Keys: has_content, plain_content, written_by, written_by_name, written_date,
-//       is_reviewed, reviewed_by, reviewed_by_name.
-//
-// jx-summary calls this function but ignores has_plain_english —
-// it is inherently plain English and uses the reviewed fields only.
-// ════════════════════════════════════════════════════════════════════════════
-
-/**
- * Builds the standard plain English sub-array for a given post.
- *
- * @param  int   $post_id  Post ID.
- * @return array
- */
-function ws_build_plain_english_array( $post_id ) {
-
-    $plain_english_reviewed_by_id = (int) get_post_meta( $post_id, 'ws_auto_plain_english_reviewed_by', true );
-    $plain_english_by_id          = (int) get_post_meta( $post_id, 'ws_auto_plain_english_by',          true );
-
-    return [
-        'has_content'          => (bool) get_post_meta( $post_id, 'ws_has_plain_english',              true ),
-        'plain_content'        => get_post_meta( $post_id, 'ws_plain_english_wysiwyg',                true ),
-        'written_by'           => $plain_english_by_id,
-        'written_by_name'      => ws_resolve_display_name( $plain_english_by_id ),
-        'written_date'         => get_post_meta( $post_id, 'ws_auto_plain_english_date',              true ),
-        'is_reviewed'          => (bool) get_post_meta( $post_id, 'ws_plain_english_reviewed',        true ),
-        'reviewed_by'          => $plain_english_reviewed_by_id,
-        'reviewed_by_name'     => ws_resolve_display_name( $plain_english_reviewed_by_id ),
-        'reviewed_date'        => '', //@todo - ws_auto_plain_english_reviewed_date needs to be added upstream (ACF and Hooks pending)
-    ];
-}
-
-
-// ════════════════════════════════════════════════════════════════════════════
-// Private Helper: Build Source Verify Array
-//
-// Constructs the standard 'verify' sub-array for all CPTs that carry the
-// source-verify field group (acf-source-verify.php). Covers provenance,
-// review status, and verification workflow fields.
-// Keys: source_method, source_name, verified_by, verified_by_name, verified_date,
-//       verify_status, needs_review.
-//
-// ws_auto_verified_by is a WP user ID and is resolved to a display name
-// here so the render layer never calls get_userdata() directly.
-//
-// Does not include the private GMT audit keys (_ws_auto_*), which are
-// intentionally excluded from the query layer throughout this file.
-// ════════════════════════════════════════════════════════════════════════════
-
-/**
- * Builds the standard source-verify sub-array for a given post.
- *
- * @param  int   $post_id  Post ID.
- * @return array
- */
-function ws_build_source_verify_array( $post_id ) {
-
-    $verified_by_id = (int) get_post_meta( $post_id, 'ws_auto_verified_by', true );
-
-    return [
-        'source_method'  => get_post_meta( $post_id, 'ws_auto_source_method',  true ),
-        'source_name'    => get_post_meta( $post_id, 'ws_auto_source_name',    true ),
-        'verified_by'    => $verified_by_id,
-        'verified_by_name'  => ws_resolve_display_name( $verified_by_id ),
-        'verified_date'  => get_post_meta( $post_id, 'ws_auto_verified_date',  true ),
-        'verify_status'  => get_post_meta( $post_id, 'ws_verification_status', true ),
-        'needs_review'   => (bool) get_post_meta( $post_id, 'ws_needs_review', true ),
-    ];
-}
 
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -576,9 +452,13 @@ function ws_get_jx_summary_data( $jx_term_id ) {
 // ════════════════════════════════════════════════════════════════════════════
 // Dataset: Statutes
 //
-// Returns all published jx-statute records assigned to the given
-// ws_jurisdiction taxonomy term that have attach_flag = true,
-// sorted by order ASC.
+// Returns the editorially curated jx-statute records for the jurisdiction
+// summary page — published records assigned to the given ws_jurisdiction
+// taxonomy term that have attach_flag = true, sorted by order ASC.
+//
+// attach_flag is NOT a publish gate. It marks the 3–5 statutes an editor
+// has chosen to highlight on the summary page. All other statutes remain
+// fully accessible via taxonomy-driven user queries.
 //
 // Accepts a taxonomy term ID integer as scope ($jx_term_id).
 // Returns an array of statute data arrays, or empty array if none found.
@@ -629,6 +509,7 @@ function ws_get_jx_statute_data( $jx_term_id ) {
 
                 // ── Legal Basis ───────────────────────────────────────────
                 'official_name'        => get_post_meta( $sid, 'ws_jx_statute_official_name',       true ),
+                'citation'             => get_post_meta( $sid, 'ws_jx_statute_citation',             true ),
                 'common_name'          => get_post_meta( $sid, 'ws_jx_statute_common_name',          true ),
                 'disclosure_type'      => get_field( 'ws_jx_statute_disclosure_type',      $sid ),
                 'protected_class'      => get_field( 'ws_jx_statute_protected_class',      $sid ),
@@ -748,9 +629,13 @@ function ws_get_us_term_id() {
 // ════════════════════════════════════════════════════════════════════════════
 // Dataset: Citations
 //
-// Returns all published jx-citation records assigned to the given
-// ws_jurisdiction taxonomy term that have attach_flag = true,
-// sorted by order ASC.
+// Returns the editorially curated jx-citation records for the jurisdiction
+// summary page — published records assigned to the given ws_jurisdiction
+// taxonomy term that have attach_flag = true, sorted by order ASC.
+//
+// attach_flag is NOT a publish gate. It marks the 3–5 citations an editor
+// has chosen to highlight on the summary page. All other citations remain
+// fully accessible via taxonomy-driven user queries.
 //
 // Accepts a taxonomy term ID integer as scope ($jx_term_id).
 // Returns an array of citation arrays, or empty array if none found.
@@ -835,9 +720,14 @@ function ws_get_jx_citation_data( $jx_term_id ) {
 // ════════════════════════════════════════════════════════════════════════════
 // Dataset: Interpretations
 //
-// Returns all published jx-interpretation records assigned to the given
-// ws_jurisdiction taxonomy term that have attach_flag = true,
-// sorted by order ASC.
+// Returns the editorially curated jx-interpretation records for the
+// jurisdiction summary page — published records assigned to the given
+// ws_jurisdiction taxonomy term that have attach_flag = true, sorted by
+// order ASC.
+//
+// attach_flag is NOT a publish gate. It marks the 3–5 interpretations an
+// editor has chosen to highlight on the summary page. All others remain
+// fully accessible via taxonomy-driven user queries.
 //
 // Accepts a taxonomy term ID integer as scope ($jx_term_id).
 // Returns an array of interpretation data arrays, or empty array if none found.
@@ -1031,7 +921,7 @@ function ws_get_assist_org_data( $jx_term_id ) {
             'status'        => get_post_status( $oid ),
             // Assist-org fields
             'internal_id'          => get_post_meta( $oid, 'ws_aorg_internal_id',               true ),
-            'type'                 => get_post_meta( $oid, 'ws_aorg_type',                       true ),
+            'type'                 => ( ( $_aorg_type = get_the_terms( $oid, 'ws_aorg_type' ) ) && ! is_wp_error( $_aorg_type ) ) ? $_aorg_type[0] : null,
             'logo'                 => get_field( 'ws_aorg_logo', $oid ),
             'serves_nationwide'    => (bool) get_post_meta( $oid, 'ws_aorg_serves_nationwide',   true ),
             'disclosure_type'      => get_field( 'ws_aorg_disclosure_type', $oid ),

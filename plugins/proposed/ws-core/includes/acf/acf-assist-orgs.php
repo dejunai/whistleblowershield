@@ -16,48 +16,48 @@
  * -------------
  * Identity tab:
  *   ws_aorg_internal_id          Internal reference code (text, required)
- *   ws_ao_type                 Organization type (select, required)
- *   ws_ao_logo                 Logo image (image)
+ *   ws_aorg_type                 Organization type (ws_aorg_type taxonomy, radio, required)
+ *   ws_aorg_logo                 Logo image (image)
  *
  * Scope of Service tab:
- *   ws_ao_serves_nationwide    Serves all U.S. jurisdictions (true_false)
+ *   ws_aorg_serves_nationwide    Serves all U.S. jurisdictions (true_false)
  *   ws_jurisdiction            Jurisdictions served (ws_jurisdiction taxonomy, checkbox)
- *   ws_ao_disclosure_type      Misconduct categories handled (taxonomy)
- *   ws_ao_services             Services offered (checkbox)
- *   ws_ao_employment_sectors   Employment sectors served (checkbox)
+ *   ws_aorg_disclosure_type      Misconduct categories handled (taxonomy)
+ *   ws_aorg_services             Services offered (checkbox)
+ *   ws_aorg_employment_sectors   Employment sectors served (checkbox)
  *
  * Contact & Intake tab:
- *   ws_ao_website_url              Official website (url, required)
- *   ws_ao_intake_url               Intake / contact form URL (url)
- *   ws_ao_phone                    Phone number (text)
- *   ws_ao_email                    Contact email (email)
- *   ws_ao_mailing_address          Mailing address (textarea)
+ *   ws_aorg_website_url              Official website (url, required)
+ *   ws_aorg_intake_url               Intake / contact form URL (url)
+ *   ws_aorg_phone                    Phone number (text)
+ *   ws_aorg_email                    Contact email (email)
+ *   ws_aorg_mailing_address          Mailing address (textarea)
  *   ws_languages                   Languages served (taxonomy checkbox)
  *   ws_aorg_additional_languages   Additional languages not in taxonomy list (text)
  *
  * Eligibility & Cost tab:
- *   ws_ao_cost_model           Cost structure (select, required)
- *   ws_ao_income_limit         Income eligibility required (true_false)
- *   ws_ao_income_limit_notes   Income limit details (textarea, conditional)
- *   ws_ao_accepts_anonymous    Can assist anonymous clients (true_false)
- *   ws_ao_eligibility_notes    Additional eligibility requirements (textarea)
+ *   ws_aorg_cost_model           Cost structure (select, required)
+ *   ws_aorg_income_limit         Income eligibility required (true_false)
+ *   ws_aorg_income_limit_notes   Income limit details (textarea, conditional)
+ *   ws_aorg_accepts_anonymous    Can assist anonymous clients (true_false)
+ *   ws_aorg_eligibility_notes    Additional eligibility requirements (textarea)
  *
  * Credentials tab:
- *   ws_ao_licensed_attorneys   Licensed attorneys on staff (true_false)
- *   ws_ao_accreditation        Certifications and accreditations (text)
- *   ws_ao_bar_states           State bar memberships (text)
- *   ws_ao_verify_url           URL to verify current status (url)
+ *   ws_aorg_licensed_attorneys   Licensed attorneys on staff (true_false)
+ *   ws_aorg_accreditation        Certifications and accreditations (text)
+ *   ws_aorg_bar_states           State bar memberships (text)
+ *   ws_aorg_verify_url           URL to verify current status (url)
  *
  * Authorship & Review tab:
- *   ws_ao_last_edited_author   Last edited by (user, stamp)
- *   ws_ao_date_created         Date created (text, readonly)
- *   ws_ao_last_edited          Last edited date (text, readonly)
- *   ws_ao_last_reviewed        Last verified date (date_picker)
+ *   ws_aorg_last_edited_author   Last edited by (user, stamp)
+ *   ws_aorg_date_created         Date created (text, readonly)
+ *   ws_aorg_last_edited          Last edited date (text, readonly)
+ *   ws_aorg_last_reviewed        Last verified date (date_picker)
  *
  * STAMP FIELDS
  * ------------
  * Written server-side via ws_acf_write_stamp_fields() in admin-hooks.php.
- * Meta prefix: ws_ao
+ * Meta prefix: ws_aorg
  *
  * @package    WhistleblowerShield
  * @since      1.0.0
@@ -68,10 +68,10 @@
  * VERSION
  * -------
  * 1.0.0  Initial release.
- * 3.0.0  Phase 8: Replaced ws_ao_languages plain-text field with ws_languages
- *         taxonomy checkbox field + ws_ao_additional_languages text field.
+ * 3.0.0  Phase 8: Replaced ws_aorg_languages plain-text field with ws_languages
+ *         taxonomy checkbox field + ws_aorg_additional_languages text field.
  *         Auto-assign of "additional" term handled in admin-hooks.php.
- *         Phase 12.1: Replaced ws_ao_jurisdictions checkbox (dynamic choices via
+ *         Phase 12.1: Replaced ws_aorg_jurisdictions checkbox (dynamic choices via
  *         ws_jx_code meta) with ws_jurisdiction taxonomy field. Dynamic choice
  *         filter removed. Plain Language tab added (Phase 9.2).
  * 3.1.1  Field keys renamed: field_ao_* → field_aorg_* to match meta key prefix (ws_aorg_*).
@@ -80,7 +80,7 @@
  *          centrally in acf-stamp-fields.php (group_stamp_metadata, menu_order 90).
  *        - Removed Plain Language tab entirely — ws-assist-org content is plain
  *          language by nature; the plain language workflow does not apply.
- *        - ws_ao_last_reviewed retained as a content-owned field.
+ *        - ws_aorg_last_reviewed retained as a content-owned field.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -139,22 +139,16 @@ function ws_register_acf_assist_org() {
                 'key'           => 'field_aorg_type',
                 'label'         => 'Organization Type',
                 'name'          => 'ws_aorg_type',
-                'type'          => 'select',
+                'type'          => 'taxonomy',
+                'taxonomy'      => 'ws_aorg_type',
                 'instructions'  => 'Select the category that best describes this organization.',
                 'required'      => 1,
-                'choices'       => [
-                    'nonprofit'   => 'Nonprofit Organization (501c3)',
-                    'legal_aid'   => 'Legal Aid Clinic',
-                    'law_firm'    => 'Law Firm (Pro Bono Program)',
-                    'bar_program' => 'Bar Association Program',
-                    'advocacy'    => 'Advocacy / Policy Group',
-                    'ombudsman'   => 'Government Ombudsman',
-                    'union'       => 'Labor Union',
-                ],
-                'default_value' => 'nonprofit',
+                'field_type'    => 'radio',
+                'add_term'      => 0,
+                'save_terms'    => 1,
+                'load_terms'    => 1,
+                'return_format' => 'id',
                 'allow_null'    => 0,
-                'ui'            => 1,
-                'return_format' => 'value',
             ],
 
             [

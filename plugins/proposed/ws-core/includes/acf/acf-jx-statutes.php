@@ -16,13 +16,17 @@ defined( 'ABSPATH' ) || exit;
  * -------------
  * Legal Basis tab:
  *   ws_jx_statute_official_name      Official name (text, required)
+ *   ws_jx_statute_citation           Official statute citation (text, optional)
  *   ws_jx_statute_common_name        Common/informal name (text, optional)
  *   ws_jx_statute_disclosure_type    Disclosure Categories taxonomy (multi_select)
  *   ws_jx_statute_protected_class    Protected Class taxonomy (multi_select)
  *   ws_jx_statute_disclosure_targets Disclosure Targets taxonomy (multi_select)
  *   ws_jx_statute_adverse_action_scope Free-text scope of covered adverse actions
- *   ws_attach_flag                   Attach to jurisdiction page (true_false)
- *   ws_display_order                 Render order (number, conditional on attach_flag)
+ *   ws_attach_flag                   Editorial curation flag (true_false). Marks this
+ *                                    record as one of the ~3–5 highlighted statutes shown
+ *                                    on the jurisdiction summary page. NOT a visibility gate —
+ *                                    unflagged statutes are accessible via taxonomy queries.
+ *   ws_display_order                 Render order among flagged items (number, conditional on attach_flag)
  *
  * Jurisdiction scope is provided by the ws_jurisdiction taxonomy — the
  * taxonomy term is assigned via the WordPress taxonomy UI, not via an ACF field.
@@ -150,6 +154,15 @@ function ws_register_acf_jx_statutes() {
                 'type'         => 'text',
                 'instructions' => 'Use standard legal notation, e.g., "California Labor Code § 1102.5" or "5 U.S.C. § 2302".',
                 'required'     => 1,
+            ],
+
+            [
+                'key'          => 'field_jx_statute_citation',
+                'label'        => 'Official Statute Citation',
+                'name'         => 'ws_jx_statute_citation',
+                'type'         => 'text',
+                'instructions' => 'Short-form legal citation, e.g., "Cal. Lab. Code § 1102.5" or "42 U.S.C. § 5851".',
+                'required'     => 0,
             ],
 
             [

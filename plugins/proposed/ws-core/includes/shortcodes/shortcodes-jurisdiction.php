@@ -51,16 +51,11 @@
  *       Reads the limitations key from ws_get_jx_summary_data().
  *       Returns empty string if the field is empty.
  *
- *   [ws_jurisdiction_index]
- *       Renders the full filterable jurisdiction index with type
- *       filter tabs and alphabetical grid.
- *
- *
  * ARCHITECTURE
  * ------------
  *
  *   Query layer:     includes/queries/query-jurisdiction.php
- *   Render layer:    includes/render/section-renderer.php
+ *   Render layer:    includes/render/render-section.php
  *   Assembler:       includes/render/render-jurisdiction.php
  *
  *
@@ -125,6 +120,10 @@
  *         gov: wb_auth_url → authority_url, wb_auth_label → authority_label.
  * 3.3.3  DATA SOURCES docblock: corrected source_method value list
  *         (ai_assist → ai_assisted; added bulk_import).
+ * 3.6.0  [ws_jurisdiction_index] moved to shortcodes-general.php — it is a
+ *         site-wide listing shortcode, not a jurisdiction-page shortcode.
+ *         QUERY LAYER RETURN REFERENCE block: added reviewed_date to PLAIN
+ *         SUB-ARRAY; removed duplicate copy from shortcodes-general.php.
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit;
@@ -440,14 +439,6 @@ function ws_shortcode_jx_limitations() {
 }
 
 
-// ── [ws_jurisdiction_index] ───────────────────────────────────────────────────
-
-add_shortcode( 'ws_jurisdiction_index', function() {
-    $data = ws_get_jurisdiction_index_data();
-    return ws_render_jurisdiction_index( $data );
-} );
-
-
 // ============================================================================
 // QUERY LAYER RETURN REFERENCE
 //
@@ -491,6 +482,7 @@ add_shortcode( 'ws_jurisdiction_index', function() {
 //   is_reviewed        bool    True when plain-language review is complete
 //   reviewed_by        int     WP user ID of the plain-language reviewer
 //   reviewed_by_name   string  Display name resolved from reviewed_by
+//   reviewed_date      string  Date plain-language review was completed (Y-m-d)
 //
 // VERIFY SUB-ARRAY  $data['verify']
 // Present on all CPTs.

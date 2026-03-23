@@ -57,9 +57,14 @@
  * 3.1.1  Bug fix: corrected 'ws-jurisdiction' to 'jurisdiction' in ws_jurisdiction
  *        taxonomy object type array. Mismatch prevented ws_jurisdiction (and all
  *        other taxonomies) from appearing on jurisdiction post edit screens.
+ *         existing seeded records.
  * 3.2.0  Added ws_employer_defense taxonomy stub (jx-statute). No seeder —
  *        terms to be defined once the taxonomy table is validated against
  *        real statute data.
+ * 3.3.0  Added ws_aorg_type taxonomy (ws-assist-org). Replaces ws_aorg_type
+ *         ACF select field. Terms: nonprofit, legal-aid, law-firm, bar-program,
+ *         advocacy, oversight-office (replaces opaque 'ombudsman'), union.
+ *         matrix-assist-orgs gate bumped to 1.2.0 to assign type terms on
  *
  */
 
@@ -430,6 +435,39 @@ function ws_register_taxonomies() {
         );
     }
 
+    // ── 12. Assist-Org Type ───────────────────────────────────────────────
+    //
+    // New in 3.3.0. Single-value classification for ws-assist-org records.
+    // Drives the public "Get Help" directory filter. Replaces the ws_aorg_type
+    // ACF select field. Terms are seeded via ws_seed_aorg_type_taxonomy().
+
+    if ( ! taxonomy_exists( 'ws_aorg_type' ) ) {
+        register_taxonomy(
+            'ws_aorg_type',
+            [ 'ws-assist-org' ],
+            [
+                'label'             => 'Organization Types',
+                'labels'            => [
+                    'name'              => 'Organization Types',
+                    'singular_name'     => 'Organization Type',
+                    'search_items'      => 'Search Organization Types',
+                    'all_items'         => 'All Organization Types',
+                    'edit_item'         => 'Edit Organization Type',
+                    'update_item'       => 'Update Organization Type',
+                    'add_new_item'      => 'Add New Organization Type',
+                    'new_item_name'     => 'New Organization Type',
+                    'menu_name'         => 'Org Types',
+                ],
+                'public'            => false,
+                'hierarchical'      => false,
+                'show_ui'           => true,
+                'show_in_rest'      => true,
+                'show_admin_column' => true,
+                'capabilities'      => ws_get_taxonomy_caps(),
+            ]
+        );
+    }
+
     // ════════════════════════════════════════════════════════════════════
     // DEPRECATED REGISTRATIONS
     //
@@ -600,6 +638,10 @@ add_action( 'admin_init', function() {
     if ( get_option( 'ws_seeded_employer_defense' ) !== '1.0.0' ) {
         ws_seed_employer_defense_taxonomy();
         update_option( 'ws_seeded_employer_defense', '1.0.0' );
+    }
+    if ( get_option( 'ws_seeded_aorg_type' ) !== '1.0.0' ) {
+        ws_seed_aorg_type_taxonomy();
+        update_option( 'ws_seeded_aorg_type', '1.0.0' );
     }
 
 } );
@@ -1023,6 +1065,31 @@ function ws_seed_fee_shifting_taxonomy() {
     }
 }
 
+
+/**
+ * Seeds ws_aorg_type with organization type terms.
+ *
+ * New in 3.3.0. Replaces the ws_aorg_type ACF select field.
+ * 'oversight-office' replaces the opaque 'ombudsman' label used in the
+ * prior select — "Government Oversight Office" is legible to laypeople.
+ */
+function ws_seed_aorg_type_taxonomy() {
+    $taxonomy = 'ws_aorg_type';
+    $terms    = [
+        'nonprofit'        => 'Nonprofit Organization',
+        'legal-aid'        => 'Legal Aid Clinic',
+        'law-firm'         => 'Law Firm',
+        'bar-program'      => 'Bar Association Program',
+        'advocacy'         => 'Advocacy Organization',
+        'oversight-office' => 'Government Oversight Office',
+        'union'            => 'Labor Union',
+    ];
+    foreach ( $terms as $slug => $name ) {
+        if ( ! term_exists( $slug, $taxonomy ) ) {
+            wp_insert_term( $name, $taxonomy, [ 'slug' => $slug ] );
+        }
+    }
+}
 
 /**
  * Seeds ws_employer_defense with its flat term structure.

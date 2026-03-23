@@ -90,6 +90,10 @@
  * VERSION
  * -------
  * 3.2.0  Initial release.
+ * 3.2.1  WP_Error case in ws_feed_monitor_poll() now stores error message to
+ *        ws_feed_monitor_last_error instead of silently returning -1.
+ *        Added admin_notices banner surfacing feed poll failures to all
+ *        admin screens, linking to Tools → Feed Monitor.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -256,6 +260,7 @@ function ws_feed_monitor_poll() {
     ] );
 
     if ( is_wp_error( $response ) ) {
+        update_option( 'ws_feed_monitor_last_error', 'Network error — ' . $response->get_error_message() );
         return -1;
     }
 
@@ -785,4 +790,37 @@ function ws_feed_monitor_save_item_edits( $guid ) {
     unset( $item );
 
     ws_feed_monitor_write_staged( $staged );
+}
+
+
+// ════════════════════════════════════════════════════════════════════════════
+// Admin Notice
+//
+// Shows a persistent error banner across all admin screens when the feed
+// monitor poll has a stored error. Visible to administrators only.
+// Links to Tools → Feed Monitor for details and manual retry.
+// ════════════════════════════════════════════════════════════════════════════
+
+add_action( 'admin_notices', 'ws_feed_monitor_admin_notice' );
+
+/**
+ * Displays an error admin notice when the last feed poll failed.
+ *
+ * Cleared automatically when the next poll succeeds (delete_option call
+ * in ws_feed_monitor_poll() on HTTP 200 with valid response).
+ */
+function ws_feed_monitor_admin_notice() {
+    if ( ! current_user_can( 'manage_options' ) ) {
+        return;
+    }
+    $error = get_option( 'ws_feed_monitor_last_error', '' );
+    if ( empty( $error ) ) {
+        return;
+    }
+    $url = admin_url( 'tools.php?page=ws-feed-monitor' );
+    echo '<div class="notice notice-error"><p>'
+        . '<strong>WhistleblowerShield Feed Monitor:</strong> Last poll failed — '
+        . esc_html( $error ) . '. '
+        . '<a href="' . esc_url( $url ) . '">View Feed Monitor &rarr;</a>'
+        . '</p></div>';
 }

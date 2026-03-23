@@ -37,6 +37,11 @@
  *                             ws_auto_plain_english_date to post meta once when
  *                             plain English content is first saved on supported CPTs.
  *
+ *   8. Statute reverse index — maintains ws_jx_statute_citation_ids /
+ *                             ws_jx_statute_interp_ids on jx-statute records,
+ *                             rebuilt from scratch on every citation and
+ *                             interpretation save and delete.
+ *
  *
  * JURISDICTION TAXONOMY
  * ---------------------
@@ -68,7 +73,8 @@
  *   ws_auto_last_edited_author        — WP user ID, written every save (admin-overridable)
  *   ws_auto_plain_english_by          — WP user ID, written once on first plain English save
  *   ws_auto_plain_english_date        — local date (Y-m-d), written once on first plain English save
- *   ws_auto_plain_english_reviewed_by — WP user ID, written once when plain_reviewed first enabled
+ *   ws_auto_plain_english_reviewed_by   — WP user ID, written once when plain_reviewed first enabled
+ *   ws_auto_plain_english_reviewed_date — local date (Y-m-d), written once when plain_reviewed first enabled
  *
  *
  * VERSION
@@ -133,6 +139,10 @@
  *        term sync for ws-assist-org to silently fail.
  *        Added inline comments to direct meta reads explaining why the query
  *        layer is not used in save/filter hook context.
+ * 3.6.0  Added statute reverse indexes (ws_jx_statute_citation_ids,
+ *        ws_jx_statute_interp_ids). Stash-and-rebuild pattern via four
+ *        acf/save_post hooks (priorities 5 and 25) for citations and
+ *        interpretations. Delete hooks maintain integrity on post removal.
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit;
@@ -199,7 +209,7 @@ foreach ( [ 'ws_auto_date_created', 'ws_auto_last_edited', 'ws_auto_last_edited_
 }
 unset( $_ws_f );
 
-foreach ( [ 'last_reviewed', 'ws_auto_plain_english_reviewed_by' ] as $_ws_f ) {
+foreach ( [ 'last_reviewed', 'ws_auto_plain_english_reviewed_by', 'ws_auto_plain_english_reviewed_date' ] as $_ws_f ) {
     add_filter( "acf/load_field/name={$_ws_f}", 'ws_acf_lock_for_non_editors' );
 }
 unset( $_ws_f );
@@ -424,9 +434,11 @@ function ws_acf_plain_english_guards( $post_id ) {
                 $_POST['acf'][ $field_key ] = 0;
             }
         }
-        // Clear plain English stamp meta written by ws_acf_stamp_summarized_fields().
+        // Clear plain English stamp meta written by ws_acf_stamp_summarized_fields()
+        // and ws_acf_stamp_plain_reviewed_by().
         delete_post_meta( $post_id, 'ws_auto_plain_english_by' );
         delete_post_meta( $post_id, 'ws_auto_plain_english_date' );
+        delete_post_meta( $post_id, 'ws_auto_plain_english_reviewed_date' );
     }
 }
 
@@ -580,7 +592,8 @@ function ws_acf_stamp_plain_reviewed_by( $post_id ) {
         return;
     }
 
-    update_post_meta( $post_id, 'ws_auto_plain_english_reviewed_by', get_current_user_id() );
+    update_post_meta( $post_id, 'ws_auto_plain_english_reviewed_by',   get_current_user_id() );
+    update_post_meta( $post_id, 'ws_auto_plain_english_reviewed_date', current_time( 'Y-m-d' ) );
 }
 
 
@@ -1044,3 +1057,225 @@ function ws_set_source_name( $post_id, $name ) {
 
     update_post_meta( $post_id, 'ws_auto_source_name', $name );
 }
+
+
+// ════════════════════════════════════════════════════════════════════════════
+// STATUTE REVERSE INDEXES
+//
+// jx-citation and jx-interpretation each store their parent statute as a
+// forward relationship:
+//   jx-citation       → ws_jx_citation_statute_ids  (post_object, multiple)
+//   jx-interpretation → ws_jx_interp_statute_id     (post_object, single)
+//
+// These hooks maintain a reverse index on the jx-statute side:
+//   ws_jx_statute_citation_ids  — PHP array of citation post IDs
+//   ws_jx_statute_interp_ids    — PHP array of interpretation post IDs
+//
+// The index is always rebuilt from scratch — no append logic, no deduplication
+// risk, no stale entries. Admin metaboxes read the index via get_post_meta()
+// + post__in, replacing the fragile OR meta_query (plain-int vs. serialized)
+// previously used.
+//
+// SAVE FLOW (citations)
+//   Priority 5:  Stash pre-save ws_jx_citation_statute_ids before ACF
+//                overwrites meta at priority 10.
+//   Priority 25: Union pre-save + post-save statute IDs; rebuild each statute's
+//                citation index. Handles reassignment: old statute loses the
+//                citation, new statute gains it.
+//
+// SAVE FLOW (interpretations)
+//   Priority 5:  Stash pre-save ws_jx_interp_statute_id.
+//   Priority 25: Union old + new statute ID; rebuild each.
+//
+// DELETE FLOW
+//   before_delete_post: Read forward relationship while meta still exists;
+//                       stash statute IDs.
+//   deleted_post:       Rebuild statute indexes — deleted post is now gone
+//                       and will not appear in the rebuild query.
+//
+// VERSION
+//   3.6.0  Initial implementation.
+// ════════════════════════════════════════════════════════════════════════════
+
+
+// ── Rebuild functions ─────────────────────────────────────────────────────────
+
+/**
+ * Rebuilds ws_jx_statute_citation_ids on a jx-statute post.
+ *
+ * Queries all jx-citation records whose ws_jx_citation_statute_ids field
+ * references $statute_id (plain integer or serialized array) and writes
+ * the resulting ID array to the statute's meta.
+ *
+ * @param int $statute_id  Post ID of the jx-statute to rebuild.
+ */
+function ws_rebuild_jx_statute_citation_index( $statute_id ) {
+    $statute_id = (int) $statute_id;
+    if ( ! $statute_id || get_post_type( $statute_id ) !== 'jx-statute' ) {
+        return;
+    }
+
+    $ids = get_posts( [
+        'post_type'      => 'jx-citation',
+        'post_status'    => [ 'publish', 'draft', 'pending' ],
+        'posts_per_page' => -1,
+        'fields'         => 'ids',
+        'meta_query'     => [
+            'relation' => 'OR',
+            [
+                'key'     => 'ws_jx_citation_statute_ids',
+                'value'   => $statute_id,
+                'compare' => '=',
+                'type'    => 'NUMERIC',
+            ],
+            [
+                'key'     => 'ws_jx_citation_statute_ids',
+                'value'   => serialize( $statute_id ),
+                'compare' => 'LIKE',
+            ],
+        ],
+    ] );
+
+    update_post_meta( $statute_id, 'ws_jx_statute_citation_ids', array_map( 'intval', (array) $ids ) );
+}
+
+/**
+ * Rebuilds ws_jx_statute_interp_ids on a jx-statute post.
+ *
+ * Queries all jx-interpretation records whose ws_jx_interp_statute_id equals
+ * $statute_id and writes the resulting ID array to the statute's meta.
+ *
+ * @param int $statute_id  Post ID of the jx-statute to rebuild.
+ */
+function ws_rebuild_jx_statute_interp_index( $statute_id ) {
+    $statute_id = (int) $statute_id;
+    if ( ! $statute_id || get_post_type( $statute_id ) !== 'jx-statute' ) {
+        return;
+    }
+
+    $ids = get_posts( [
+        'post_type'      => 'jx-interpretation',
+        'post_status'    => [ 'publish', 'draft', 'pending' ],
+        'posts_per_page' => -1,
+        'fields'         => 'ids',
+        'meta_query'     => [
+            [
+                'key'     => 'ws_jx_interp_statute_id',
+                'value'   => $statute_id,
+                'compare' => '=',
+                'type'    => 'NUMERIC',
+            ],
+        ],
+    ] );
+
+    update_post_meta( $statute_id, 'ws_jx_statute_interp_ids', array_map( 'intval', (array) $ids ) );
+}
+
+
+// ── Save stash helpers ────────────────────────────────────────────────────────
+//
+// Static arrays pass pre-save statute IDs from the priority-5 capture hook to
+// the priority-25 rebuild hook within the same acf/save_post call chain.
+// Separate functions for citations (array) and interpretations (scalar).
+
+function ws_citation_save_stash( $post_id, $ids = null ) {
+    static $stash = [];
+    if ( $ids !== null ) { $stash[ $post_id ] = $ids; }
+    return $stash[ $post_id ] ?? [];
+}
+
+function ws_interp_save_stash( $post_id, $id = null ) {
+    static $stash = [];
+    if ( $id !== null ) { $stash[ $post_id ] = $id; }
+    return $stash[ $post_id ] ?? 0;
+}
+
+
+// ── Delete stash helpers ──────────────────────────────────────────────────────
+//
+// Separate stash functions for the before_delete_post → deleted_post pair.
+// before_delete_post captures statute IDs while meta is still intact;
+// deleted_post reads the stash after the post is gone and triggers rebuilds.
+
+function ws_citation_delete_stash( $post_id, $ids = null ) {
+    static $stash = [];
+    if ( $ids !== null ) { $stash[ $post_id ] = $ids; }
+    return $stash[ $post_id ] ?? [];
+}
+
+function ws_interp_delete_stash( $post_id, $id = null ) {
+    static $stash = [];
+    if ( $id !== null ) { $stash[ $post_id ] = $id; }
+    return $stash[ $post_id ] ?? 0;
+}
+
+
+// ── Citation save hooks ───────────────────────────────────────────────────────
+
+// Priority 5: capture pre-save statute IDs before ACF writes at priority 10.
+add_action( 'acf/save_post', function( $post_id ) {
+    if ( get_post_type( $post_id ) !== 'jx-citation' ) { return; }
+    $raw = get_post_meta( $post_id, 'ws_jx_citation_statute_ids', true );
+    $ids = is_array( $raw ) ? array_map( 'intval', $raw ) : ( $raw ? [ (int) $raw ] : [] );
+    ws_citation_save_stash( $post_id, $ids );
+}, 5 );
+
+// Priority 25: union old + new statute IDs; rebuild each statute's citation index.
+add_action( 'acf/save_post', function( $post_id ) {
+    if ( get_post_type( $post_id ) !== 'jx-citation' ) { return; }
+    $raw_new = get_post_meta( $post_id, 'ws_jx_citation_statute_ids', true );
+    $new_ids = is_array( $raw_new ) ? array_map( 'intval', $raw_new ) : ( $raw_new ? [ (int) $raw_new ] : [] );
+    $all_ids = array_unique( array_merge( ws_citation_save_stash( $post_id ), $new_ids ) );
+    foreach ( array_filter( $all_ids ) as $sid ) {
+        ws_rebuild_jx_statute_citation_index( $sid );
+    }
+}, 25 );
+
+
+// ── Interpretation save hooks ─────────────────────────────────────────────────
+
+// Priority 5: capture pre-save statute ID.
+add_action( 'acf/save_post', function( $post_id ) {
+    if ( get_post_type( $post_id ) !== 'jx-interpretation' ) { return; }
+    ws_interp_save_stash( $post_id, (int) get_post_meta( $post_id, 'ws_jx_interp_statute_id', true ) );
+}, 5 );
+
+// Priority 25: union old + new statute ID; rebuild each.
+add_action( 'acf/save_post', function( $post_id ) {
+    if ( get_post_type( $post_id ) !== 'jx-interpretation' ) { return; }
+    $new_id  = (int) get_post_meta( $post_id, 'ws_jx_interp_statute_id', true );
+    $all_ids = array_unique( array_filter( [ ws_interp_save_stash( $post_id ), $new_id ] ) );
+    foreach ( $all_ids as $sid ) {
+        ws_rebuild_jx_statute_interp_index( $sid );
+    }
+}, 25 );
+
+
+// ── Delete hooks ──────────────────────────────────────────────────────────────
+
+// before_delete_post: stash statute IDs while forward-relationship meta is intact.
+add_action( 'before_delete_post', function( $post_id ) {
+    $type = get_post_type( $post_id );
+    if ( $type === 'jx-citation' ) {
+        $raw = get_post_meta( $post_id, 'ws_jx_citation_statute_ids', true );
+        $ids = is_array( $raw ) ? array_map( 'intval', $raw ) : ( $raw ? [ (int) $raw ] : [] );
+        ws_citation_delete_stash( $post_id, $ids );
+    } elseif ( $type === 'jx-interpretation' ) {
+        ws_interp_delete_stash( $post_id, (int) get_post_meta( $post_id, 'ws_jx_interp_statute_id', true ) );
+    }
+} );
+
+// deleted_post: rebuild statute indexes now that the deleted post is gone.
+// Fires for every deleted post; stash functions return empty/zero for non-
+// citation/interpretation posts, so unrelated deletions are no-ops.
+add_action( 'deleted_post', function( $post_id ) {
+    foreach ( array_filter( ws_citation_delete_stash( $post_id ) ) as $sid ) {
+        ws_rebuild_jx_statute_citation_index( $sid );
+    }
+    $interp_sid = ws_interp_delete_stash( $post_id );
+    if ( $interp_sid ) {
+        ws_rebuild_jx_statute_interp_index( $interp_sid );
+    }
+} );
+
+

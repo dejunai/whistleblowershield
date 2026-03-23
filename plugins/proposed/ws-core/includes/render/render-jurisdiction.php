@@ -82,7 +82,7 @@
  *
  * It does NOT:
  *      • perform database queries (handled by query-jurisdiction.php)
- *      • contain HTML templates (handled by section-renderer.php)
+ *      • contain HTML templates (handled by render-section.php)
  *      • register shortcodes (handled by shortcodes-jurisdiction.php)
  *
  *

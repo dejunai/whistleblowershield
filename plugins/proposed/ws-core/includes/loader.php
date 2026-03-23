@@ -69,6 +69,10 @@
  * 3.4.0  Added acf-stamp-fields and acf-plain-english-fields to ACF load list.
  *        These centralize stamp and plain language fields previously duplicated
  *        across individual CPT ACF files.
+ * 3.6.0  Query layer split: single query-jurisdiction load replaced with ordered
+ *        array load of query-helpers → query-shared → query-jurisdiction.
+ *        render-directory.php stub added to ASSEMBLY LAYER render_files.
+ * 3.6.1  admin-health-check.php added to ADMIN LAYER.
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit;
@@ -109,9 +113,16 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 	}
 
 	// QUERY Layer: The "Data API" for both Admin and Frontend
-	$file = "query-jurisdiction";
-	$path = WS_CORE_PATH . "includes/queries/{$file}.php";
-		if ( file_exists( $path) ) {
+	// Load order is non-negotiable: helpers → shared → jurisdiction.
+	//   query-helpers.php      — pure utilities (no WP meta reads)
+	//   query-shared.php       — cross-CPT sub-array builders (depend on helpers)
+	//   query-jurisdiction.php — jurisdiction dataset functions (depend on shared)
+	$query_files = [
+		'query-helpers', 'query-shared', 'query-jurisdiction',
+	];
+	foreach ( $query_files as $file ) {
+		$path = WS_CORE_PATH . "includes/queries/{$file}.php";
+		if ( file_exists( $path ) ) {
 			require_once $path;
 		} else {
 			error_log( sprintf(
@@ -131,6 +142,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 				echo '</p></div>';
 			} );
 		}
+	}
 
 	// TAXONOMY Layer: Must load everywhere — registers CPT taxonomy associations
 	// for URL rewriting, REST API, and frontend queries. Seeding functions inside
@@ -238,11 +250,11 @@ if ( is_admin() ) {
     // Admin Tools & Workflow Improvements
 	//
 	// ADMIN Layer: Loaded from /includes/admin/
-	// Note: admin-navigation.php MUST load first
 	$admin_files = [
-		'admin-navigation', 'admin-audit-trail', 'admin-columns', 'admin-feed-monitor',
-		'admin-hooks', 'admin-interpretation-metabox', 'admin-url-monitor',
-		'admin-major-edit-hook', 'jurisdiction-dashboard', 
+		'admin-navigation', // Note: admin-navigation.php MUST load first
+		'admin-audit-trail', 'admin-columns', 'admin-feed-monitor',
+		'admin-hooks', 'admin-interpretation-metabox', 'admin-citation-metabox', 'admin-url-monitor',
+		'admin-major-edit-hook', 'jurisdiction-dashboard', 'admin-health-check',
 	];
 	foreach ( $admin_files as $file ) {
 		$path = WS_CORE_PATH . "includes/admin/{$file}.php";
@@ -279,10 +291,12 @@ if ( is_admin() ) {
 */
 if ( ! is_admin() ) {
 	// ASSEMBLY/RENDER Layer: (Only for Public Display)
-    // The HTML Templates via section-render.php
-	// The "Automatic Assembler" (The the_content filter) via render-jurisdiction.php
+	// render-general.php  — general-page renderers (footer, disclaimer, legal updates, jx index)
+	// render-section.php  — jurisdiction-page section renderers (header, summary, statutes, etc.)
+	// render-jurisdiction.php — the_content assembler that stitches shortcodes together
+	// render-directory.php — Directory page stub (no render functions yet)
 	$render_files = [
-		'section-renderer', 'render-jurisdiction',
+		'render-general', 'render-section', 'render-jurisdiction', 'render-directory',
 	];
 	foreach ( $render_files as $file ) {
 		$path = WS_CORE_PATH . "includes/render/{$file}.php";

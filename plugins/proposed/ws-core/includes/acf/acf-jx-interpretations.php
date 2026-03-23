@@ -13,22 +13,28 @@
  * FIELD SUMMARY
  * -------------
  * Case Identity tab:
- *   ws_interp_court      Court (select, populated by ws_interp_load_court_choices)
- *   ws_interp_year       Decision Year (number)
- *   ws_interp_favorable  Favorable to Whistleblower? (true_false)
- *   ws_jx_interp_official_name   Official name — full case name (text, required)
- *   ws_jx_interp_common_name     Common/informal name (text, optional)
- *   ws_interp_citation   Citation (text)
- *   ws_interp_url        Opinion URL (url)
+ *   ws_jx_interp_court         Court (select, populated by ws_interp_load_court_choices)
+ *   ws_jx_interp_year          Decision Year (number)
+ *   ws_jx_interp_favorable     Favorable to Whistleblower? (true_false)
+ *   ws_jx_interp_official_name Official name — full case name (text, required)
+ *   ws_jx_interp_common_name   Common/informal name (text, optional)
+ *   ws_jx_interp_case_citation Citation (text)
+ *   ws_jx_interp_url           Opinion URL (url)
  *
  * Summary tab:
- *   ws_interp_summary    Summary (textarea)
- *   ws_process_type      Process Type (taxonomy multi_select)
- *   attach_flag          Attach to jurisdiction page (true_false)
- *   order                Render order (number, conditional on attach_flag)
+ *   ws_jx_interp_summary  Summary (textarea)
+ *   ws_process_type        Process Type (taxonomy multi_select)
+ *   ws_attach_flag         Editorial curation flag (true_false). Marks this record as
+ *                          one of the ~3–5 highlighted interpretations shown on the
+ *                          jurisdiction summary page. NOT a visibility gate — unflagged
+ *                          interpretations are accessible via taxonomy queries.
+ *   ws_display_order       Render order among flagged items (number, conditional on ws_attach_flag)
  *
  * Relationships tab:
- *   ws_statute_id        Parent Statute (post_object, jx-statute)
+ *   ws_jx_interp_statute_id   Parent Statute (post_object, jx-statute)
+ *   ws_jx_interp_affected_jx  Affected Jurisdictions (taxonomy multi_select, ws_jurisdiction)
+ *                              Auto-computed on save from the court's ws_jx_codes in
+ *                              $ws_court_matrix. Empty = SCOTUS (all jurisdictions).
  *
  * Jurisdiction scope is provided by the ws_jurisdiction taxonomy — always
  * the US term for federal court interpretations; assigned via the taxonomy
@@ -68,6 +74,11 @@
  *         ws_statute_id with acf/load_value checked against auto-draft
  *         status. acf/load_field default_value is silently ignored by
  *         ACF for post_object fields and does not pre-select anything.
+ * 3.6.0  FIELD SUMMARY corrected: all ws_interp_* meta names updated to
+ *         ws_jx_interp_* to match actual ACF field name values. ws_statute_id
+ *         corrected to ws_jx_interp_statute_id. Added ws_jx_interp_affected_jx
+ *         (taxonomy multi_select, save_terms=0) with auto-population hook that
+ *         resolves the court's ws_jx_codes from $ws_court_matrix on every save.
  * 3.0.0  Architecture refactor (Phase 3.5):
  *        - Removed ws_jx_code field (retired; scope now via ws_jurisdiction taxonomy).
  *        - Added attach_flag toggle and order number field.
@@ -294,6 +305,21 @@ function ws_register_acf_jx_interpretations() {
                 'return_format' => 'id',
             ],
 
+            [
+                'key'           => 'field_jx_interp_affected_jx',
+                'label'         => 'Affected Jurisdictions',
+                'name'          => 'ws_jx_interp_affected_jx',
+                'type'          => 'taxonomy',
+                'taxonomy'      => WS_JURISDICTION_TERM_ID,
+                'field_type'    => 'multi_select',
+                'instructions'  => 'Jurisdictions bound by this ruling. Auto-computed on save from the selected court\'s geographic scope ($ws_court_matrix). Empty = SCOTUS (all jurisdictions). Override manually only when the court\'s scope does not reflect the ruling\'s actual reach.',
+                'required'      => 0,
+                'add_term'      => 0,
+                'save_terms'    => 0,
+                'load_terms'    => 0,
+                'return_format' => 'id',
+            ],
+
             // ── Tab: Authorship & Review ──────────────────────────────────
             // Removed — registered centrally in acf-stamp-fields.php
             // (group_stamp_metadata, menu_order 90).
@@ -412,4 +438,56 @@ function ws_interp_prefill_statute_id( $value, $post_id, $field ) {
     }
 
     return $value;
+}
+
+
+// ── Auto-populate ws_jx_interp_affected_jx from court matrix on every save ────
+//
+// Runs at priority 20 (after ACF saves its fields at 10). Reads the court key
+// saved to ws_jx_interp_court, looks it up in $ws_court_matrix, and resolves
+// ws_jx_codes to ws_jurisdiction taxonomy term IDs.
+//
+// SCOTUS (ws_jx_codes = null): writes an empty array. The query/render layer
+// treats empty affected_jx + SCOTUS court as "all jurisdictions" — avoids
+// storing all 60+ term IDs in meta unnecessarily.
+//
+// Recomputes on every save so the value stays in sync if the court is changed.
+
+add_action( 'acf/save_post', 'ws_interp_auto_populate_affected_jx', 20 );
+
+function ws_interp_auto_populate_affected_jx( $post_id ) {
+
+    if ( get_post_type( $post_id ) !== 'jx-interpretation' ) {
+        return;
+    }
+
+    global $ws_court_matrix;
+    if ( empty( $ws_court_matrix ) ) {
+        return;
+    }
+
+    $court_key = get_post_meta( $post_id, 'ws_jx_interp_court', true );
+
+    if ( ! $court_key || ! isset( $ws_court_matrix[ $court_key ] ) ) {
+        return;
+    }
+
+    $jx_codes = $ws_court_matrix[ $court_key ]['ws_jx_codes'];
+
+    // SCOTUS: null = all jurisdictions. Store empty to signal bind-all.
+    if ( $jx_codes === null ) {
+        update_post_meta( $post_id, 'ws_jx_interp_affected_jx', [] );
+        return;
+    }
+
+    // Resolve each USPS code to a ws_jurisdiction term ID.
+    $term_ids = [];
+    foreach ( $jx_codes as $code ) {
+        $term = get_term_by( 'slug', strtolower( $code ), WS_JURISDICTION_TERM_ID );
+        if ( $term && ! is_wp_error( $term ) ) {
+            $term_ids[] = $term->term_id;
+        }
+    }
+
+    update_post_meta( $post_id, 'ws_jx_interp_affected_jx', $term_ids );
 }

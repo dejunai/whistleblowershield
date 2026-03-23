@@ -58,6 +58,11 @@
  *                             once when plain_english_reviewed is first
  *                             enabled. Cleared on toggle-off.
  *
+ *   ws_auto_plain_english_reviewed_date  Local date (Y-m-d) the plain language
+ *                             content was first reviewed. Stamped once when
+ *                             plain_english_reviewed is first enabled.
+ *                             Cleared on has_plain_english toggle-off.
+ *
  *   ws_auto_plain_english_by  WP user ID of the summarizer. Stamped once
  *                             on first save after has_plain_english is
  *                             enabled and content exists.
@@ -82,10 +87,10 @@
  *
  * STAMP WRITES
  * ------------
- * ws_auto_plain_english_reviewed_by — ws_acf_stamp_plain_reviewed_by() priority 25.
+ * ws_auto_plain_english_reviewed_by + ws_auto_plain_english_reviewed_date — ws_acf_stamp_plain_reviewed_by() priority 25.
  * ws_auto_plain_english_by + ws_auto_plain_english_date — ws_acf_stamp_summarized_fields() priority 25.
- * Both functions in admin-hooks.php. Neither references ACF field keys —
- * both read/write post meta directly by key name.
+ * All functions in admin-hooks.php. None reference ACF field keys —
+ * all read/write post meta directly by key name.
  *
  * HOOKS
  * -----
@@ -234,6 +239,22 @@ function ws_register_acf_plain_english_fields() {
                 'disabled'      => 1,
             ],
 
+            // ── Reviewed Date ─────────────────────────────────────────────
+            //
+            // Stamped once by ws_acf_stamp_plain_reviewed_by() alongside
+            // plain_english_reviewed_by. Cleared on has_plain_english toggle-off.
+            // Locked for users below editor via ws_acf_lock_for_non_editors().
+
+            [
+                'key'          => 'field_plain_english_reviewed_date',
+                'label'        => 'Reviewed Date',
+                'name'         => 'ws_auto_plain_english_reviewed_date',
+                'type'         => 'text',
+                'instructions' => 'Auto-stamped when Plain Language Reviewed is first enabled. Read only.',
+                'readonly'     => 1,
+                'disabled'     => 1,
+            ],
+
             // ── Summarized By ─────────────────────────────────────────────
             //
             // Stamped once by ws_acf_stamp_summarized_fields() on first save
@@ -278,5 +299,6 @@ function ws_register_acf_plain_english_fields() {
 // fields are handled centrally in admin-hooks.php:
 //   ws_acf_plain_english_guards()       — acf/save_post priority 5
 //   ws_acf_stamp_plain_reviewed_by()    — acf/save_post priority 25
+//     writes: ws_auto_plain_english_reviewed_by, ws_auto_plain_english_reviewed_date
 //   ws_acf_stamp_summarized_fields()    — acf/save_post priority 25
 //   ws_acf_lock_for_non_editors()       — acf/load_field by field name

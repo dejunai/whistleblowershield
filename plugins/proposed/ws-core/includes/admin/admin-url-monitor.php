@@ -67,6 +67,8 @@
  * 3.2.0  Initial release.
  * 3.2.1  Added inline comment to direct meta read in monitor loop explaining
  *        why the query layer is not used in WP-Cron context.
+ * 3.2.2  Added admin_notices banner surfacing active URL failures to all
+ *        admin screens, linking to the Dashboard widget.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -547,4 +549,39 @@ function ws_url_monitor_render_widget() {
         }
         echo '</ul>';
     }
+}
+
+
+// ════════════════════════════════════════════════════════════════════════════
+// Admin Notice
+//
+// Shows a persistent error banner across all admin screens when the URL
+// monitor log contains active failure entries. Visible to administrators
+// only. Links to the Dashboard where the full widget is rendered.
+// ════════════════════════════════════════════════════════════════════════════
+
+add_action( 'admin_notices', 'ws_url_monitor_admin_notice' );
+
+/**
+ * Displays an error admin notice when active URL failures are logged.
+ *
+ * Shown on every admin screen to all administrator-role users until the
+ * failures are resolved and the monitor runs again to clear them.
+ */
+function ws_url_monitor_admin_notice() {
+    if ( ! current_user_can( 'manage_options' ) ) {
+        return;
+    }
+    $log      = get_option( 'ws_url_monitor_log', [] );
+    $failures = array_filter( $log, fn( $e ) => $e['type'] === 'failure' );
+    if ( empty( $failures ) ) {
+        return;
+    }
+    $count = count( $failures );
+    $label = $count === 1 ? '1 URL failure' : $count . ' URL failures';
+    echo '<div class="notice notice-error"><p>'
+        . '<strong>WhistleblowerShield URL Monitor:</strong> '
+        . esc_html( $label ) . ' detected. '
+        . '<a href="' . esc_url( admin_url( 'index.php' ) ) . '">View on Dashboard &rarr;</a>'
+        . '</p></div>';
 }

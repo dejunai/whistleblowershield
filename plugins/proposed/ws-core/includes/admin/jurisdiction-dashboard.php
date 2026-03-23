@@ -5,6 +5,13 @@
  * Provides a simple overview dashboard for all jurisdictions.
  * Purpose: Completion Tracker for the 57 Jurisdictions
  *
+ * CACHING
+ * -------
+ * The full rendered HTML table is cached as a 10-minute transient
+ * (ws_jx_dashboard_html). The cache is invalidated automatically whenever
+ * any of the tracked CPTs is saved or deleted via save_post / delete_post.
+ * A "Refresh" button on the page clears it on demand.
+ *
  * VERSION
  * -------
  * 2.1.0  Initial implementation
@@ -15,6 +22,8 @@
  * 3.0.0  Removed Resources column (CPT deleted). Added Interpretations, Legal
  *        Updates, Agencies, and Assist-Orgs count columns. All counts use
  *        ws_jurisdiction taxonomy queries — no ACF relationship fields.
+ * 3.6.1  Added 10-minute transient cache with auto-invalidation on save/delete
+ *        and manual refresh button.
  */
 
 if (!defined('ABSPATH')) {
@@ -42,18 +51,49 @@ add_action('admin_menu', function() {
  * 2. Render the Dashboard
  * This is the cleaned-up version that loops through your 57 jurisdictions
  * and shows the visual "Health Matrix."
+ *
+ * The table HTML is cached as a 10-minute transient. A "Refresh" button
+ * clears it on demand; save/delete hooks clear it automatically.
  */
 function ws_render_jurisdiction_dashboard() {
+
+    // ── Manual cache clear ────────────────────────────────────────────────
+    if (
+        isset( $_POST['ws_jx_dash_refresh'] ) &&
+        check_admin_referer( 'ws_jx_dash_refresh' )
+    ) {
+        delete_transient( 'ws_jx_dashboard_html' );
+    }
+
     echo '<div class="wrap">';
     echo '<h1>Jurisdiction Data Health</h1>';
     echo '<p>Visual status of the 57 core jurisdictions and their associated datasets.</p>';
 
+    // ── Refresh button ────────────────────────────────────────────────────
+    echo '<form method="post" style="display:inline-block;margin-bottom:12px;">';
+    wp_nonce_field( 'ws_jx_dash_refresh' );
+    echo '<input type="hidden" name="ws_jx_dash_refresh" value="1">';
+    submit_button( 'Refresh Data', 'secondary small', '', false );
+    echo '</form>';
+
+    // ── Serve from cache if available ─────────────────────────────────────
+    $cached = get_transient( 'ws_jx_dashboard_html' );
+    if ( false !== $cached ) {
+        echo $cached; // Already escaped when built.
+        echo '</div>';
+        return;
+    }
+
+    // ── Build table ───────────────────────────────────────────────────────
     $jurisdictions = ws_get_all_jurisdictions();
 
     if ( empty( $jurisdictions ) ) {
         echo '<div class="notice notice-warning"><p>No jurisdictions found. Please create one to begin tracking.</p></div>';
+        echo '</div>';
         return;
     }
+
+    ob_start();
 
     echo '<table class="wp-list-table widefat fixed striped" style="margin-top: 20px;">';
     echo '<thead><tr>
@@ -81,15 +121,15 @@ function ws_render_jurisdiction_dashboard() {
         $summary_status = ws_jx_dashboard_one_status( $term_id, 'jx-summary' );
         echo ws_jx_dashboard_status_cell( $summary_status );
 
-        // ── Statutes (count of attached) ──────────────────────────────────
+        // ── Statutes (count of editorially curated / attach_flag = 1) ─────
         $statute_count = ws_jx_dashboard_count( $term_id, 'jx-statute', true );
         echo ws_jx_dashboard_count_cell( $statute_count );
 
-        // ── Citations (attached count via shared helper) ───────────────────
+        // ── Citations (curated count via shared helper) ────────────────────
         $cite_count = ws_get_attached_citation_count( $jx->ID );
         echo ws_jx_dashboard_count_cell( $cite_count );
 
-        // ── Interpretations (count of attached) ───────────────────────────
+        // ── Interpretations (count of editorially curated) ────────────────
         $interp_count = ws_jx_dashboard_count( $term_id, 'jx-interpretation', true );
         echo ws_jx_dashboard_count_cell( $interp_count );
 
@@ -109,7 +149,37 @@ function ws_render_jurisdiction_dashboard() {
     }
 
     echo '</tbody></table>';
+    echo '<p style="color:#999;font-size:11px;margin-top:8px;">Cached for 10 minutes. Use Refresh to rebuild.</p>';
+
+    $html = ob_get_clean();
+    set_transient( 'ws_jx_dashboard_html', $html, 10 * MINUTE_IN_SECONDS );
+    echo $html;
+
     echo '</div>';
+}
+
+
+// ── Cache Invalidation ────────────────────────────────────────────────────────
+//
+// Clears the dashboard transient whenever any CPT tracked by the dashboard
+// is saved or deleted. Covers all eight CPT types shown in the matrix.
+
+add_action( 'save_post',   'ws_jx_dashboard_invalidate_cache' );
+add_action( 'delete_post', 'ws_jx_dashboard_invalidate_cache' );
+
+/**
+ * Deletes the dashboard HTML transient when a tracked CPT post is modified.
+ *
+ * @param int $post_id
+ */
+function ws_jx_dashboard_invalidate_cache( $post_id ) {
+    static $tracked = [
+        'jurisdiction', 'jx-summary', 'jx-statute', 'jx-citation',
+        'jx-interpretation', 'ws-legal-update', 'ws-agency', 'ws-assist-org',
+    ];
+    if ( in_array( get_post_type( $post_id ), $tracked, true ) ) {
+        delete_transient( 'ws_jx_dashboard_html' );
+    }
 }
 
 

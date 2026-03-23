@@ -21,8 +21,14 @@
  *   ws_jx_citation_common_name    Common/informal name (text, optional)
  *   ws_jx_cite_url           Source URL (url)
  *   ws_jx_cite_is_pdf        PDF link toggle (true_false)
- *   attach_flag              Attach to jurisdiction page (true_false)
- *   order                    Render order (number, conditional on attach_flag)
+ *   attach_flag              Editorial curation flag (true_false). Marks this record as
+ *                            one of the ~3–5 highlighted citations shown on the jurisdiction
+ *                            summary page. NOT a visibility gate — unflagged citations are
+ *                            accessible via taxonomy queries.
+ *   order                    Render order among flagged items (number, conditional on attach_flag)
+ *
+ * Relationships tab:
+ *   ws_jx_citation_statute_ids  Related statutes (post_object, jx-statute, multiple, optional)
  *
  * Jurisdiction scope is provided by the ws_jurisdiction taxonomy — the taxonomy
  * term is assigned via the WordPress taxonomy UI, not via an ACF field.
@@ -62,6 +68,9 @@
  * -------
  * 2.3.0  Initial release.
  * 3.0.0  Architecture refactor (Phase 3.3):
+ * 3.6.0  Added Relationships tab with ws_jx_citation_statute_ids (post_object,
+ *         jx-statute, multiple, optional). Added acf/load_value hook to pre-fill
+ *         from ?statute_id= URL param when opened via the statute citation metabox.
  *        - Removed Relationships tab: ws_jx_code text field and ws_jurisdiction
  *          post_object field retired. Scope now provided by ws_jurisdiction taxonomy.
  *        - Renamed ws_jx_cite_attach → attach_flag (field key unchanged).
@@ -231,6 +240,33 @@ function ws_register_acf_jx_citations() {
             // Removed — registered centrally in acf-plain-english-fields.php
             // (group_plain_english_metadata, menu_order 85).
 
+            // ── Tab: Relationships ────────────────────────────────────────
+            //
+            // Links this citation back to the statute(s) it interprets or
+            // supports. Optional — a citation may be jurisdiction-wide without
+            // a statute parent. Multiple — one citation may be relevant to
+            // more than one statute in the same jurisdiction.
+
+            [
+                'key'   => 'field_jx_citation_relationships_tab',
+                'label' => 'Relationships',
+                'type'  => 'tab',
+            ],
+
+            [
+                'key'           => 'field_jx_citation_statute_ids',
+                'label'         => 'Related Statutes',
+                'name'          => 'ws_jx_citation_statute_ids',
+                'type'          => 'post_object',
+                'post_type'     => [ 'jx-statute' ],
+                'instructions'  => 'Link this citation to the statute(s) it interprets or supports. Optional — leave blank for jurisdiction-wide citations not tied to a specific statute.',
+                'required'      => 0,
+                'multiple'      => 1,
+                'allow_null'    => 1,
+                'ui'            => 1,
+                'return_format' => 'id',
+            ],
+
             // ── Tab: Reference Materials ───────────────────────────────────
             //
             // Links this citation to ws-reference records for researchers and
@@ -266,6 +302,36 @@ function ws_register_acf_jx_citations() {
 // Field locking, auto-fill today, and stamp fields are handled centrally
 // in admin-hooks.php via ws_acf_lock_for_non_admins(), ws_acf_autofill_today(),
 // and ws_acf_write_stamp_fields().
+
+
+// ── Pre-populate ws_jx_citation_statute_ids from ?statute_id= URL param ──────
+//
+// Mirrors ws_interp_prefill_statute_id() in acf-jx-interpretations.php.
+// When a new citation is opened from the statute's citation metabox,
+// statute_id is passed as a URL param. acf/load_value returns it as the
+// field's live value so ACF renders the statute pre-selected.
+// Returns an array — ws_jx_citation_statute_ids is a multiple post_object field.
+
+add_filter( 'acf/load_value/key=field_jx_citation_statute_ids', 'ws_citation_prefill_statute_ids', 5, 3 );
+
+function ws_citation_prefill_statute_ids( $value, $post_id, $field ) {
+
+    if ( get_post_status( $post_id ) !== 'auto-draft' ) {
+        return $value;
+    }
+
+    if ( ! isset( $_GET['statute_id'] ) ) {
+        return $value;
+    }
+
+    $statute_id = absint( $_GET['statute_id'] );
+
+    if ( $statute_id && get_post_type( $statute_id ) === 'jx-statute' ) {
+        return [ $statute_id ];
+    }
+
+    return $value;
+}
 
 
 // ── Admin notice: zero attached citations ─────────────────────────────────────
