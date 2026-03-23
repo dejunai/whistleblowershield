@@ -17,7 +17,7 @@
  *       Renders the site-wide footer block: mission statement,
  *       policy page links, contact email, and copyright line.
  *
- *   [ws_legal_updates jurisdiction="california" count="5" public_only="true"]
+ *   [ws_legal_updates jx=jx_id]
  *       Renders recent legal updates. Scoped to a jurisdiction when the
  *       jurisdiction parameter is provided; site-wide when omitted.
  *       public_only defaults true (public types only). Pass false for
@@ -104,35 +104,30 @@ add_shortcode( 'ws_footer', function() {
 // ── [ws_legal_updates] ────────────────────────────────────────────────────────
 //
 // Renders recent legal updates for a specified jurisdiction, or site-wide
-// if no jurisdiction parameter is given.
+// if no jurisdiction parameter is given. Has defaults per scope when no count parameter is given
 //
 // Usage:
-//   [ws_legal_updates jurisdiction="california" count="5"]
-//   [ws_legal_updates count="10"]                        <- site-wide, public types only
-//   [ws_legal_updates count="100" public_only="false"]   <- full site changelog
+//   [ws_legal_updates jx="california" count=""]  <- scoped to jurisdiction, summary types only, default count is 5
+//   [ws_legal_updates count=""]                  <- scoped to site-wide, all types, default count is 100
 //
-// public_only defaults true -- safe for all public-facing placements.
-// Pass public_only="false" only for the internal site-wide changelog page.
-// Public types are defined by WS_LEGAL_UPDATE_PUBLIC_TYPES in ws-core.php.
+// Summary types are defined by WS_LEGAL_UPDATE_SUMMARY_TYPES in ws-core.php.
 //
 // DEPLOYMENT
 // Use 1 -- Jurisdiction page (assembled by render-jurisdiction.php):
-//   [ws_legal_updates jurisdiction="CA" count="5"]
-//   Shows the last 5 public-type updates scoped to the current jurisdiction.
-//   public_only is true by default -- internal and other types are excluded.
+//   [ws_legal_updates jx="CA" count="5"]
+//   Shows the last 5 summary-type updates scoped to the current jurisdiction.
 //
 // Use 2 -- Site-wide changelog page (standalone WP page, manually placed):
-//   [ws_legal_updates count="100" public_only="false"]
+//   [ws_legal_updates]
 //   Shows the last 100 updates of all types across all jurisdictions.
-//   Intended for internal review and site history; not linked from public pages.
+
 
 add_shortcode( 'ws_legal_updates', 'ws_shortcode_legal_updates' );
 function ws_shortcode_legal_updates( $atts ) {
 
     $atts = shortcode_atts( [
-        'jurisdiction' => '',
-        'count'        => 5,
-        'public_only'  => 'true',
+        'jx'     => '',
+        'count'  => 100,
     ], $atts, 'ws_legal_updates' );
 
     // ── Resolve jurisdiction parameter to a post ID ───────────────────────
@@ -141,15 +136,15 @@ function ws_shortcode_legal_updates( $atts ) {
     // All data reads are delegated to ws_get_legal_updates_data().
 
     $jx_id = 0;
-    if ( ! empty( $atts['jurisdiction'] ) ) {
-        if ( is_numeric( $atts['jurisdiction'] ) ) {
-            $jx_id = (int) $atts['jurisdiction'];
+    if ( ! empty( $atts['jx'] ) ) {
+        if ( is_numeric( $atts['jx'] ) ) {
+            $jx_id = (int) $atts['jx'];
         } else {
-            $jx_id = ws_get_id_by_code( strtoupper( $atts['jurisdiction'] ) );
+            $jx_id = ws_get_id_by_code( strtoupper( $atts['jx'] ) );
             if ( ! $jx_id ) {
                 $posts = get_posts( [
                     'post_type'      => 'jurisdiction',
-                    'name'           => sanitize_title( $atts['jurisdiction'] ),
+                    'name'           => sanitize_title( $atts['jx'] ),
                     'posts_per_page' => 1,
                     'post_status'    => 'publish',
                     'fields'         => 'ids',
@@ -159,11 +154,7 @@ function ws_shortcode_legal_updates( $atts ) {
         }
     }
 
-    // Shortcode attributes are always strings; convert to bool explicitly.
-    // Any value other than the string "false" is treated as true.
-    $public_only = ( strtolower( trim( $atts['public_only'] ) ) !== 'false' );
-
-    $items = ws_get_legal_updates_data( $jx_id, (int) $atts['count'], $public_only );
+    $items = ws_get_legal_updates_data( $jx_id, (int) $atts['count']);
 
     if ( empty( $items ) ) {
         return '';

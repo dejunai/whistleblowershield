@@ -257,7 +257,7 @@ function ws_render_jx_summary_section( $content, $review_html = '' ) {
     ob_start(); ?>
     <section class="ws-jx-summary-container">
         <div class="ws-jx-summary-content">
-            <?php echo $content; // Already passed through the_content ?>
+            <?php echo $content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped // Already passed through the_content ?>
         </div>
         <?php if ( $review_html ) : ?>
             <footer class="ws-jx-summary-footer">
@@ -289,7 +289,7 @@ function ws_render_plain_english_reviewed_badge( $plain_reviewed, $reviewer_name
             $parts[] = 'Reviewed by ' . esc_attr( $reviewer_name );
         }
         if ( $reviewed_date ) {
-            $parts[] = 'on ' . esc_attr( $reviewed_date );
+            $parts[] = 'on ' . esc_attr( date_i18n( get_option( 'date_format' ), strtotime( $reviewed_date ) ) );
         }
         $tooltip = ! empty( $parts ) ? implode( ' ', $parts ) : 'Reviewed';
         return '<span class="ws-trust-badge ws-trust-badge--reviewed" title="' . $tooltip . '">'
@@ -332,11 +332,22 @@ function ws_render_jx_summary_footer( $data ) {
 
         <?php if ( $data['created_date'] ) : ?>
         <p class="ws-jx-summary-date-created">
-            <strong>Date Created:</strong> <?php echo esc_html( $data['created_date'] ); ?>
+            <strong>Date Created:</strong> <?php echo esc_html( date_i18n( get_option( 'date_format' ), strtotime( $data['created_date'] ) ) ); ?>
         </p>
         <?php endif; ?>
+		
+		<?php if ( $data['edited_by_name'] ) : ?>
+			<p class="ws-jx-summary-date-edited">
+				<strong>Last Edited By:</strong> <?php echo esc_html( $data['edited_by_name'] ); ?>
+			</p>
+			<?php if ( $data['edited_date'] ) : ?>
+			<p class="ws-jx-summary-date-edited">
+				<strong>Last Edited:</strong> <?php echo esc_html( date_i18n( get_option( 'date_format' ), strtotime( $data['edited_date'] ) ) ); ?>
+			</p>
+			<?php endif; ?>
+		<?php endif; ?>
 
-        <?php echo ws_render_plain_english_reviewed_badge(
+		 <?php echo ws_render_plain_english_reviewed_badge(
 				! empty( $data['is_reviewed'] ),
 				$data['reviewed_by_name'] ?? '',
 				$data['reviewed_date'] ?? ''

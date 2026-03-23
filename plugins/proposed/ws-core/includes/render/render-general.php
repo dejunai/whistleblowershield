@@ -117,7 +117,7 @@ function ws_render_footer( $data ) {
  *     @type string $update_date      Date update was logged (Y-m-d local).
  *     @type string $effective_date   Date the legal change takes effect (Y-m-d local).
  *     @type string $post_date        MySQL post_date from WP core.
- *     @type string $update_type      Update type slug (statute, citation, etc.).
+ *     @type string $type             Update type slug (statute, citation, etc.).
  *     @type bool   $multi_jurisdiction True if update affects more than one jurisdiction.
  *     @type string $law_name         Official name of the affected law, or empty string.
  *     @type string $source_url       Primary source URL, or empty string.
@@ -145,7 +145,13 @@ function ws_render_legal_updates( $items ) {
                 <?php endif; ?>
             </h3>
 
-            <?php if ( $item['law_name'] ) : ?>
+            <?php if ( $item['type'] ) : ?>
+            <p class="ws-legal-update-type">
+                <strong>Update Type:</strong> <?php echo esc_html( $item['type'] ); ?>
+            </p>
+            <?php endif; ?>
+
+             <?php if ( $item['law_name'] ) : ?>
             <p class="ws-legal-update-law">
                 <strong>Law / Statute:</strong> <?php echo esc_html( $item['law_name'] ); ?>
             </p>
@@ -158,12 +164,12 @@ function ws_render_legal_updates( $items ) {
             <?php endif; ?>
 
             <p class="ws-legal-update-posted">
-                <strong>Posted:</strong> <?php echo esc_html( $item['post_date'] ); ?>
+                <strong>Posted:</strong> <?php echo esc_html( date_i18n( get_option( 'date_format' ), strtotime( $data['post_date'] ) ) ); ?>
             </p>
 
             <?php if ( $item['summary'] ) : ?>
             <div class="ws-legal-update-summary">
-                <?php echo $item['summary']; // Already passed through wp_kses_post ?>
+                <?php echo $item['summary']; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped // Already passed through wp_kses_post ?>
             </div>
             <?php endif; ?>
 

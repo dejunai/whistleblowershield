@@ -180,7 +180,7 @@
  *         - $count parameter default changed from 5 to 0; function resolves
  *           0 to 100 for sitewide calls and 5 for per-jurisdiction calls.
  *         - Sitewide calls requesting ≥50 records now served from a transient
- *           (WS_CACHE_LEGAL_UPDATES_SITEWIDE . '_100'). Full 100-record set
+ *           (WS_CACHE_LEGAL_UPDATES_SITEWIDE). Full 100-record set
  *           is always cached; callers requesting fewer records receive a slice.
  *         - save_post_ws-legal-update hook added to invalidate the cache on
  *           every legal update save.
@@ -1209,73 +1209,46 @@ function ws_get_jurisdiction_index_data() {
 
 
 // ════════════════════════════════════════════════════════════════════════════
-// Legal Updates Query
+// ws_get_legal_updates_data( $jx_id );  // jurisdiction summary — auto summary types
+// ws_get_legal_updates_data();          // sitewide changelog — auto all types
 //
-// Centralises all ws-legal-update field reads so the shortcode layer
-// never calls get_field() or get_post_meta() directly.
-//
-// Jurisdiction filtering uses a tax_query on ws_jurisdiction (not post_meta).
-// This requires save_terms=1 on the ACF jurisdiction field and wp_set_post_terms()
-// in the hook — both enforced as of acf-legal-updates.php v3.5.0 and
-// admin-major-edit-hook.php v1.1.0.
-//
-// Dates are returned as stored (Y-m-d / MySQL datetime). The render layer
-// is responsible for formatting dates for display.
+// Returns structured legal update data for the render layer.
 //
 // @param int  $jx_id       Jurisdiction post ID to scope results. 0 = site-wide.
-// @param int  $count       Maximum number of records to return. Defaults to 100
-//                          when called site-wide ($jx_id = 0); defaults to 5
-//                          for per-jurisdiction calls. Pass 0 to use the default.
-// @param bool $public_only If true, restricts results to types listed in
-//                          WS_LEGAL_UPDATE_PUBLIC_TYPES (ws-core.php).
-//                          Pass true for all public-facing shortcode/render calls.
-//                          Pass false (default) for the site-wide changelog.
+// @param int  $count       Number of updates to collect, defaults to 100 if !$jx_id,
+//                          defaults to 5 if $jx_id
 // @return array            Array of data items ready for the render layer.
 //
 // CACHING
-// Site-wide calls ($jx_id = 0) requesting 50 or more records are served from
-// a transient keyed as WS_CACHE_LEGAL_UPDATES_SITEWIDE_100 (or _N for other
-// large counts). The full 100-record result is always fetched and cached;
-// callers requesting fewer than 100 receive a slice of that cached result.
-// The cache is invalidated on every ws-legal-update save.
-// Per-jurisdiction calls and small counts (<50) are never cached.
+// Site-wide calls ($jx_id = 0) are cached as a single transient keyed by
+// WS_CACHE_LEGAL_UPDATES_SITEWIDE. Invalidated on every ws-legal-update save.
+// Per-jurisdiction calls are never cached.
 // ════════════════════════════════════════════════════════════════════════════
 
-function ws_get_legal_updates_data( $jx_id = 0, $count = 0, $public_only = false ) {
+function ws_get_legal_updates_data( $jx_id = 0, $count = 0 ) {
 
-    // Resolve default count: 100 sitewide, 5 per-jurisdiction.
-    if ( (int) $count < 1 ) {
-        $count = $jx_id ? 5 : 100;
-    }
-    $count = (int) $count;
+	if ( !$count ) {
+		$count = $jx_id ? 5 : 100;
+	}
 
-    // ── Sitewide large-result cache ───────────────────────────────────────
-    // Fetch and cache 100 records. Slice to $count before returning so any
-    // caller requesting ≥50 sitewide records shares a single transient.
-    $use_cache  = ( ! $jx_id && $count >= 50 );
-    $fetch_count = $use_cache ? 100 : $count;
-    $cache_key   = WS_CACHE_LEGAL_UPDATES_SITEWIDE . '_100';
-
-    if ( $use_cache ) {
-        $cached = get_transient( $cache_key );
+    // ── Sitewide cache ────────────────────────────────────────────────────
+    if ( ! $jx_id ) {
+        $cached = get_transient( WS_CACHE_LEGAL_UPDATES_SITEWIDE );
         if ( false !== $cached ) {
-            return array_slice( $cached, 0, $count );
+            return $cached;
         }
     }
 
     $query_args = [
         'post_type'      => 'ws-legal-update',
         'post_status'    => 'publish',
-        'posts_per_page' => $fetch_count,
+        'posts_per_page' => $count,
         'orderby'        => 'date',
         'order'          => 'DESC',
         'no_found_rows'  => true,
     ];
 
     if ( $jx_id ) {
-        // Resolve jurisdiction post ID → ws_jurisdiction term ID via the
-        // shared helper. Legal updates are linked via the taxonomy table
-        // (save_terms=1 on the ACF jurisdiction field).
         $term_id = ws_get_jx_term_id( $jx_id );
         if ( $term_id ) {
             $query_args['tax_query'] = [ [
@@ -1284,15 +1257,10 @@ function ws_get_legal_updates_data( $jx_id = 0, $count = 0, $public_only = false
                 'terms'    => $term_id,
             ] ];
         }
-    }
-
-    if ( $public_only ) {
-        // Restrict to types listed in WS_LEGAL_UPDATE_PUBLIC_TYPES (defined in ws-core.php).
-        // Using an inclusion list means newly added types are non-public by default
-        // until explicitly added to the constant -- safer than an exclusion list.
+        // Jurisdiction-scoped calls restrict to summary-safe update types only.
         $query_args['meta_query'] = [ [
             'key'     => 'ws_legal_update_type',
-            'value'   => WS_LEGAL_UPDATE_PUBLIC_TYPES,
+            'value'   => WS_LEGAL_UPDATE_SUMMARY_TYPES,
             'compare' => 'IN',
         ] ];
     }
@@ -1308,44 +1276,42 @@ function ws_get_legal_updates_data( $jx_id = 0, $count = 0, $public_only = false
         $uid     = $update->ID;
         $items[] = [
             // ── Identity ─────────────────────────────────────────────────
-            'id'  => $uid,
+            'id'                 => $uid,
             'title'              => get_the_title( $uid ),
 
-            // ── Dates ─────────────────────────────────────────────────────
-            'update_date'        => get_post_meta( $uid, 'ws_legal_update_date',                    true ),
-            'effective_date'     => get_post_meta( $uid, 'ws_legal_update_effective_date',    true ),
+            // ── Dates ────────────────────────────────────────────────────
+            'update_date'        => get_post_meta( $uid, 'ws_legal_update_date',             true ),
+            'effective_date'     => get_post_meta( $uid, 'ws_legal_update_effective_date',   true ),
             'post_date'          => get_post_field( 'post_date', $uid ),
 
-            // ── Classification ────────────────────────────────────────────
-            'update_type'        => get_post_meta( $uid, 'ws_legal_update_type',                    true ),
+            // ── Classification ───────────────────────────────────────────
+            'type'        => get_post_meta( $uid, 'ws_legal_update_type',                      true ),
             'multi_jurisdiction' => (bool) get_post_meta( $uid, 'ws_legal_update_multi_jurisdiction', true ),
 
-            // ── Content ───────────────────────────────────────────────────
-            'law_name'           => get_post_meta( $uid, 'ws_legal_update_law_name',          true ) ?: '',
-            'source_url'         => get_post_meta( $uid, 'ws_legal_update_source_url',              true ) ?: '',
+            // ── Content ──────────────────────────────────────────────────
+            'law_name'           => get_post_meta( $uid, 'ws_legal_update_law_name',         true ) ?: '',
+            'source_url'         => get_post_meta( $uid, 'ws_legal_update_source_url',       true ) ?: '',
             'summary'            => wp_kses_post( get_post_meta( $uid, 'ws_legal_update_summary_wysiwyg', true ) ?: '' ),
 
             // ── Source post backlink ──────────────────────────────────────
             'source_post_id'     => (int) get_post_meta( $uid, 'ws_legal_update_source_post_id',   true ),
             'source_post_type'   => get_post_meta(       $uid, 'ws_legal_update_source_post_type', true ),
 
-            // ── Source & verification ───────────────────────────────────────
+            // ── Source & verification ────────────────────────────────────
             'verify'             => ws_build_source_verify_array( $uid ),
 
-            // ── Record management ─────────────────────────────────────────
+            // ── Record management ────────────────────────────────────────
             'record'             => ws_build_record_array( $uid ),
         ];
     }
 
-    if ( $use_cache ) {
-        // Cache the full 100-record set. Slicing happens on read, so callers
-        // requesting any large sitewide count share this one transient.
-        set_transient( $cache_key, $items, HOUR_IN_SECONDS );
+    // Cache sitewide results only.
+    if ( ! $jx_id ) {
+        set_transient( WS_CACHE_LEGAL_UPDATES_SITEWIDE, $items, HOUR_IN_SECONDS );
     }
 
-    return $use_cache ? array_slice( $items, 0, $count ) : $items;
+    return $items;
 }
-
 
 // ════════════════════════════════════════════════════════════════════════════
 // Reference Materials
@@ -1424,7 +1390,7 @@ function ws_get_reference_page_data( $parent_post_id ) {
 // is saved or published. The single _100 key covers all large sitewide callers
 // since they all share the same fetched-and-sliced transient.
 add_action( 'save_post_ws-legal-update', function() {
-    delete_transient( WS_CACHE_LEGAL_UPDATES_SITEWIDE . '_100' );
+    delete_transient( WS_CACHE_LEGAL_UPDATES_SITEWIDE );
 } );
 
 

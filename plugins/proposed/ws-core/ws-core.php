@@ -221,6 +221,25 @@
  *   4. Matrix seeder (matrix-fed-statutes.php 3.2.0): meta key renames applied,
  *      ws_employer_defense taxonomy assignment added, pre-existing
  *      ws_jx_statute_trigger key mismatch corrected. Gate bumped to 1.2.0.
+ *
+ * RENDER FUNCTION NAMING RULES (v3.6.0)
+ * --------------------------------------
+ * Established to eliminate the mental translation layer between function
+ * names and the data they process. These rules govern all current and
+ * future render function names:
+ *
+ *   1. Render functions must be named after their ingest data type, not
+ *      the page section they produce. The data type is unambiguous;
+ *      the section name requires context to interpret.
+ *      e.g., ws_render_jx_citations()  not  ws_render_jx_case_law()
+ *            ws_render_jx_statutes()   not  ws_render_jx_relevant_law()
+ *
+ *   2. Exception: wrapper functions that compose multiple data types into
+ *      a named page region may use a section name, provided the docblock
+ *      explicitly lists every data type the function consumes.
+ *
+ * @todo - fix function names pre-launch
+ *
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -276,8 +295,8 @@ define( 'WS_SOURCE_NAME_DIRECT', 'Direct' );
 // shortcodes. 'internal' and 'other' are intentionally excluded. When a new
 // type is added to the ws_legal_update_type ACF select in acf-legal-updates.php,
 // add it here to make it public. The query layer reads this constant when
-// $public_only = true is passed to ws_get_legal_updates_data().
-define( 'WS_LEGAL_UPDATE_PUBLIC_TYPES', [ 'statute', 'citation', 'summary', 'interpretation', 'regulation', 'policy' ] );
+// $summary_only = true is passed to ws_get_legal_updates_data().
+define( 'WS_LEGAL_UPDATE_SUMMARY_TYPES', [ 'statute', 'citation', 'summary', 'interpretation', 'regulation', 'policy' ] );
 
 
 // ── Activation Hook ───────────────────────────────────────────────────────────

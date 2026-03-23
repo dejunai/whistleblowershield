@@ -213,7 +213,7 @@ function ws_handle_jurisdiction_render( $content ) {
     }
 
     // Legal updates — always attempt; shortcode returns empty if none exist.
-    $legal_updates = do_shortcode( '[ws_legal_updates jurisdiction="' . esc_attr( $post->post_name ) . '" count="5"]' );
+    $legal_updates = do_shortcode( '[ws_legal_updates jx="' . esc_attr( $post->post_name ) . '" count="5"]' );
     if ( $legal_updates ) {
         $output      .= $legal_updates;
         $has_content  = true;
