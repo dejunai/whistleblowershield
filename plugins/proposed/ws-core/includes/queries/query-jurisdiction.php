@@ -199,6 +199,12 @@
  *                               ws_build_plain_english_array, ws_build_source_verify_array).
  *        - query-jurisdiction.php — jurisdiction-specific dataset functions (this file).
  *        Load order is non-negotiable: helpers → shared → jurisdiction.
+ * 3.7.0  Added ws_get_nationwide_assist_org_data() — dedicated query function for
+ *        the [ws_assist_org_directory] shortcode. Returns all published ws-assist-org
+ *        records scoped to the 'us' ws_jurisdiction term, with optional $filters for
+ *        type (ws_aorg_type slug), sector (employment sector slug), stage (ws_case_stage
+ *        slug), and cost_model. Sector filtering is applied post-query (serialized meta).
+ *        Return shape is identical to ws_get_assist_org_data().
  */
 
 
@@ -922,6 +928,7 @@ function ws_get_assist_org_data( $jx_term_id ) {
             // Assist-org fields
             'internal_id'          => get_post_meta( $oid, 'ws_aorg_internal_id',               true ),
             'type'                 => ( ( $_aorg_type = get_the_terms( $oid, 'ws_aorg_type' ) ) && ! is_wp_error( $_aorg_type ) ) ? $_aorg_type[0] : null,
+            'description'          => get_post_meta( $oid, 'ws_aorg_description',                true ),
             'logo'                 => get_field( 'ws_aorg_logo', $oid ),
             'serves_nationwide'    => (bool) get_post_meta( $oid, 'ws_aorg_serves_nationwide',   true ),
             'disclosure_type'      => get_field( 'ws_aorg_disclosure_type', $oid ),
@@ -951,6 +958,138 @@ function ws_get_assist_org_data( $jx_term_id ) {
             // Record management
             'record' => ws_build_record_array( $oid ),
         ];
+    }
+
+    return $rows;
+}
+
+
+// ════════════════════════════════════════════════════════════════════════════
+// Dataset: Nationwide Assist Organizations (Directory)
+//
+// Returns all published ws-assist-org records scoped to the 'us'
+// ws_jurisdiction taxonomy term, ordered alphabetically. Accepts an optional
+// $filters array to narrow results before returning.
+//
+// Intended for the [ws_assist_org_directory] shortcode. For jurisdiction-page
+// renders, use ws_get_assist_org_data() with the US term ID instead.
+//
+// $filters keys (all optional):
+//   'type'       — ws_aorg_type slug (e.g. 'nonprofit', 'legal-aid')
+//   'sector'     — employment sector slug (e.g. 'federal', 'healthcare')
+//   'stage'      — ws_case_stage slug (e.g. 'pre-disclosure', 'retaliation')
+//   'cost_model' — cost model value (e.g. 'pro_bono', 'free', 'contingency')
+//
+// Sector filtering is applied post-query because employment_sectors is a
+// serialized array in post_meta and cannot be safely matched via meta_query.
+//
+// Returns an array of assist-org data arrays (identical shape to
+// ws_get_assist_org_data()), or empty array if 'us' term is missing.
+// ════════════════════════════════════════════════════════════════════════════
+
+function ws_get_nationwide_assist_org_data( $filters = [] ) {
+
+    // Resolve the 'us' ws_jurisdiction term.
+    $us_term = get_term_by( 'slug', 'us', WS_JURISDICTION_TERM_ID );
+    if ( ! $us_term || is_wp_error( $us_term ) ) {
+        return [];
+    }
+
+    $query_args = [
+        'post_type'      => 'ws-assist-org',
+        'post_status'    => 'publish',
+        'posts_per_page' => -1,
+        'orderby'        => 'title',
+        'order'          => 'ASC',
+        'no_found_rows'  => true,
+        'tax_query'      => [
+            'relation' => 'AND',
+            [
+                'taxonomy' => WS_JURISDICTION_TERM_ID,
+                'field'    => 'term_id',
+                'terms'    => $us_term->term_id,
+            ],
+        ],
+    ];
+
+    // Optional taxonomy filter: org type.
+    if ( ! empty( $filters['type'] ) ) {
+        $query_args['tax_query'][] = [
+            'taxonomy' => 'ws_aorg_type',
+            'field'    => 'slug',
+            'terms'    => sanitize_key( $filters['type'] ),
+        ];
+    }
+
+    // Optional taxonomy filter: case stage.
+    if ( ! empty( $filters['stage'] ) ) {
+        $query_args['tax_query'][] = [
+            'taxonomy' => 'ws_case_stage',
+            'field'    => 'slug',
+            'terms'    => sanitize_key( $filters['stage'] ),
+        ];
+    }
+
+    // Optional meta filter: cost model (scalar string — safe for meta_query).
+    if ( ! empty( $filters['cost_model'] ) ) {
+        $query_args['meta_query'] = [ [
+            'key'     => 'ws_aorg_cost_model',
+            'value'   => sanitize_text_field( $filters['cost_model'] ),
+            'compare' => '=',
+        ] ];
+    }
+
+    $q    = new WP_Query( $query_args );
+    $rows = [];
+
+    foreach ( $q->posts as $org ) {
+        $oid    = $org->ID;
+        $rows[] = [
+            'id'     => $oid,
+            'title'  => get_the_title( $oid ),
+            'url'    => get_permalink( $oid ),
+            'status' => get_post_status( $oid ),
+            // Assist-org fields — identical shape to ws_get_assist_org_data().
+            'internal_id'          => get_post_meta( $oid, 'ws_aorg_internal_id',               true ),
+            'type'                 => ( ( $_t = get_the_terms( $oid, 'ws_aorg_type' ) ) && ! is_wp_error( $_t ) ) ? $_t[0] : null,
+            'description'          => get_post_meta( $oid, 'ws_aorg_description',                true ),
+            'logo'                 => get_field( 'ws_aorg_logo', $oid ),
+            'serves_nationwide'    => (bool) get_post_meta( $oid, 'ws_aorg_serves_nationwide',   true ),
+            'disclosure_type'      => get_field( 'ws_aorg_disclosure_type', $oid ),
+            'services'             => get_post_meta( $oid, 'ws_aorg_services',                   true ),
+            'employment_sectors'   => get_post_meta( $oid, 'ws_aorg_employment_sectors',         true ),
+            'website_url'          => get_post_meta( $oid, 'ws_aorg_website_url',                true ),
+            'intake_url'           => get_post_meta( $oid, 'ws_aorg_intake_url',                 true ),
+            'phone'                => get_post_meta( $oid, 'ws_aorg_phone',                      true ),
+            'email'                => get_post_meta( $oid, 'ws_aorg_email',                      true ),
+            'mailing_address'      => get_post_meta( $oid, 'ws_aorg_mailing_address',            true ),
+            'languages'            => get_field( 'ws_languages', $oid ),
+            'additional_languages' => get_post_meta( $oid, 'ws_aorg_additional_languages',       true ),
+            'cost_model'           => get_post_meta( $oid, 'ws_aorg_cost_model',                 true ),
+            'income_limit'         => get_post_meta( $oid, 'ws_aorg_income_limit',               true ),
+            'income_limit_notes'   => get_post_meta( $oid, 'ws_aorg_income_limit_notes',         true ),
+            'anonymous'            => (bool) get_post_meta( $oid, 'ws_aorg_accepts_anonymous',   true ),
+            'eligibility_notes'    => get_post_meta( $oid, 'ws_aorg_eligibility_notes',          true ),
+            'licensed_attorneys'   => (bool) get_post_meta( $oid, 'ws_aorg_licensed_attorneys',  true ),
+            'accreditation'        => get_post_meta( $oid, 'ws_aorg_accreditation',              true ),
+            'bar_states'           => get_post_meta( $oid, 'ws_aorg_bar_states',                 true ),
+            'verify_url'           => get_post_meta( $oid, 'ws_aorg_verify_url',                 true ),
+            'last_reviewed'        => get_post_meta( $oid, 'ws_aorg_last_reviewed',              true ),
+            // Plain language fields
+            'plain'  => ws_build_plain_english_array( $oid ),
+            // Source & verification
+            'verify' => ws_build_source_verify_array( $oid ),
+            // Record management
+            'record' => ws_build_record_array( $oid ),
+        ];
+    }
+
+    // Post-query: filter by employment sector (serialized array meta).
+    if ( ! empty( $filters['sector'] ) ) {
+        $sector = sanitize_text_field( $filters['sector'] );
+        $rows   = array_values( array_filter( $rows, static function( $r ) use ( $sector ) {
+            return is_array( $r['employment_sectors'] ) && in_array( $sector, $r['employment_sectors'], true );
+        } ) );
     }
 
     return $rows;

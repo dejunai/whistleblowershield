@@ -36,6 +36,14 @@
  *       and alphabetical grid. Placed on a standalone WP page — not called
  *       by the assembler. Moved here from shortcodes-jurisdiction.php (v3.6.0).
  *
+ *   [ws_assist_org_directory type="" sector="" stage="" cost_model=""]
+ *       Renders the nationwide assist-org directory. Shortcode attributes
+ *       pre-filter results; all attributes are optional (omit = show all).
+ *       URL query params aorg_type, aorg_sector, aorg_stage, aorg_cost
+ *       take priority over shortcode attributes, enabling deep-linking from
+ *       jurisdiction pages. Data from ws_get_nationwide_assist_org_data();
+ *       render via ws_render_directory_page() in render-directory.php.
+ *
  * VERSION
  * -------
  * 2.1.3  Full implementations restored from v2.0.0
@@ -49,6 +57,9 @@
  * 3.6.0  [ws_jurisdiction_index] moved here from shortcodes-jurisdiction.php.
  *         Duplicate QUERY LAYER RETURN REFERENCE block removed — canonical copy
  *         lives in shortcodes-jurisdiction.php.
+ * 3.7.0  Added [ws_assist_org_directory] shortcode. Delegates to
+ *         ws_get_nationwide_assist_org_data() + ws_render_directory_page().
+ *         Supports shortcode atts and URL param overrides for deep-linking.
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit;
@@ -288,6 +299,76 @@ add_shortcode( 'ws_jurisdiction_index', function() {
     $data = ws_get_jurisdiction_index_data();
     return ws_render_jurisdiction_index( $data );
 } );
+
+
+// ── [ws_assist_org_directory] ─────────────────────────────────────────────────
+//
+// Renders the nationwide assist-org directory. All shortcode attributes are
+// optional — omitting them shows all organizations.
+//
+// Usage:
+//   [ws_assist_org_directory]                              — all organizations
+//   [ws_assist_org_directory type="nonprofit"]             — filtered by type
+//   [ws_assist_org_directory sector="federal" stage="retaliation"]
+//   [ws_assist_org_directory cost_model="pro_bono"]
+//
+// URL query params override shortcode attributes, enabling deep-links from
+// jurisdiction pages to arrive with pre-applied filter state:
+//
+//   ?aorg_type=legal-aid&aorg_stage=retaliation
+//
+// URL param names:
+//   aorg_type     — ws_aorg_type slug
+//   aorg_sector   — employment sector slug
+//   aorg_stage    — ws_case_stage slug
+//   aorg_cost     — cost model value
+
+add_shortcode( 'ws_assist_org_directory', 'ws_shortcode_assist_org_directory' );
+function ws_shortcode_assist_org_directory( $atts ) {
+
+    $atts = shortcode_atts( [
+        'type'       => '',
+        'sector'     => '',
+        'stage'      => '',
+        'cost_model' => '',
+    ], $atts, 'ws_assist_org_directory' );
+
+    // Build filters — URL params take priority over shortcode atts.
+    // All values are sanitized before use.
+    $filters = [];
+
+    $type = ! empty( $_GET['aorg_type'] )
+        ? sanitize_key( wp_unslash( $_GET['aorg_type'] ) )
+        : sanitize_key( $atts['type'] );
+    if ( $type ) {
+        $filters['type'] = $type;
+    }
+
+    $sector = ! empty( $_GET['aorg_sector'] )
+        ? sanitize_text_field( wp_unslash( $_GET['aorg_sector'] ) )
+        : sanitize_text_field( $atts['sector'] );
+    if ( $sector ) {
+        $filters['sector'] = $sector;
+    }
+
+    $stage = ! empty( $_GET['aorg_stage'] )
+        ? sanitize_key( wp_unslash( $_GET['aorg_stage'] ) )
+        : sanitize_key( $atts['stage'] );
+    if ( $stage ) {
+        $filters['stage'] = $stage;
+    }
+
+    $cost_model = ! empty( $_GET['aorg_cost'] )
+        ? sanitize_key( wp_unslash( $_GET['aorg_cost'] ) )
+        : sanitize_key( $atts['cost_model'] );
+    if ( $cost_model ) {
+        $filters['cost_model'] = $cost_model;
+    }
+
+    $items = ws_get_nationwide_assist_org_data( $filters );
+
+    return ws_render_directory_page( $items );
+}
 
 
 // ============================================================================

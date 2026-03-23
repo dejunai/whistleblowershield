@@ -44,6 +44,24 @@
  *
  * v1.9.1 — Updated [ws_legal_updates] to use `ws_legal_update_*` ACF field names.
  * v1.9.2 — Updated [ws_legal_updates] post_type query to `ws-legal-update`.
+ * v1.9.3 — ARIA / keyboard-nav compliance pass (WCAG 2.1 AA):
+ *           - [ws_nla_disclaimer_notice]: role="note" on wrapper div.
+ *           - [ws_jurisdiction_header]: aria-label + screen-reader-text "(opens in
+ *             new tab)" on all _blank links; tabindex="0" + aria-label on
+ *             attribution <span> (tooltip now keyboard-reachable); esc_attr()
+ *             on data-tooltip attributes; review-badges container labeled.
+ *           - [ws_jx_flag]: same attribution fixes; corrected missing echo on
+ *             esc_html() in data-tooltip (was silently emitting empty string).
+ *           - [ws_jurisdiction_summary] / [ws_review_status]: badge symbol chars
+ *             (&#10003; &#9679;) wrapped in aria-hidden="true"; badge containers
+ *             carry aria-label="Review status".
+ *           - [ws_legal_updates]: source-URL links carry aria-label + SR text.
+ *           - [ws_footer]: email link carries descriptive aria-label.
+ *           - [ws_jurisdiction_index]: no-results <p> uses HTML hidden attribute
+ *             + role="status" + aria-live="polite" (inline style removed);
+ *             grid <ul> carries id="ws-jx-grid"; tab buttons carry aria-controls;
+ *             JS updated to toggle .hidden property; arrow-key / Home / End
+ *             keyboard navigation added to tab list (WCAG SC 2.1.1).
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -101,31 +119,35 @@ function ws_shortcode_nla_disclaimer_notice() {
         . 'consult with a qualified legal professional regarding the specifics '
         . 'of their situation before initiating any formal disclosure or legal action.';
 
-    return '<div class="ws-nla-disclaimer-notice">'
+    // role="note" marks this as a complementary aside — screen readers
+    // announce it as a note region rather than generic content.
+    return '<div class="ws-nla-disclaimer-notice" role="note">'
         . '<strong>NOTICE:</strong> '
         . esc_html( $notice_text )
         . '</div>';
 }
+
 if ( ! function_exists( 'ws_get_government_label' ) ) {
     function ws_get_government_label( $pid ) {
         $choices_gl = [
             'governor' => 'Office of the Governor',
             'mayor'    => 'Office of the Mayor',
         ];
-        $key_gl        = get_field( 'ws_head_of_government_label', $pid ) ?: 'governor';
-        return $choices_gl[$key_gl] ?? 'Office of the Governor';
+        $key_gl = get_field( 'ws_head_of_government_label', $pid ) ?: 'governor';
+        return $choices_gl[ $key_gl ] ?? 'Office of the Governor';
     }
 }
-	function ws_get_legal_authority_label( $pid ) {
+
+function ws_get_legal_authority_label( $pid ) {
     $choices_lal = [
-		'attorney'   => 'Office of the Attorney General',
-		'inspector'  => 'D.C. Office of the Inspector General',
-		'secretary'  => 'Office of the Secretary of Justice',
-		'special'    => 'U.S. Office of Special Counsel',
-	];
-    $key_lal         = get_field( 'ws_legal_authority_label', $pid ) ?: 'attorney';
-    return $choices_lal[$key_lal] ?? 'Office of the Attorney General';
-	}
+        'attorney'  => 'Office of the Attorney General',
+        'inspector' => 'D.C. Office of the Inspector General',
+        'secretary' => 'Office of the Secretary of Justice',
+        'special'   => 'U.S. Office of Special Counsel',
+    ];
+    $key_lal = get_field( 'ws_legal_authority_label', $pid ) ?: 'attorney';
+    return $choices_lal[ $key_lal ] ?? 'Office of the Attorney General';
+}
 
 
 // ── [ws_jurisdiction_header] ──────────────────────────────────────────────────
@@ -152,22 +174,17 @@ function ws_shortcode_jurisdiction_header( $atts ) {
     $license     = get_field( 'ws_jx_flag_license', $pid );
 
     // Government URLs
-    $portal_url     = get_field( 'ws_gov_portal_url', $pid );
-    $portal_label   = get_field( 'ws_gov_portal_label', $pid ) ?: 'Official Government Portal';
-    $head_url   	= get_field( 'ws_head_of_government_url', $pid );
-	//
-	$head_label     = ws_get_government_label( $pid );
-	//
-	$legal_url      = get_field( 'ws_legal_authority_url', $pid );
-    //
-	$legal_label    = ws_get_legal_authority_label( $pid );
-	//
-	
+    $portal_url   = get_field( 'ws_gov_portal_url', $pid );
+    $portal_label = get_field( 'ws_gov_portal_label', $pid ) ?: 'Official Government Portal';
+    $head_url     = get_field( 'ws_head_of_government_url', $pid );
+    $head_label   = ws_get_government_label( $pid );
+    $legal_url    = get_field( 'ws_legal_authority_url', $pid );
+    $legal_label  = ws_get_legal_authority_label( $pid );
 
     ob_start();
     ?>
 
-	<h1 class="ws-jurisdiction-title"><?php echo esc_html( $name ); ?></h1>
+    <h1 class="ws-jurisdiction-title"><?php echo esc_html( $name ); ?></h1>
     <div class="ws-jurisdiction-header">
         <div class="ws-jurisdiction-flag-row">
 
@@ -179,15 +196,29 @@ function ws_shortcode_jurisdiction_header( $atts ) {
             <?php if ( $attrib_text ) : ?>
             <div class="ws-jx-flag-attribution">
                 <?php if ( $attrib_url ) : ?>
+                    <?php
+                    // aria-label carries the full attribution text so keyboard
+                    // users get the same info as hover/mouse users.
+                    // (opens in new tab) warning satisfies WCAG SC 3.2.2.
+                    ?>
                     <a href="<?php echo esc_url( $attrib_url ); ?>"
-                       target="_blank" rel="noopener noreferrer" class="ws-term-highlight" 
-                        data-tooltip="<?php echo esc_html( $attrib_text )?> &mdash; Click to WikiMedia Commons">
-						Attribution
+                       target="_blank" rel="noopener noreferrer" class="ws-term-highlight"
+                       data-tooltip="<?php echo esc_attr( $attrib_text ); ?>"
+                       aria-label="<?php echo esc_attr( $attrib_text ); ?> — View on Wikimedia Commons (opens in new tab)">
+                        Attribution
+                        <span class="screen-reader-text">(opens in new tab)</span>
                     </a>
                 <?php else : ?>
-					<span class="ws-term-highlight"
-                    data-tooltip="<?php echo esc_html( $attrib_text )?>">
-					Attribution</span>
+                    <?php
+                    // No link — tabindex="0" makes this keyboard-focusable so
+                    // the :focus-visible tooltip rule in the CSS fires for
+                    // keyboard-only users. aria-label exposes the full text.
+                    ?>
+                    <span class="ws-term-highlight"
+                          data-tooltip="<?php echo esc_attr( $attrib_text ); ?>"
+                          tabindex="0"
+                          aria-label="<?php echo esc_attr( $attrib_text ); ?>">
+                        Attribution</span>
                 <?php endif; ?>
                 <?php if ( $license ) : ?>
                     &mdash; <?php echo esc_html( $license ); ?>
@@ -215,33 +246,39 @@ function ws_shortcode_jurisdiction_header( $atts ) {
                     <?php if ( $portal_url ) : ?>
                     <li class="ws-jx-gov-link ws-jx-gov-portal">
                         <a href="<?php echo esc_url( $portal_url ); ?>"
-                           target="_blank" rel="noopener noreferrer">
+                           target="_blank" rel="noopener noreferrer"
+                           aria-label="<?php echo esc_attr( $portal_label ); ?> (opens in new tab)">
                             <?php echo esc_html( $portal_label ); ?>
+                            <span class="screen-reader-text">(opens in new tab)</span>
                         </a>
                     </li>
                     <?php endif; ?>
 
                     <?php
                     // Head of government
-					if ( $head_url ) : 
-						// Determine CSS class based on the jurisdiction type (district vs others)
-						$gov_class = ( $type === 'district' ) ? 'ws-head-mayor' : 'ws-head-governor';
-						?>
-						<li class="ws-jx-gov-link <?php echo esc_attr( $gov_class ); ?>">
-							<a href="<?php echo esc_url( $head_url ); ?>" 
-							   target="_blank" rel="noopener noreferrer">
-								<?php echo esc_html( $head_label ); ?>
-							</a>
-						</li>
-					<?php endif; ?>
+                    if ( $head_url ) :
+                        // Determine CSS class based on the jurisdiction type (district vs others)
+                        $gov_class = ( $type === 'district' ) ? 'ws-head-mayor' : 'ws-head-governor';
+                    ?>
+                    <li class="ws-jx-gov-link <?php echo esc_attr( $gov_class ); ?>">
+                        <a href="<?php echo esc_url( $head_url ); ?>"
+                           target="_blank" rel="noopener noreferrer"
+                           aria-label="<?php echo esc_attr( $head_label ); ?> (opens in new tab)">
+                            <?php echo esc_html( $head_label ); ?>
+                            <span class="screen-reader-text">(opens in new tab)</span>
+                        </a>
+                    </li>
+                    <?php endif; ?>
 
-                     <?php
+                    <?php
                     // Legal Authority
-					if ( $legal_url ) : ?>
-						<li class="ws-jx-gov-link ws-jx-legal-authority">
+                    if ( $legal_url ) : ?>
+                    <li class="ws-jx-gov-link ws-jx-legal-authority">
                         <a href="<?php echo esc_url( $legal_url ); ?>"
-                           target="_blank" rel="noopener noreferrer">
+                           target="_blank" rel="noopener noreferrer"
+                           aria-label="<?php echo esc_attr( $legal_label ); ?> (opens in new tab)">
                             <?php echo esc_html( $legal_label ); ?>
+                            <span class="screen-reader-text">(opens in new tab)</span>
                         </a>
                     </li>
                     <?php endif; ?>
@@ -250,8 +287,6 @@ function ws_shortcode_jurisdiction_header( $atts ) {
             </div>
 
         </div>
-
-
 
     </div>
     <?php
@@ -292,15 +327,24 @@ function ws_shortcode_jx_flag( $atts ) {
         <?php if ( $attrib_text ) : ?>
         <p class="ws-jx-flag-attribution">
             <?php if ( $attrib_url ) : ?>
+                <?php
+                // v1.9.3: Fixed missing echo on esc_html() — data-tooltip was
+                // silently emitting an empty string. Also added aria-label so
+                // the attribution text is accessible to keyboard/SR users.
+                ?>
                 <a href="<?php echo esc_url( $attrib_url ); ?>"
-					target="_blank" rel="noopener noreferrer" class="ws-term-highlight" 
-					data-tooltip="<?php esc_html( $attrib_text )?>">
-					Attribution
-                    </a>
+                   target="_blank" rel="noopener noreferrer" class="ws-term-highlight"
+                   data-tooltip="<?php echo esc_attr( $attrib_text ); ?>"
+                   aria-label="<?php echo esc_attr( $attrib_text ); ?> — View on Wikimedia Commons (opens in new tab)">
+                    Attribution
+                    <span class="screen-reader-text">(opens in new tab)</span>
+                </a>
             <?php else : ?>
-				<span class="ws-term-highlight"
-				data-tooltip="<?php esc_html( $attrib_text )?>">
-				Attribution</span>
+                <span class="ws-term-highlight"
+                      data-tooltip="<?php echo esc_attr( $attrib_text ); ?>"
+                      tabindex="0"
+                      aria-label="<?php echo esc_attr( $attrib_text ); ?>">
+                    Attribution</span>
             <?php endif; ?>
             <?php if ( $license ) : ?>
                 &mdash; <?php echo esc_html( $license ); ?>
@@ -382,22 +426,35 @@ function ws_shortcode_jurisdiction_summary( $atts ) {
             </p>
             <?php endif; ?>
 
-            <div class="ws-review-badges">
+            <?php
+            // aria-label="Review status" groups the badges so screen readers
+            // announce "Review status, group" before reading badge text.
+            // The &#10003; / &#9679; symbol chars are wrapped in aria-hidden
+            // so screen readers don't announce "check mark" / "black circle"
+            // — the descriptive text that follows is sufficient.
+            ?>
+            <div class="ws-review-badges" aria-label="Review status">
                 <?php if ( $human_reviewed ) : ?>
-                    <span class="ws-badge ws-badge-reviewed">&#10003; Human Reviewed</span>
+                    <span class="ws-badge ws-badge-reviewed">
+                        <span aria-hidden="true">&#10003;</span> Human Reviewed
+                    </span>
                 <?php else : ?>
-                    <span class="ws-badge ws-badge-pending">&#9679; Pending Human Review</span>
+                    <span class="ws-badge ws-badge-pending">
+                        <span aria-hidden="true">&#9679;</span> Pending Human Review
+                    </span>
                 <?php endif; ?>
 
                 <?php if ( $legal_reviewed ) : ?>
                     <span class="ws-badge ws-badge-legal-reviewed">
-                        &#10003; Legally Reviewed
+                        <span aria-hidden="true">&#10003;</span> Legally Reviewed
                         <?php if ( $legal_reviewer ) : ?>
                             &mdash; <?php echo esc_html( $legal_reviewer ); ?>
                         <?php endif; ?>
                     </span>
                 <?php else : ?>
-                    <span class="ws-badge ws-badge-pending">&#9679; Pending Legal Review</span>
+                    <span class="ws-badge ws-badge-pending">
+                        <span aria-hidden="true">&#9679;</span> Pending Legal Review
+                    </span>
                 <?php endif; ?>
             </div>
 
@@ -438,22 +495,28 @@ function ws_shortcode_review_status( $atts ) {
 
     ob_start();
     ?>
-    <div class="ws-review-status">
+    <div class="ws-review-status" aria-label="Review status">
         <?php if ( $human_reviewed ) : ?>
-            <span class="ws-badge ws-badge-reviewed">&#10003; Human Reviewed</span>
+            <span class="ws-badge ws-badge-reviewed">
+                <span aria-hidden="true">&#10003;</span> Human Reviewed
+            </span>
         <?php else : ?>
-            <span class="ws-badge ws-badge-pending">&#9679; Pending Human Review</span>
+            <span class="ws-badge ws-badge-pending">
+                <span aria-hidden="true">&#9679;</span> Pending Human Review
+            </span>
         <?php endif; ?>
 
         <?php if ( $legal_reviewed ) : ?>
             <span class="ws-badge ws-badge-legal-reviewed">
-                &#10003; Legally Reviewed
+                <span aria-hidden="true">&#10003;</span> Legally Reviewed
                 <?php if ( $legal_reviewer ) : ?>
                     &mdash; <?php echo esc_html( $legal_reviewer ); ?>
                 <?php endif; ?>
             </span>
         <?php else : ?>
-            <span class="ws-badge ws-badge-pending">&#9679; Pending Legal Review</span>
+            <span class="ws-badge ws-badge-pending">
+                <span aria-hidden="true">&#9679;</span> Pending Legal Review
+            </span>
         <?php endif; ?>
     </div>
     <?php
@@ -470,7 +533,7 @@ function ws_shortcode_review_status( $atts ) {
 //
 // Usage:
 //   [ws_legal_updates jurisdiction="california" count="5"]
-//   [ws_legal_updates count="10"]   ← site-wide (Legal Updates page)
+//   [ws_legal_updates count="10"]   <- site-wide (Legal Updates page)
 
 add_shortcode( 'ws_legal_updates', 'ws_shortcode_legal_updates' );
 function ws_shortcode_legal_updates( $atts ) {
@@ -522,16 +585,23 @@ function ws_shortcode_legal_updates( $atts ) {
             $summary_html   = get_field( 'ws_legal_update_summary',        $update->ID );
             $fmt_effective  = $effective_date ? date( 'F j, Y', strtotime( $effective_date ) ) : '';
             $post_date      = get_the_date( 'F j, Y', $update->ID );
+            $update_title   = get_the_title( $update->ID );
         ?>
         <div class="ws-legal-update-item">
             <h3 class="ws-legal-update-title">
                 <?php if ( $source_url ) : ?>
+                    <?php
+                    // aria-label: title + "(opens in new tab)" so the announcement
+                    // is unambiguous when multiple update links appear on one page.
+                    ?>
                     <a href="<?php echo esc_url( $source_url ); ?>"
-                       target="_blank" rel="noopener noreferrer">
-                        <?php echo esc_html( get_the_title( $update->ID ) ); ?>
+                       target="_blank" rel="noopener noreferrer"
+                       aria-label="<?php echo esc_attr( $update_title ); ?> — source document (opens in new tab)">
+                        <?php echo esc_html( $update_title ); ?>
+                        <span class="screen-reader-text">(opens in new tab)</span>
                     </a>
                 <?php else : ?>
-                    <?php echo esc_html( get_the_title( $update->ID ) ); ?>
+                    <?php echo esc_html( $update_title ); ?>
                 <?php endif; ?>
             </h3>
 
@@ -595,7 +665,10 @@ function ws_shortcode_footer( $atts ) {
         </nav>
 
         <p class="ws-footer-contact">
-            Contact: <a href="mailto:admin@whistleblowershield.org">admin@whistleblowershield.org</a>
+            Contact: <a href="mailto:admin@whistleblowershield.org"
+                        aria-label="Send email to admin@whistleblowershield.org">
+                admin@whistleblowershield.org
+            </a>
         </p>
 
         <p class="ws-footer-copyright">
@@ -647,6 +720,10 @@ function ws_shortcode_jurisdiction_index( $atts ) {
     ?>
     <div class="ws-jurisdiction-index" id="ws-jurisdiction-index">
 
+        <?php
+        // aria-controls="ws-jx-grid" on each tab points to the grid this
+        // tablist controls — required by the ARIA tab pattern.
+        ?>
         <div class="ws-jx-index-filter" role="tablist" aria-label="Filter jurisdictions by type">
             <?php foreach ( $types as $value => $label ) : ?>
             <button
@@ -654,6 +731,7 @@ function ws_shortcode_jurisdiction_index( $atts ) {
                 data-filter="<?php echo esc_attr( $value ); ?>"
                 role="tab"
                 aria-selected="<?php echo $value === 'all' ? 'true' : 'false'; ?>"
+                aria-controls="ws-jx-grid"
                 type="button">
                 <?php echo esc_html( $label ); ?>
                 <span class="ws-jx-filter-count" data-count-for="<?php echo esc_attr( $value ); ?>"></span>
@@ -661,7 +739,7 @@ function ws_shortcode_jurisdiction_index( $atts ) {
             <?php endforeach; ?>
         </div>
 
-        <ul class="ws-jx-index-grid" role="list">
+        <ul class="ws-jx-index-grid" id="ws-jx-grid" role="list">
             <?php foreach ( $items as $item ) : ?>
             <li class="ws-jx-index-card"
                 data-type="<?php echo esc_attr( $item['type'] ); ?>">
@@ -672,7 +750,12 @@ function ws_shortcode_jurisdiction_index( $atts ) {
             <?php endforeach; ?>
         </ul>
 
-        <p class="ws-jx-index-no-results" style="display:none;">
+        <?php
+        // HTML hidden attribute replaces the inline style="display:none".
+        // role="status" + aria-live="polite" ensures this message is announced
+        // by screen readers when JS shows it after a filter change.
+        ?>
+        <p class="ws-jx-index-no-results" role="status" aria-live="polite" hidden>
             No jurisdictions found for this filter.
         </p>
 
@@ -686,6 +769,8 @@ function ws_shortcode_jurisdiction_index( $atts ) {
         const tabs      = index.querySelectorAll( '.ws-jx-filter-tab' );
         const cards     = index.querySelectorAll( '.ws-jx-index-card' );
         const noResults = index.querySelector( '.ws-jx-index-no-results' );
+
+        // ── Populate counts ───────────────────────────────────────────────────
 
         tabs.forEach( function( tab ) {
             const filter  = tab.dataset.filter;
@@ -703,27 +788,75 @@ function ws_shortcode_jurisdiction_index( $atts ) {
             }
         } );
 
+        // ── Shared activate function ──────────────────────────────────────────
+        //
+        // Used by both click and keyboard handlers so filter logic lives
+        // in one place.
+
+        function activateTab( tab ) {
+            const filter = tab.dataset.filter;
+
+            tabs.forEach( function( t ) {
+                t.classList.remove( 'ws-jx-filter-active' );
+                t.setAttribute( 'aria-selected', 'false' );
+            } );
+            tab.classList.add( 'ws-jx-filter-active' );
+            tab.setAttribute( 'aria-selected', 'true' );
+
+            let visible = 0;
+            cards.forEach( function( card ) {
+                const match = filter === 'all' || card.dataset.type === filter;
+                card.style.display = match ? '' : 'none';
+                if ( match ) visible++;
+            } );
+
+            // Toggle the hidden attribute — avoids inline style conflicts and
+            // allows the aria-live region to announce the change to screen readers.
+            noResults.hidden = ( visible !== 0 );
+        }
+
+        // ── Click handler ─────────────────────────────────────────────────────
+
         tabs.forEach( function( tab ) {
             tab.addEventListener( 'click', function() {
-                const filter = tab.dataset.filter;
-
-                tabs.forEach( function( t ) {
-                    t.classList.remove( 'ws-jx-filter-active' );
-                    t.setAttribute( 'aria-selected', 'false' );
-                } );
-                tab.classList.add( 'ws-jx-filter-active' );
-                tab.setAttribute( 'aria-selected', 'true' );
-
-                let visible = 0;
-                cards.forEach( function( card ) {
-                    const match = filter === 'all' || card.dataset.type === filter;
-                    card.style.display = match ? '' : 'none';
-                    if ( match ) visible++;
-                } );
-
-                noResults.style.display = visible === 0 ? '' : 'none';
+                activateTab( tab );
             } );
         } );
+
+        // ── Keyboard navigation (WCAG 2.1 SC 2.1.1) ──────────────────────────
+        //
+        // ARIA tablist pattern: ArrowLeft/Right move focus between tabs and
+        // activate the newly focused tab (automatic-activation model).
+        // Home/End jump to first/last visible tab.
+        // Only visible tabs are included in the rotation — hidden tabs (those
+        // with no matching jurisdictions) are skipped.
+
+        tabs.forEach( function( tab ) {
+            tab.addEventListener( 'keydown', function( e ) {
+                const visibleTabs = Array.from( tabs ).filter( function( t ) {
+                    return t.style.display !== 'none';
+                } );
+                const current = visibleTabs.indexOf( tab );
+                let next      = -1;
+
+                if ( e.key === 'ArrowRight' || e.key === 'ArrowDown' ) {
+                    next = ( current + 1 ) % visibleTabs.length;
+                } else if ( e.key === 'ArrowLeft' || e.key === 'ArrowUp' ) {
+                    next = ( current - 1 + visibleTabs.length ) % visibleTabs.length;
+                } else if ( e.key === 'Home' ) {
+                    next = 0;
+                } else if ( e.key === 'End' ) {
+                    next = visibleTabs.length - 1;
+                } else {
+                    return; // Pass all other keys through normally
+                }
+
+                e.preventDefault();
+                visibleTabs[ next ].focus();
+                activateTab( visibleTabs[ next ] );
+            } );
+        } );
+
     } )();
     </script>
     <?php

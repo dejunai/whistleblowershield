@@ -442,3 +442,131 @@
     height: 12px;
 	width:  auto;
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ * ACCESSIBILITY ADDITIONS — v1.9.3
+ * WCAG 2.1 AA: focus-visible, keyboard-reachable tooltip, SR utility class.
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+
+/* ── .screen-reader-text ─────────────────────────────────────────────────────
+ *
+ * Plugin-local copy of the standard WordPress visually-hidden SR utility.
+ * GeneratePress Premium and Twenty Twenty-Four both ship this class in their
+ * own stylesheets, so this declaration is a safety net only — it activates if
+ * neither theme has defined it first (e.g., on a bare theme or after a theme
+ * swap). Specificity is intentionally low so the theme copy wins.
+ *
+ * Used by shortcodes.php to provide "(opens in new tab)" warnings on all
+ * _blank links without cluttering the visible UI.
+ */
+
+.screen-reader-text {
+    border: 0;
+    clip: rect(1px, 1px, 1px, 1px);
+    clip-path: inset(50%);
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    padding: 0;
+    position: absolute;
+    width: 1px;
+    word-wrap: normal !important;
+}
+
+
+/* ── :focus-visible — keyboard focus indicators ──────────────────────────────
+ *
+ * WCAG 2.1 SC 2.4.7 (AA): any component that receives keyboard focus must
+ * have a visible focus indicator. :focus-visible targets keyboard focus only
+ * (not mouse clicks), keeping the UI clean for pointer users while remaining
+ * fully compliant for keyboard-only and assistive-technology users.
+ *
+ * Rule of thumb: the outline must contrast at least 3:1 against the adjacent
+ * background (WCAG SC 1.4.11 Non-text Contrast).
+ *
+ * NEVER add "outline: none" or "outline: 0" to these selectors.
+ * If you need a custom ring shape use outline + outline-offset, not none.
+ *
+ * GeneratePress Premium may define its own :focus-visible rules globally.
+ * These are scoped to ws-* classes so they will not conflict.
+ */
+
+/* Government office links (header box) */
+.ws-jx-gov-link a:focus-visible {
+    outline: 2px solid #005fcc;
+    outline-offset: 2px;
+    border-radius: 2px;
+}
+
+/* Attribution tooltip link/span */
+.ws-term-highlight:focus-visible {
+    outline: 2px solid #005fcc;
+    outline-offset: 2px;
+    border-radius: 2px;
+}
+
+/* Footer policy nav links */
+.ws-footer-policy-links a:focus-visible {
+    outline: 2px solid #005fcc;
+    outline-offset: 2px;
+    border-radius: 2px;
+}
+
+/* Footer contact email link */
+.ws-footer-contact a:focus-visible {
+    outline: 2px solid #005fcc;
+    outline-offset: 2px;
+    border-radius: 2px;
+}
+
+/* Legal update title links */
+.ws-legal-update-title a:focus-visible {
+    outline: 2px solid #005fcc;
+    outline-offset: 2px;
+    border-radius: 2px;
+}
+
+/* Jurisdiction index filter tabs */
+.ws-jx-filter-tab:focus-visible {
+    outline: 2px solid #005fcc;
+    outline-offset: 2px;
+    border-radius: 2px;
+}
+
+/* Jurisdiction index grid links */
+.ws-jx-index-card a:focus-visible {
+    outline: 2px solid #005fcc;
+    outline-offset: 2px;
+    border-radius: 2px;
+}
+
+
+/* ── Tooltip on keyboard focus ───────────────────────────────────────────────
+ *
+ * The existing .ws-term-highlight:hover::after rule shows the tooltip on
+ * mouse hover only. Adding :focus-visible::after makes the same tooltip
+ * appear when a keyboard user tabs to the element (or to the link version),
+ * removing the last hover-only information barrier without any JavaScript.
+ *
+ * The tabindex="0" added to the non-link <span> variant in shortcodes.php
+ * v1.9.3 makes the span focusable by keyboard, enabling this rule to fire.
+ */
+
+.ws-term-highlight:focus-visible::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 140%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #2d3748;
+    color: #ffffff;
+    padding: 10px 14px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    width: 250px;
+    z-index: 1000;
+    text-align: left;
+    white-space: normal;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}

@@ -17,6 +17,7 @@
  * Identity tab:
  *   ws_aorg_internal_id          Internal reference code (text, required)
  *   ws_aorg_type                 Organization type (ws_aorg_type taxonomy, radio, required)
+ *   ws_aorg_description          Plain-language organization overview (textarea)
  *   ws_aorg_logo                 Logo image (image)
  *
  * Scope of Service tab:
@@ -75,6 +76,7 @@
  *         ws_jx_code meta) with ws_jurisdiction taxonomy field. Dynamic choice
  *         filter removed. Plain Language tab added (Phase 9.2).
  * 3.1.1  Field keys renamed: field_ao_* → field_aorg_* to match meta key prefix (ws_aorg_*).
+ * 3.5.0  Added ws_aorg_description textarea field (Identity tab, after type).
  * 3.4.0  Stamp field centralization:
  *        - Removed Authorship & Review tab and all stamp fields — now registered
  *          centrally in acf-stamp-fields.php (group_stamp_metadata, menu_order 90).
@@ -150,6 +152,18 @@ function ws_register_acf_assist_org() {
                 'return_format' => 'id',
                 'allow_null'    => 0,
             ],
+
+            [
+                'key'          => 'field_aorg_description',
+                'label'        => 'Organization Description',
+                'name'         => 'ws_aorg_description',
+                ‘type’         => ‘textarea’,
+                ‘instructions’ => ‘Plain-language overview of this organization\’s mission, focus areas, and typical whistleblower support.’,
+                ‘required’     => 0,
+                'rows'         => 4,
+                'new_lines'    => 'wpautop',
+            ],
+
 
             [
                 'key'           => 'field_aorg_logo',

@@ -65,6 +65,11 @@
  *         ACF select field. Terms: nonprofit, legal-aid, law-firm, bar-program,
  *         advocacy, oversight-office (replaces opaque 'ombudsman'), union.
  *         matrix-assist-orgs gate bumped to 1.2.0 to assign type terms on
+ * 3.6.0  Added National Security parent term + 3 children to ws_disclosure_type
+ *        seeder to cover matrix slugs used by Whistleblower Aid and similar orgs.
+ *        Children: intelligence-community, classified-information,
+ *        export-sanctions-compliance. Gate ws_seeded_disclosure_type bumped to
+ *        1.1.0 so existing sites pick up the new terms on next admin_init.
  *
  */
 
@@ -595,9 +600,9 @@ function ws_bulk_insert_hierarchical( array $hierarchy, string $taxonomy ) {
 
 add_action( 'admin_init', function() {
 
-    if ( get_option( 'ws_seeded_disclosure_type' ) !== '1.0.0' ) {
+    if ( get_option( 'ws_seeded_disclosure_type' ) !== '1.1.0' ) {
         ws_seed_disclosure_taxonomy();
-        update_option( 'ws_seeded_disclosure_type', '1.0.0' );
+        update_option( 'ws_seeded_disclosure_type', '1.1.0' );
     }
     if ( get_option( 'ws_seeded_process_type' ) !== '1.0.0' ) {
         ws_seed_process_taxonomy();
@@ -703,6 +708,14 @@ function ws_seed_disclosure_taxonomy() {
                 'hipaa-patient-privacy'     => 'HIPAA & Patient Privacy',
                 'consumer-data-protection'  => 'Consumer Data Protection',
                 'education-privacy-ferpa'   => 'Education Privacy (FERPA)',
+            ],
+        ],
+        'National Security' => [
+            'slug'     => 'national-security',
+            'children' => [
+                'intelligence-community'       => 'Intelligence Community Reporting',
+                'classified-information'       => 'Classified Information Disclosures',
+                'export-sanctions-compliance'  => 'Export Controls & Sanctions Compliance',
             ],
         ],
     ];
