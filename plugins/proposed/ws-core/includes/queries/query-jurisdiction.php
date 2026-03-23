@@ -179,11 +179,15 @@
  * 3.3.3  ws_get_legal_updates_data() caching and default-count improvements:
  *         - $count parameter default changed from 5 to 0; function resolves
  *           0 to 100 for sitewide calls and 5 for per-jurisdiction calls.
- *         - Sitewide calls requesting ≥50 records now served from a transient
- *           (WS_CACHE_LEGAL_UPDATES_SITEWIDE). Full 100-record set
- *           is always cached; callers requesting fewer records receive a slice.
- *         - save_post_ws-legal-update hook added to invalidate the cache on
- *           every legal update save.
+ *         - Sitewide calls now cached via WS_CACHE_LEGAL_UPDATES_SITEWIDE transient.
+ *           Exact result set is stored; no slicing. Invalidated on every legal update save.
+ *         - ≥50 threshold and 100-record slice logic later removed (see 3.3.4).
+ * 3.3.4  ws_get_legal_updates_data() caching simplified:
+ *         - Removed ≥50-record threshold; all sitewide calls are cached regardless of count.
+ *         - Removed 100-record fetch-and-slice pattern; cache stores the exact result set.
+ *         - $public_only parameter removed; summary-type filtering is now implicit when
+ *           $jx_id is provided (uses WS_LEGAL_UPDATE_SUMMARY_TYPES automatically).
+ *         - [ws_legal_updates] shortcode attribute renamed jurisdiction → jx.
  * 3.5.0  ws_get_jx_statute_data() rebuilt to match ACF 3.5.0 ingest alignment:
  *        - Renamed keys: limit_value/unit/trigger → sol_*, burden_of_proof →
  *          bop_standard, exhaustion_required → has_exhaustion.

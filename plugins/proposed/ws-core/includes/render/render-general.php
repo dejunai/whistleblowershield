@@ -105,14 +105,14 @@ function ws_render_footer( $data ) {
  *
  * Outputs a .ws-legal-updates container with one .ws-legal-update-item
  * per update. All field data must be pre-fetched by the caller via
- * ws_get_legal_updates_data(). Dates arrive as Y-m-d strings; format
- * for display in the render layer before passing here.
+ * ws_get_legal_updates_data(). Dates arrive as Y-m-d strings and are
+ * formatted for display here in the render layer.
  *
  * Called by the [ws_legal_updates] shortcode after data assembly.
  *
  * @param  array $items {
  *     Array of update data arrays, each from ws_get_legal_updates_data():
- *     @type int    $post_id          ws-legal-update post ID.
+ *     @type int    $id                ws-legal-update post ID.
  *     @type string $title            Update post title.
  *     @type string $update_date      Date update was logged (Y-m-d local).
  *     @type string $effective_date   Date the legal change takes effect (Y-m-d local).
@@ -164,7 +164,7 @@ function ws_render_legal_updates( $items ) {
             <?php endif; ?>
 
             <p class="ws-legal-update-posted">
-                <strong>Posted:</strong> <?php echo esc_html( date_i18n( get_option( 'date_format' ), strtotime( $data['post_date'] ) ) ); ?>
+                <strong>Posted:</strong> <?php echo esc_html( date_i18n( get_option( 'date_format' ), strtotime( $item['post_date'] ) ) ); ?>
             </p>
 
             <?php if ( $item['summary'] ) : ?>

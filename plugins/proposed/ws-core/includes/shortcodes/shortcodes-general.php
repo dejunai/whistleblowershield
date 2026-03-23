@@ -17,11 +17,11 @@
  *       Renders the site-wide footer block: mission statement,
  *       policy page links, contact email, and copyright line.
  *
- *   [ws_legal_updates jx=jx_id]
- *       Renders recent legal updates. Scoped to a jurisdiction when the
- *       jurisdiction parameter is provided; site-wide when omitted.
- *       public_only defaults true (public types only). Pass false for
- *       the internal site-wide changelog. Queries the ws-legal-update CPT.
+ *   [ws_legal_updates jx="california" count="5"]
+ *       Renders recent legal updates. Scoped to a jurisdiction when jx
+ *       is provided; site-wide when omitted. Jurisdiction calls restrict
+ *       to WS_LEGAL_UPDATE_SUMMARY_TYPES automatically. Queries the
+ *       ws-legal-update CPT.
  *
  *   [ws_reference_page post_id="123"]
  *       Renders the full reference materials page for a given jx-statute,
@@ -107,8 +107,8 @@ add_shortcode( 'ws_footer', function() {
 // if no jurisdiction parameter is given. Has defaults per scope when no count parameter is given
 //
 // Usage:
-//   [ws_legal_updates jx="california" count=""]  <- scoped to jurisdiction, summary types only, default count is 5
-//   [ws_legal_updates count=""]                  <- scoped to site-wide, all types, default count is 100
+//   [ws_legal_updates jx="california"]           <- scoped to jurisdiction, summary types only, default count 5
+//   [ws_legal_updates]                           <- site-wide, all types, default count 100
 //
 // Summary types are defined by WS_LEGAL_UPDATE_SUMMARY_TYPES in ws-core.php.
 //
@@ -127,7 +127,7 @@ function ws_shortcode_legal_updates( $atts ) {
 
     $atts = shortcode_atts( [
         'jx'     => '',
-        'count'  => 100,
+        'count'  => 0,   // 0 = auto-resolve: 5 per-jurisdiction, 100 sitewide.
     ], $atts, 'ws_legal_updates' );
 
     // ── Resolve jurisdiction parameter to a post ID ───────────────────────

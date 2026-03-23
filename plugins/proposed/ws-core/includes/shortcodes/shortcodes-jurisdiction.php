@@ -79,7 +79,7 @@
  *                                   display_order, is_fed, record{},
  *                                   ref_materials[]
  *   ws_get_legal_updates_data()  → array of update entries, each with
- *                                   post_id, update_date, update_type,
+ *                                   id, update_date, type,
  *                                   law_name, source_url, summary,
  *                                   source_post_id, source_post_type
  *
@@ -643,19 +643,18 @@ function ws_shortcode_jx_limitations() {
 //   verify[ ... ]  See VERIFY SUB-ARRAY above
 //   record[ ... ]  See RECORD SUB-ARRAY above
 //
-// ws_get_legal_updates_data( $jx_id, $count, $public_only )  -- returns array of items
-//   $jx_id       int   Jurisdiction post ID to scope results. 0 = site-wide.
-//   $count       int   Maximum records to return (default 5).
-//   $public_only bool  When true, restricts results to WS_LEGAL_UPDATE_PUBLIC_TYPES.
-//                      Shortcode attribute: public_only="false" for full changelog.
-//                      Defaults true -- safe for all public-facing placements.
+// ws_get_legal_updates_data( $jx_id, $count )  -- returns array of items
+//   $jx_id  int  Jurisdiction post ID to scope results. 0 = site-wide.
+//                When non-zero, results are restricted to WS_LEGAL_UPDATE_SUMMARY_TYPES.
+//   $count  int  Maximum records to return. Pass 0 to auto-resolve:
+//                default 5 per-jurisdiction, 100 sitewide.
 // ----------------------------------------
 //   id                  int     Post ID
 //   title               string  Post title
 //   update_date         string  Date of the legal change (Y-m-d)
 //   effective_date      string  Date the change takes effect (Y-m-d)
 //   post_date           string  WordPress publish date (MySQL datetime)
-//   update_type         string  Update category (legislation, ruling, guidance, etc.)
+//   type                string  Update category (legislation, ruling, guidance, etc.)
 //   multi_jurisdiction  bool    True when the update affects multiple jurisdictions
 //   law_name            string  Name of the law or ruling
 //   source_url          string  URL of the primary source

@@ -260,11 +260,9 @@ define( 'WS_JURISDICTION_TERM_ID', 'ws_jurisdiction' );
 define( 'WS_CACHE_ALL_JURISDICTIONS', 'ws_all_jurisdictions_cache' );
 define( 'WS_CACHE_JX_INDEX',          'ws_jx_index_cache'          );
 
-// Base transient key for the sitewide legal updates cache. The full key is
-// this value suffixed with the fetch count (e.g. ws_legal_updates_sitewide_100).
-// Only sitewide calls ($jx_id = 0) requesting 50 or more records are cached.
-// Callers requesting fewer than 50 records, or any per-jurisdiction call,
-// skip the cache entirely. Invalidated on every ws-legal-update save.
+// Transient key for the sitewide legal updates cache.
+// All sitewide calls ($jx_id = 0) are cached; per-jurisdiction calls are not.
+// Invalidated on every ws-legal-update save.
 define( 'WS_CACHE_LEGAL_UPDATES_SITEWIDE', 'ws_legal_updates_sitewide' );
 
 // CPT slugs that can carry a reference parent relationship. Statutes,
@@ -294,8 +292,8 @@ define( 'WS_SOURCE_NAME_DIRECT', 'Direct' );
 // Legal update types that are visible on public-facing pages and jurisdiction
 // shortcodes. 'internal' and 'other' are intentionally excluded. When a new
 // type is added to the ws_legal_update_type ACF select in acf-legal-updates.php,
-// add it here to make it public. The query layer reads this constant when
-// $summary_only = true is passed to ws_get_legal_updates_data().
+// add it here to make it public. The query layer applies this constant
+// automatically for all per-jurisdiction calls.
 define( 'WS_LEGAL_UPDATE_SUMMARY_TYPES', [ 'statute', 'citation', 'summary', 'interpretation', 'regulation', 'policy' ] );
 
 
