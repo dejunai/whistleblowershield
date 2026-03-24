@@ -6,14 +6,16 @@
  *
  * PURPOSE
  * -------
- * Provides structured metadata for individual federal court interpretations
- * of whistleblower statutes. Fields cover case identity, the holding,
- * process type classification, and authorship stamps.
+ * Provides structured metadata for individual court interpretations of
+ * whistleblower statutes. Fields cover case identity, the holding,
+ * process type classification, and authorship stamps. Covers both federal
+ * court decisions (SCOTUS, circuits, districts) and state court decisions.
  *
  * FIELD SUMMARY
  * -------------
  * Case Identity tab:
  *   ws_jx_interp_court         Court (select, populated by ws_interp_load_court_choices)
+ *   ws_jx_interp_court_name    Court Name (text, conditional on court == 'other')
  *   ws_jx_interp_year          Decision Year (number)
  *   ws_jx_interp_favorable     Favorable to Whistleblower? (true_false)
  *   ws_jx_interp_official_name Official name — full case name (text, required)
@@ -34,17 +36,17 @@
  *   ws_jx_interp_statute_id   Parent Statute (post_object, jx-statute)
  *   ws_jx_interp_affected_jx  Affected Jurisdictions (taxonomy multi_select, ws_jurisdiction)
  *                              Auto-computed on save from the court's ws_jx_codes in
- *                              $ws_court_matrix. Empty = SCOTUS (all jurisdictions).
+ *                              $ws_court_matrix / $ws_state_court_matrix. Empty = SCOTUS
+ *                              (all jurisdictions). __manual__ = skip auto-population (other).
  *
- * Jurisdiction scope is provided by the ws_jurisdiction taxonomy — always
- * the US term for federal court interpretations; assigned via the taxonomy
- * UI or auto-assigned on Create Now flow.
+ * Jurisdiction scope is provided by the ws_jurisdiction taxonomy — US term
+ * for federal court interpretations; state term for state court decisions.
+ * Assigned via the taxonomy UI or auto-assigned on Create Now flow.
  *
- * Authorship & Review tab:
- *   ws_interp_last_edited_author  Last edited by (user, readonly non-admins)
- *   ws_interp_date_created        Date created (text, readonly)
- *   ws_interp_last_edited         Last edited (text, readonly)
- *   ws_interp_last_reviewed       Last verified date (text)
+ * Authorship & Review:
+ *   Stamp fields registered centrally in acf-stamp-fields.php (menu_order 90).
+ *   ws_jx_interp_last_reviewed    Last verified date (text) — content-owned,
+ *                                  retained in this group.
  *
  * WORKFLOW
  * --------
@@ -74,11 +76,6 @@
  *         ws_statute_id with acf/load_value checked against auto-draft
  *         status. acf/load_field default_value is silently ignored by
  *         ACF for post_object fields and does not pre-select anything.
- * 3.6.0  FIELD SUMMARY corrected: all ws_interp_* meta names updated to
- *         ws_jx_interp_* to match actual ACF field name values. ws_statute_id
- *         corrected to ws_jx_interp_statute_id. Added ws_jx_interp_affected_jx
- *         (taxonomy multi_select, save_terms=0) with auto-population hook that
- *         resolves the court's ws_jx_codes from $ws_court_matrix on every save.
  * 3.0.0  Architecture refactor (Phase 3.5):
  *        - Removed ws_jx_code field (retired; scope now via ws_jurisdiction taxonomy).
  *        - Added attach_flag toggle and order number field.
@@ -93,6 +90,17 @@
  *        - Removed Plain Language tab and all plain English fields — now registered
  *          centrally in acf-plain-english-fields.php (menu_order 85).
  *        - ws_interp_last_reviewed retained as a content-owned field.
+ * 3.6.0  FIELD SUMMARY corrected: all ws_interp_* meta names updated to
+ *         ws_jx_interp_* to match actual ACF field name values. ws_statute_id
+ *         corrected to ws_jx_interp_statute_id. Added ws_jx_interp_affected_jx
+ *         (taxonomy multi_select, save_terms=0) with auto-population hook that
+ *         resolves the court's ws_jx_codes from the court matrix on every save.
+ * 3.7.0  Added ws_jx_interp_court_name conditional text field (reveals when
+ *         court = 'other'). ws_interp_load_court_choices() rewritten — context-
+ *         aware: federal statute merges both $ws_court_matrix and
+ *         $ws_state_court_matrix; state statute uses $ws_state_court_matrix only.
+ *         ws_interp_auto_populate_affected_jx() updated to use ws_court_lookup()
+ *         and skip auto-population when ws_jx_codes === '__manual__' (other).
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -141,13 +149,28 @@ function ws_register_acf_jx_interpretations() {
                 'label'         => 'Court',
                 'name'          => 'ws_jx_interp_court',
                 'type'          => 'select',
-                'instructions'  => 'Select the federal court that issued this decision.',
+                'instructions'  => 'Select the court that issued this decision. For state court decisions, select "State Level" and enter the court name in the field below.',
                 'choices'       => [],  // populated by ws_interp_load_court_choices()
                 'allow_null'    => 0,
                 'required'      => 1,
                 'ui'            => 1,
                 'return_format' => 'value',
                 'wrapper'       => [ 'width' => '50' ],
+            ],
+
+            [
+                'key'               => 'field_jx_interp_court_name',
+                'label'             => 'Court Name',
+                'name'              => 'ws_jx_interp_court_name',
+                'type'              => 'text',
+                'instructions'      => 'Enter the court name. Include jurisdiction and level where relevant, e.g., "Superior Court of California, Sacramento County". This field only appears when "Other" is selected above.',
+                'required'          => 1,
+                'conditional_logic' => [ [ [
+                    'field'    => 'field_jx_interp_court',
+                    'operator' => '==',
+                    'value'    => 'other',
+                ] ] ],
+                'wrapper'           => [ 'width' => '50' ],
             ],
 
             [
@@ -312,7 +335,7 @@ function ws_register_acf_jx_interpretations() {
                 'type'          => 'taxonomy',
                 'taxonomy'      => WS_JURISDICTION_TERM_ID,
                 'field_type'    => 'multi_select',
-                'instructions'  => 'Jurisdictions bound by this ruling. Auto-computed on save from the selected court\'s geographic scope ($ws_court_matrix). Empty = SCOTUS (all jurisdictions). Override manually only when the court\'s scope does not reflect the ruling\'s actual reach.',
+                'instructions'  => 'Jurisdictions bound by this ruling. Auto-computed on save from the selected court\'s geographic scope (federal or state court matrix). Empty = SCOTUS (all jurisdictions). Override manually only when the court\'s scope does not reflect the ruling\'s actual reach.',
                 'required'      => 0,
                 'add_term'      => 0,
                 'save_terms'    => 0,
@@ -372,30 +395,61 @@ function ws_register_acf_jx_interpretations() {
 } // end ws_register_acf_jx_interpretations
 
 
-// ── Court choices: filter to US federal courts only ───────────────────────────
+// ── Court choices: context-aware select population ────────────────────────────
 //
-// Reads $ws_court_matrix and returns only courts whose ws_jx_codes includes
-// 'US' or is null (SCOTUS). Sorted by level ascending (SCOTUS first, then
-// appellate, then district).
+// Builds the court select list based on the parent statute's scope:
+//
+//   Federal statute (has 'us' ws_jurisdiction term):
+//     All federal courts (SCOTUS + circuits + districts) merged with all
+//     state courts. $ws_court_matrix and $ws_state_court_matrix are merged.
+//
+//   State statute (does not have 'us' term):
+//     State courts only ($ws_state_court_matrix). Federal courts do not
+//     interpret state statutes.
+//
+//   Unknown (no parent statute resolved yet):
+//     Defaults to showing all courts (federal + state) as a safe fallback.
+//
+// Parent statute is resolved from saved meta (existing records) or the
+// statute_id URL parameter (new records created from the statute metabox).
+//
+// The 'other' entry (level=99) sorts last and reveals the free-text
+// ws_jx_interp_court_name field for courts not in either matrix.
+//
+// Sorted by level ascending so SCOTUS / state supreme courts appear before
+// appellate courts, which appear before district / trial courts.
 
 add_filter( 'acf/load_field/key=field_jx_interp_court', 'ws_interp_load_court_choices' );
 
 function ws_interp_load_court_choices( $field ) {
-    global $ws_court_matrix;
+    global $ws_court_matrix, $ws_state_court_matrix, $post;
+
     if ( empty( $ws_court_matrix ) ) {
         return $field;
     }
 
-    $filtered = array_filter( $ws_court_matrix, function( $court ) {
-        return $court['ws_jx_codes'] === null || in_array( 'US', $court['ws_jx_codes'], true );
-    } );
+    // Resolve parent statute ID — saved meta first, URL param fallback.
+    $statute_id = 0;
+    if ( $post && get_post_type( $post->ID ) === 'jx-interpretation' && get_post_status( $post->ID ) !== 'auto-draft' ) {
+        $statute_id = (int) get_post_meta( $post->ID, 'ws_jx_interp_statute_id', true );
+    }
+    if ( ! $statute_id && isset( $_GET['statute_id'] ) ) {
+        $statute_id = absint( $_GET['statute_id'] );
+    }
 
-    uasort( $filtered, function( $a, $b ) {
+    // Determine statute scope. Unknown parent defaults to showing all courts.
+    $is_federal = ! $statute_id || has_term( 'us', WS_JURISDICTION_TERM_ID, $statute_id );
+
+    $candidates = $is_federal
+        ? array_merge( $ws_court_matrix, $ws_state_court_matrix ?: [] )
+        : ( $ws_state_court_matrix ?: [] );
+
+    uasort( $candidates, function( $a, $b ) {
         return $a['level'] <=> $b['level'];
     } );
 
     $choices = [];
-    foreach ( $filtered as $key => $court ) {
+    foreach ( $candidates as $key => $court ) {
         $choices[ $key ] = $court['short'];
     }
 
@@ -444,8 +498,9 @@ function ws_interp_prefill_statute_id( $value, $post_id, $field ) {
 // ── Auto-populate ws_jx_interp_affected_jx from court matrix on every save ────
 //
 // Runs at priority 20 (after ACF saves its fields at 10). Reads the court key
-// saved to ws_jx_interp_court, looks it up in $ws_court_matrix, and resolves
-// ws_jx_codes to ws_jurisdiction taxonomy term IDs.
+// saved to ws_jx_interp_court, looks it up via ws_court_lookup() (checks both
+// $ws_court_matrix and $ws_state_court_matrix), and resolves ws_jx_codes to
+// ws_jurisdiction taxonomy term IDs.
 //
 // SCOTUS (ws_jx_codes = null): writes an empty array. The query/render layer
 // treats empty affected_jx + SCOTUS court as "all jurisdictions" — avoids
@@ -461,18 +516,19 @@ function ws_interp_auto_populate_affected_jx( $post_id ) {
         return;
     }
 
-    global $ws_court_matrix;
-    if ( empty( $ws_court_matrix ) ) {
+    $court_key  = get_post_meta( $post_id, 'ws_jx_interp_court', true );
+    $court_data = ws_court_lookup( $court_key );
+
+    if ( ! $court_data ) {
         return;
     }
 
-    $court_key = get_post_meta( $post_id, 'ws_jx_interp_court', true );
+    $jx_codes = $court_data['ws_jx_codes'];
 
-    if ( ! $court_key || ! isset( $ws_court_matrix[ $court_key ] ) ) {
+    // Other: geographic scope is unknown — leave affected_jx for manual entry.
+    if ( $jx_codes === '__manual__' ) {
         return;
     }
-
-    $jx_codes = $ws_court_matrix[ $court_key ]['ws_jx_codes'];
 
     // SCOTUS: null = all jurisdictions. Store empty to signal bind-all.
     if ( $jx_codes === null ) {

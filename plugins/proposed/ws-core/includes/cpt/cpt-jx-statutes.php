@@ -30,6 +30,10 @@
  * 1.0.0  Initial release.
  * 2.1.0  Refactored for ws-core architecture. CPT slug standardized
  *         to hyphenated convention: jx-statute.
+ * 3.2.0  ws_employer_defense taxonomy added to taxonomies array.
+ * 3.7.0  Taxonomies array corrected — deprecated slugs removed
+ *         (ws_remedy_type, ws_coverage_scope, ws_retaliation_forms);
+ *         all current taxonomy slugs confirmed present.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -73,7 +77,17 @@ function ws_register_cpt_statutes() {
         // Title: official statutory name. All structured metadata via ACF.
 
         'supports'   => [ 'title', 'editor', 'revisions' ],
-        'taxonomies' => [ 'ws_disclosure_type', 'ws_process_type', 'ws_remedy_type', 'ws_coverage_scope', 'ws_retaliation_forms' ],
+        'taxonomies' => [
+            'ws_disclosure_type',
+            'ws_process_type',
+            'ws_remedies',
+            'ws_protected_class',
+            'ws_adverse_action_types',
+            'ws_disclosure_targets',
+            'ws_fee_shifting',
+            'ws_employer_defense',
+            WS_JURISDICTION_TERM_ID,
+        ],
 
         // ── REST ──────────────────────────────────────────────────────────
 

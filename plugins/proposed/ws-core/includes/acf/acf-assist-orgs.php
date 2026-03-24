@@ -1,6 +1,6 @@
 <?php
 /**
- * acf-assist-org.php
+ * acf-assist-orgs.php
  *
  * Registers ACF Pro fields for the `ws-assist-org` CPT.
  *
@@ -25,7 +25,7 @@
  *   ws_jurisdiction            Jurisdictions served (ws_jurisdiction taxonomy, checkbox)
  *   ws_aorg_disclosure_type      Misconduct categories handled (taxonomy)
  *   ws_aorg_services             Services offered (checkbox)
- *   ws_aorg_employment_sectors   Employment sectors served (checkbox)
+ *   ws_aorg_employment_sectors   Employment sectors served (taxonomy checkbox, ws_employment_sector)
  *
  * Contact & Intake tab:
  *   ws_aorg_website_url              Official website (url, required)
@@ -76,13 +76,17 @@
  *         ws_jx_code meta) with ws_jurisdiction taxonomy field. Dynamic choice
  *         filter removed. Plain Language tab added (Phase 9.2).
  * 3.1.1  Field keys renamed: field_ao_* → field_aorg_* to match meta key prefix (ws_aorg_*).
- * 3.5.0  Added ws_aorg_description textarea field (Identity tab, after type).
  * 3.4.0  Stamp field centralization:
  *        - Removed Authorship & Review tab and all stamp fields — now registered
  *          centrally in acf-stamp-fields.php (group_stamp_metadata, menu_order 90).
  *        - Removed Plain Language tab entirely — ws-assist-org content is plain
  *          language by nature; the plain language workflow does not apply.
  *        - ws_aorg_last_reviewed retained as a content-owned field.
+ * 3.5.0  Added ws_aorg_description textarea field (Identity tab, after type).
+ * 3.7.0  ws_aorg_employment_sectors field converted from checkbox (ACF choices)
+ *        to taxonomy type (ws_employment_sector) with save_terms: 1. Enables
+ *        tax_query filtering throughout the Phase 2 filter cascade — no
+ *        meta_query required at any level.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -258,22 +262,19 @@ function ws_register_acf_assist_org() {
             ],
 
             [
-                'key'          => 'field_aorg_employment_sectors',
-                'label'        => 'Employment Sectors Served',
-                'name'         => 'ws_aorg_employment_sectors',
-                'type'         => 'checkbox',
-                'instructions' => 'Select the employment sectors this organization serves. Leave blank if all sectors are accepted.',
-                'required'     => 0,
-                'choices'      => [
-                    'federal'   => 'Federal Government Employees',
-                    'state'     => 'State & Local Government Employees',
-                    'private'   => 'Private Sector Employees',
-                    'military'  => 'Military & Defense Contractors',
-                    'nonprofit' => 'Nonprofit & NGO Employees',
-                    'any'       => 'All Sectors',
-                ],
-                'layout'        => 'vertical',
-                'return_format' => 'value',
+                'key'           => 'field_aorg_employment_sectors',
+                'label'         => 'Employment Sectors Served',
+                'name'          => 'ws_aorg_employment_sectors',
+                'type'          => 'taxonomy',
+                'taxonomy'      => 'ws_employment_sector',
+                'field_type'    => 'checkbox',
+                'instructions'  => 'Select the employment sectors this organization serves. Leave blank if all sectors are accepted.',
+                'required'      => 0,
+                'add_term'      => 0,
+                'save_terms'    => 1,
+                'load_terms'    => 1,
+                'return_format' => 'id',
+                'allow_null'    => 1,
             ],
 
             // ────────────────────────────────────────────────────────────────

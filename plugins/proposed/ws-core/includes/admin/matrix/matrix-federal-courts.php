@@ -1,6 +1,6 @@
 <?php
 /**
- * court-matrix.php
+ * matrix-federal-courts.php
  *
  * Global registry of U.S. courts for ws-core citation fields.
  *
@@ -9,8 +9,7 @@
  * Each entry:
  *   'name'        Full official court name
  *   'short'       Legal citation abbreviation
- *   'type'        scotus | federal_appellate | federal_district |
- *                 state_supreme | state_appellate
+ *   'type'        scotus | federal_appellate | federal_district
  *   'ws_jx_codes' Array of USPS codes this court serves, or null
  *                 (null = appears on every jurisdiction — SCOTUS only)
  *   'circuit'     Federal circuit number string, or null
@@ -21,15 +20,21 @@
  * 1. Supreme Court of the United States
  * 2. Federal Circuit Courts of Appeals (13)
  * 3. Federal District Courts (94)
- * 4. State & Territory Supreme Courts
- * 5. State Intermediate Appellate Courts
- *    Omitted (no intermediate tier): DE, ID, ME, MT, NH, ND, RI, SD, VT, WY
- *    PA has two entries: Commonwealth Court and Superior Court.
- *    TX/OK dual high courts each get two state_supreme entries.
+ *
+ * State and territory courts live in matrix-state-courts.php ($ws_state_court_matrix).
+ * ws_interp_load_court_choices() merges both matrices when the parent statute is
+ * federal; for state statutes it uses $ws_state_court_matrix only.
  *
  * VERSION
  * -------
  * 2.3.1  Initial release.
+ * 3.7.0  Removed sections 4–5 (state & territory courts) — extracted to
+ *         matrix-state-courts.php. Enables context-aware court select: federal
+ *         statute = all courts; state statute = state courts only.
+ *         Added 'other' sentinel entry (ws_jx_codes = '__manual__', level = 99):
+ *         signals the save hook to skip auto-population of ws_jx_interp_affected_jx
+ *         and reveals the ws_jx_interp_court_name free-text field.
+ *         Gate bumped to 1.1.0.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -37,6 +42,22 @@ defined( 'ABSPATH' ) || exit;
 global $ws_court_matrix;
 
 $ws_court_matrix = [
+
+    // ── 0. Other (edge case — court not in matrix) ────────────────────────
+    //
+    // Selecting this entry reveals ws_jx_interp_court_name (free text field).
+    // ws_jx_codes = '__manual__' signals the save hook to skip auto-population
+    // of ws_jx_interp_affected_jx — the editor must set scope manually.
+    // level = 99 ensures this entry sorts last in the select list.
+
+    'other' => [
+        'name'        => 'Other (specify below)',
+        'short'       => 'Other',
+        'type'        => 'other',
+        'ws_jx_codes' => '__manual__',
+        'circuit'     => null,
+        'level'       => 99,
+    ],
 
     // ── 1. Supreme Court of the United States ─────────────────────────────
 
@@ -308,123 +329,6 @@ $ws_court_matrix = [
     // Wyoming
     'd-wy'  => [ 'name' => 'U.S. District Court for the District of Wyoming',          'short' => 'D. Wyo.',     'type' => 'federal_district', 'ws_jx_codes' => [ 'WY' ], 'circuit' => '10', 'level' => 3 ],
 
-    // ── 4. State & Territory Supreme Courts ───────────────────────────────
-    //
-    // TX and OK each have dual high courts (civil + criminal) — two entries each.
-    // NY: Court of Appeals is the highest state court.
-    // MD: Supreme Court of Maryland (renamed from Court of Appeals in 2022).
-    // ME/MA: Supreme Judicial Court.
-    // WV: Supreme Court of Appeals.
-    // DC: D.C. Court of Appeals is the highest local court.
-
-    'al-sup'  => [ 'name' => 'Supreme Court of Alabama',                       'short' => 'Ala. Sup. Ct.',          'type' => 'state_supreme', 'ws_jx_codes' => [ 'AL' ], 'circuit' => null, 'level' => 1 ],
-    'ak-sup'  => [ 'name' => 'Alaska Supreme Court',                           'short' => 'Alaska Sup. Ct.',        'type' => 'state_supreme', 'ws_jx_codes' => [ 'AK' ], 'circuit' => null, 'level' => 1 ],
-    'az-sup'  => [ 'name' => 'Arizona Supreme Court',                          'short' => 'Ariz. Sup. Ct.',         'type' => 'state_supreme', 'ws_jx_codes' => [ 'AZ' ], 'circuit' => null, 'level' => 1 ],
-    'ar-sup'  => [ 'name' => 'Arkansas Supreme Court',                         'short' => 'Ark. Sup. Ct.',          'type' => 'state_supreme', 'ws_jx_codes' => [ 'AR' ], 'circuit' => null, 'level' => 1 ],
-    'ca-sup'  => [ 'name' => 'Supreme Court of California',                    'short' => 'Cal. Sup. Ct.',          'type' => 'state_supreme', 'ws_jx_codes' => [ 'CA' ], 'circuit' => null, 'level' => 1 ],
-    'co-sup'  => [ 'name' => 'Colorado Supreme Court',                         'short' => 'Colo. Sup. Ct.',         'type' => 'state_supreme', 'ws_jx_codes' => [ 'CO' ], 'circuit' => null, 'level' => 1 ],
-    'ct-sup'  => [ 'name' => 'Connecticut Supreme Court',                      'short' => 'Conn. Sup. Ct.',         'type' => 'state_supreme', 'ws_jx_codes' => [ 'CT' ], 'circuit' => null, 'level' => 1 ],
-    'de-sup'  => [ 'name' => 'Delaware Supreme Court',                         'short' => 'Del. Sup. Ct.',          'type' => 'state_supreme', 'ws_jx_codes' => [ 'DE' ], 'circuit' => null, 'level' => 1 ],
-    'fl-sup'  => [ 'name' => 'Florida Supreme Court',                          'short' => 'Fla. Sup. Ct.',          'type' => 'state_supreme', 'ws_jx_codes' => [ 'FL' ], 'circuit' => null, 'level' => 1 ],
-    'ga-sup'  => [ 'name' => 'Supreme Court of Georgia',                       'short' => 'Ga. Sup. Ct.',           'type' => 'state_supreme', 'ws_jx_codes' => [ 'GA' ], 'circuit' => null, 'level' => 1 ],
-    'hi-sup'  => [ 'name' => 'Hawaii Supreme Court',                           'short' => 'Haw. Sup. Ct.',          'type' => 'state_supreme', 'ws_jx_codes' => [ 'HI' ], 'circuit' => null, 'level' => 1 ],
-    'id-sup'  => [ 'name' => 'Idaho Supreme Court',                            'short' => 'Idaho Sup. Ct.',         'type' => 'state_supreme', 'ws_jx_codes' => [ 'ID' ], 'circuit' => null, 'level' => 1 ],
-    'il-sup'  => [ 'name' => 'Illinois Supreme Court',                         'short' => 'Ill. Sup. Ct.',          'type' => 'state_supreme', 'ws_jx_codes' => [ 'IL' ], 'circuit' => null, 'level' => 1 ],
-    'in-sup'  => [ 'name' => 'Indiana Supreme Court',                          'short' => 'Ind. Sup. Ct.',          'type' => 'state_supreme', 'ws_jx_codes' => [ 'IN' ], 'circuit' => null, 'level' => 1 ],
-    'ia-sup'  => [ 'name' => 'Iowa Supreme Court',                             'short' => 'Iowa Sup. Ct.',          'type' => 'state_supreme', 'ws_jx_codes' => [ 'IA' ], 'circuit' => null, 'level' => 1 ],
-    'ks-sup'  => [ 'name' => 'Kansas Supreme Court',                           'short' => 'Kan. Sup. Ct.',          'type' => 'state_supreme', 'ws_jx_codes' => [ 'KS' ], 'circuit' => null, 'level' => 1 ],
-    'ky-sup'  => [ 'name' => 'Kentucky Supreme Court',                         'short' => 'Ky. Sup. Ct.',           'type' => 'state_supreme', 'ws_jx_codes' => [ 'KY' ], 'circuit' => null, 'level' => 1 ],
-    'la-sup'  => [ 'name' => 'Louisiana Supreme Court',                        'short' => 'La. Sup. Ct.',           'type' => 'state_supreme', 'ws_jx_codes' => [ 'LA' ], 'circuit' => null, 'level' => 1 ],
-    'me-sup'  => [ 'name' => 'Maine Supreme Judicial Court',                   'short' => 'Me. Sup. Jud. Ct.',      'type' => 'state_supreme', 'ws_jx_codes' => [ 'ME' ], 'circuit' => null, 'level' => 1 ],
-    'md-sup'  => [ 'name' => 'Supreme Court of Maryland',                      'short' => 'Md. Sup. Ct.',           'type' => 'state_supreme', 'ws_jx_codes' => [ 'MD' ], 'circuit' => null, 'level' => 1 ],
-    'ma-sup'  => [ 'name' => 'Massachusetts Supreme Judicial Court',           'short' => 'Mass. Sup. Jud. Ct.',    'type' => 'state_supreme', 'ws_jx_codes' => [ 'MA' ], 'circuit' => null, 'level' => 1 ],
-    'mi-sup'  => [ 'name' => 'Michigan Supreme Court',                         'short' => 'Mich. Sup. Ct.',         'type' => 'state_supreme', 'ws_jx_codes' => [ 'MI' ], 'circuit' => null, 'level' => 1 ],
-    'mn-sup'  => [ 'name' => 'Minnesota Supreme Court',                        'short' => 'Minn. Sup. Ct.',         'type' => 'state_supreme', 'ws_jx_codes' => [ 'MN' ], 'circuit' => null, 'level' => 1 ],
-    'ms-sup'  => [ 'name' => 'Mississippi Supreme Court',                      'short' => 'Miss. Sup. Ct.',         'type' => 'state_supreme', 'ws_jx_codes' => [ 'MS' ], 'circuit' => null, 'level' => 1 ],
-    'mo-sup'  => [ 'name' => 'Missouri Supreme Court',                         'short' => 'Mo. Sup. Ct.',           'type' => 'state_supreme', 'ws_jx_codes' => [ 'MO' ], 'circuit' => null, 'level' => 1 ],
-    'mt-sup'  => [ 'name' => 'Montana Supreme Court',                          'short' => 'Mont. Sup. Ct.',         'type' => 'state_supreme', 'ws_jx_codes' => [ 'MT' ], 'circuit' => null, 'level' => 1 ],
-    'ne-sup'  => [ 'name' => 'Nebraska Supreme Court',                         'short' => 'Neb. Sup. Ct.',          'type' => 'state_supreme', 'ws_jx_codes' => [ 'NE' ], 'circuit' => null, 'level' => 1 ],
-    'nv-sup'  => [ 'name' => 'Nevada Supreme Court',                           'short' => 'Nev. Sup. Ct.',          'type' => 'state_supreme', 'ws_jx_codes' => [ 'NV' ], 'circuit' => null, 'level' => 1 ],
-    'nh-sup'  => [ 'name' => 'New Hampshire Supreme Court',                    'short' => 'N.H. Sup. Ct.',          'type' => 'state_supreme', 'ws_jx_codes' => [ 'NH' ], 'circuit' => null, 'level' => 1 ],
-    'nj-sup'  => [ 'name' => 'New Jersey Supreme Court',                       'short' => 'N.J. Sup. Ct.',          'type' => 'state_supreme', 'ws_jx_codes' => [ 'NJ' ], 'circuit' => null, 'level' => 1 ],
-    'nm-sup'  => [ 'name' => 'New Mexico Supreme Court',                       'short' => 'N.M. Sup. Ct.',          'type' => 'state_supreme', 'ws_jx_codes' => [ 'NM' ], 'circuit' => null, 'level' => 1 ],
-    'ny-app'  => [ 'name' => 'New York Court of Appeals',                      'short' => 'N.Y. Ct. App.',          'type' => 'state_supreme', 'ws_jx_codes' => [ 'NY' ], 'circuit' => null, 'level' => 1 ],
-    'nc-sup'  => [ 'name' => 'North Carolina Supreme Court',                   'short' => 'N.C. Sup. Ct.',          'type' => 'state_supreme', 'ws_jx_codes' => [ 'NC' ], 'circuit' => null, 'level' => 1 ],
-    'nd-sup'  => [ 'name' => 'North Dakota Supreme Court',                     'short' => 'N.D. Sup. Ct.',          'type' => 'state_supreme', 'ws_jx_codes' => [ 'ND' ], 'circuit' => null, 'level' => 1 ],
-    'oh-sup'  => [ 'name' => 'Ohio Supreme Court',                             'short' => 'Ohio Sup. Ct.',          'type' => 'state_supreme', 'ws_jx_codes' => [ 'OH' ], 'circuit' => null, 'level' => 1 ],
-    'ok-sup'  => [ 'name' => 'Oklahoma Supreme Court',                         'short' => 'Okla. Sup. Ct.',         'type' => 'state_supreme', 'ws_jx_codes' => [ 'OK' ], 'circuit' => null, 'level' => 1 ],
-    'ok-cca'  => [ 'name' => 'Oklahoma Court of Criminal Appeals',             'short' => 'Okla. Crim. App.',       'type' => 'state_supreme', 'ws_jx_codes' => [ 'OK' ], 'circuit' => null, 'level' => 1 ],
-    'or-sup'  => [ 'name' => 'Oregon Supreme Court',                           'short' => 'Or. Sup. Ct.',           'type' => 'state_supreme', 'ws_jx_codes' => [ 'OR' ], 'circuit' => null, 'level' => 1 ],
-    'pa-sup'  => [ 'name' => 'Supreme Court of Pennsylvania',                  'short' => 'Pa. Sup. Ct.',           'type' => 'state_supreme', 'ws_jx_codes' => [ 'PA' ], 'circuit' => null, 'level' => 1 ],
-    'ri-sup'  => [ 'name' => 'Rhode Island Supreme Court',                     'short' => 'R.I. Sup. Ct.',          'type' => 'state_supreme', 'ws_jx_codes' => [ 'RI' ], 'circuit' => null, 'level' => 1 ],
-    'sc-sup'  => [ 'name' => 'South Carolina Supreme Court',                   'short' => 'S.C. Sup. Ct.',          'type' => 'state_supreme', 'ws_jx_codes' => [ 'SC' ], 'circuit' => null, 'level' => 1 ],
-    'sd-sup'  => [ 'name' => 'South Dakota Supreme Court',                     'short' => 'S.D. Sup. Ct.',          'type' => 'state_supreme', 'ws_jx_codes' => [ 'SD' ], 'circuit' => null, 'level' => 1 ],
-    'tn-sup'  => [ 'name' => 'Tennessee Supreme Court',                        'short' => 'Tenn. Sup. Ct.',         'type' => 'state_supreme', 'ws_jx_codes' => [ 'TN' ], 'circuit' => null, 'level' => 1 ],
-    'tx-sup'  => [ 'name' => 'Supreme Court of Texas',                         'short' => 'Tex. Sup. Ct.',          'type' => 'state_supreme', 'ws_jx_codes' => [ 'TX' ], 'circuit' => null, 'level' => 1 ],
-    'tx-cca'  => [ 'name' => 'Texas Court of Criminal Appeals',                'short' => 'Tex. Crim. App.',        'type' => 'state_supreme', 'ws_jx_codes' => [ 'TX' ], 'circuit' => null, 'level' => 1 ],
-    'ut-sup'  => [ 'name' => 'Utah Supreme Court',                             'short' => 'Utah Sup. Ct.',          'type' => 'state_supreme', 'ws_jx_codes' => [ 'UT' ], 'circuit' => null, 'level' => 1 ],
-    'vt-sup'  => [ 'name' => 'Vermont Supreme Court',                          'short' => 'Vt. Sup. Ct.',           'type' => 'state_supreme', 'ws_jx_codes' => [ 'VT' ], 'circuit' => null, 'level' => 1 ],
-    'va-sup'  => [ 'name' => 'Supreme Court of Virginia',                      'short' => 'Va. Sup. Ct.',           'type' => 'state_supreme', 'ws_jx_codes' => [ 'VA' ], 'circuit' => null, 'level' => 1 ],
-    'wa-sup'  => [ 'name' => 'Washington Supreme Court',                       'short' => 'Wash. Sup. Ct.',         'type' => 'state_supreme', 'ws_jx_codes' => [ 'WA' ], 'circuit' => null, 'level' => 1 ],
-    'wv-sup'  => [ 'name' => 'Supreme Court of Appeals of West Virginia',      'short' => 'W. Va. Sup. Ct.',        'type' => 'state_supreme', 'ws_jx_codes' => [ 'WV' ], 'circuit' => null, 'level' => 1 ],
-    'wi-sup'  => [ 'name' => 'Wisconsin Supreme Court',                        'short' => 'Wis. Sup. Ct.',          'type' => 'state_supreme', 'ws_jx_codes' => [ 'WI' ], 'circuit' => null, 'level' => 1 ],
-    'wy-sup'  => [ 'name' => 'Wyoming Supreme Court',                          'short' => 'Wyo. Sup. Ct.',          'type' => 'state_supreme', 'ws_jx_codes' => [ 'WY' ], 'circuit' => null, 'level' => 1 ],
-    // D.C. and territories
-    'dc-app'  => [ 'name' => 'District of Columbia Court of Appeals',          'short' => 'D.C. Ct. App.',          'type' => 'state_supreme', 'ws_jx_codes' => [ 'DC' ], 'circuit' => null, 'level' => 1 ],
-    'pr-sup'  => [ 'name' => 'Supreme Court of Puerto Rico',                   'short' => 'P.R. Sup. Ct.',          'type' => 'state_supreme', 'ws_jx_codes' => [ 'PR' ], 'circuit' => null, 'level' => 1 ],
-    'vi-sup'  => [ 'name' => 'Supreme Court of the Virgin Islands',            'short' => 'V.I. Sup. Ct.',          'type' => 'state_supreme', 'ws_jx_codes' => [ 'VI' ], 'circuit' => null, 'level' => 1 ],
-    'gu-sup'  => [ 'name' => 'Supreme Court of Guam',                          'short' => 'Guam Sup. Ct.',          'type' => 'state_supreme', 'ws_jx_codes' => [ 'GU' ], 'circuit' => null, 'level' => 1 ],
-    'as-hct'  => [ 'name' => 'High Court of American Samoa',                   'short' => 'Am. Samoa H. Ct.',       'type' => 'state_supreme', 'ws_jx_codes' => [ 'AS' ], 'circuit' => null, 'level' => 1 ],
-    'mp-sup'  => [ 'name' => 'Supreme Court of the Northern Mariana Islands',  'short' => 'N. Mar. I. Sup. Ct.',    'type' => 'state_supreme', 'ws_jx_codes' => [ 'MP' ], 'circuit' => null, 'level' => 1 ],
-
-    // ── 5. State Intermediate Appellate Courts ─────────────────────────────
-    //
-    // Omitted (no intermediate appellate tier): DE, ID, ME, MT, NH, ND, RI, SD, VT, WY
-    // PA: two entries — Commonwealth Court (public/admin law) and Superior Court (general).
-    // One entry per jurisdiction; specific division noted in the citation label.
-
-    'al-app'     => [ 'name' => 'Alabama Court of Civil Appeals',                      'short' => 'Ala. Civ. App.',         'type' => 'state_appellate', 'ws_jx_codes' => [ 'AL' ], 'circuit' => null, 'level' => 2 ],
-    'ak-app'     => [ 'name' => 'Alaska Court of Appeals',                             'short' => 'Alaska Ct. App.',        'type' => 'state_appellate', 'ws_jx_codes' => [ 'AK' ], 'circuit' => null, 'level' => 2 ],
-    'az-app'     => [ 'name' => 'Arizona Court of Appeals',                            'short' => 'Ariz. Ct. App.',         'type' => 'state_appellate', 'ws_jx_codes' => [ 'AZ' ], 'circuit' => null, 'level' => 2 ],
-    'ar-app'     => [ 'name' => 'Arkansas Court of Appeals',                           'short' => 'Ark. Ct. App.',          'type' => 'state_appellate', 'ws_jx_codes' => [ 'AR' ], 'circuit' => null, 'level' => 2 ],
-    'ca-app'     => [ 'name' => 'California Court of Appeal',                          'short' => 'Cal. Ct. App.',          'type' => 'state_appellate', 'ws_jx_codes' => [ 'CA' ], 'circuit' => null, 'level' => 2 ],
-    'co-app'     => [ 'name' => 'Colorado Court of Appeals',                           'short' => 'Colo. Ct. App.',         'type' => 'state_appellate', 'ws_jx_codes' => [ 'CO' ], 'circuit' => null, 'level' => 2 ],
-    'ct-app'     => [ 'name' => 'Connecticut Appellate Court',                         'short' => 'Conn. App. Ct.',         'type' => 'state_appellate', 'ws_jx_codes' => [ 'CT' ], 'circuit' => null, 'level' => 2 ],
-    'fl-app'     => [ 'name' => 'Florida District Courts of Appeal',                   'short' => 'Fla. Dist. Ct. App.',    'type' => 'state_appellate', 'ws_jx_codes' => [ 'FL' ], 'circuit' => null, 'level' => 2 ],
-    'ga-app'     => [ 'name' => 'Georgia Court of Appeals',                            'short' => 'Ga. Ct. App.',           'type' => 'state_appellate', 'ws_jx_codes' => [ 'GA' ], 'circuit' => null, 'level' => 2 ],
-    'hi-app'     => [ 'name' => 'Intermediate Court of Appeals of Hawaii',             'short' => 'Haw. ICA',               'type' => 'state_appellate', 'ws_jx_codes' => [ 'HI' ], 'circuit' => null, 'level' => 2 ],
-    'il-app'     => [ 'name' => 'Illinois Appellate Court',                            'short' => 'Ill. App. Ct.',          'type' => 'state_appellate', 'ws_jx_codes' => [ 'IL' ], 'circuit' => null, 'level' => 2 ],
-    'in-app'     => [ 'name' => 'Indiana Court of Appeals',                            'short' => 'Ind. Ct. App.',          'type' => 'state_appellate', 'ws_jx_codes' => [ 'IN' ], 'circuit' => null, 'level' => 2 ],
-    'ia-app'     => [ 'name' => 'Iowa Court of Appeals',                               'short' => 'Iowa Ct. App.',          'type' => 'state_appellate', 'ws_jx_codes' => [ 'IA' ], 'circuit' => null, 'level' => 2 ],
-    'ks-app'     => [ 'name' => 'Kansas Court of Appeals',                             'short' => 'Kan. Ct. App.',          'type' => 'state_appellate', 'ws_jx_codes' => [ 'KS' ], 'circuit' => null, 'level' => 2 ],
-    'ky-app'     => [ 'name' => 'Kentucky Court of Appeals',                           'short' => 'Ky. Ct. App.',           'type' => 'state_appellate', 'ws_jx_codes' => [ 'KY' ], 'circuit' => null, 'level' => 2 ],
-    'la-app'     => [ 'name' => 'Louisiana Courts of Appeal',                          'short' => 'La. Ct. App.',           'type' => 'state_appellate', 'ws_jx_codes' => [ 'LA' ], 'circuit' => null, 'level' => 2 ],
-    'md-app'     => [ 'name' => 'Appellate Court of Maryland',                         'short' => 'Md. App. Ct.',           'type' => 'state_appellate', 'ws_jx_codes' => [ 'MD' ], 'circuit' => null, 'level' => 2 ],
-    'ma-app'     => [ 'name' => 'Massachusetts Appeals Court',                         'short' => 'Mass. App. Ct.',         'type' => 'state_appellate', 'ws_jx_codes' => [ 'MA' ], 'circuit' => null, 'level' => 2 ],
-    'mi-app'     => [ 'name' => 'Michigan Court of Appeals',                           'short' => 'Mich. Ct. App.',         'type' => 'state_appellate', 'ws_jx_codes' => [ 'MI' ], 'circuit' => null, 'level' => 2 ],
-    'mn-app'     => [ 'name' => 'Minnesota Court of Appeals',                          'short' => 'Minn. Ct. App.',         'type' => 'state_appellate', 'ws_jx_codes' => [ 'MN' ], 'circuit' => null, 'level' => 2 ],
-    'ms-app'     => [ 'name' => 'Mississippi Court of Appeals',                        'short' => 'Miss. Ct. App.',         'type' => 'state_appellate', 'ws_jx_codes' => [ 'MS' ], 'circuit' => null, 'level' => 2 ],
-    'mo-app'     => [ 'name' => 'Missouri Court of Appeals',                           'short' => 'Mo. Ct. App.',           'type' => 'state_appellate', 'ws_jx_codes' => [ 'MO' ], 'circuit' => null, 'level' => 2 ],
-    'ne-app'     => [ 'name' => 'Nebraska Court of Appeals',                           'short' => 'Neb. Ct. App.',          'type' => 'state_appellate', 'ws_jx_codes' => [ 'NE' ], 'circuit' => null, 'level' => 2 ],
-    'nv-app'     => [ 'name' => 'Nevada Court of Appeals',                             'short' => 'Nev. Ct. App.',          'type' => 'state_appellate', 'ws_jx_codes' => [ 'NV' ], 'circuit' => null, 'level' => 2 ],
-    'nj-app'     => [ 'name' => 'New Jersey Superior Court, Appellate Division',       'short' => 'N.J. Super. App. Div.',  'type' => 'state_appellate', 'ws_jx_codes' => [ 'NJ' ], 'circuit' => null, 'level' => 2 ],
-    'nm-app'     => [ 'name' => 'New Mexico Court of Appeals',                         'short' => 'N.M. Ct. App.',          'type' => 'state_appellate', 'ws_jx_codes' => [ 'NM' ], 'circuit' => null, 'level' => 2 ],
-    'ny-appdiv'  => [ 'name' => 'New York Supreme Court, Appellate Division',          'short' => 'N.Y. App. Div.',         'type' => 'state_appellate', 'ws_jx_codes' => [ 'NY' ], 'circuit' => null, 'level' => 2 ],
-    'nc-app'     => [ 'name' => 'North Carolina Court of Appeals',                     'short' => 'N.C. Ct. App.',          'type' => 'state_appellate', 'ws_jx_codes' => [ 'NC' ], 'circuit' => null, 'level' => 2 ],
-    'oh-app'     => [ 'name' => 'Ohio Courts of Appeals',                              'short' => 'Ohio Ct. App.',          'type' => 'state_appellate', 'ws_jx_codes' => [ 'OH' ], 'circuit' => null, 'level' => 2 ],
-    'ok-app'     => [ 'name' => 'Oklahoma Court of Civil Appeals',                     'short' => 'Okla. Civ. App.',        'type' => 'state_appellate', 'ws_jx_codes' => [ 'OK' ], 'circuit' => null, 'level' => 2 ],
-    'or-app'     => [ 'name' => 'Oregon Court of Appeals',                             'short' => 'Or. Ct. App.',           'type' => 'state_appellate', 'ws_jx_codes' => [ 'OR' ], 'circuit' => null, 'level' => 2 ],
-    'pa-cw'      => [ 'name' => 'Pennsylvania Commonwealth Court',                     'short' => 'Pa. Commw. Ct.',         'type' => 'state_appellate', 'ws_jx_codes' => [ 'PA' ], 'circuit' => null, 'level' => 2 ],
-    'pa-sup-app' => [ 'name' => 'Pennsylvania Superior Court',                         'short' => 'Pa. Super. Ct.',         'type' => 'state_appellate', 'ws_jx_codes' => [ 'PA' ], 'circuit' => null, 'level' => 2 ],
-    'sc-app'     => [ 'name' => 'South Carolina Court of Appeals',                     'short' => 'S.C. Ct. App.',          'type' => 'state_appellate', 'ws_jx_codes' => [ 'SC' ], 'circuit' => null, 'level' => 2 ],
-    'tn-app'     => [ 'name' => 'Tennessee Court of Appeals',                          'short' => 'Tenn. Ct. App.',         'type' => 'state_appellate', 'ws_jx_codes' => [ 'TN' ], 'circuit' => null, 'level' => 2 ],
-    'tx-app'     => [ 'name' => 'Texas Courts of Appeals',                             'short' => 'Tex. App.',              'type' => 'state_appellate', 'ws_jx_codes' => [ 'TX' ], 'circuit' => null, 'level' => 2 ],
-    'ut-app'     => [ 'name' => 'Utah Court of Appeals',                               'short' => 'Utah Ct. App.',          'type' => 'state_appellate', 'ws_jx_codes' => [ 'UT' ], 'circuit' => null, 'level' => 2 ],
-    'va-app'     => [ 'name' => 'Virginia Court of Appeals',                           'short' => 'Va. Ct. App.',           'type' => 'state_appellate', 'ws_jx_codes' => [ 'VA' ], 'circuit' => null, 'level' => 2 ],
-    'wa-app'     => [ 'name' => 'Washington Court of Appeals',                         'short' => 'Wash. Ct. App.',         'type' => 'state_appellate', 'ws_jx_codes' => [ 'WA' ], 'circuit' => null, 'level' => 2 ],
-    'wv-app'     => [ 'name' => 'West Virginia Intermediate Court of Appeals',         'short' => 'W. Va. Ct. App.',        'type' => 'state_appellate', 'ws_jx_codes' => [ 'WV' ], 'circuit' => null, 'level' => 2 ],
-    'wi-app'     => [ 'name' => 'Wisconsin Court of Appeals',                          'short' => 'Wis. Ct. App.',          'type' => 'state_appellate', 'ws_jx_codes' => [ 'WI' ], 'circuit' => null, 'level' => 2 ],
-
 ];
 
 
@@ -452,7 +356,7 @@ $ws_court_matrix = [
 // ════════════════════════════════════════════════════════════════════════════
 
 add_action( 'admin_init', function() {
-    if ( get_option( 'ws_seeded_court_matrix' ) !== '1.0.0' ) {
-        update_option( 'ws_seeded_court_matrix', '1.0.0' );
+    if ( get_option( 'ws_seeded_court_matrix' ) !== '1.1.0' ) {
+        update_option( 'ws_seeded_court_matrix', '1.1.0' );
     }
 } );

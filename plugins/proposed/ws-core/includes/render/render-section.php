@@ -35,7 +35,8 @@
  *   ws_render_jx_summary_section()           Summary content + footer wrapper.
  *   ws_render_plain_english_reviewed_badge() Plain-language review status badge.
  *   ws_render_jx_summary_footer()            Summary footer (author, date, badge, sources).
- *   ws_render_jx_case_law()                  Case law / citations footnote section.
+ *   ws_render_jx_citations()                 Case law / citations footnote section.
+ *   ws_render_jx_interpretations()           Court interpretations card section.
  *   ws_render_jx_limitations()               Limitations section wrapper.
  *
  *
@@ -67,6 +68,9 @@
  *        ws_render_legal_updates, ws_render_jurisdiction_index) moved to
  *        render-general.php. This file now contains jurisdiction-page
  *        section renderers only.
+ * 3.7.0  ws_render_jx_interpretations() added. Renders court interpretation
+ *        cards (case name, court/year/citation, favorable indicator, summary,
+ *        External References button). Called by [ws_jx_interpretation].
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -198,6 +202,7 @@ function ws_render_jx_flag($flag_data) {
         <div class="ws-jx-attribution">
             <a href="<?php echo esc_url($flag_data['source_url']); ?>"
                target="_blank"
+               rel="noopener noreferrer"
                class="ws-term-highlight"
                data-tooltip="<?php echo esc_attr($flag_data['attr_str'] . ' — Click to open on Wikimedia Commons'); ?>">
                Attribution
@@ -229,7 +234,7 @@ function ws_render_jx_gov_offices($gov_data) {
             <?php foreach ($gov_data['links'] as $link) :
                 if (!empty($link['url'])) : ?>
                     <div class="ws-gov-link-item">
-                        <a href="<?php echo esc_url($link['url']); ?>" target="_blank" rel="noopener">
+                        <a href="<?php echo esc_url($link['url']); ?>" target="_blank" rel="noopener noreferrer">
                             <?php echo esc_html($link['label']); ?>
                         </a>
                     </div>
@@ -260,7 +265,7 @@ function ws_render_jx_summary_section( $content, $review_html = '' ) {
             <?php echo $content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped // Already passed through the_content ?>
         </div>
         <?php if ( $review_html ) : ?>
-            <footer class="ws-jx-summary-footer">
+            <footer>
                 <?php echo $review_html; ?>
             </footer>
         <?php endif; ?>
@@ -379,14 +384,14 @@ function ws_render_jx_summary_footer( $data ) {
  * .ws-case-law section. Each $item is a pre-built HTML string
  * containing the return link, index number, and linked citation label.
  *
- * Called by ws_shortcode_jx_case_law() after the footnote items are
+ * Called by ws_shortcode_jx_citation() after the footnote items are
  * assembled from jx-citation query results.
  *
  * @param  array  $items         Array of footnote item HTML strings.
  * @param  string $section_class Optional extra CSS class for the section element.
  * @return string                HTML section block, or empty string if $items is empty.
  */
-function ws_render_jx_case_law( $items, $section_class = '' ) {
+function ws_render_jx_citations( $items, $section_class = '' ) {
     if ( empty( $items ) ) return '';
     $extra = $section_class ? ' ' . sanitize_html_class( $section_class ) : '';
     ob_start(); ?>
@@ -398,6 +403,90 @@ function ws_render_jx_case_law( $items, $section_class = '' ) {
     </section>
     <?php
     return ob_get_clean();
+}
+
+
+/**
+ * Renders the court interpretations section.
+ *
+ * Formats each interpretation as a card: case name (linked to opinion URL
+ * when available), optional common name, court / year / citation meta line,
+ * favorable-to-whistleblower indicator, plain-text summary, and a conditional
+ * "→ External References" button.
+ *
+ * Calls ws_get_reference_page_url() to build the ref button URL — a lightweight
+ * URL builder, not a database query. Wraps output in ws_render_section() which
+ * applies wp_kses_post(). Called by ws_shortcode_jx_interpretation().
+ *
+ * Note: interpretations are federal court decisions. On state jurisdiction pages
+ * they arrive with is_fed = true (US-term append). The --fed modifier class is
+ * applied but the local/federal two-group split used for statutes and citations
+ * is not appropriate here — all interpretations share a single section heading.
+ *
+ * @param  array  $interps  Interpretation data arrays from ws_get_jx_interpretation_data().
+ * @return string           HTML section block, or empty string if $interps is empty.
+ */
+function ws_render_jx_interpretations( $interps ) {
+    if ( empty( $interps ) ) return '';
+
+    $content = '';
+    foreach ( $interps as $interp ) {
+
+        $name_html = $interp['opinion_url']
+            ? '<a href="' . esc_url( $interp['opinion_url'] ) . '" target="_blank" rel="noopener noreferrer">'
+              . esc_html( $interp['official_name'] ) . '</a>'
+            : esc_html( $interp['official_name'] );
+
+        $meta_parts = array_filter( [
+            esc_html( $interp['court'] ),
+            esc_html( $interp['year'] ),
+            esc_html( $interp['citation'] ),
+        ] );
+
+        $favorable_class = $interp['favorable'] ? 'ws-interp-favorable' : 'ws-interp-unfavorable';
+        $favorable_label = $interp['favorable'] ? 'Favorable' : 'Unfavorable';
+
+        $ref_btn = '';
+        if ( ! empty( $interp['ref_materials'] ) ) {
+            $ref_url = ws_get_reference_page_url( $interp['id'], 'interpretations' );
+            if ( $ref_url ) {
+                $ref_btn = '<div class="ws-ref-materials-link">'
+                         . '<a href="' . esc_url( $ref_url ) . '" class="ws-ref-materials-btn" target="_blank">'
+                         . '&rarr; External References'
+                         . '</a></div>';
+            }
+        }
+
+        $card_class = 'ws-interpretation-card'
+                    . ( $interp['is_fed'] ? ' ws-interpretation-card--fed' : '' );
+
+        $card  = '<div class="' . esc_attr( $card_class ) . '">';
+        $card .= '<p class="ws-interp-case-name">' . $name_html . '</p>';
+
+        if ( $interp['common_name'] ) {
+            $card .= '<p class="ws-interp-common-name">'
+                   . esc_html( $interp['common_name'] ) . '</p>';
+        }
+
+        if ( $meta_parts ) {
+            $favorable_span = '<span class="' . esc_attr( $favorable_class ) . '">'
+                            . esc_html( $favorable_label ) . '</span>';
+            $card .= '<p class="ws-interp-meta">'
+                   . implode( ' &bull; ', $meta_parts )
+                   . ' &bull; ' . $favorable_span . '</p>';
+        }
+
+        if ( $interp['summary'] ) {
+            $card .= '<p class="ws-interp-summary">'
+                   . esc_html( $interp['summary'] ) . '</p>';
+        }
+
+        $card    .= $ref_btn;
+        $card    .= '</div>';
+        $content .= $card;
+    }
+
+    return ws_render_section( 'Court Interpretations', $content );
 }
 
 

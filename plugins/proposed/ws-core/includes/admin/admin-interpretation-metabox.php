@@ -8,18 +8,19 @@
  * -------
  * Displays all jx-interpretation records linked to the current statute,
  * with a direct "Add New Interpretation" button that opens the creation
- * form in a new tab. Only renders when the statute has the 'us'
- * ws_jurisdiction taxonomy term (i.e. it is a federal statute).
+ * form in a new tab. Renders on all jx-statute posts — both federal and
+ * state statutes can have court interpretation records.
  *
  * WORKFLOW
  * --------
- * 1. Editor saves a jx-statute post assigned the 'us' ws_jurisdiction term.
+ * 1. Editor saves a jx-statute post.
  * 2. The meta box appears below the ACF field groups.
  * 3. Existing interpretations are listed: case name, court, year, favorable?,
  *    and an Edit link.
  * 4. "Add New Interpretation" opens:
  *    post-new.php?post_type=jx-interpretation&statute_id={ID}
- *    in a new browser tab.
+ *    in a new browser tab. The statute's own ws_jurisdiction term is passed
+ *    via tax_input so the new interpretation inherits the correct jurisdiction.
  * 5. After saving the new interpretation, the editor closes the tab and
  *    refreshes the statute screen to see the updated list.
  *
@@ -45,6 +46,11 @@
  *        explaining why the query layer is not used in admin metabox context.
  * 3.6.0  Metabox now reads ws_jx_statute_interp_ids (reverse index maintained
  *        by admin-hooks.php) — simple post__in query, no meta_query JOIN.
+ * 3.8.0  Removed federal-only guard (has_term 'us' check). Both federal and
+ *        state statutes now show the metabox. Court label resolution updated
+ *        to use ws_court_lookup() + other branch. Add URL now uses the
+ *        statute's own ws_jurisdiction term instead of hardcoded 'us'.
+ *        Metabox title renamed from "Federal Court Interpretations".
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -57,7 +63,7 @@ add_action( 'add_meta_boxes', 'ws_register_interpretation_metabox' );
 function ws_register_interpretation_metabox() {
     add_meta_box(
         'ws_interpretations',
-        'Federal Court Interpretations',
+        'Court Interpretations',
         'ws_render_interpretation_metabox',
         'jx-statute',
         'normal',
@@ -67,27 +73,15 @@ function ws_register_interpretation_metabox() {
 
 
 /**
- * Renders the Federal Court Interpretations meta box.
+ * Renders the Court Interpretations meta box.
  *
- * Only shows interpretation content when the statute has the 'us'
- * ws_jurisdiction term. For all other jurisdictions a short explanatory
- * notice is displayed instead.
+ * Displays all jx-interpretation records linked to the current statute,
+ * regardless of jurisdiction. Both federal and state statutes can have
+ * court interpretation records.
  *
  * @param WP_Post $post  The current jx-statute post object.
  */
 function ws_render_interpretation_metabox( $post ) {
-
-    global $ws_court_matrix;
-
-    // ── Jurisdiction guard ────────────────────────────────────────────────
-    //
-    // Federal statutes carry the 'us' ws_jurisdiction term. Only federal
-    // statutes receive court interpretation records.
-
-    if ( ! has_term( 'us', WS_JURISDICTION_TERM_ID, $post->ID ) ) {
-        echo '<p style="color:#666;font-style:italic;">Court interpretation records are only tracked for federal (US) statutes.</p>';
-        return;
-    }
 
     // ── Auto-draft guard ──────────────────────────────────────────────────
 
@@ -99,14 +93,15 @@ function ws_render_interpretation_metabox( $post ) {
     //                      to pre-select the ws_jx_interp_statute_id field.
     // tax_input[...][]   — WordPress core pre-assigns the ws_jurisdiction taxonomy
     //                      term on the new post screen without any ACF hook.
-    //                      Always 'us' for interpretations; resolved via get_term_by
-    //                      so the numeric term ID is used, not the slug.
+    //                      Uses the statute's own jurisdiction term so state-level
+    //                      interpretations inherit the correct jurisdiction.
     // post_title         — WordPress core pre-fills the title field.
 
-    $us_term = get_term_by( 'slug', 'us', WS_JURISDICTION_TERM_ID );
+    $statute_terms = get_the_terms( $post->ID, WS_JURISDICTION_TERM_ID );
+    $statute_term  = ( $statute_terms && ! is_wp_error( $statute_terms ) ) ? $statute_terms[0] : null;
     $add_url = admin_url( 'post-new.php?post_type=jx-interpretation&statute_id=' . $post->ID );
-    if ( $us_term ) {
-        $add_url .= '&tax_input[' . WS_JURISDICTION_TERM_ID . '][]=' . $us_term->term_id;
+    if ( $statute_term ) {
+        $add_url .= '&tax_input[' . WS_JURISDICTION_TERM_ID . '][]=' . $statute_term->term_id;
     }
     $post_title = get_the_title( $post );
     if ( $post_title ) {
@@ -168,9 +163,12 @@ function ws_render_interpretation_metabox( $post ) {
                     $court_key   = get_post_meta( $interp_id, 'ws_jx_interp_court', true );
                     $year        = get_post_meta( $interp_id, 'ws_jx_interp_year', true );
                     $favorable   = get_post_meta( $interp_id, 'ws_jx_interp_favorable', true );
-                    $court_label = ( $court_key && ! empty( $ws_court_matrix[ $court_key ] ) )
-                        ? esc_html( $ws_court_matrix[ $court_key ]['short'] )
-                        : esc_html( $court_key );
+                    if ( $court_key === 'other' ) {
+                        $court_label = esc_html( get_post_meta( $interp_id, 'ws_jx_interp_court_name', true ) ?: 'Other' );
+                    } else {
+                        $court_entry = ws_court_lookup( $court_key );
+                        $court_label = $court_entry ? esc_html( $court_entry['short'] ) : esc_html( $court_key );
+                    }
                     $edit_url    = get_edit_post_link( $interp_id );
                 ?>
                 <tr>

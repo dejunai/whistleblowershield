@@ -73,6 +73,8 @@
  *        array load of query-helpers → query-shared → query-jurisdiction.
  *        render-directory.php stub added to ASSEMBLY LAYER render_files.
  * 3.6.1  admin-health-check.php added to ADMIN LAYER.
+ * 3.7.0  matrix-state-courts.php added to MATRIX LAYER between
+ *        matrix-federal-courts.php and matrix-assist-orgs.php.
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit;
@@ -190,8 +192,8 @@ if ( is_admin() ) {
 	// MATRIX Layer: Loaded from /includes/admin/matrix/
 	$matrix_files = [
 		'matrix-helpers',      // Shared helpers — must load before all seeders.
-		'matrix-jurisdictions', 'matrix-fed-statutes', 'matrix-courts', 'matrix-assist-orgs',
-		'matrix-agencies', 'admin-matrix-watch',
+		'matrix-jurisdictions', 'matrix-fed-statutes', 'matrix-federal-courts', 'matrix-state-courts',
+		'matrix-assist-orgs', 'matrix-agencies', 'admin-matrix-watch',
 	];
 	foreach ( $matrix_files as $file ) {
 		$path = WS_CORE_PATH . "includes/admin/matrix/{$file}.php";
@@ -294,7 +296,7 @@ if ( ! is_admin() ) {
 	// render-general.php  — general-page renderers (footer, disclaimer, legal updates, jx index)
 	// render-section.php  — jurisdiction-page section renderers (header, summary, statutes, etc.)
 	// render-jurisdiction.php — the_content assembler that stitches shortcodes together
-	// render-directory.php — Directory page stub (no render functions yet)
+	// render-directory.php — Directory page renderers (card grid, empty state, taxonomy guide stub)
 	$render_files = [
 		'render-general', 'render-section', 'render-jurisdiction', 'render-directory',
 	];

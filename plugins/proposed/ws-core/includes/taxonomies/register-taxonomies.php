@@ -57,7 +57,6 @@
  * 3.1.1  Bug fix: corrected 'ws-jurisdiction' to 'jurisdiction' in ws_jurisdiction
  *        taxonomy object type array. Mismatch prevented ws_jurisdiction (and all
  *        other taxonomies) from appearing on jurisdiction post edit screens.
- *         existing seeded records.
  * 3.2.0  Added ws_employer_defense taxonomy stub (jx-statute). No seeder —
  *        terms to be defined once the taxonomy table is validated against
  *        real statute data.
@@ -65,11 +64,17 @@
  *         ACF select field. Terms: nonprofit, legal-aid, law-firm, bar-program,
  *         advocacy, oversight-office (replaces opaque 'ombudsman'), union.
  *         matrix-assist-orgs gate bumped to 1.2.0 to assign type terms on
+ *         existing seeded records.
  * 3.6.0  Added National Security parent term + 3 children to ws_disclosure_type
  *        seeder to cover matrix slugs used by Whistleblower Aid and similar orgs.
  *        Children: intelligence-community, classified-information,
  *        export-sanctions-compliance. Gate ws_seeded_disclosure_type bumped to
  *        1.1.0 so existing sites pick up the new terms on next admin_init.
+ * 3.7.0  Added ws_employment_sector taxonomy (ws-assist-org). Replaces
+ *        ws_aorg_employment_sectors ACF checkbox field to enable tax_query
+ *        filtering in the Phase 2 filter panel — no meta_query in the cascade.
+ *        Removed deprecated taxonomy registrations (ws_remedy_type,
+ *        ws_coverage_scope, ws_retaliation_forms) — no live data to migrate.
  *
  */
 
@@ -151,7 +156,6 @@ function ws_register_taxonomies() {
     // ── 3. Remedies ───────────────────────────────────────────────────────
     //
     // Renamed from ws_remedy_type → ws_remedies (3.1.0).
-    // ws_remedy_type retained below as DEPRECATED until migration confirmed.
 
     if ( ! taxonomy_exists( 'ws_remedies' ) ) {
         register_taxonomy(
@@ -184,7 +188,6 @@ function ws_register_taxonomies() {
     //
     // Renamed from ws_coverage_scope → ws_protected_class (3.1.0).
     // Converted to hierarchical to support employee type groupings.
-    // ws_coverage_scope retained below as DEPRECATED until migration confirmed.
 
     if ( ! taxonomy_exists( 'ws_protected_class' ) ) {
         register_taxonomy(
@@ -219,7 +222,6 @@ function ws_register_taxonomies() {
     //
     // Renamed from ws_retaliation_forms → ws_adverse_action_types (3.1.0).
     // Aligns with JSON field name adverse_action; cleaner legal terminology.
-    // ws_retaliation_forms retained below as DEPRECATED until migration confirmed.
 
     if ( ! taxonomy_exists( 'ws_adverse_action_types' ) ) {
         register_taxonomy(
@@ -473,59 +475,36 @@ function ws_register_taxonomies() {
         );
     }
 
-    // ════════════════════════════════════════════════════════════════════
-    // DEPRECATED REGISTRATIONS
+    // ── 13. Employment Sector ─────────────────────────────────────────────
     //
-    // Retained to preserve post assignments during migration window.
-    // Remove after migration to renamed taxonomies is confirmed complete.
-    // @todo  Remove ws_remedy_type, ws_coverage_scope, ws_retaliation_forms
-    //        after migration pass.
-    // ════════════════════════════════════════════════════════════════════
+    // New in 3.7.0. Flat taxonomy classifying the employment sectors served
+    // by a ws-assist-org record. Applied to ws-assist-org only.
+    // Replaces ws_aorg_employment_sectors ACF checkbox field — enables
+    // tax_query filtering for Phase 2 filter panel.
 
-    // DEPRECATED: ws_remedy_type → ws_remedies
-    if ( ! taxonomy_exists( 'ws_remedy_type' ) ) {
+    if ( ! taxonomy_exists( 'ws_employment_sector' ) ) {
         register_taxonomy(
-            'ws_remedy_type',
-            [ 'jx-statute' ],
+            'ws_employment_sector',
+            [ 'ws-assist-org' ],
             [
-                'label'        => 'Remedies (Deprecated)',
-                'public'       => false,
-                'hierarchical' => false,
-                'show_ui'      => false,
-                'show_in_rest' => false,
-                'capabilities' => ws_get_taxonomy_caps(),
-            ]
-        );
-    }
-
-    // DEPRECATED: ws_coverage_scope → ws_protected_class
-    if ( ! taxonomy_exists( 'ws_coverage_scope' ) ) {
-        register_taxonomy(
-            'ws_coverage_scope',
-            [ 'jx-statute' ],
-            [
-                'label'        => 'Coverage Scope (Deprecated)',
-                'public'       => false,
-                'hierarchical' => false,
-                'show_ui'      => false,
-                'show_in_rest' => false,
-                'capabilities' => ws_get_taxonomy_caps(),
-            ]
-        );
-    }
-
-    // DEPRECATED: ws_retaliation_forms → ws_adverse_action_types
-    if ( ! taxonomy_exists( 'ws_retaliation_forms' ) ) {
-        register_taxonomy(
-            'ws_retaliation_forms',
-            [ 'jx-statute' ],
-            [
-                'label'        => 'Retaliation Forms (Deprecated)',
-                'public'       => false,
-                'hierarchical' => false,
-                'show_ui'      => false,
-                'show_in_rest' => false,
-                'capabilities' => ws_get_taxonomy_caps(),
+                'label'             => 'Employment Sectors',
+                'labels'            => [
+                    'name'              => 'Employment Sectors',
+                    'singular_name'     => 'Employment Sector',
+                    'search_items'      => 'Search Employment Sectors',
+                    'all_items'         => 'All Employment Sectors',
+                    'edit_item'         => 'Edit Employment Sector',
+                    'update_item'       => 'Update Employment Sector',
+                    'add_new_item'      => 'Add New Employment Sector',
+                    'new_item_name'     => 'New Employment Sector Name',
+                    'menu_name'         => 'Employment Sectors',
+                ],
+                'public'            => false,
+                'hierarchical'      => false,
+                'show_ui'           => true,
+                'show_in_rest'      => true,
+                'show_admin_column' => true,
+                'capabilities'      => ws_get_taxonomy_caps(),
             ]
         );
     }
@@ -647,6 +626,10 @@ add_action( 'admin_init', function() {
     if ( get_option( 'ws_seeded_aorg_type' ) !== '1.0.0' ) {
         ws_seed_aorg_type_taxonomy();
         update_option( 'ws_seeded_aorg_type', '1.0.0' );
+    }
+    if ( get_option( 'ws_seeded_employment_sector' ) !== '1.0.0' ) {
+        ws_seed_employment_sector_taxonomy();
+        update_option( 'ws_seeded_employment_sector', '1.0.0' );
     }
 
 } );
@@ -1096,6 +1079,29 @@ function ws_seed_aorg_type_taxonomy() {
         'advocacy'         => 'Advocacy Organization',
         'oversight-office' => 'Government Oversight Office',
         'union'            => 'Labor Union',
+    ];
+    foreach ( $terms as $slug => $name ) {
+        if ( ! term_exists( $slug, $taxonomy ) ) {
+            wp_insert_term( $name, $taxonomy, [ 'slug' => $slug ] );
+        }
+    }
+}
+
+/**
+ * Seeds ws_employment_sector with flat sector terms.
+ *
+ * New in 3.7.0. Replaces ws_aorg_employment_sectors ACF checkbox.
+ * 'all-sectors' is used for organizations that serve all worker types.
+ */
+function ws_seed_employment_sector_taxonomy() {
+    $taxonomy = 'ws_employment_sector';
+    $terms    = [
+        'federal-employee'     => 'Federal Government Employee',
+        'state-local-employee' => 'State & Local Government Employee',
+        'private-sector'       => 'Private Sector Employee',
+        'military-defense'     => 'Military & Defense Contractors',
+        'nonprofit-ngo'        => 'Nonprofit & NGO Employee',
+        'all-sectors'          => 'All Employment Sectors',
     ];
     foreach ( $terms as $slug => $name ) {
         if ( ! term_exists( $slug, $taxonomy ) ) {

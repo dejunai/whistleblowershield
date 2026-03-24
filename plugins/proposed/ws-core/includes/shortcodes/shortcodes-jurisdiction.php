@@ -39,12 +39,13 @@
  *       Renders human-reviewed and legal-review status badges.
  *       Reads from the linked jx-summary post.
  *
- *   [ws_jx_case_law]
- *       Renders the ws-case-law section for the current jurisdiction.
+ *   [ws_jx_citation]
+ *       Renders the case law / citations section for the current jurisdiction.
  *       Queries published jx-citation records scoped by ws_jurisdiction
  *       taxonomy with attach_flag = 1, ordered by display_order ascending.
- *       Outputs citation body content, footnote anchors, and Unicode
- *       return links. Returns empty string if no attached citations exist.
+ *       Outputs citation body content, footnote anchors, and return links.
+ *       Returns empty string if no attached citations exist.
+ *       (Formerly [ws_jx_case_law] — renamed v3.6.0.)
  *
  *   [ws_jx_limitations]
  *       Renders the ws-limitations section for the current jurisdiction.
@@ -109,8 +110,6 @@
  *         [ws_jx_case_law] per-record rendering. Button only renders when
  *         ws_get_ref_materials() returns non-empty results AND the
  *         reference materials page resolves via ws_get_reference_page_url().
- *         @todo Add "→ External References" button to jx-interpretation
- *         shortcode when that shortcode is implemented.
  * 3.3.2  Updated all query layer return key references to match the
  *         simplified key names introduced in query-jurisdiction.php v3.3.2.
  *         record: author_name → created_by_name, editor_name → edited_by_name,
@@ -124,6 +123,10 @@
  *         site-wide listing shortcode, not a jurisdiction-page shortcode.
  *         QUERY LAYER RETURN REFERENCE block: added reviewed_date to PLAIN
  *         SUB-ARRAY; removed duplicate copy from shortcodes-general.php.
+ *         [ws_jx_case_law] renamed to [ws_jx_citation]; shortcode tag updated.
+ * 3.7.0  [ws_jx_interpretation] implemented. "→ External References" button
+ *         included — handled inside ws_render_jx_interpretations() in
+ *         render-section.php. Shortcode wired into assembler after citations.
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit;
@@ -245,11 +248,11 @@ function ws_shortcode_jx_statutes() {
         $html = apply_filters( 'the_content', $statute['content'] );
 
         $refs     = ws_get_ref_materials( $statute['id'] );
-        $ref_url  = ! empty( $refs ) ? ws_get_reference_page_url( $statute['id'] ) : '';
+        $ref_url  = ! empty( $refs ) ? ws_get_reference_page_url( $statute['id'], 'statutes' ) : '';
 
         if ( $ref_url ) {
             $html .= '<div class="ws-ref-materials-link">'
-                   . '<a href="' . esc_url( $ref_url ) . '" class="ws-ref-materials-btn">'
+                   . '<a href="' . esc_url( $ref_url ) . '" class="ws-ref-materials-btn" target="_blank">'
                    . '&rarr; External References'
                    . '</a>'
                    . '</div>';
@@ -329,8 +332,8 @@ add_shortcode( 'ws_jx_flag', function( $atts ) {
 // Unicode return character: ↩ (U+21A9) replaces the PNG workaround.
 // Controlled via .ws-footnote-return in ws-core-front.css.
 
-add_shortcode( 'ws_jx_case_law', 'ws_shortcode_jx_case_law' );
-function ws_shortcode_jx_case_law() {
+add_shortcode( 'ws_jx_citation', 'ws_shortcode_jx_citation' );
+function ws_shortcode_jx_citation() {
 
     global $post;
     if ( ! $post ) return '';
@@ -355,31 +358,32 @@ function ws_shortcode_jx_case_law() {
             $is_pdf = $citation['is_pdf'];
 
             $pdf_suffix = $is_pdf ? ' (PDF)' : '';
-            $fn_id      = $id_prefix . '-fn-' . $fn_index;
-            $fn_ref_id  = $id_prefix . '-fn-ref-' . $fn_index;
+            $fn_id = $id_prefix . '-fn-' . $fn_index;
 
             if ( $url ) {
-                $linked_label = '<a href="' . esc_url( $url ) . '" target="_blank">'
+                $linked_label = '<a href="' . esc_url( $url ) . '" target="_blank" rel="noopener noreferrer">'
                               . esc_html( $label ) . esc_html( $pdf_suffix ) . '</a>';
             } else {
                 $linked_label = esc_html( $label ) . esc_html( $pdf_suffix );
             }
 
-            // Unicode return link: ↩ (U+21A9), styled via .ws-footnote-return.
-            // @todo fn-ref-X anchors not yet emitted inline — return links are
-            // currently dead until in-text superscript anchors are implemented.
-            $return_link = '<a href="#' . esc_attr( $fn_ref_id ) . '" '
-                         . 'class="ws-footnote-return" '
-                         . 'title="Return to text">&#x21a9;</a>';
+            // Unicode return character: ↩ (U+21A9), styled via .ws-footnote-return.
+            // Links back to the in-text superscript anchor using the convention:
+            //   id="{prefix}-fn-ref-{n}"  e.g. id="all-fn-ref-1"
+            // Editors writing HTML blobs reference citations as:
+            //   <sup><a href="#all-fn-1" id="all-fn-ref-1">1</a></sup>
+            // Prefix is 'all' (single group), 'local', or 'fed' (two-group).
+            $ref_target  = '#' . $id_prefix . '-fn-ref-' . $fn_index;
+            $return_link = '<a href="' . esc_attr( $ref_target ) . '" class="ws-footnote-return" aria-label="Return to in-text reference">&#x21a9;</a>';
 
             // "→ External References" button — only when approved references exist.
             $ref_btn = '';
             $refs    = ws_get_ref_materials( $citation['id'] );
             if ( ! empty( $refs ) ) {
-                $ref_url = ws_get_reference_page_url( $citation['id'] );
+                $ref_url = ws_get_reference_page_url( $citation['id'], 'citations' );
                 if ( $ref_url ) {
                     $ref_btn = ' <a href="' . esc_url( $ref_url ) . '" '
-                             . 'class="ws-ref-materials-btn ws-ref-materials-btn--inline">'
+                             . 'class="ws-ref-materials-btn ws-ref-materials-btn--inline" target="_blank">'
                              . '&rarr; External References'
                              . '</a>';
                 }
@@ -403,14 +407,40 @@ function ws_shortcode_jx_case_law() {
 
     if ( empty( $fed ) ) {
         // Single-group: no federal append.
-        return ws_render_jx_case_law( $build_items( $citations, 1, 'all' ) );
+        return ws_render_jx_citations( $build_items( $citations, 1, 'all' ) );
     }
 
     // Two-group: local and federal citations keep independent visible numbering
     // but use distinct DOM ID prefixes so anchor targets remain unique.
-    $out  = ws_render_jx_case_law( $build_items( $local, 1, 'local' ), 'ws-section--local' );
-    $out .= ws_render_jx_case_law( $build_items( $fed,   1, 'fed' ), 'ws-section--federal' );
+    $out  = ws_render_jx_citations( $build_items( $local, 1, 'local' ), 'ws-section--local' );
+    $out .= ws_render_jx_citations( $build_items( $fed,   1, 'fed' ), 'ws-section--federal' );
     return $out;
+}
+
+
+// ── [ws_jx_interpretation] ───────────────────────────────────────────────────
+//
+// Queries published jx-interpretation records for the current jurisdiction
+// where ws_attach_flag is true, ordered by ws_display_order ASC.
+// Appends US-scoped records (federal court decisions) to state pages via
+// the same is_fed pattern used by statutes and citations.
+//
+// Rendering is delegated to ws_render_jx_interpretations() in render-section.php.
+// Returns empty string silently if no attached interpretations exist.
+
+add_shortcode( 'ws_jx_interpretation', 'ws_shortcode_jx_interpretation' );
+function ws_shortcode_jx_interpretation() {
+
+    global $post;
+    if ( ! $post ) return '';
+
+    $term_id = ws_get_jx_term_id( $post->ID );
+    if ( ! $term_id ) return '';
+
+    $interps = ws_get_jx_interpretation_data( $term_id );
+    if ( empty( $interps ) ) return '';
+
+    return ws_render_jx_interpretations( $interps );
 }
 
 

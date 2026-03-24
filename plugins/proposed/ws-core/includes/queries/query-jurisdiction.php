@@ -206,9 +206,14 @@
  * 3.7.0  Added ws_get_nationwide_assist_org_data() — dedicated query function for
  *        the [ws_assist_org_directory] shortcode. Returns all published ws-assist-org
  *        records scoped to the 'us' ws_jurisdiction term, with optional $filters for
- *        type (ws_aorg_type slug), sector (employment sector slug), stage (ws_case_stage
- *        slug), and cost_model. Sector filtering is applied post-query (serialized meta).
+ *        type (ws_aorg_type slug), sector (ws_employment_sector slug), stage (ws_case_stage
+ *        slug), and cost_model. Sector filtering uses tax_query on ws_employment_sector.
  *        Return shape is identical to ws_get_assist_org_data().
+ * 3.8.0  court key in ws_get_jx_interpretation_data() resolved to short label via
+ *        ws_court_lookup(); 'other' court key resolves to ws_jx_interp_court_name
+ *        free-text value. Dead ws_ref_approved gate removed from ws_get_ref_materials()
+ *        — was silently excluding all references. ws_get_reference_page_url() updated
+ *        to accept $section param for anchor targeting.
  */
 
 
@@ -791,7 +796,9 @@ function ws_get_jx_interpretation_data( $jx_term_id ) {
                 'common_name'   => get_post_meta( $iid, 'ws_jx_interp_common_name',              true ),
                 'citation'      => get_post_meta( $iid, 'ws_jx_interp_case_citation',    true ),
                 'opinion_url'   => get_post_meta( $iid, 'ws_jx_interp_url',              true ),
-                'court'         => get_post_meta( $iid, 'ws_jx_interp_court',            true ),
+                'court'         => ( ( $_ck = get_post_meta( $iid, 'ws_jx_interp_court', true ) ) === 'other' )
+                                        ? ( get_post_meta( $iid, 'ws_jx_interp_court_name', true ) ?: 'Other' )
+                                        : ( ( $crt = ws_court_lookup( $_ck ) ) ? $crt['short'] : $_ck ),
                 'year'          => get_post_meta( $iid, 'ws_jx_interp_year',             true ),
                 'favorable'     => (bool) get_post_meta( $iid, 'ws_jx_interp_favorable', true ),
                 'summary'       => get_post_meta( $iid, 'ws_jx_interp_summary',          true ),
@@ -937,7 +944,7 @@ function ws_get_assist_org_data( $jx_term_id ) {
             'serves_nationwide'    => (bool) get_post_meta( $oid, 'ws_aorg_serves_nationwide',   true ),
             'disclosure_type'      => get_field( 'ws_aorg_disclosure_type', $oid ),
             'services'             => get_post_meta( $oid, 'ws_aorg_services',                   true ),
-            'employment_sectors'   => get_post_meta( $oid, 'ws_aorg_employment_sectors',         true ),
+            'employment_sectors'   => wp_get_object_terms( $oid, 'ws_employment_sector', [ 'fields' => 'slugs' ] ),
             'website_url'          => get_post_meta( $oid, 'ws_aorg_website_url',                true ),
             'intake_url'           => get_post_meta( $oid, 'ws_aorg_intake_url',                 true ),
             'phone'                => get_post_meta( $oid, 'ws_aorg_phone',                      true ),
@@ -971,33 +978,34 @@ function ws_get_assist_org_data( $jx_term_id ) {
 // ════════════════════════════════════════════════════════════════════════════
 // Dataset: Nationwide Assist Organizations (Directory)
 //
-// Returns all published ws-assist-org records scoped to the 'us'
-// ws_jurisdiction taxonomy term, ordered alphabetically. Accepts an optional
-// $filters array to narrow results before returning.
+// Returns all published ws-assist-org records where ws_aorg_serves_nationwide
+// is true, ordered alphabetically. Accepts an optional $filters array to
+// narrow results before returning.
+//
+// NATIONWIDE vs FEDERAL-SCOPE
+// us jurisdiction tag = federal law scope (federal workers only).
+// ws_aorg_serves_nationwide = 1 = org operates across all 57 jurisdictions.
+// This function gates on serves_nationwide, not the us jurisdiction term.
+// Federal-scope-only orgs (OSC, GAO FraudNet, etc.) have is_nationwide = 0
+// and are intentionally excluded here; they surface on jurisdiction pages.
 //
 // Intended for the [ws_assist_org_directory] shortcode. For jurisdiction-page
-// renders, use ws_get_assist_org_data() with the US term ID instead.
+// renders, use ws_get_assist_org_data() with the jurisdiction term ID instead.
 //
 // $filters keys (all optional):
 //   'type'       — ws_aorg_type slug (e.g. 'nonprofit', 'legal-aid')
-//   'sector'     — employment sector slug (e.g. 'federal', 'healthcare')
-//   'stage'      — ws_case_stage slug (e.g. 'pre-disclosure', 'retaliation')
+//   'sector'     — ws_employment_sector slug (e.g. 'federal-employee')
+//   'stage'      — ws_case_stage slug (e.g. 'pre-report', 'retaliation-active')
 //   'cost_model' — cost model value (e.g. 'pro_bono', 'free', 'contingency')
 //
-// Sector filtering is applied post-query because employment_sectors is a
-// serialized array in post_meta and cannot be safely matched via meta_query.
+// All filtering is performed at the query level via tax_query / meta_query.
+// No post-query filtering is used.
 //
 // Returns an array of assist-org data arrays (identical shape to
-// ws_get_assist_org_data()), or empty array if 'us' term is missing.
+// ws_get_assist_org_data()).
 // ════════════════════════════════════════════════════════════════════════════
 
 function ws_get_nationwide_assist_org_data( $filters = [] ) {
-
-    // Resolve the 'us' ws_jurisdiction term.
-    $us_term = get_term_by( 'slug', 'us', WS_JURISDICTION_TERM_ID );
-    if ( ! $us_term || is_wp_error( $us_term ) ) {
-        return [];
-    }
 
     $query_args = [
         'post_type'      => 'ws-assist-org',
@@ -1006,12 +1014,14 @@ function ws_get_nationwide_assist_org_data( $filters = [] ) {
         'orderby'        => 'title',
         'order'          => 'ASC',
         'no_found_rows'  => true,
-        'tax_query'      => [
+        // Gate: only orgs that operate across all 57 jurisdictions.
+        // Federal-scope-only orgs (is_nationwide = 0) are excluded.
+        'meta_query'     => [
             'relation' => 'AND',
             [
-                'taxonomy' => WS_JURISDICTION_TERM_ID,
-                'field'    => 'term_id',
-                'terms'    => $us_term->term_id,
+                'key'     => 'ws_aorg_serves_nationwide',
+                'value'   => '1',
+                'compare' => '=',
             ],
         ],
     ];
@@ -1022,6 +1032,15 @@ function ws_get_nationwide_assist_org_data( $filters = [] ) {
             'taxonomy' => 'ws_aorg_type',
             'field'    => 'slug',
             'terms'    => sanitize_key( $filters['type'] ),
+        ];
+    }
+
+    // Optional taxonomy filter: employment sector.
+    if ( ! empty( $filters['sector'] ) ) {
+        $query_args['tax_query'][] = [
+            'taxonomy' => 'ws_employment_sector',
+            'field'    => 'slug',
+            'terms'    => sanitize_key( $filters['sector'] ),
         ];
     }
 
@@ -1036,11 +1055,11 @@ function ws_get_nationwide_assist_org_data( $filters = [] ) {
 
     // Optional meta filter: cost model (scalar string — safe for meta_query).
     if ( ! empty( $filters['cost_model'] ) ) {
-        $query_args['meta_query'] = [ [
+        $query_args['meta_query'][] = [
             'key'     => 'ws_aorg_cost_model',
             'value'   => sanitize_text_field( $filters['cost_model'] ),
             'compare' => '=',
-        ] ];
+        ];
     }
 
     $q    = new WP_Query( $query_args );
@@ -1061,7 +1080,7 @@ function ws_get_nationwide_assist_org_data( $filters = [] ) {
             'serves_nationwide'    => (bool) get_post_meta( $oid, 'ws_aorg_serves_nationwide',   true ),
             'disclosure_type'      => get_field( 'ws_aorg_disclosure_type', $oid ),
             'services'             => get_post_meta( $oid, 'ws_aorg_services',                   true ),
-            'employment_sectors'   => get_post_meta( $oid, 'ws_aorg_employment_sectors',         true ),
+            'employment_sectors'   => wp_get_object_terms( $oid, 'ws_employment_sector', [ 'fields' => 'slugs' ] ),
             'website_url'          => get_post_meta( $oid, 'ws_aorg_website_url',                true ),
             'intake_url'           => get_post_meta( $oid, 'ws_aorg_intake_url',                 true ),
             'phone'                => get_post_meta( $oid, 'ws_aorg_phone',                      true ),
@@ -1086,14 +1105,6 @@ function ws_get_nationwide_assist_org_data( $filters = [] ) {
             // Record management
             'record' => ws_build_record_array( $oid ),
         ];
-    }
-
-    // Post-query: filter by employment sector (serialized array meta).
-    if ( ! empty( $filters['sector'] ) ) {
-        $sector = sanitize_text_field( $filters['sector'] );
-        $rows   = array_values( array_filter( $rows, static function( $r ) use ( $sector ) {
-            return is_array( $r['employment_sectors'] ) && in_array( $sector, $r['employment_sectors'], true );
-        } ) );
     }
 
     return $rows;
@@ -1321,10 +1332,12 @@ function ws_get_legal_updates_data( $jx_id = 0, $count = 0 ) {
 // Reference Materials
 //
 // ws_get_ref_materials( $post_id )
-//     Returns an array of approved ws-reference items linked to a parent
-//     post via the ws_ref_materials ACF relationship field.
-//     Only approved references (ws_ref_approved == 1) are included.
-//     Returns [] if no approved references exist.
+//     Returns an array of ws-reference items linked to a parent post via
+//     the ws_ref_materials ACF relationship field. All linked references
+//     are returned — the approval gate (ws_ref_approved) was retired in
+//     v3.4.0; editors are trusted users and the parent record's review
+//     workflow is the quality gate.
+//     Returns [] if no references are linked.
 //
 // ws_get_reference_page_data( $parent_post_id )
 //     Builds the full data payload for the [ws_reference_page] shortcode.
@@ -1344,7 +1357,6 @@ function ws_get_ref_materials( $post_id ) {
     foreach ( $refs as $ref ) {
         if ( ! ( $ref instanceof WP_Post ) ) continue;
         $rid = $ref->ID;
-        if ( ! (bool) get_post_meta( $rid, 'ws_ref_approved', true ) ) continue;
 
         $title = get_post_meta( $rid, 'ws_ref_title', true );
         if ( empty( $title ) ) {

@@ -2,16 +2,24 @@
 /**
  * matrix-assist-orgs.php
  *
- * Seeds nationwide whistleblower support organizations.
+ * Seeds nationwide and federal-scope whistleblower support organizations.
  *
  * PURPOSE
  * -------
  * Creates ws-assist-org CPT posts for major national organizations that
  * provide legal support, advocacy, and resources to whistleblowers.
- * All records are scoped to the US ws_jurisdiction taxonomy term.
+ * All records are tagged with the US ws_jurisdiction taxonomy term.
  *
- * Only nationwide organizations are seeded here. State or regional
- * organizations are managed via the admin UI.
+ * NATIONWIDE vs FEDERAL-SCOPE
+ * ---------------------------
+ * is_nationwide = 1  Org operates across all 57 jurisdictions (e.g. ACLU,
+ *                    GAP). Appears in ws_get_nationwide_assist_org_data().
+ * is_nationwide = 0  Org serves federal workers / federal law only (e.g.
+ *                    OSC, GAO FraudNet). US jurisdiction tag reflects scope
+ *                    of law, not geographic reach. Not returned by the
+ *                    nationwide query; accessible via jurisdiction pages.
+ *
+ * State or regional organizations are managed via the admin UI.
  *
  * SEEDER RULES
  * ------------
@@ -48,6 +56,16 @@
  *        Seeder now writes all corresponding ACF meta fields and assigns
  *        ws_disclosure_type taxonomy terms by slug. 14 total organizations.
  *        Gate bumped to 1.4.0.
+ * 3.7.0  Replaced ws_aorg_employment_sectors post_meta write with
+ *        wp_set_object_terms on ws_employment_sector taxonomy.
+ *        All sectors slugs remapped: federal → federal-employee,
+ *        state → state-local-employee, private → private-sector,
+ *        military → military-defense, nonprofit → nonprofit-ngo,
+ *        any → all-sectors. Gate bumped to 1.5.0.
+ * 3.7.1  is_nationwide corrected for federal-scope-only orgs (POGO,
+ *        GAO FraudNet, IG Community, OSC, OPM OIG): 1 → 0. These orgs
+ *        serve federal workers under federal law; the us jurisdiction tag
+ *        reflects legal scope, not geographic reach. Gate bumped to 1.6.0.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -77,8 +95,8 @@ $_ws_assist_org_matrix = [
         'accepts_anon'         => 1,
         'has_attorneys'        => 1,
         'services'             => [ 'legal_rep', 'consultation', 'advocacy', 'media' ],
-        'sectors'              => [ 'federal', 'private', 'nonprofit' ],
-        'disclosure_types'     => [ 'government-accountability', 'public-health-safety', 'financial-corporate' ],
+        'sectors'              => [ 'federal-employee', 'private-sector', 'nonprofit-ngo' ],
+        'disclosure_types'     => [ 'public-corruption-ethics', 'procurement-spending-fraud', 'environmental-protection', 'occupational-health-safety', 'securities-commodities-fraud' ],
         'case_stages'          => [ 'pre-report', 'post-report', 'retaliation-active', 'litigation' ],
     ],
 
@@ -98,8 +116,8 @@ $_ws_assist_org_matrix = [
         'accepts_anon'         => 1,
         'has_attorneys'        => 0,
         'services'             => [ 'referral', 'advocacy', 'media' ],
-        'sectors'              => [ 'any' ],
-        'disclosure_types'     => [ 'financial-corporate', 'government-accountability', 'public-health-safety' ],
+        'sectors'              => [ 'all-sectors' ],
+        'disclosure_types'     => [ 'securities-commodities-fraud', 'tax-evasion-fraud', 'public-corruption-ethics', 'procurement-spending-fraud', 'healthcare-medicare-fraud', 'environmental-protection' ],
         'case_stages'          => [ 'pre-report', 'post-report' ],
     ],
 
@@ -119,8 +137,8 @@ $_ws_assist_org_matrix = [
         'accepts_anon'         => 1,
         'has_attorneys'        => 1,
         'services'             => [ 'legal_rep', 'consultation', 'doc_review', 'retaliation' ],
-        'sectors'              => [ 'federal', 'private' ],
-        'disclosure_types'     => [ 'government-accountability', 'public-health-safety', 'national-security' ],
+        'sectors'              => [ 'federal-employee', 'private-sector' ],
+        'disclosure_types'     => [ 'public-corruption-ethics', 'classified-information', 'intelligence-community', 'environmental-protection', 'cybersecurity-disclosure' ],
         'case_stages'          => [ 'pre-report', 'post-report', 'retaliation-active', 'litigation' ],
     ],
 
@@ -136,12 +154,12 @@ $_ws_assist_org_matrix = [
         'ws_aorg_email'        => 'info@pogo.org',
         'aorg_type'            => 'advocacy',
         'cost_model'           => 'free',
-        'is_nationwide'        => 1,
+        'is_nationwide'        => 0,
         'accepts_anon'         => 1,
         'has_attorneys'        => 0,
         'services'             => [ 'advocacy', 'media' ],
-        'sectors'              => [ 'federal', 'military' ],
-        'disclosure_types'     => [ 'government-accountability', 'public-health-safety' ],
+        'sectors'              => [ 'federal-employee', 'military-defense' ],
+        'disclosure_types'     => [ 'public-corruption-ethics', 'procurement-spending-fraud', 'military-defense-reporting', 'environmental-protection' ],
         'case_stages'          => [ 'pre-report', 'post-report' ],
     ],
 
@@ -161,8 +179,8 @@ $_ws_assist_org_matrix = [
         'accepts_anon'         => 0,
         'has_attorneys'        => 0,
         'services'             => [ 'referral', 'advocacy' ],
-        'sectors'              => [ 'any' ],
-        'disclosure_types'     => [ 'financial-corporate', 'healthcare-medicare-fraud', 'procurement-spending-fraud' ],
+        'sectors'              => [ 'all-sectors' ],
+        'disclosure_types'     => [ 'securities-commodities-fraud', 'healthcare-medicare-fraud', 'procurement-spending-fraud', 'tax-evasion-fraud' ],
         'case_stages'          => [ 'pre-report', 'post-report', 'litigation' ],
     ],
 
@@ -182,8 +200,8 @@ $_ws_assist_org_matrix = [
         'accepts_anon'         => 1,
         'has_attorneys'        => 0,
         'services'             => [ 'advocacy', 'financial' ],
-        'sectors'              => [ 'any' ],
-        'disclosure_types'     => [ 'workplace-employment', 'public-health-safety' ],
+        'sectors'              => [ 'all-sectors' ],
+        'disclosure_types'     => [ 'retaliation-protection', 'wrongful-termination', 'occupational-health-safety', 'healthcare-medicare-fraud' ],
         'case_stages'          => [ 'post-report', 'retaliation-active' ],
     ],
 
@@ -203,8 +221,8 @@ $_ws_assist_org_matrix = [
         'accepts_anon'         => 0,
         'has_attorneys'        => 0,
         'services'             => [ 'referral', 'advocacy' ],
-        'sectors'              => [ 'any' ],
-        'disclosure_types'     => [ 'government-accountability', 'public-health-safety', 'privacy-data-integrity' ],
+        'sectors'              => [ 'all-sectors' ],
+        'disclosure_types'     => [ 'public-corruption-ethics', 'election-integrity', 'environmental-protection', 'cybersecurity-disclosure', 'consumer-data-protection' ],
         'case_stages'          => [ 'pre-report', 'post-report' ],
     ],
 
@@ -226,8 +244,8 @@ $_ws_assist_org_matrix = [
         'accepts_anon'         => 0,
         'has_attorneys'        => 0,
         'services'             => [ 'advocacy' ],
-        'sectors'              => [ 'private', 'nonprofit' ],
-        'disclosure_types'     => [ 'workplace-employment', 'wage-hour-violations', 'occupational-health-safety' ],
+        'sectors'              => [ 'private-sector', 'nonprofit-ngo' ],
+        'disclosure_types'     => [ 'retaliation-protection', 'wage-hour-violations', 'occupational-health-safety' ],
         'case_stages'          => [ 'post-report', 'retaliation-active' ],
     ],
 
@@ -245,12 +263,12 @@ $_ws_assist_org_matrix = [
         'ws_aorg_email'        => '',
         'aorg_type'            => 'oversight-office',
         'cost_model'           => 'free',
-        'is_nationwide'        => 1,
+        'is_nationwide'        => 0,
         'accepts_anon'         => 1,
         'has_attorneys'        => 0,
         'services'             => [ 'hotline', 'referral' ],
-        'sectors'              => [ 'federal' ],
-        'disclosure_types'     => [ 'government-accountability', 'procurement-spending-fraud', 'financial-corporate' ],
+        'sectors'              => [ 'federal-employee' ],
+        'disclosure_types'     => [ 'public-corruption-ethics', 'procurement-spending-fraud', 'banking-aml-compliance', 'tax-evasion-fraud' ],
         'case_stages'          => [ 'pre-report' ],
     ],
 
@@ -266,12 +284,12 @@ $_ws_assist_org_matrix = [
         'ws_aorg_email'        => '',
         'aorg_type'            => 'oversight-office',
         'cost_model'           => 'free',
-        'is_nationwide'        => 1,
+        'is_nationwide'        => 0,
         'accepts_anon'         => 1,
         'has_attorneys'        => 0,
         'services'             => [ 'hotline', 'referral' ],
-        'sectors'              => [ 'federal' ],
-        'disclosure_types'     => [ 'government-accountability', 'public-health-safety' ],
+        'sectors'              => [ 'federal-employee' ],
+        'disclosure_types'     => [ 'public-corruption-ethics', 'procurement-spending-fraud', 'healthcare-medicare-fraud', 'environmental-protection' ],
         'case_stages'          => [ 'pre-report', 'post-report' ],
     ],
 
@@ -287,12 +305,12 @@ $_ws_assist_org_matrix = [
         'ws_aorg_email'        => '',
         'aorg_type'            => 'oversight-office',
         'cost_model'           => 'free',
-        'is_nationwide'        => 1,
+        'is_nationwide'        => 0,
         'accepts_anon'         => 1,
         'has_attorneys'        => 0,
         'services'             => [ 'hotline', 'referral' ],
-        'sectors'              => [ 'federal' ],
-        'disclosure_types'     => [ 'workplace-employment', 'government-accountability' ],
+        'sectors'              => [ 'federal-employee' ],
+        'disclosure_types'     => [ 'retaliation-protection', 'wrongful-termination', 'public-corruption-ethics', 'procurement-spending-fraud' ],
         'case_stages'          => [ 'pre-report', 'post-report', 'retaliation-active' ],
     ],
 
@@ -308,12 +326,12 @@ $_ws_assist_org_matrix = [
         'ws_aorg_email'        => '',
         'aorg_type'            => 'oversight-office',
         'cost_model'           => 'free',
-        'is_nationwide'        => 1,
+        'is_nationwide'        => 0,
         'accepts_anon'         => 1,
         'has_attorneys'        => 0,
         'services'             => [ 'hotline', 'referral' ],
-        'sectors'              => [ 'federal' ],
-        'disclosure_types'     => [ 'government-accountability', 'workplace-employment' ],
+        'sectors'              => [ 'federal-employee' ],
+        'disclosure_types'     => [ 'public-corruption-ethics', 'procurement-spending-fraud', 'retaliation-protection' ],
         'case_stages'          => [ 'pre-report', 'post-report' ],
     ],
 
@@ -335,8 +353,8 @@ $_ws_assist_org_matrix = [
         'accepts_anon'         => 0,
         'has_attorneys'        => 0,
         'services'             => [ 'referral' ],
-        'sectors'              => [ 'any' ],
-        'disclosure_types'     => [ 'financial-corporate', 'government-accountability', 'public-health-safety' ],
+        'sectors'              => [ 'all-sectors' ],
+        'disclosure_types'     => [ 'securities-commodities-fraud', 'tax-evasion-fraud', 'public-corruption-ethics', 'procurement-spending-fraud', 'healthcare-medicare-fraud' ],
         'case_stages'          => [ 'pre-report', 'post-report', 'litigation' ],
     ],
 
@@ -356,8 +374,8 @@ $_ws_assist_org_matrix = [
         'accepts_anon'         => 0,
         'has_attorneys'        => 0,
         'services'             => [ 'referral' ],
-        'sectors'              => [ 'any' ],
-        'disclosure_types'     => [ 'workplace-employment', 'financial-corporate', 'public-health-safety' ],
+        'sectors'              => [ 'all-sectors' ],
+        'disclosure_types'     => [ 'retaliation-protection', 'wrongful-termination', 'securities-commodities-fraud', 'occupational-health-safety', 'healthcare-medicare-fraud' ],
         'case_stages'          => [ 'pre-report', 'post-report', 'litigation' ],
     ],
 
@@ -421,7 +439,6 @@ function ws_seed_assist_org_matrix() {
             'ws_aorg_accepts_anonymous'  => $org['accepts_anon']        ?? 0,
             'ws_aorg_licensed_attorneys' => $org['has_attorneys']       ?? 0,
             'ws_aorg_services'           => $org['services']            ?? [],
-            'ws_aorg_employment_sectors' => $org['sectors']             ?? [],
         ];
 
         foreach ( $meta as $key => $value ) {
@@ -447,6 +464,11 @@ function ws_seed_assist_org_matrix() {
             wp_set_object_terms( $post_id, $org['case_stages'], 'ws_case_stage' );
         }
 
+        // Employment sectors (array of ws_employment_sector slugs).
+        if ( ! empty( $org['sectors'] ) ) {
+            wp_set_object_terms( $post_id, $org['sectors'], 'ws_employment_sector' );
+        }
+
         // Language: English (all seeded national orgs operate in English).
         wp_set_object_terms( $post_id, 'english', 'ws_languages' );
 
@@ -462,8 +484,8 @@ function ws_seed_assist_org_matrix() {
 // ── Gate ──────────────────────────────────────────────────────────────────────
 
 add_action( 'admin_init', function() {
-    if ( get_option( 'ws_seeded_assist_org_matrix' ) !== '1.4.0' ) {
+    if ( get_option( 'ws_seeded_assist_org_matrix' ) !== '1.6.0' ) {
         ws_seed_assist_org_matrix();
-        update_option( 'ws_seeded_assist_org_matrix', '1.4.0' );
+        update_option( 'ws_seeded_assist_org_matrix', '1.6.0' );
     }
 } );

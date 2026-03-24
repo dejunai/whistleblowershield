@@ -1,6 +1,6 @@
 WHISTLEBLOWERSHIELD TAXONOMY TABLES
 ====================================
-Source: register-taxonomies.php v3.2.0
+Source: register-taxonomies.php v3.7.0
 Use these slug values in all JSON record arrays.
 Hierarchical taxonomies show PARENT > child relationships.
 Use child slugs in JSON records — not parent slugs.
@@ -44,6 +44,11 @@ PARENT: privacy-data-integrity | Privacy & Data Integrity
   hipaa-patient-privacy        HIPAA & Patient Privacy
   consumer-data-protection     Consumer Data Protection
   education-privacy-ferpa      Education Privacy (FERPA)
+
+PARENT: national-security | National Security
+  intelligence-community       Intelligence Community Reporting
+  classified-information       Classified Information Disclosures
+  export-sanctions-compliance  Export Controls & Sanctions Compliance
 
 
 ────────────────────────────────────────────────────────────────────────────
@@ -250,6 +255,22 @@ other                        Other
 
 
 ────────────────────────────────────────────────────────────────────────────
+TAXONOMY: ws_aorg_type
+Applies to: ws-assist-org
+Hierarchical: NO — flat list
+Description: Organizational classification for assist-org records.
+────────────────────────────────────────────────────────────────────────────
+
+nonprofit          Nonprofit Organization
+legal-aid          Legal Aid Clinic
+law-firm           Law Firm
+bar-program        Bar Association Program
+advocacy           Advocacy Organization
+oversight-office   Government Oversight Office
+union              Labor Union
+
+
+────────────────────────────────────────────────────────────────────────────
 TAXONOMY: ws_languages
 Applies to: ws-agency, ws-assist-org
 Hierarchical: NO — flat list
@@ -268,12 +289,17 @@ japanese         Japanese
 
 
 ────────────────────────────────────────────────────────────────────────────
-DEPRECATED TAXONOMIES — DO NOT USE IN NEW RECORDS
+TAXONOMY: ws_employment_sector
+Applies to: ws-assist-org
+Hierarchical: NO — flat list
+Description: Employment sector(s) served by an assistance organization.
+             Replaces ws_aorg_employment_sectors ACF checkbox (3.7.0).
+             Used as filter layer for Phase 2 directory query panel.
 ────────────────────────────────────────────────────────────────────────────
 
-ws_coverage_scope     → replaced by ws_protected_class
-ws_retaliation_forms  → replaced by ws_adverse_action_types
-ws_remedy_type        → replaced by ws_remedies
-
-These taxonomies remain registered for migration purposes only.
-They will be removed in a future version after migration is confirmed.
+federal-employee      Federal Government Employee
+state-local-employee  State & Local Government Employee
+private-sector        Private Sector Employee
+military-defense      Military & Defense Contractors
+nonprofit-ngo         Nonprofit & NGO Employee
+all-sectors           All Employment Sectors

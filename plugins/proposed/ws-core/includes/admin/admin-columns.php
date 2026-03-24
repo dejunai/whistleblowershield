@@ -22,6 +22,9 @@
  *        ws-legal-update, ws-agency, and ws-assist-org list tables.
  * 3.1.1  Added inline comments to direct meta reads explaining why the
  *        query layer is not used in admin list table context.
+ * 3.8.0  jx-interpretation Court column updated to use ws_court_lookup()
+ *        for label resolution. 'other' court key shows the free-text
+ *        ws_jx_interp_court_name value instead of the raw key.
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit;
@@ -220,8 +223,14 @@ function ws_render_interp_column( $column, $post_id ) {
         }
     } elseif ( $column === 'ws_court' ) {
         // Direct meta reads — admin list table display only; query layer is for front-end shortcode rendering.
-        $court = get_post_meta( $post_id, 'ws_jx_interp_court', true );
-        echo $court ? esc_html( $court ) : '<span style="color:#999;">—</span>';
+        $court_key = get_post_meta( $post_id, 'ws_jx_interp_court', true );
+        if ( $court_key === 'other' ) {
+            $name = get_post_meta( $post_id, 'ws_jx_interp_court_name', true ) ?: 'Other';
+            echo esc_html( $name );
+        } else {
+            $court_entry = ws_court_lookup( $court_key );
+            echo $court_entry ? esc_html( $court_entry['short'] ) : ( $court_key ? esc_html( $court_key ) : '<span style="color:#999;">—</span>' );
+        }
     } elseif ( $column === 'ws_year' ) {
         $year = get_post_meta( $post_id, 'ws_jx_interp_year', true );
         echo $year ? esc_html( $year ) : '<span style="color:#999;">—</span>';

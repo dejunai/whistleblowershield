@@ -1,140 +1,23 @@
 /*
- * ws-core-front.css
+ * ws-core-front-general.css
  *
- * Frontend styles for ws-core shortcode output.
- * Enqueued globally by ws-core.php on all public-facing pages.
+ * General-purpose frontend styles for ws-core shortcode output.
+ * Loaded on all singular posts/pages via wp_enqueue_scripts.
  *
- * These styles control layout and scale only.
+ * Covers shortcodes that may appear on any page type:
+ *   [ws_nla_disclaimer_notice], [ws_footer], [ws_legal_updates],
+ *   [ws_jurisdiction_index], [ws_reference_page], [ws_jx_flag],
+ *   .ws-ref-materials-btn (rendered from jurisdiction and reference pages),
+ *   .ws-term-highlight (tooltip, usable in any content).
+ *
+ * Jurisdiction-page-only styles are in ws-core-front-jx.css.
+ *
  * Color, typography, and aesthetic design are intentionally
  * deferred to the GeneratePress theme pass before launch.
  *
- * NOTE: Tooltip (.ws-term-highlight) is pure CSS and not
- * keyboard-accessible. Before launch, consider upgrading to
- * a JS-driven solution (e.g., Tippy.js) for accessibility compliance.
- *
  * Version history:
- *   1.1.0 — Initial stylesheet.
- *   1.2.0 — No CSS changes.
- *   1.3.0 — Removed duplicate H1. Added ws-gov-offices-box panel.
- *   1.3.1 — Tightened gov link spacing.
- *   1.4.0 — Added ws-footer-block styles.
- *   1.4.1 — Added GeneratePress footer/header overrides.
- *   1.7.0 — Added .ws-nla-disclaimer-notice class.
- *   1.7.1 — Migrated .ws-term-highlight tooltip styles from Additional CSS.
- *   2.1.0 — Removed commented-out rules and noted redundancies.
- *            Enqueue changed to global (all public pages).
+ *   3.8.0 — Split from ws-core-front.css. General shortcode styles extracted.
  */
-
-
-/* ── Jurisdiction Header ─────────────────────────────────────────────────── */
-
-.ws-jurisdiction-header {
-    display: flex;
-    align-items: flex-start;
-    gap: 1.25rem;
-    margin-bottom: 1.5rem;
-}
-
-
-/* ── Flag Image ──────────────────────────────────────────────────────────── */
-
-.ws-jurisdiction-flag {
-    flex-shrink: 0;
-}
-
-.ws-jx-flag-img,
-.ws-jurisdiction-header .ws-jx-flag {
-    height: 130px;
-    width: auto;
-    border: 1px solid #D8D2C7;
-    background: #fff;
-    display: block;
-    object-fit: contain;
-}
-
-
-/* ── Flag Attribution ────────────────────────────────────────────────────── */
-/*
- * Deliberately smaller and visually subordinate to the government links.
- * Satisfies Wikimedia Commons attribution requirements without
- * competing visually with primary jurisdiction information.
- */
-
-.ws-jx-flag-attribution {
-    font-size: 0.65rem;
-    line-height: 1.3;
-    color: #888;
-    margin: 0.3rem 0 0 0;
-}
-
-.ws-jx-flag-attribution a {
-    color: #888;
-    text-decoration: underline;
-}
-
-.ws-jx-flag-attribution a:hover {
-    color: #555;
-}
-
-
-/* ── Jurisdiction Title Block ─────────────────────────────────────────────── */
-
-.ws-jurisdiction-title-block {
-    flex: 1;
-}
-
-
-/* ── Government Offices Box ──────────────────────────────────────────────── */
-/*
- * Styled panel containing the stacked leadership office links.
- * Background is intentionally offset from page background.
- * Color and border will be refined in the pre-launch design pass.
- */
-
-.ws-jx-gov-offices-box {
-    display: inline-block;
-    background: #f4f2ee;
-    border: 1px solid #D8D2C7;
-    border-radius: 4px;
-    padding: 0.6rem 1rem;
-    margin-top: 0.25rem;
-}
-
-.ws-jx-gov-offices-label {
-    font-size: 0.7rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: #888;
-    margin: 0 0 0.4rem 0;
-}
-
-
-/* ── Government Links List ───────────────────────────────────────────────── */
-
-.ws-jx-gov-links {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-}
-
-.ws-jx-gov-link {
-    line-height: 1;
-    padding: 0.2rem 0;
-}
-
-.ws-jx-gov-link a {
-    text-decoration: none;
-    font-size: 0.88rem;
-    line-height: 1;
-}
-
-.ws-jx-gov-link a:hover {
-    text-decoration: underline;
-}
 
 
 /* ── "Not Legal Advice" Disclaimer Notice ────────────────────────────────── */
@@ -153,77 +36,6 @@
     font-size: 0.9rem;
     line-height: 1.5;
     color: #4a5568;
-}
-
-
-/* ── Summary Block ───────────────────────────────────────────────────────── */
-
-.ws-jx-summary-block {
-    margin-top: 1.5rem;
-}
-
-.ws-jx-summary-content {
-    margin-bottom: 1.5rem;
-}
-
-
-/* ── Summary Footer ──────────────────────────────────────────────────────── */
-
-.ws-jx-summary-footer {
-    border-top: 1px solid #e0e0e0;
-    padding-top: 1rem;
-    font-size: 0.85rem;
-    color: #555;
-}
-
-.ws-jx-summary-footer p {
-    margin: 0.2rem 0;
-}
-
-
-/* ── Trust Badges ────────────────────────────────────────────────────────── */
-/* Phase 9: Replaces .ws-badge-legal-reviewed and .ws-review-badges system.  */
-
-.ws-trust-badge {
-    display: inline-block;
-    padding: 0.15rem 0.5rem;
-    border-radius: 3px;
-    font-size: 0.75rem;
-    font-weight: 500;
-    letter-spacing: 0.01em;
-    margin: 0.5rem 0;
-}
-
-.ws-trust-badge--reviewed {
-    background: #f0f7f0;
-    color: #2e7d32;
-    border: 1px solid #c8e6c9;
-}
-
-.ws-trust-badge--draft {
-    background: #fafafa;
-    color: #9e9e9e;
-    border: 1px solid #e0e0e0;
-}
-
-
-/* ── Sources Block ───────────────────────────────────────────────────────── */
-
-.ws-jx-summary-sources {
-    margin-top: 0.75rem;
-    font-size: 0.8rem;
-}
-
-.ws-jx-sources-text {
-    white-space: pre-wrap;
-    word-break: break-word;
-    font-family: inherit;
-    font-size: 0.8rem;
-    background: #f9f9f9;
-    border: 1px solid #e0e0e0;
-    border-radius: 3px;
-    padding: 0.5rem 0.75rem;
-    margin: 0.25rem 0 0 0;
 }
 
 
@@ -268,24 +80,10 @@
 }
 
 
-/* ── Flag-only Block (ws_flag shortcode) ─────────────────────────────────── */
+/* ── Flag-only Block ([ws_jx_flag] standalone shortcode) ─────────────────── */
 
 .ws-flag-block {
     display: inline-block;
-}
-
-
-/* ── Responsive: Stack Header on Small Screens ───────────────────────────── */
-
-@media ( max-width: 480px ) {
-    .ws-jurisdiction-header {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-
-    .ws-jx-flag-attribution {
-        max-width: 100%;
-    }
 }
 
 
@@ -370,11 +168,37 @@
 }
 
 
+/* ── Screen Reader Utility ───────────────────────────────────────────────── */
+/*
+ * Visually hides an element while keeping it readable by screen readers.
+ * Used by ws-core-front.js for "opens in new tab" link hints.
+ * Standard sr-only technique — clip/overflow approach, not display:none.
+ */
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+
 /* ── Term Highlight Tooltip ──────────────────────────────────────────────── */
 /*
  * Apply class="ws-term-highlight" data-tooltip="Definition here"
  * to any <span> wrapping a legal term in post content or shortcode output.
- * Tooltip appears above the term on hover, centered horizontally.
+ * Tooltip appears above the term on hover or keyboard focus.
+ *
+ * Keyboard accessibility is handled in two layers:
+ *   CSS  — :focus::after mirrors :hover::after for visual display
+ *   JS   — ws-core-front.js injects a role="tooltip" DOM element and
+ *          aria-describedby so screen readers announce the definition
+ *          when the term receives focus.
  */
 
 .ws-term-highlight {
@@ -385,7 +209,8 @@
     font-weight: 600;
 }
 
-.ws-term-highlight:hover::after {
+.ws-term-highlight:hover::after,
+.ws-term-highlight:focus::after {
     content: attr(data-tooltip);
     position: absolute;
     bottom: 140%;
@@ -403,13 +228,27 @@
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
+.ws-term-highlight:focus {
+    outline: 2px solid #4a90d9;
+    outline-offset: 2px;
+    border-radius: 2px;
+}
 
-/* ── Footnote Return Links ───────────────────────────────────────────────── */
-
-.ws-case-law .ws-footnote-return {
-    font-size: 0.85rem;
-    text-decoration: none;
-    margin-right: 0.2rem;
+/*
+ * Hidden tooltip DOM element injected by ws-core-front.js.
+ * Read by screen readers via aria-describedby; never displayed visually.
+ * Uses sr-only technique so screen readers can still find it.
+ */
+.ws-tooltip-content {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
 }
 
 
@@ -479,6 +318,9 @@
 
 /* ── Reference Materials Button ──────────────────────────────────────────── */
 /*
+ * Appears on jurisdiction pages (inline in statute/citation blocks) and
+ * on the standalone reference-materials WP page.
+ *
  * .ws-ref-materials-link     Wrapper div appended to statute content blocks.
  * .ws-ref-materials-btn      Block-level "→ External References" button.
  * .ws-ref-materials-btn--inline  Compact inline variant used in citation

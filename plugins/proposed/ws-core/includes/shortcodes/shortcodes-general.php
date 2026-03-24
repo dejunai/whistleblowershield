@@ -60,6 +60,13 @@
  * 3.7.0  Added [ws_assist_org_directory] shortcode. Delegates to
  *         ws_get_nationwide_assist_org_data() + ws_render_directory_page().
  *         Supports shortcode atts and URL param overrides for deep-linking.
+ * 3.8.0  ws_get_reference_page_url() updated to accept optional $section param;
+ *         appends section as query arg for anchor targeting in the assembler
+ *         (id="ws-{section}" wrappers in render-jurisdiction.php).
+ *         [ws_reference_page] shortcode reads $section from URL and appends
+ *         #ws-{section} to the back link. Two disclaimers added to reference
+ *         page output. External reference links use target="_blank" with
+ *         rel="noopener noreferrer" and window.opener JS for tab management.
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit;
@@ -69,7 +76,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 //
 // To update the notice text site-wide: edit $notice_text below.
 // The change propagates to all jurisdiction pages automatically.
-// Styling is handled by .ws-nla-disclaimer-notice in ws-core-front.css.
+// Styling is handled by .ws-nla-disclaimer-notice in ws-core-front-general.css.
 
 add_shortcode( 'ws_nla_disclaimer_notice', function() {
 
@@ -132,7 +139,7 @@ function ws_shortcode_legal_updates( $atts ) {
 
     // ── Resolve jurisdiction parameter to a post ID ───────────────────────
     //
-    // Accepts: numeric post ID, USPS code ("CA"), or post slug ("california").
+    // Accepts: numeric post ID or USPS code ("CA").
     // All data reads are delegated to ws_get_legal_updates_data().
 
     $jx_id = 0;
@@ -141,16 +148,6 @@ function ws_shortcode_legal_updates( $atts ) {
             $jx_id = (int) $atts['jx'];
         } else {
             $jx_id = ws_get_id_by_code( strtoupper( $atts['jx'] ) );
-            if ( ! $jx_id ) {
-                $posts = get_posts( [
-                    'post_type'      => 'jurisdiction',
-                    'name'           => sanitize_title( $atts['jx'] ),
-                    'posts_per_page' => 1,
-                    'post_status'    => 'publish',
-                    'fields'         => 'ids',
-                ] );
-                $jx_id = ! empty( $posts ) ? $posts[0] : 0;
-            }
         }
     }
 
@@ -189,11 +186,15 @@ function ws_shortcode_legal_updates( $atts ) {
 //
 // Usage: ws_get_reference_page_url( $post_id )
 
-function ws_get_reference_page_url( $post_id ) {
+function ws_get_reference_page_url( $post_id, $section = '' ) {
     $slug = apply_filters( 'ws_reference_page_slug', 'reference-materials' );
     $page = get_page_by_path( $slug );
     if ( ! $page ) return '';
-    return add_query_arg( 'post_id', (int) $post_id, get_permalink( $page->ID ) );
+    $args = [ 'post_id' => (int) $post_id ];
+    if ( $section ) {
+        $args['section'] = sanitize_key( $section );
+    }
+    return add_query_arg( $args, get_permalink( $page->ID ) );
 }
 
 
@@ -203,8 +204,8 @@ function ws_shortcode_reference_page( $atts ) {
     $atts    = shortcode_atts( [ 'post_id' => 0 ], $atts, 'ws_reference_page' );
     $post_id = (int) $atts['post_id'];
 
-    // Accept post_id from URL query param when not passed as shortcode attribute.
-    // This allows a single page with [ws_reference_page] to serve all records.
+    // Accept post_id and section from URL query params.
+    // A single page with [ws_reference_page] serves all records.
     if ( ! $post_id && isset( $_GET['post_id'] ) ) {
         $post_id = (int) $_GET['post_id'];
     }
@@ -219,6 +220,15 @@ function ws_shortcode_reference_page( $atts ) {
         return '';
     }
 
+    // Build back URL — anchor to the originating section when section param is present.
+    // section is set by ws_get_reference_page_url() at each call site (statutes,
+    // citations, interpretations). Matches id="ws-{section}" wrappers in the assembler.
+    $section  = isset( $_GET['section'] ) ? sanitize_key( $_GET['section'] ) : '';
+    $back_url = $data['parent_url'];
+    if ( $section ) {
+        $back_url .= '#ws-' . $section;
+    }
+
     $refs = $data['references'];
 
     ob_start();
@@ -226,55 +236,72 @@ function ws_shortcode_reference_page( $atts ) {
     <div class="ws-reference-page">
 
         <div class="ws-reference-page__back">
-            <a href="<?php echo esc_url( $data['parent_url'] ); ?>"
+            <a href="<?php echo esc_url( $back_url ); ?>"
                class="ws-reference-page__back-link">
                 &larr; <?php echo esc_html( $data['parent_title'] ); ?>
             </a>
         </div>
 
-        <h2 class="ws-reference-page__heading">Reference Materials</h2>
+        <div class="ws-reference-page__notice ws-reference-page__notice--redirect">
+            <p>If you arrived here looking for help with your situation, you are likely
+            in the wrong place. Use the link above to return to
+            <a href="<?php echo esc_url( $back_url ); ?>"><?php echo esc_html( $data['parent_title'] ); ?></a>.</p>
+        </div>
+
+        <h2 class="ws-reference-page__heading">External References</h2>
         <p class="ws-reference-page__subheading">
-            External resources related to:
+            Additional resources related to:
             <strong><?php echo esc_html( $data['parent_title'] ); ?></strong>
         </p>
 
         <?php if ( empty( $refs ) ) : ?>
             <p class="ws-reference-page__empty">
-                No reference materials are currently available for this record.
+                No external references are currently available for this record.
             </p>
         <?php else : ?>
             <ul class="ws-reference-page__list">
                 <?php foreach ( $refs as $ref ) : ?>
                     <li class="ws-reference-page__item">
-                        <div class="ws-reference-page__item-header">
-                            <a href="<?php echo esc_url( $ref['url'] ); ?>"
-                               class="ws-reference-page__item-title"
-                               target="_blank"
-                               rel="noopener noreferrer">
-                                <?php echo esc_html( $ref['title'] ); ?>
-                            </a>
-                            <?php if ( ! empty( $ref['type'] ) ) : ?>
-                                <span class="ws-reference-page__item-type">
-                                    <?php echo esc_html( $ref['type'] ); ?>
-                                </span>
-                            <?php endif; ?>
-                        </div>
-                        <?php if ( ! empty( $ref['source_name'] ) ) : ?>
-                            <div class="ws-reference-page__item-source">
-                                <?php echo esc_html( $ref['source_name'] ); ?>
-                            </div>
-                        <?php endif; ?>
-                        <?php if ( ! empty( $ref['description'] ) ) : ?>
-                            <div class="ws-reference-page__item-description">
-                                <?php echo esc_html( $ref['description'] ); ?>
-                            </div>
+                        <a href="<?php echo esc_url( $ref['url'] ); ?>"
+                           class="ws-reference-page__item-title"
+                           target="_blank"
+                           rel="noopener noreferrer">
+                            <?php echo esc_html( $ref['title'] ); ?>
+                        </a>
+                        <?php if ( ! empty( $ref['source_name'] ) || ! empty( $ref['type'] ) ) : ?>
+                            <span class="ws-reference-page__item-meta">
+                                <?php if ( ! empty( $ref['source_name'] ) ) : ?>
+                                    <?php echo esc_html( $ref['source_name'] ); ?>
+                                <?php endif; ?>
+                                <?php if ( ! empty( $ref['type'] ) ) : ?>
+                                    <span class="ws-reference-page__item-type"><?php echo esc_html( $ref['type'] ); ?></span>
+                                <?php endif; ?>
+                            </span>
                         <?php endif; ?>
                     </li>
                 <?php endforeach; ?>
             </ul>
+
+            <div class="ws-reference-page__notice ws-reference-page__notice--accuracy">
+                <p>External references are provided as additional sources of information.
+                They have not been verified by WhistleblowerShield for accuracy or currency.</p>
+            </div>
         <?php endif; ?>
 
     </div>
+
+    <script>
+    document.addEventListener( 'DOMContentLoaded', function() {
+        var backLink = document.querySelector( '.ws-reference-page__back-link' );
+        if ( backLink && window.opener && ! window.opener.closed ) {
+            backLink.addEventListener( 'click', function( e ) {
+                e.preventDefault();
+                window.opener.focus();
+                window.close();
+            } );
+        }
+    } );
+    </script>
     <?php
     return ob_get_clean();
 }

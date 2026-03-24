@@ -23,7 +23,7 @@
  * Description: Core architecture for WhistleblowerShield. Proposed replacement
  *              plugin — radical refactor of v2.3.1. Not an upgrade of the live plugin.
  *              Assembles public whistleblower protection pages for 57 U.S. jurisdictions.
- * Version:     3.5.0
+ * Version:     3.8.0
  * Author:      Whistleblower Shield
  * Author URI:  https://whistleblowershield.org
  *
@@ -238,7 +238,91 @@
  *      a named page region may use a section name, provided the docblock
  *      explicitly lists every data type the function consumes.
  *
- * @todo - fix function names pre-launch
+ *   Applied (v3.6.0): ws_render_jx_case_law() → ws_render_jx_citations(),
+ *      ws_shortcode_jx_case_law() → ws_shortcode_jx_citation(),
+ *      shortcode tag [ws_jx_case_law] → [ws_jx_citation].
+ *      CSS class .ws-case-law intentionally preserved (end-user facing).
+ *
+ * TAXONOMY CLEANUP + EMPLOYMENT SECTOR (v3.7.0)
+ * -----------------------------------------------
+ *   1. Deprecated taxonomy registrations removed: ws_remedy_type,
+ *      ws_coverage_scope, ws_retaliation_forms — no live data, safe to drop.
+ *
+ *   2. New taxonomy: ws_employment_sector (flat, ws-assist-org only).
+ *      Replaces the ws_aorg_employment_sectors ACF checkbox field.
+ *      ACF field converted to taxonomy type with save_terms: 1 so that
+ *      term relationships are written via wp_set_object_terms, enabling
+ *      tax_query throughout the Phase 2 filter cascade. No meta_query
+ *      required at any cascade level.
+ *      Seeded with 6 terms: federal-employee, state-local-employee,
+ *      private-sector, military-defense, nonprofit-ngo, all-sectors.
+ *
+ *   3. cpt-jx-statutes.php taxonomies array corrected — removed deprecated
+ *      slugs, all current taxonomy slugs confirmed.
+ *
+ *   4. matrix-assist-orgs.php: sectors slugs remapped to new taxonomy slugs,
+ *      wp_set_object_terms() call added, update_post_meta() for sectors removed.
+ *      is_nationwide flag corrected: federal-scope-only orgs set to false.
+ *
+ * COURT MATRIX SPLIT + INTERPRETATION SYSTEM (v3.8.0)
+ * -----------------------------------------------------
+ *   1. matrix-courts.php renamed to matrix-federal-courts.php. State and
+ *      territory courts extracted to new matrix-state-courts.php
+ *      ($ws_state_court_matrix). Enables context-aware court select:
+ *      federal statute = all courts merged; state statute = state courts only.
+ *
+ *   2. ws_court_lookup( $court_key ) added to matrix-helpers.php — checks
+ *      both $ws_court_matrix and $ws_state_court_matrix, returns entry array
+ *      or null. Used by ACF save hook, query layer, metabox, and admin columns
+ *      to eliminate duplicated dual-matrix lookup logic.
+ *
+ *   3. 'other' sentinel added to $ws_court_matrix (ws_jx_codes = '__manual__',
+ *      level = 99). Selecting it reveals ws_jx_interp_court_name free-text
+ *      field (conditional on court == 'other'). Save hook skips
+ *      auto-population of ws_jx_interp_affected_jx for this sentinel.
+ *
+ *   4. ws_interp_load_court_choices() rewritten: context-aware population of
+ *      the court select from saved or URL-param parent statute. Merged matrix
+ *      for federal statutes; state matrix only for state statutes.
+ *
+ *   5. ws_interp_auto_populate_affected_jx() updated to use ws_court_lookup();
+ *      handles __manual__ sentinel (skip) and null (SCOTUS = all jx).
+ *
+ *   6. Dispatcher refactor: ws_handle_jurisdiction_render() reduced to a thin
+ *      dispatcher. Curated render logic extracted to ws_render_jx_curated().
+ *      ws_render_jx_filtered() signature updated to ( $post, $jx_term_id,
+ *      $filter_context ). Phase 2 dispatch hook point added (dormant).
+ *
+ *   7. ws_render_jx_interpretations() added to render-section.php; wired into
+ *      assembler after citations, before limitations. [ws_jx_interpretation]
+ *      shortcode added to shortcodes-jurisdiction.php.
+ *
+ *   8. Section anchors added: id="ws-statutes", id="ws-citations",
+ *      id="ws-interpretations" wrapper divs in the assembler.
+ *
+ *   9. ws_get_reference_page_url() updated to accept $section param for anchor
+ *      targeting. [ws_reference_page] shortcode reads $section from URL and
+ *      appends #ws-{section} to the back link. Dead ws_ref_approved gate
+ *      removed from ws_get_ref_materials() — was silently excluding all refs.
+ *
+ *  10. court key in ws_get_jx_interpretation_data() resolved to short label
+ *      via ws_court_lookup(); 'other' resolves to ws_jx_interp_court_name.
+ *
+ *  11. admin-columns.php and admin-interpretation-metabox.php updated to use
+ *      ws_court_lookup() for label resolution; 'other' shows free-text name.
+ *
+ *  12. rel= audit: all external links carry rel="noopener noreferrer";
+ *      internal same-domain links have no rel attribute.
+ *
+ *  13. Citation footnote return links upgraded from <span aria-hidden="true">
+ *      to <a href="#{prefix}-fn-ref-{n}" aria-label="Return to in-text reference">.
+ *
+ *  14. [ws_reference_page] fully implemented: two disclaimers, trimmed list,
+ *      target="_blank", window.opener JS for tab management.
+ *
+ *  15. ws_employment_sector taxonomy added to register-taxonomies.php (section
+ *      13). Seeder and gate added. Replaces ws_aorg_employment_sectors ACF
+ *      checkbox field. acf-assist-orgs.php field converted to taxonomy type.
  *
  */
 
@@ -246,12 +330,18 @@ defined( 'ABSPATH' ) || exit;
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
-define( 'WS_CORE_VERSION', '3.5.0' );
+define( 'WS_CORE_VERSION', '3.8.0' );
 define( 'WS_CORE_PATH',    plugin_dir_path( __FILE__ ) );
 define( 'WS_CORE_URL',     plugin_dir_url( __FILE__ ) );
 
-// Taxonomy slug for the jurisdiction vocabulary. Used everywhere a taxonomy
-// argument is required — wp_get_post_terms(), tax_query, get_term_by(), etc.
+// WS_JURISDICTION_TERM_ID holds the taxonomy *slug* ('ws_jurisdiction'), not
+// an integer term_id. Yes, the _ID suffix conventionally implies an integer.
+// No, that convention is not being followed here. The name was chosen because
+// this constant is passed wherever WordPress expects a "taxonomy identifier"
+// — wp_get_post_terms(), has_term(), tax_query 'taxonomy' key, get_term_by()
+// second arg, etc. — and "TERM_ID" reads correctly at every call site.
+// Storing the slug string is intentional and is not changing. Complaints can
+// be directed to /dev/null.
 define( 'WS_JURISDICTION_TERM_ID', 'ws_jurisdiction' );
 
 // Transient keys for the two jurisdiction-level query caches. Both are
@@ -348,30 +438,53 @@ function ws_core_init() {
 
 // ── Frontend Assets ───────────────────────────────────────────────────────────
 //
-// ws-core-front.css and ws-core-front.js are loaded globally on all
-// public-facing pages.
+// Two CSS files, one JS file:
 //
-// @todo - Revisit before launch. Narrow to specific page types once
-//         shortcode usage across page templates has been fully audited.
-//         Candidate conditional: is_singular('jurisdiction') plus any
-//         other page types confirmed to use ws-core shortcodes.
+//   ws-core-front-general.css — shortcodes usable on any page type:
+//       disclaimer, footer, legal updates, jurisdiction index, directory,
+//       reference materials page, ref-materials button, term tooltip.
+//       Loaded on all singular posts/pages (is_singular || is_page).
+//
+//   ws-core-front-jx.css — jurisdiction CPT pages only:
+//       header, flag, gov offices, summary, trust badge, sources,
+//       footnote indicator, responsive header stack.
+//       Loaded only on is_singular('jurisdiction').
+//
+//   ws-core-front.js — jurisdiction index filter tab logic.
+//       Self-exits when .ws-jx-filter-nav is absent, so safe to load
+//       alongside general CSS on all singular/page contexts.
 
 add_action( 'wp_enqueue_scripts', 'ws_core_enqueue_assets' );
 
 function ws_core_enqueue_assets() {
 
-    wp_enqueue_style(
-        'ws-core-front',
-        WS_CORE_URL . 'ws-core-front.css',
-        [],
-        WS_CORE_VERSION
-    );
+    // General styles + JS: any singular post or page.
+    if ( is_singular() || is_page() ) {
 
-    wp_enqueue_script(
-        'ws-core-front',
-        WS_CORE_URL . 'ws-core-front.js',
-        [],             // No dependencies
-        WS_CORE_VERSION,
-        true            // Load in footer
-    );
+        wp_enqueue_style(
+            'ws-core-front-general',
+            WS_CORE_URL . 'ws-core-front-general.css',
+            [],
+            WS_CORE_VERSION
+        );
+
+        wp_enqueue_script(
+            'ws-core-front',
+            WS_CORE_URL . 'ws-core-front.js',
+            [],
+            WS_CORE_VERSION,
+            true    // Load in footer
+        );
+    }
+
+    // Jurisdiction-only styles: jurisdiction CPT singles only.
+    if ( is_singular( 'jurisdiction' ) ) {
+
+        wp_enqueue_style(
+            'ws-core-front-jx',
+            WS_CORE_URL . 'ws-core-front-jx.css',
+            [ 'ws-core-front-general' ],    // General loads first
+            WS_CORE_VERSION
+        );
+    }
 }

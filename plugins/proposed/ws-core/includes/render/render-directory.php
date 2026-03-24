@@ -49,10 +49,12 @@
  *      "Are you looking for free legal help?"
  *
  * As the end-user answers, selected taxonomy terms cascade and filter the
- * jurisdiction page content — without a page refresh. Relevant assist-org
- * cards surface within the jurisdiction view as filters are applied. Each
- * assist-org card carries a [Connect for Help] button that deep-links to
- * the Directory with the active filter state pre-applied.
+ * jurisdiction page content. Filter state is carried as GET query parameters,
+ * producing a PHP re-render on each selection — bookmarkable URLs, no JS
+ * required. Relevant assist-org cards surface within the jurisdiction view
+ * as filters are applied. Each assist-org card carries a [Connect for Help]
+ * button that deep-links to the Directory with the active filter state
+ * pre-applied as query params.
  *
  * The taxonomy guide on the standalone Directory page uses different logic:
  * it allows the end-user to independently refine results without a
@@ -101,7 +103,7 @@
  * LOAD ORDER
  * ----------
  *
- * Loaded in the ASSEMBLY LAYER (frontend only) alongside section-renderer.php
+ * Loaded in the ASSEMBLY LAYER (frontend only) alongside render-section.php
  * and render-jurisdiction.php. No dependency on either — fully standalone.
  *
  *
@@ -254,8 +256,6 @@ function ws_render_directory_card( $org ) {
         ? 'aorg-' . sanitize_html_class( $org['internal_id'] )
         : 'aorg-' . absint( $org['id'] );
 
-    // Precompute the org title attribute once — used in multiple aria-label strings.
-    $org_title_attr = esc_attr( $org['title'] );
 
     ob_start();
     ?>
@@ -284,7 +284,7 @@ function ws_render_directory_card( $org ) {
             // announce the group once rather than reading six unlabeled spans.
             ?>
             <div class="ws-aorg-card__badges"
-                 aria-label="<?php echo $org_title_attr; ?> details">
+                 aria-label="<?php echo esc_attr( $org['title'] ); ?> details">
 
                 <?php if ( $type_name ) : ?>
                     <span class="ws-aorg-card__badge ws-aorg-card__badge--type"
@@ -340,7 +340,7 @@ function ws_render_directory_card( $org ) {
                 <?php if ( ! empty( $org['phone'] ) ) : ?>
                     <span class="ws-aorg-card__phone">
                         <a href="tel:<?php echo esc_attr( preg_replace( '/[^0-9+]/', '', $org['phone'] ) ); ?>"
-                           aria-label="Call <?php echo $org_title_attr; ?>: <?php echo esc_attr( $org['phone'] ); ?>">
+                           aria-label="Call <?php echo esc_attr( $org['title'] ); ?>: <?php echo esc_attr( $org['phone'] ); ?>">
                             <?php echo esc_html( $org['phone'] ); ?>
                         </a>
                     </span>
@@ -348,7 +348,7 @@ function ws_render_directory_card( $org ) {
                 <?php if ( ! empty( $org['email'] ) ) : ?>
                     <span class="ws-aorg-card__email">
                         <a href="mailto:<?php echo esc_attr( sanitize_email( $org['email'] ) ); ?>"
-                           aria-label="Email <?php echo $org_title_attr; ?>: <?php echo esc_attr( sanitize_email( $org['email'] ) ); ?>">
+                           aria-label="Email <?php echo esc_attr( $org['title'] ); ?>: <?php echo esc_attr( sanitize_email( $org['email'] ) ); ?>">
                             <?php echo esc_html( $org['email'] ); ?>
                         </a>
                     </span>
@@ -374,7 +374,7 @@ function ws_render_directory_card( $org ) {
                    class="ws-btn ws-btn--primary"
                    target="_blank"
                    rel="noopener noreferrer"
-                   aria-label="Get Help Now from <?php echo $org_title_attr; ?> (opens in new tab)">
+                   aria-label="Get Help Now from <?php echo esc_attr( $org['title'] ); ?> (opens in new tab)">
                     Get Help Now
                     <span class="screen-reader-text">(opens in new tab)</span>
                 </a>
@@ -384,7 +384,7 @@ function ws_render_directory_card( $org ) {
                    class="ws-btn ws-btn--secondary"
                    target="_blank"
                    rel="noopener noreferrer"
-                   aria-label="Visit the <?php echo $org_title_attr; ?> website (opens in new tab)">
+                   aria-label="Visit the <?php echo esc_attr( $org['title'] ); ?> website (opens in new tab)">
                     Visit Website
                     <span class="screen-reader-text">(opens in new tab)</span>
                 </a>
@@ -422,13 +422,24 @@ function ws_render_directory_empty() {
 // ════════════════════════════════════════════════════════════════════════════
 // ws_render_directory_taxonomy_guide()
 //
-// Right-side taxonomy filtering panel — Phase 2.
-// Reserved for the JS-driven filter interaction described in the docblock.
-// Returns '' until implemented.
+// !! PHASE 2 PRIORITY — DO NOT REMOVE !!
 //
-// @return string  Empty string (not yet implemented).
+// Renders the right-side taxonomy cascade filtering panel for the Directory.
+// Presents taxonomy terms as plain-language filter questions (industry,
+// disclosure type, etc.). Operates on the full nationwide assist-org dataset
+// without a jurisdiction scope — contrast with ws_render_jx_filtered() in
+// render-jurisdiction.php, which is scoped to a single jurisdiction.
+//
+// Implementation approach (Phase 2):
+//   - PHP-only: panel submits a GET form; page re-renders with $_GET params.
+//   - No AJAX required for core functionality; JS may be layered on for UX.
+//   - attach_flag is not applicable to the directory dataset.
+//   - Filtered URLs are bookmarkable and shareable.
+//
+// @return string  Empty string until Phase 2 implementation.
 // ════════════════════════════════════════════════════════════════════════════
 
 function ws_render_directory_taxonomy_guide() {
+    // Phase 2: Taxonomy cascade panel for Directory — see block comment above.
     return '';
 }

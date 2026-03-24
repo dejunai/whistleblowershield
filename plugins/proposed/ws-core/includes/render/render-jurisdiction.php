@@ -30,10 +30,8 @@
  *      └── ws-assist-org
  *      └── ws-legal-update
  *
- * Each dataset is stored as a separate Custom Post Type and linked
- * to the jurisdiction using ACF relationship fields defined in:
- *
- *      /includes/acf/acf-jurisdiction.php
+ * Each dataset is stored as a separate Custom Post Type and scoped
+ * to the jurisdiction via the ws_jurisdiction taxonomy term.
  *
  *
  * RENDERING MODEL
@@ -86,6 +84,22 @@
  *      • register shortcodes (handled by shortcodes-jurisdiction.php)
  *
  *
+ * RENDER PATHS
+ * ------------
+ *
+ * Two render paths share the same dispatcher (ws_handle_jurisdiction_render):
+ *
+ *   Curated  (ws_render_jx_curated)   — default path. attach_flag gates all
+ *            datasets. Editors control what appears by flagging records.
+ *
+ *   Filtered (ws_render_jx_filtered)  — Phase 2 path. attach_flag ignored.
+ *            All published records are candidates; $filter_context narrows
+ *            results via taxonomy cascade. Wired but dormant until Phase 2.
+ *
+ * The dispatcher resolves $jx_term_id once and passes it to whichever path
+ * is active. Neither render function touches the_content filter directly.
+ *
+ *
  * VERSION
  * -------
  * 2.1.0  Auto-render architecture introduced
@@ -99,6 +113,16 @@
  *         All dataset functions return arrays with a 'status' key.
  *         ws_get_jx_statutes() returns an array-of-arrays (state + federal
  *         merge) — first entry's 'status' key is used for the gate check.
+ * 2.4.0  ws_render_jx_filtered() stub added — Phase 2 taxonomy cascade
+ *         filter render path. Complements ws_render_directory_taxonomy_guide()
+ *         in render-directory.php. See stub comment block for implementation notes.
+ * 3.7.0  [ws_jx_interpretation] wired into assembler after [ws_jx_citation]
+ *         and before [ws_jx_limitations]. Render order: summary → statutes →
+ *         citations → interpretations → limitations → legal updates.
+ * 3.8.0  Dispatcher refactor: ws_handle_jurisdiction_render() reduced to a
+ *         thin dispatcher. Curated render logic extracted to ws_render_jx_curated().
+ *         ws_render_jx_filtered() signature updated to match dispatcher contract.
+ *         Phase 2 dispatch hook point added (commented — dormant until Phase 2).
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit;
@@ -143,19 +167,23 @@ function ws_is_published( $data ) {
 
 /*
 ---------------------------------------------------------
-Main Jurisdiction Renderer
+Dispatcher
 ---------------------------------------------------------
 */
 
 add_filter( 'the_content', 'ws_handle_jurisdiction_render' );
 
+/**
+ * Thin dispatcher — guards, resolves $jx_term_id, routes to the correct
+ * render path. Contains no render logic of its own.
+ */
 function ws_handle_jurisdiction_render( $content ) {
     global $post;
 
-    // Guard against infinite loops from nested do_shortcode calls
+    // Guard against infinite loops from nested do_shortcode calls.
     static $is_rendering = false;
 
-    // Only run on the main query loop — not widgets, sidebars, or REST calls
+    // Only run on the main query loop — not widgets, sidebars, or REST calls.
     if ( ! is_main_query() || ! in_the_loop() ) {
         return $content;
     }
@@ -166,66 +194,142 @@ function ws_handle_jurisdiction_render( $content ) {
 
     $is_rendering = true;
 
-    // Always render the header
-    $output = do_shortcode( '[ws_jx_header]' );
+    // Resolve ws_jurisdiction term ID once — both render paths need it.
+    $jx_term_id = ws_get_jx_term_id( $post->ID );
 
-    // Render disclaimer notice below header, before summary content
-    $output .= do_shortcode( '[ws_nla_disclaimer_notice]' );
-
-    // Each section renders only if its addendum post exists and is published.
-    // Post_content is NOT checked — content lives in ACF fields on addendum CPTs.
+    // ── Phase 2 dispatch ──────────────────────────────────────────────────
     //
-    // Resolve ws_jurisdiction term ID once; used for all dataset gate checks.
-    $jx_term_id  = ws_get_jx_term_id( $post->ID );
-    $has_content = false; // Phase 10: tracks whether any content section was added.
+    // When filter GET params are present, route to ws_render_jx_filtered().
+    // Dormant until ws_resolve_filter_context() is implemented in Phase 2.
+    // Centralized param names live in ws-filter-config.php (also Phase 2).
+    //
+    // $filter_context = ws_resolve_filter_context();
+    // if ( $filter_context ) {
+    //     $is_rendering = false;
+    //     return ws_render_jx_filtered( $post, $jx_term_id, $filter_context );
+    // }
 
-    // Render summary.
+    $output       = ws_render_jx_curated( $post, $jx_term_id );
+    $is_rendering = false;
+    return $output;
+}
+
+
+/*
+---------------------------------------------------------
+Curated Render Path  (default)
+---------------------------------------------------------
+*/
+
+/**
+ * Assembles the curated jurisdiction page.
+ *
+ * Renders sections gated by attach_flag — only records an editor has
+ * explicitly flagged appear here. Called by ws_handle_jurisdiction_render()
+ * when no filter context is active.
+ *
+ * Render order: header → disclaimer → summary → statutes → citations →
+ *               interpretations → limitations → legal updates → fallback
+ *
+ * @param  WP_Post  $post        The jurisdiction post object.
+ * @param  int|null $jx_term_id  The ws_jurisdiction term ID for this post.
+ * @return string                Assembled HTML for the jurisdiction page.
+ */
+function ws_render_jx_curated( $post, $jx_term_id ) {
+
+    $output      = do_shortcode( '[ws_jx_header]' );
+    $output     .= do_shortcode( '[ws_nla_disclaimer_notice]' );
+    $has_content = false;
+
+    // Summary.
     if ( $jx_term_id ) {
-        $related_summary = ws_get_jx_summary_data( $jx_term_id );
-        if ( ws_is_published( $related_summary ) ) {
-            $output .= do_shortcode( '[ws_jx_summary]' );
-            $has_content = true;
+        if ( ws_is_published( ws_get_jx_summary_data( $jx_term_id ) ) ) {
+            $output      .= do_shortcode( '[ws_jx_summary]' );
+            $has_content  = true;
         }
     }
 
-    // Render statutes — shown before case law so users see what protects
-    // them before seeing how courts have interpreted those protections.
+    // Statutes — users see what protects them before seeing how courts
+    // have interpreted those protections.
     if ( $jx_term_id ) {
-        $related_statutes = ws_get_jx_statute_data( $jx_term_id );
-        if ( ws_is_published( $related_statutes ) ) {
-            $output .= do_shortcode( '[ws_jx_statutes]' );
-            $has_content = true;
+        if ( ws_is_published( ws_get_jx_statute_data( $jx_term_id ) ) ) {
+            $output      .= '<div id="ws-statutes">' . do_shortcode( '[ws_jx_statutes]' ) . '</div>';
+            $has_content  = true;
         }
     }
 
-    // Render case law citations — [ws_jx_case_law] returns empty if none attached.
-    $case_law = do_shortcode( '[ws_jx_case_law]' );
-    if ( $case_law ) {
-        $output      .= $case_law;
+    // Citations — id="ws-citations" is the anchor target for the reference page back link.
+    $citations = do_shortcode( '[ws_jx_citation]' );
+    if ( $citations ) {
+        $output      .= '<div id="ws-citations">' . $citations . '</div>';
         $has_content  = true;
     }
 
-    // Render limitations — [ws_jx_limitations] returns empty if field is empty.
+    // Interpretations — after citations, before limitations.
+    // id="ws-interpretations" is the anchor target for the reference page back link.
+    $interpretations = do_shortcode( '[ws_jx_interpretation]' );
+    if ( $interpretations ) {
+        $output      .= '<div id="ws-interpretations">' . $interpretations . '</div>';
+        $has_content  = true;
+    }
+
+    // Limitations.
     $limitations = do_shortcode( '[ws_jx_limitations]' );
     if ( $limitations ) {
         $output      .= $limitations;
         $has_content  = true;
     }
 
-    // Legal updates — always attempt; shortcode returns empty if none exist.
+    // Legal updates — shortcode returns empty if none exist.
     $legal_updates = do_shortcode( '[ws_legal_updates jx="' . esc_attr( $post->post_name ) . '" count="5"]' );
     if ( $legal_updates ) {
         $output      .= $legal_updates;
         $has_content  = true;
     }
 
-    // Phase 10 — Fallback: if no content sections were assembled, render a
-    // placeholder notice. Only triggered when the entire page is empty — no
-    // per-section placeholders.
+    // Fallback — only triggers when no content sections were assembled.
     if ( ! $has_content ) {
         $output .= '<div class="ws-section--placeholder">Content for this jurisdiction is currently being prepared.</div>';
     }
 
-    $is_rendering = false;
     return $output;
+}
+
+
+// ════════════════════════════════════════════════════════════════════════════
+// ws_render_jx_filtered()
+//
+// !! PHASE 2 PRIORITY — DO NOT REMOVE !!
+//
+// Filtered render path — parallel sibling to ws_render_jx_curated().
+// Invoked by ws_handle_jurisdiction_render() when $_GET contains taxonomy
+// filter params resolved by ws_resolve_filter_context() (Phase 2).
+//
+// Contrast with ws_render_jx_curated():
+//   Curated:  attach_flag = true gates all datasets — editorial curation.
+//   Filtered: attach_flag ignored — all published records are candidates;
+//             $filter_context constrains results via taxonomy cascade instead.
+//
+// Implementation notes (Phase 2):
+//   - $filter_context is an array of resolved taxonomy term IDs built from
+//     the plain-English question panel ($_GET params on page load).
+//     Example: [ 'ws_industry' => [12, 47], 'ws_disclosure_type' => [8] ]
+//   - Output includes statutes, citations, interpretations, limitations, and
+//     ws-assist-org records matched by the filter context. ws-assist-org and
+//     ws-agency records are not on the curated page — they appear here only.
+//   - Render order mirrors the curated path; assist-orgs append last.
+//   - PHP-only: standard GET form. No AJAX required for core functionality;
+//     JS may be layered on for UX polish.
+//   - Filtered URLs are bookmarkable and shareable
+//     (e.g. /california/?industry=12&disclosure=8).
+//
+// @param  WP_Post  $post           The jurisdiction post object.
+// @param  int|null $jx_term_id     The ws_jurisdiction term ID for this post.
+// @param  array    $filter_context Taxonomy term IDs resolved from $_GET params.
+// @return string                   HTML for the filtered jurisdiction page.
+// ════════════════════════════════════════════════════════════════════════════
+
+function ws_render_jx_filtered( $post, $jx_term_id, $filter_context ) {
+    // Phase 2: Taxonomy cascade filter render — see block comment above.
+    return '';
 }
