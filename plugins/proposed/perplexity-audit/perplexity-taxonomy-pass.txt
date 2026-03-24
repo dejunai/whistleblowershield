@@ -1,0 +1,96 @@
+All three files read. Here's the full pass.
+
+***
+
+## `/taxonomies/` — Review
+
+**Overall: the strongest directory in the codebase so far. Very few issues.**
+
+***
+
+## `register-taxonomies.php`
+
+### 🟡 `ws_disclosure_type` CPT list excludes `jx-citation`
+
+The taxonomy is listed on the ACF field in `acf-jx-citations.php` with `save_terms => 1`, meaning citations will write term relationships to `wp_term_relationships`. But `jx-citation` is absent from the `register_taxonomy()` object_types array here. WordPress requires a CPT to be in the object_types list for `wp_set_object_terms()` and `tax_query` to work reliably on that post type. This is the matching half of the `save_terms` inconsistency flagged in the `/acf/` review — citations save terms but the taxonomy isn't registered against the CPT.
+
+**Recommendation**: Add `'jx-citation'` to the `ws_disclosure_type` object_types array (position 2, after `jx-statute`).
+
+### 🟡 `ws_disclosure_type` seeder uses a different iteration pattern than all other seeders
+
+Every other hierarchical seeder delegates to `ws_bulk_insert_hierarchical()`. `ws_seed_disclosure_taxonomy()` rolls its own parent/child loop with an inline `is_array()` guard. This isn't wrong — it predates `ws_bulk_insert_hierarchical()` and the structure uses a slightly different data shape (`slug` key inside the parent array vs. the outer-key-is-the-slug pattern in `ws_bulk_insert_hierarchical`). But the inconsistency is a minor maintenance burden. A comment in the function noting why it doesn't use the helper would prevent a future dev from "refactoring" it into the wrong shape.
+
+### 🟡 `ws_seed_jurisdiction_taxonomy()` calls `update_term_meta` on every `admin_init` for existing terms
+
+The gate version is `'1.0.0'` and has never been bumped, so the gate fires once and never again — correct. But the seeder's inner loop for existing terms calls `update_term_meta( $existing->term_id, 'display_order', $order )` even when the term already exists. Since the gate fires only once, this runs exactly once, which is fine. However, if the gate is ever bumped for a term addition, `display_order` will be re-written for all 57 terms on next `admin_init`. That's harmless but worth noting in the function docblock — and the pattern creates a small trap for a future dev who bumps the gate expecting only new terms to be affected.
+
+### 🟢 `ws_remedies` has `public => false` but no `rewrite`
+
+All other public-facing taxonomies have `'rewrite' => [ 'slug' => '...' ]`. The private ones (remedies, protected_class, etc.) intentionally omit rewrite — this is correct and consistent. ✅
+
+### 🟢 All 13 seeders have individual gates — no grouped gates
+
+Clean. Each can be bumped independently. ✅
+
+### 🟢 `ws_employer_defense` seeder was previously flagged as a stub with "no seeder" in v3.2.0
+
+The v3.2.0 note says "No seeder — terms to be defined once taxonomy table is validated." The seeder now exists with 6 terms. The version history should technically have a `3.x.x` entry noting when the seeder was added, but this is cosmetic.
+
+***
+
+## `register-glossary.php`
+
+**This is excellent work. One real issue, one minor note.**
+
+### 🔴 `ws_glossary_collect_text_nodes()` recurses into `$node->childNodes` without checking for null
+
+`DOMNode::$childNodes` returns a `DOMNodeList` which is never null — safe. But the function signature accepts any `DOMNode`, and `DOMText` nodes have `childNodes` that are empty (not null), which means the `foreach` will simply not iterate. Harmless at runtime, but the function doesn't guard against being called on a leaf node from outside. Since it's only ever called from `ws_apply_glossary_tooltips()` on a `<body>` element, this is not a real bug — just worth a `@internal` note in the docblock.
+
+### 🔴 `ws_apply_glossary_tooltips()` — `try/catch` indentation is inconsistent with the rest of the file
+
+The entire try block uses tab-and-tab indentation while the rest of the file uses 4-space indentation. This is a style inconsistency, not a code bug, but it will cause confusion in diffs. The closing `catch` and `finally` blocks are also misaligned relative to the function body. Worth a single formatting pass.
+
+### 🟡 `group_ws_glossary_term` ACF key violates the v3.1.0 key naming rules
+
+The key is `group_ws_glossary_term`. Per the `ws-core.php` ACF Key Naming Rules (rule 2): group keys must end with `_metadata`, not `_term`. Should be `group_glossary_metadata`. Also has the old `ws_` prefix on the group key (rule 1 says no `ws_` on field keys; rule 2 implies the same for group keys given the rename examples). Low-stakes since the glossary ACF group is standalone, but it's the same class of violation cleaned up in the 3.1.0 sanity pass everywhere else.
+
+### 🟡 `ws_glossary_invalidate_cache()` hooks `delete_ws_glossary` but the docblock says `edited_ws_glossary` and `created_ws_glossary` only
+
+The docblock in the TRANSIENT section says: *"Invalidated on `edited_ws_glossary` and `created_ws_glossary` hooks."* But the code correctly adds a third hook: `delete_ws_glossary`. The docblock is incomplete — it should list all three. A deleted term that remains in cache would cause phantom tooltips until TTL expiry.
+
+### 🟡 Empty `aliases` string in seed entries (`'aliases' => ''`) passes the `! empty()` check cleanly, but is noise
+
+Six seed entries have `'aliases' => ''`. The seeder correctly guards with `if ( ! is_wp_error( $result ) && ! empty( $data['aliases'] ) )`, so nothing bad happens. But the empty string keys could be omitted entirely to reduce clutter. Minor.
+
+### 🟢 `preg_replace` with `limit = 1` for first-occurrence-only matching — correct
+
+The `$count` output variable and the `null !== $new_html` guard are both present. ✅
+
+### 🟢 `iterator_to_array()` used before modifying `$frag_body->childNodes` during the import loop — correct
+
+Without this, iterating `childNodes` while inserting siblings would cause nodes to be skipped. This is a subtle DOM pitfall and it's handled correctly. ✅
+
+### 🟢 Empty-result transient uses a 5-minute TTL instead of the 24-hour standard
+
+Intentional and documented inline. Correct behavior — no reason to hammer `get_terms()` on a fresh install, but also no reason to cache an empty result for a full day. ✅
+
+***
+
+## `taxonomy-tables.txt`
+
+Skipping code review — it's a reference/documentation file, not executable. If you want a content accuracy pass against the registered taxonomies and their term lists, say the word.
+
+***
+
+## Net findings
+
+| # | File | Issue | Severity |
+|---|------|-------|----------|
+| 1 | `register-taxonomies.php` | `jx-citation` missing from `ws_disclosure_type` object_types | 🔴 |
+| 2 | `register-glossary.php` | `try` block indentation inconsistent with rest of file | 🔴 |
+| 3 | `register-taxonomies.php` | `ws_seed_disclosure_taxonomy()` doesn't use `ws_bulk_insert_hierarchical()` — undocumented | 🟡 |
+| 4 | `register-taxonomies.php` | `update_term_meta` re-runs on all existing terms if gate is ever bumped — undocumented trap | 🟡 |
+| 5 | `register-glossary.php` | `group_ws_glossary_term` ACF key violates v3.1.0 naming rules | 🟡 |
+| 6 | `register-glossary.php` | TRANSIENT docblock missing `delete_ws_glossary` hook | 🟡 |
+
+The 🔴 indentation issue in `register-glossary.php` is cosmetic but large enough to corrupt a diff — worth a format pass. The 🔴 missing CPT in `ws_disclosure_type` is the only real functional bug in the directory.

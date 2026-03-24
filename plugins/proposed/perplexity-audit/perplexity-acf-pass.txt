@@ -1,0 +1,147 @@
+Good — I've now read all 12 files in the `/acf/` directory. Here is the complete review.
+
+***
+
+## `/acf/` — Full Directory Review
+
+All 12 files read. The folder is well-structured and has gone through multiple disciplined refactoring passes. The findings below are grouped by severity.
+
+***
+
+## 🔴 Bugs / Definite Problems
+
+### 1. `acf-jurisdictions.php` — `field_last_edited_author` uses wrong `return_format`
+
+The shared stamp field in `acf-stamp-fields.php` registers `field_last_edited_author` with `return_format => 'array'` for the `jurisdiction` CPT… except that it doesn't — the jurisdiction CPT is **excluded** from the shared stamp group entirely and has its own `field_last_edited_author` in the Record Management tab. That one uses `'return_format' => 'array'`, which is intentional for display. However, every other stamp registration (in `acf-stamp-fields.php`) uses `'return_format' => 'array'` too — that's fine and consistent.
+
+**Real bug here**: In `acf-stamp-fields.php`, the file header says version 3.6.0 renamed `create_author → ws_auto_create_author`, etc. But the `acf-jurisdictions.php` Record Management tab still declares `field_create_author` with `name => 'ws_auto_create_author'` — that's correct. However, `field_date_created` in `acf-jurisdictions.php` uses `name => 'ws_auto_date_created'` (correct), and `field_last_edited` uses `name => 'ws_auto_last_edited'` (correct). These are consistent. ✅ Not a bug after all — I'm clearing this one.
+
+### 2. `acf-jx-statutes.php` — `ws_jx_statute_disclosure_type` uses `save_terms => 0`
+
+Three taxonomy fields in `acf-jx-statutes.php` — `ws_jx_statute_disclosure_type`, `ws_jx_statute_protected_class`, `ws_jx_statute_disclosure_targets`, `ws_jx_statute_process_type`, `ws_jx_statute_adverse_action`, `ws_jx_statute_fee_shifting`, `ws_jx_statute_remedies`, `ws_jx_statute_employer_defense` — all use **`save_terms => 0`**. The data is saved as post meta (arrays of term IDs), not into the taxonomy relationship table.
+
+This is a **deliberate design choice** only if the query layer reads exclusively from post meta. But compare this to `acf-jx-interpretations.php`, where `ws_process_type` uses `save_terms => 1`, and `acf-jx-citations.php`, where `ws_jx_citation_disclosure_type` uses `save_terms => 1`. The inconsistency means you cannot use a single `tax_query` across both statutes and citations for the same taxonomy (e.g. `ws_disclosure_type`) — you'd need a `meta_query` for statutes and a `tax_query` for citations.
+
+**This is almost certainly unintentional.** The `acf-legal-updates.php` changelog from v3.5.0 shows `save_terms` was explicitly changed to `1` there. The statute file's `save_terms => 0` appears to be a leftover from before that convention was established, never updated in the 3.5.0 overhaul. The docblock for v3.5.0 does not mention changing `save_terms`.
+
+**Recommendation**: Change all taxonomy fields in `acf-jx-statutes.php` from `save_terms => 0` to `save_terms => 1` (and `load_terms => 1` is already set). Re-run a migration pass to populate term relationships for existing statute posts.
+
+### 3. `acf-jx-summaries.php` — stale file-level docblock / filename mismatch
+
+The `@since` tag says `2.1.0` and the file is named `acf-jx-summaries.php`, but the internal docblock title says `acf-jx-summary.php`. Minor, but the version history only goes to `3.4.0` while the repo is at v3.5+ / v3.6+ convention for other files. The `ws_auto_` prefixing pass (3.6.0) that renamed meta keys across all other files has **no entry** in this file's version log — yet the fields `ws_auto_plain_english_by` and `ws_auto_plain_english_reviewed_by` are present. Either those were renamed silently or the version log is incomplete.
+
+**Recommendation**: Add a `3.6.0` entry to the version history noting the `ws_auto_` prefix on `plain_english_by` and `plain_english_reviewed_by`.
+
+***
+
+## 🟡 Inconsistencies / Design Concerns
+
+### 4. `acf-source-verify.php` — `ws-legal-update` missing from location rules
+
+The `acf-source-verify.php` header says attached CPTs are: `jx-statute, jx-citation, jx-interpretation, ws-agency, ws-assist-org, jx-summary, ws-reference`. But `ws-legal-update` is absent. Legal update records have a `source_method` concept too — they're created either by humans, the major-edit hook, or potentially by ingest tooling. If ingest ever creates `ws-legal-update` posts programmatically, there's no source provenance tracking on them.
+
+This may be intentional (legal updates are always internally generated, not ingested), but it's worth a conscious decision documented in the header. **The exclusion is not currently documented** in the EXCLUDED CPTs note, which only lists the omission of `ws-legal-update` from `acf-plain-english-fields.php` in that file. `acf-source-verify.php` has no such exclusion rationale for `ws-legal-update`.
+
+### 5. `acf-jx-interpretations.php` — `ws_jx_interp_affected_jx` with `save_terms => 0` and `load_terms => 0`
+
+The affected jurisdictions field is intentionally not written to the taxonomy table (`save_terms => 0`) — it stores term IDs in post meta. The auto-population hook `ws_interp_auto_populate_affected_jx()` writes to `ws_jx_interp_affected_jx` meta directly. This is coherent *for the hook*, but the ACF field UI will never show a pre-selected value in the multi-select because `load_terms => 0` and the field's stored meta format (a serialized array of IDs) may not match what ACF expects when rendering the selector. Editors who need to manually override the affected jurisdictions may see a blank field even when the meta is populated.
+
+**Recommendation**: If manual override is a real use case, either set `load_terms => 1` and let the hook write to the taxonomy table too, or switch to `save_terms => 0 / load_terms => 0` but use `acf/load_value` to pull from post meta directly (the same pattern used for `ws_citation_prefill_statute_ids`).
+
+### 6. `acf-references.php` — filename/docblock mismatch
+
+The filename is `acf-references.php` but the docblock title reads `acf-ws-reference.php`. Cosmetic, but worth a one-line fix.
+
+### 7. `acf-jx-statutes.php` — `ws_jx_statute_last_reviewed` is outside all tabs
+
+`field_jx_statute_last_reviewed` is declared after the Reference Materials tab block, meaning it renders outside the tab structure — it will appear loose at the bottom of the metabox rather than inside any tab. Every comparable "Last Verified Date" field in other CPT files (`acf-agencies.php`, `acf-assist-orgs.php`, `acf-jx-citations.php`, `acf-jx-interpretations.php`) has the same pattern of being content-owned and outside stamps, but in those files there's typically only one active tab group so "outside tabs" is fine. In `acf-jx-statutes.php` with 7 named tabs, a field floating after the last tab may be invisible to editors in practice.
+
+**Recommendation**: Move `field_jx_statute_last_reviewed` inside the Links tab (or give it its own tab) so it isn't orphaned.
+
+### 8. `acf-plain-english-fields.php` — `field_plain_english_reviewed` key collision with `acf-jx-summaries.php`
+
+Both files register a field with `'key' => 'field_plain_english_reviewed'` and `'name' => 'ws_plain_english_reviewed'`. In `acf-plain-english-fields.php` this attaches to `jx-statute, jx-citation, jx-interpretation, ws-agency`. In `acf-jx-summaries.php` it attaches to `jx-summary` only. Since a `jx-summary` post will never load the plain-english group (it's excluded), there's no ACF collision at runtime. However, if ACF ever validates field keys globally (some versions do), this duplicate key could cause warnings or silently suppress one registration.
+
+**Recommendation**: Rename the key in `acf-jx-summaries.php` to something like `field_jx_sum_plain_reviewed` to make the keys unique, even though the meta name stays `ws_plain_english_reviewed`.
+
+Similarly, `field_plain_english_by` and `field_plain_english_reviewed_by` exist in both files with identical keys. Same risk, same fix.
+
+***
+
+## 🟢 Minor / Cosmetic
+
+### 9. `acf-legal-updates.php` — `'taxonomy' => WS_JURISDICTION_TERM_ID` correct but undocumented
+
+Using a constant as the taxonomy slug is the right pattern and is consistent across all files. No issue — just noting it's consistent.
+
+### 10. `acf-agencies.php` — `'name' => WS_JURISDICTION_TERM_ID` on the jurisdiction taxonomy field
+
+The `field_agency_jurisdiction` uses `'name' => WS_JURISDICTION_TERM_ID` as the ACF meta name. This means the meta key stored in the DB for this field will be the *value* of that constant at runtime — which should be fine since the constant is defined before ACF init. But if the constant value ever changes, the meta key silently changes. All other files use the same pattern (e.g. `acf-assist-orgs.php`), so this is consistent, but it's worth a note that the meta key is constant-derived.
+
+### 11. `acf-stamp-fields.php` — truncated in first fetch
+
+The file was cut off mid-field in the initial retrieval (last line visible: `// ── Last Edited By ───────────────`). The full file was not re-fetched, but based on the docblock and usage across all CPT files, the four stamp fields are clearly defined correctly. If you want me to fetch the full file to confirm the field definitions, say the word.
+
+***
+
+## Summary Table
+
+| # | File | Issue | Severity |
+|---|------|-------|----------|
+| 2 | `acf-jx-statutes.php` | All taxonomy fields use `save_terms => 0` — breaks `tax_query` consistency vs. citations/interpretations | 🔴 |
+| 8 | `acf-plain-english-fields.php` + `acf-jx-summaries.php` | Duplicate ACF field keys (`field_plain_english_reviewed`, `field_plain_english_by`, `field_plain_english_reviewed_by`) | 🟡 |
+| 5 | `acf-jx-interpretations.php` | `ws_jx_interp_affected_jx` won't display in UI with `load_terms => 0`; manual override is broken | 🟡 |
+| 7 | `acf-jx-statutes.php` | `last_reviewed` field is outside all tabs — likely invisible to editors | 🟡 |
+| 4 | `acf-source-verify.php` | `ws-legal-update` exclusion is undocumented in file header | 🟡 |
+| 3 | `acf-jx-summaries.php` | `ws_auto_` rename pass (3.6.0) absent from version history | 🟢 |
+| 6 | `acf-references.php` | Filename / docblock title mismatch | 🟢 |
+| 11 | `acf-stamp-fields.php` | Full file not confirmed (truncated on initial fetch) | 🟢 |
+
+Want me to produce the corrected files for any of these, or pull the full `acf-stamp-fields.php` to close out #11?
+
+Clean file. Here's the full pass:
+
+## `acf-stamp-fields.php` — Review
+
+**Overall: solid. One issue, one docblock discrepancy.**
+
+***
+
+### 🔴 Key collision with `acf-jurisdictions.php`
+
+`acf-stamp-fields.php` registers `field_create_author` and `field_date_created` as ACF field keys. `acf-jurisdictions.php` also registers fields with those exact same keys in its Record Management tab (`field_create_author`, `field_date_created`, `field_last_edited_author`, `field_last_edited`). ACF field keys are supposed to be globally unique across all registered field groups. Since jurisdiction is excluded from the stamp group's location rules, there's no runtime UI collision — both groups won't appear on the same screen — but ACF may log warnings or behave unpredictably if it encounters duplicate keys during `acf_add_local_field_group` registration. This is the same category of risk as the duplicate `field_plain_english_reviewed` keys flagged in the prior review.
+
+**Recommendation**: Namespace the jurisdiction-specific versions in `acf-jurisdictions.php` to `field_jx_create_author`, `field_jx_date_created`, `field_jx_last_edited`, `field_jx_last_edited_author`. The meta names (`ws_auto_*`) can stay identical — only the ACF field key needs to be unique.
+
+***
+
+### 🟡 Docblock FIELDS section describes old meta key names
+
+The FIELDS block in the docblock header still uses the pre-3.6.0 unprefixed names:
+
+```
+last_edited_author  ...
+date_created        ...
+last_edited         ...
+create_author       ...
+```
+
+After the 3.6.0 `ws_auto_` pass, the canonical meta key names are `ws_auto_last_edited_author`, `ws_auto_date_created`, etc. The version history correctly records the rename, but the field description block above it still shows the old names. Anyone reading the header top-to-bottom gets the wrong meta key names without scrolling to the version log.
+
+**Recommendation**: Update the four field descriptions in the FIELDS section to show the current `ws_auto_*` names.
+
+***
+
+### 🟢 Minor observations — all fine
+
+- `return_format => 'array'` on `field_last_edited_author` and `return_format => 'id'` on `field_create_author` — correct and intentional; the comment explains why.
+- `readonly => 1, disabled => 1` on `date_created` and `last_edited` — correct; `last_edited_author` deliberately omits these so admins can override, which matches the docblock.
+- `menu_order => 90` — correct; slots between CPT content tabs and `acf-major-edit.php` at 99.
+- 3-column wrapper layout (34 / 33 / 33) — sensible for a review row, though the `field_create_author` user picker will be a bit narrow at 33%. Not a bug.
+- The trailing comment block accurately reflects what `ws_acf_lock_for_non_admins()` registers — no drift from the actual field names.
+
+***
+
+### Net verdict
+
+Two issues to address: the **ACF field key collision** with `acf-jurisdictions.php` (fix in jurisdictions, not here), and the **stale meta key names in the docblock FIELDS section** (fix here). Want me to write either correction?

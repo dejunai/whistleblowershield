@@ -1,0 +1,49 @@
+Full file digested. Here are the findings.
+
+***
+
+## `admin-feed-monitor.php` — Findings
+
+### 🔴 Critical
+
+**1. Inoreader bearer token stored and rendered in plaintext**
+`ws_feed_monitor_token` is saved to `wp_options` via `update_option()` and rendered directly into the password input's `value` attribute . Storing credentials in `wp_options` means they are readable by any code with database access, visible in option table exports, and exposed in any WP backup that includes the database. The field uses `type="password"` which masks the UI display only — the value is in the HTML source. For a solo operator on a locked-down server this is acceptable risk, but it should be noted: if this site is ever on shared hosting or a managed WP platform, the token is effectively exposed. Consider storing it in `wp-config.php` as a constant and reading it with `defined()` checks, which keeps it out of the database entirely.
+
+**2. `ws_feed_monitor_render_page()` — `$notice` echoed unescaped**
+The `$notice` variable is assembled from hardcoded HTML strings with `esc_url()` and integer counts, so no current XSS vector exists . However it is echoed raw with `echo $notice` — if any future branch introduces user-controlled content into `$notice`, it becomes an XSS sink immediately. Wrap the echo in `wp_kses_post()` or restructure to use `printf` with escaped slots.
+
+***
+
+### 🟡 Should Fix
+
+**3. `ws_feed_ingest_item()` — `wp_insert_post()` fires `wp_insert_post` action, triggering the taxonomy auto-assign hook from `admin-hooks.php`**
+The auto-assign hook in `admin-hooks.php` fires on every `wp_insert_post` for addendum CPTs and checks `$_GET['ws_jx_term']` . `ws_feed_ingest_item()` is called from a POST handler — `$_GET['ws_jx_term']` will not be set, so the hook bails harmlessly. **However**, if someone calls `ws_feed_ingest_item()` from a CLI context or a GET request that happens to carry `ws_jx_term`, the auto-assign hook fires and overwrites the taxonomy term that `ws_feed_ingest_item()` sets two lines later . The auto-assign hook should check `is_admin()` and `!wp_doing_cron()` before acting, or `ws_feed_ingest_item()` should temporarily remove the hook around `wp_insert_post()`.
+
+**4. `ws_feed_monitor_write_staged()` — no file locking**
+`file_put_contents()` without `LOCK_EX` is a race condition if two requests write simultaneously . On a single-admin site with manual-only triggers this is extremely low risk, but the daily cron and a manual "Poll Now" click could theoretically overlap. Change to `file_put_contents( ..., $json, LOCK_EX )`.
+
+**5. `ws_feed_monitor_deactivate()` — same unhooked deactivation issue as `admin-url-monitor.php`**
+Defined but no evidence of wiring in `ws-core.php` . Both monitors will leave orphaned cron events on deactivation until this is confirmed.
+
+**6. `enacted` exclusion keyword overlap — `'introduced'` will match `'introduced into evidence'`-style legislative titles**
+The exclusion keyword `'introduced'` is matched case-insensitively against the full title + description haystack . Legitimate enacted bills sometimes reference prior introduction in their description text ("originally introduced in 2023, the bill was signed..."). This would cause valid enacted items to be silently skipped. Worth making the exclusion match title-only, or restricting to word-boundary matching.
+
+***
+
+### 🔵 Tech Debt
+
+**7. `jx_code` defaults to `'US'` for every staged item**
+The poll loop hardcodes `'jx_code' => 'US'` as the default . The feed is the `LegalResearch` Inoreader folder which presumably contains both federal and state items. A reviewer must manually correct this for every state bill — there's no attempt to infer jurisdiction from the title or source. A future pass could run a simple state-name/abbreviation scan against the title to pre-populate `jx_code` more accurately.
+
+**8. Staged JSON grows unboundedly until items are accepted or rejected**
+The `ws_feed_monitor_ingested` option is trimmed to 30 days , but the staged file itself has no maximum size or age limit. A pending item sits in `feed-staged.json` forever if the reviewer never acts on it. Worth adding a max-age or max-count guard to the staging logic.
+
+***
+
+### ✅ Security Posture — Mostly Solid
+
+Every POST action is gated behind `check_admin_referer( 'ws_feed_monitor_action' )` and `current_user_can( 'manage_options' )` . `$_POST` inputs are sanitized before writing to the staged JSON. The `.htaccess` guard on the data directory is present with an Nginx caveat documented. The main exposure is the token storage (item #1) and the unescaped `$notice` echo (item #2).
+
+***
+
+The remaining admin files are all under 12KB. Want me to pull the remaining five (`admin-columns.php`, `admin-navigation.php`, `admin-major-edit-hook.php`, the two metaboxes, plus `jurisdiction-dashboard.php` and `admin-health-check.php`) in batches, or tackle them one at a time?

@@ -1,0 +1,68 @@
+All five in. Processing all together.
+
+***
+
+## Batch Review: Remaining 5 Files
+
+***
+
+### `admin-columns.php` — ✅ Clean
+
+No issues . Every output path uses `esc_html()` or `esc_attr()`. The `ws_court_lookup()` call for the `'other'` branch correctly reads the free-text field as a fallback. Jurisdiction columns are consistent across all seven CPT list tables. Nothing to flag.
+
+***
+
+### `admin-navigation.php` — 🟡 One Issue
+
+**1. `ws_render_cpt_count_row()` — `get_posts( 'posts_per_page' => -1 )` then `count( $results )` instead of `found_posts`**
+For Legal Updates, Agencies, and Assist Orgs, the function fetches all matching post IDs then calls `count()` on the returned array . It should use `WP_Query` with `'no_found_rows' => false` and read `$query->found_posts`, or at minimum add `'no_found_rows' => true` since it's only counting. This is a minor inefficiency — the IDs are fetched and discarded — but contrast it with `ws_get_attached_citation_count()` in the same file, which correctly uses `WP_Query` and `$query->found_posts` . Worth aligning the pattern.
+
+Everything else is clean: `esc_url()` on all generated links, `esc_html()` on all label output, capability check is inherited from the meta box context.
+
+***
+
+### `admin-citation-metabox.php` — 🟡 One Issue
+
+**1. `add_url` built via string concatenation with unencoded `tax_input` array keys**
+The URL is built by manually appending `&tax_input[ws_jurisdiction][]={term_id}` . `WS_JURISDICTION_TERM_ID` is not URL-encoded in the key position. If the constant ever contains characters that need encoding (it currently doesn't — `ws_jurisdiction` is alphanumeric with underscores) this would silently break. More importantly, the loop concatenating multiple terms with `$add_url .= '&tax_input[...][]='` is correct but fragile — should use `add_query_arg()` with `http_build_query()` for the `tax_input` array instead. This is the same approach used in `admin-interpretation-metabox.php`, so the inconsistency is minor, but the citation metabox already notes it passes terms in a loop while the interpretation metabox only passes one term . That asymmetry is fine, just worth documenting.
+
+Otherwise clean: `get_post_meta()` calls are all escaped on output, auto-draft guard is correct, the reverse-index lookup pattern is consistent with the interpretation metabox.
+
+***
+
+### `admin-interpretation-metabox.php` — ✅ Clean
+
+No issues . The `ws_court_lookup()` / `'other'` branch is handled correctly with `esc_html()`. The `$court_label` is pre-escaped before being echoed unquoted in the table cell — consistent and safe. The `ws_jx_statute_interp_ids` reverse-index read-then-`post__in` pattern is sound and the `meta_key` / `orderby` year sort is the correct form (the 2.4.1 bug fix that fixed the original duplicate `meta_key` issue is in place).
+
+***
+
+### `jurisdiction-dashboard.php` — 🟡 Two Issues
+
+**1. `$cached` echoed unescaped**
+`get_transient( 'ws_jx_dashboard_html' )` returns the previously stored HTML and it's echoed with `echo $cached` with only an inline comment that says "Already escaped when built" . The comment is correct for the current build path — all cells go through `esc_html()` helpers — but if the transient is ever poisoned (e.g., via a direct `set_transient()` call in another context, or if a future branch introduces unescaped content), this becomes an XSS sink. Wrap in `wp_kses_post()` as a belt-and-suspenders measure.
+
+**2. Same `get_posts( -1 )` + `count()` pattern as `admin-navigation.php`**
+`ws_jx_dashboard_count()` fetches all matching IDs and returns `count( get_posts(...) )` . For 57 jurisdictions × 5 CPT types, that's up to 285 separate `get_posts()` calls per uncached render. Each individually is cheap, but the aggregate on a large dataset could be slow. This is partially mitigated by the 10-minute transient cache, so it's not urgent — but switching to `WP_Query` with `'fields' => 'ids'`, `'no_found_rows' => false`, and reading `$query->found_posts` would be cleaner and avoids loading post IDs into memory just to count them.
+
+***
+
+### `admin-health-check.php` — ✅ Clean
+
+Tight and well-scoped . The four checks are exactly right — ACF presence, CPT registration, taxonomy registration, query-layer sentinels. Output uses `wp_kses()` with a `code` allowlist, which is the correct approach for the mixed-HTML issue strings. No issues.
+
+***
+
+## Batch Summary
+
+| File | Status | Priority Finds |
+|---|---|---|
+| `admin-columns.php` | ✅ | — |
+| `admin-navigation.php` | 🟡 | `count(get_posts())` vs `found_posts` |
+| `admin-citation-metabox.php` | 🟡 | URL build fragility with `tax_input` array |
+| `admin-interpretation-metabox.php` | ✅ | — |
+| `jurisdiction-dashboard.php` | 🟡 | Unescaped transient echo; `count(get_posts())` pattern |
+| `admin-health-check.php` | ✅ | — |
+
+***
+
+That completes the entire `includes/admin/` directory. The remaining unreviewed files would be in `includes/query/`, `includes/render/`, and `includes/acf/` — want to proceed into query, or would you like to produce a consolidated issues list across all reviewed files first?

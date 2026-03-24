@@ -1,0 +1,57 @@
+All nine digested. Here are the findings.
+
+***
+
+## `includes/cpt/` — Full Review
+
+The CPT layer is structural boilerplate — the risk surface is narrow and mostly limited to visibility mismatches, stale docblock text, and missing taxonomy registrations. Nothing here will cause data loss or security issues.
+
+***
+
+### 🟡 Should Fix
+
+**1. `cpt-agencies.php` — duplicate column filter conflicts with `admin-columns.php`**
+`cpt-agencies.php` registers its own `manage_ws-agency_posts_columns` filter and `manage_ws-agency_posts_custom_column` action at the bottom of the file . `admin-columns.php` registers an entirely separate `ws_add_agency_columns` / `ws_render_agency_column` pair for the same CPT covering different columns (`ws_jx`, `ws_process_type`, `ws_languages`) . Both filters run, meaning the agency list table gets columns from both hooks merged in load order. The CPT file columns (`ws_agency_code`, `ws_jurisdiction_col`) appear first, then the admin-columns additions appear after `title`. This produces a list table with five non-default columns — potentially too wide. The CPT file's column code should be removed and consolidated into `admin-columns.php` where all other CPT column definitions live. Mixing CPT registration with admin UI logic also violates the file's own stated purpose.
+
+**2. `cpt-jx-citations.php` — docblock references legacy `ws_jx_code` meta query pattern**
+The docblock states citations are "linked to their parent jurisdiction via the `ws_jx_code` field" and "The `[ws_jx_case_law]` shortcode queries all jx-citation records where `ws_jx_code` matches" . This architecture was replaced in v3.0.0 with `ws_jurisdiction` taxonomy queries — confirmed across `admin-columns.php`, `admin-navigation.php`, and the metabox files. The docblock was not updated and now actively misdescribes the query model. A future developer reading this file would build against the wrong pattern.
+
+**3. `cpt-legal-updates.php` — `show_in_rest => true` with `publicly_queryable => false`**
+`ws-legal-update` is registered as `public => false`, `publicly_queryable => false`, but `show_in_rest => true` . REST API exposure for a non-public CPT means authenticated users (including those with `read` capability via the REST API) can query legal update records via `/wp-json/wp/v2/ws-legal-update`. Since `capability_type => 'post'`, any subscriber-level user with REST API access can read these records. The same pattern exists on `jx-summary`, `jx-statute`, `jx-citation`, and `jx-interpretation` . If these CPTs are truly internal-only datasets, `show_in_rest` should be `false`, or custom REST permissions should be added via `rest_permission_check`. The most likely intent was "enable block editor support," which requires `show_in_rest => true` — but that's worth confirming since it has this exposure side effect.
+
+***
+
+### 🔵 Tech Debt / Stale Content
+
+**4. `cpt-jurisdictions.php` — docblock lists blank lines where CPT relationships should be**
+The "parent reference for:" list shows `jx-summary`, `jx-statute`, two blank lines, and `ws-legal-update` . The blank lines are where `jx-citation` and `jx-interpretation` used to be or should be. Minor but worth cleaning up.
+
+**5. `cpt-interpretations.php` — docblock still says "federal court interpretations" in the PURPOSE**
+The docblock purpose reads "stores federal court interpretations" , but the file's own version history notes the federal-only guard was removed in v3.8.0 of the metabox, and both federal and state statutes now show the metabox. The CPT-level docblock didn't track that change.
+
+**6. `cpt-legal-updates.php` — `menu_position => 30` conflicts with `cpt-assist-orgs.php`**
+Both `ws-legal-update` and `ws-assist-org` claim `menu_position => 30` . WordPress resolves this silently by appending one after the other in registration order, but the intent expressed in the assist-orgs docblock ("Citations 27 → Agencies 28 → Interpretations 29 → Assist Orgs 30") clearly places legal updates somewhere else — likely 31 or 32 . `cpt-references.php` is at 32 . The agreed menu order should be audited and positions adjusted to eliminate the collision.
+
+***
+
+### ✅ Clean
+
+`cpt-jx-summaries.php`, `cpt-jx-statutes.php`, `cpt-jx-interpretations.php`, `cpt-assist-orgs.php`, `cpt-references.php` — all structurally correct, consistent visibility settings, no logic issues .
+
+***
+
+### Quick Reference Table
+
+| File | Status | Key Issue |
+|---|---|---|
+| `cpt-jurisdictions.php` | 🔵 | Stale docblock (blank CPT lines) |
+| `cpt-jx-summaries.php` | ✅ | — |
+| `cpt-jx-statutes.php` | ✅ | — |
+| `cpt-jx-citations.php` | 🟡 | Docblock describes legacy `ws_jx_code` pattern |
+| `cpt-jx-interpretations.php` | 🔵 | Docblock still says "federal only" |
+| `cpt-legal-updates.php` | 🟡 | `show_in_rest` exposure; `menu_position` collision at 30 |
+| `cpt-agencies.php` | 🟡 | Duplicate column hooks vs `admin-columns.php` |
+| `cpt-assist-orgs.php` | ✅ | — |
+| `cpt-references.php` | ✅ | — |
+
+The `show_in_rest` concern (item #3) applies broadly across five CPTs and is worth a deliberate decision — either remove `show_in_rest` from the private dataset CPTs, or add a `rest_permission_check` callback. Everything else is low-priority cleanup. Ready for the next directory when you are.

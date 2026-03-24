@@ -1,0 +1,69 @@
+Clean file — here's the pass.
+
+***
+
+## `loader.php` — Review
+
+**Overall: one of the tidiest files in the codebase. Three issues worth noting.**
+
+***
+
+### 🔴 Loading order claim vs. actual order
+
+The LOADING STRATEGY section in the docblock states:
+
+```
+1) CPT definitions
+2) ACF field definitions
+3) query layer
+...
+6) taxonomies
+```
+
+But the actual load order is:
+```
+1) CPTs
+2) Query layer       ← ACF is listed 2nd in the docblock, query is listed 3rd
+3) Taxonomies
+```
+
+ACF is actually loaded **4th** (inside `is_admin()`), after CPTs, queries, and taxonomies. The docblock order is wrong and would mislead anyone trying to understand dependency order. This matters particularly because the inline comment correctly says *"Load order is non-negotiable: helpers → shared → jurisdiction"* for the query files — but the numbered list above contradicts it by placing ACF before queries.
+
+**Recommendation**: Update the LOADING STRATEGY list to reflect the actual order: CPTs → Query → Taxonomies → (admin: Matrix → ACF → Admin tools) → (frontend: Render → Shortcodes).
+
+***
+
+### 🟡 Assembly layer missing frontend admin notice on missing render/shortcode files
+
+The ADMIN LAYER error handler adds both an `error_log()` call **and** an `admin_notices` action for every missing file. The ASSEMBLY LAYER (render and shortcode files) only calls `error_log()` — no `admin_notices`. Since these files load only on the frontend (`! is_admin()`), an `admin_notices` hook would be unreachable anyway. That's correct behavior. However, a missing render file silently produces a broken public page with no visible admin warning — a developer debugging a blank jurisdiction page would only find it in the error log.
+
+This is a deliberate tradeoff (no admin surface for frontend-only load failures), but it's undocumented. A one-line comment next to the render/shortcode error handlers explaining *why* there's no `admin_notices` fallback would prevent someone from adding one later and wondering why it never fires.
+
+***
+
+### 🟡 `is_admin()` for ACF registration is accurate but fragile at the margins
+
+Loading ACF field definitions only inside `is_admin()` is a smart memory optimization and documented as intentional. However, there are edge cases where ACF field data is needed outside the admin: REST API requests (`defined('REST_REQUEST')`) and WP-CLI runs (`defined('WP_CLI')`). If any future feature reads ACF field definitions via the REST API or CLI, those requests will silently get no field registration. Since the codebase currently uses direct meta reads in the query layer (not `get_field()` on the frontend), this isn't a current bug — but it's worth a `@todo pre-launch` note flagging the REST/CLI blind spot before Phase 2 filter work begins.
+
+***
+
+### 🟢 All observations — clean
+
+- `admin-navigation.php MUST load first` comment is present and correct. ✅
+- Matrix load order comment is thorough and accurate (`matrix-helpers` before all seeders, `matrix-jurisdictions` before matrices that depend on the `us` term). ✅
+- `admin-relationships.php removed` tombstone comment is present and explains why. ✅
+- All five load loops use identical `file_exists()` + `error_log()` + `admin_notices` patterns — fully consistent. ✅
+- `require_once` used throughout — no accidental double-loads possible. ✅
+- The query layer's three-file ordered load with the dependency note is correct and clearly documented. ✅
+
+***
+
+## Net findings
+
+| # | Issue | Severity |
+|---|-------|----------|
+| 1 | LOADING STRATEGY docblock list order doesn't match actual load order | 🔴 |
+| 2 | Assembly layer `error_log`-only handler has no comment explaining why no `admin_notices` | 🟡 |
+| 3 | ACF admin-only loading has undocumented REST/CLI blind spot — needs `@todo pre-launch` | 🟡 |
+
+That's the last file. Want a consolidated issue list across the full codebase review?

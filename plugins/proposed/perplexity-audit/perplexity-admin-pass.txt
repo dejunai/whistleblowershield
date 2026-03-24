@@ -1,0 +1,51 @@
+That's a substantial file. The list is indeed long — bailing on the matrix deep-read per your instruction and returning focused findings from `admin-hooks.php` only, then a structural summary for matrix.
+
+***
+
+## `admin-hooks.php` — Bugs & Oversights
+
+### 🔴 Critical / Functional Bugs
+
+**1. `ws_stamp_source_name` race condition — both hooks run at priority 5**
+`ws_stamp_source_method` and `ws_stamp_source_name` both register on `acf/save_post` at priority 5 . `ws_stamp_source_name` reads `ws_auto_source_method` via `get_post_meta()` to decide whether to write `'Direct'` — but it's racing against `ws_stamp_source_method` writing that value in the same priority bucket. WordPress fires same-priority hooks in registration order, so this currently works, but it's fragile. If the `add_action` call order ever shifts, `ws_stamp_source_name` could read an empty string and skip writing `'Direct'` on first save. The comment says "Must fire after" but doesn't enforce it — the fix is to move `ws_stamp_source_name` to priority 6.
+
+**2. `ws_stamp_verified_by_date` reads `$_POST['acf']` by hardcoded literal key**
+At Hook 4, the incoming verification status is read as `$_POST['acf']['field_verification_status']` . This is the only place in the entire file where a field ACF key is hardcoded directly into a `$_POST` read rather than resolved through `acf_get_field()`. If the ACF key for `ws_verification_status` is ever changed or the field is duplicated to another group, this silently stops stamping `verified_by` and `verified_date` on status transitions. The same hardcoded key pattern appears in Hook 5 (`ws_enforce_source_verify_roles`) — both should use the same `$_POST['acf']` loop-and-resolve pattern the plain English guards use.
+
+**3. Rule 3 (plain English toggle-off) does NOT clear `ws_auto_plain_english_reviewed_date`**
+`ws_acf_plain_english_guards()` Rule 3 calls `delete_post_meta()` for `ws_auto_plain_english_by` and `ws_auto_plain_english_date`, but **not** for `ws_auto_plain_english_reviewed_date` . The stamp keys comment at the top of the file lists `ws_auto_plain_english_reviewed_date` as a "written once when plain_reviewed first enabled" key — so it should be cleared on toggle-off just like `ws_auto_plain_english_reviewed_by` (which is cleared). This means after a toggle-off/toggle-on cycle, `ws_acf_stamp_plain_reviewed_by()` will correctly re-stamp the `_by` field, but the stale `_date` from the *previous* review cycle will persist.
+
+**4. `wp_insert_post` hook reads `$_GET['ws_jx_term']` without capability check**
+The auto-assign hook fires on every `wp_insert_post` for the addendum post types and reads `$_GET['ws_jx_term']` directly . There is no `current_user_can()` guard before `wp_set_object_terms()` is called. If a lower-privileged user somehow triggers a `wp_insert_post` for a `jx-statute` (even via a plugin conflict), the taxonomy term would be auto-assigned without any role check. The fix is a `current_user_can( 'edit_posts' )` guard at the top of the closure.
+
+***
+
+### 🟡 Design Oversights / Tech Debt
+
+**5. `ws_acf_plain_english_guards` does not guard against `post_id = 'options'`**
+Every other `acf/save_post` handler in this file opens with a `get_post_type( $post_id )` check, which naturally excludes the options page context where `$post_id === 'options'`. But `ws_acf_plain_english_guards` does the same — it's fine — except the `$stored_has_plain` line calls `get_post_meta( $post_id, ... )` with `$post_id = 'options'`, which returns an empty string and is harmless but produces a PHP notice in debug mode. A `! is_numeric( $post_id )` early return before the stored meta reads would be clean.
+
+**6. `ws_enforce_source_verify_roles` Hook 1 — `needs_review` revert is a no-op on first save**
+The non-admin guard for `ws_needs_review` reads the pre-save value and immediately writes it back . On a brand-new post, the pre-save value is an empty string `''`, so the write does nothing meaningful. More importantly, if a non-admin submits `ws_needs_review = 1` on a new post, ACF writes the submitted value at priority 10, then this hook at priority 20 reads the **just-written** value (not the pre-save value) because `get_post_meta()` reflects what ACF already committed. The "revert" is broken — it reads and re-writes the same submitted value. The fix requires a priority-5 stash of the pre-save `ws_needs_review` value, exactly like the statute reverse-index pattern already in this file.
+
+**7. `ws_rebuild_jx_statute_citation_index` uses `meta_query LIKE` with `serialize()`**
+The OR `meta_query` for citation index rebuild uses `'value' => serialize( $statute_id )` with `'compare' => 'LIKE'` . The `serialize()` of a single integer (e.g. `serialize(42)` → `i:42;`) is not a safe LIKE pattern — it will also match serialized arrays containing `42` as part of a larger value like `a:2:{i:0;i:42;i:1;i:142;}` where `i:142` contains the substring `i:42`. This is a pre-existing acknowledged pattern in WordPress but worth flagging since ACF now stores post_object values as single integers, making the OR branch of this query the active one — the LIKE branch is arguably dead code that should simply be removed.
+
+***
+
+## `matrix/` — Structural Summary
+
+The list did grow long, so here's the high-level picture without a full line-by-line pass :
+
+| File | Size | Notable Risk |
+|---|---|---|
+| `matrix-jurisdictions.php` | 63KB | Largest file — worth its own pass |
+| `matrix-assist-orgs.php` | 29KB | v3.7.0 sector slug remapping — verify all 6 slugs match `register-taxonomies.php` |
+| `matrix-federal-courts.php` | 28KB | Split from courts in v3.8.0 — confirm no lingering state court entries |
+| `matrix-state-courts.php` | 25KB | New in v3.8.0 — gate version and `ws_court_lookup()` wiring to verify |
+| `matrix-fed-statutes.php` | 19KB | `ws_employer_defense` taxonomy assignment added v3.5.0 — term slug alignment risk |
+| `matrix-agencies.php` | 9.5KB | Lowest risk based on scope |
+| `matrix-helpers.php` | 4KB | `ws_court_lookup()` added v3.8.0 — null return path needs verifying in callers |
+| `admin-matrix-watch.php` | 5KB | Dashboard widget only — low functional risk |
+
+The most likely matrix-layer bugs will be in **slug mismatches** between seeder arrays and `register-taxonomies.php` following the v3.7.0 taxonomy restructure. Want me to do a targeted pass on just `matrix-jurisdictions.php` and `matrix-state-courts.php`, or pull `register-taxonomies.php` first to cross-reference all slug names?
