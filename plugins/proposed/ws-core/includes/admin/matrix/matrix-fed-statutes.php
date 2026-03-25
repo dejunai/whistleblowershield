@@ -13,7 +13,7 @@
  * SEEDER RULES
  * ------------
  * - All seeded records receive ws_matrix_source = 'fed-statutes-matrix'.
- * - Gate: ws_seeded_fed_statutes_matrix / 1.2.0 (Unified Option-Gate Method).
+ * - Gate: ws_seeded_fed_statutes_matrix / 1.0.0 (Unified Option-Gate Method).
  * - The US ws_jurisdiction term must exist before this seeder runs.
  *   Load order in loader.php guarantees jurisdiction-matrix.php fires first.
  *
@@ -23,22 +23,6 @@
  * @link       https://whistleblowershield.org
  * @copyright  Copyright (c) Whistleblower Shield
  *
- * VERSION
- * -------
- * 3.0.0  Initial release (Phase 6.3).
- * 3.1.0  Fixed ws_jx_statute_burden_of_proof meta key (was missing jx_ infix).
- *        Added per-statute taxonomy assignments: ws_process_type, ws_disclosure_type,
- *        ws_remedies, ws_protected_class, ws_adverse_action_types,
- *        ws_disclosure_targets, ws_fee_shifting.
- *        Gate bumped to 1.1.0 so existing records are updated on next admin_init.
- * 3.2.0  Meta key renames to match ACF 3.5.0 overhaul:
- *        limit_value → sol_value, limit_unit → sol_unit,
- *        ws_jx_statute_trigger → sol_trigger (also corrects pre-existing mismatch —
- *        matrix was writing ws_jx_statute_trigger; ACF and query layer expected
- *        ws_jx_statute_limit_trigger; both now aligned on ws_jx_statute_sol_trigger),
- *        exhaustion_required → has_exhaustion, burden_of_proof → bop_standard.
- *        Added ws_employer_defense taxonomy assignment.
- *        Gate bumped to 1.2.0.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -316,8 +300,8 @@ function ws_seed_fed_statutes_matrix() {
 // ── Gate ──────────────────────────────────────────────────────────────────────
 
 add_action( 'admin_init', function() {
-    if ( get_option( 'ws_seeded_fed_statutes_matrix' ) !== '1.2.0' ) {
+    if ( get_option( 'ws_seeded_fed_statutes_matrix' ) !== '1.0.0' ) {
         ws_seed_fed_statutes_matrix();
-        update_option( 'ws_seeded_fed_statutes_matrix', '1.2.0' );
+        update_option( 'ws_seeded_fed_statutes_matrix', '1.0.0' );
     }
 } );

@@ -211,7 +211,18 @@ function ws_run_url_priority_health_check() {
  */
 function ws_url_monitor_run_check_for_map( array $monitor_map ) {
 
-    $previous_log = get_option( 'ws_url_monitor_log', [] );
+/**
+ * Shared URL monitor loop for a supplied CPT/meta map.
+ *
+ * @param array  $monitor_map Post type => URL meta keys map.
+ * @param string $scope       Monitor scope key: standard|priority.
+ */
+function ws_url_monitor_run_check_for_map( array $monitor_map, $scope = 'standard' ) {
+
+    $scope            = ( $scope === 'priority' ) ? 'priority' : 'standard';
+    $log_option       = "ws_url_monitor_log_{$scope}";
+    $last_run_option  = "ws_url_monitor_last_run_{$scope}";
+    $previous_log     = get_option( $log_option, [] );
     $new_log      = [];
     $new_failures = [];
     $new_warnings = [];
@@ -350,8 +361,8 @@ function ws_url_monitor_run_check_for_map( array $monitor_map ) {
     }
 
     // Persist updated log and last-run timestamp.
-    update_option( 'ws_url_monitor_log',      $new_log );
-    update_option( 'ws_url_monitor_last_run', time() );
+    update_option( $log_option,      $new_log );
+    update_option( $last_run_option, time() );
 
     // Send email digests.
     if ( ! empty( $new_failures ) || ! empty( $new_warnings ) ) {
@@ -539,14 +550,20 @@ function ws_url_monitor_render_widget() {
         echo '<div class="notice notice-success inline"><p>Priority URL health check completed.</p></div>';
 
         // Refresh values after manual run.
-        $log      = get_option( 'ws_url_monitor_log', [] );
-        $last_run = get_option( 'ws_url_monitor_last_run', 0 );
+        $standard_log = get_option( 'ws_url_monitor_log_standard', [] );
+        $priority_log = get_option( 'ws_url_monitor_log_priority', [] );
+        $log          = array_merge( $standard_log, $priority_log );
+        $last_run_standard = (int) get_option( 'ws_url_monitor_last_run_standard', 0 );
+        $last_run_priority = (int) get_option( 'ws_url_monitor_last_run_priority', 0 );
     }
 
     // ── Meta bar ──────────────────────────────────────────────────────────
 
-    $last_run_str = $last_run
-        ? esc_html( date_i18n( 'Y-m-d H:i', $last_run ) )
+    $last_run_standard_str = $last_run_standard
+        ? esc_html( date_i18n( 'Y-m-d H:i', $last_run_standard ) )
+        : 'Never';
+    $last_run_priority_str = $last_run_priority
+        ? esc_html( date_i18n( 'Y-m-d H:i', $last_run_priority ) )
         : 'Never';
     $next_run_str = $next_run
         ? esc_html( date_i18n( 'Y-m-d H:i', $next_run ) )
@@ -644,7 +661,9 @@ function ws_url_monitor_admin_notice() {
     if ( ! current_user_can( 'manage_options' ) ) {
         return;
     }
-    $log      = get_option( 'ws_url_monitor_log', [] );
+    $standard_log = get_option( 'ws_url_monitor_log_standard', [] );
+    $priority_log = get_option( 'ws_url_monitor_log_priority', [] );
+    $log          = array_merge( $standard_log, $priority_log );
     $failures = array_filter( $log, fn( $e ) => $e['type'] === 'failure' );
     if ( empty( $failures ) ) {
         return;
