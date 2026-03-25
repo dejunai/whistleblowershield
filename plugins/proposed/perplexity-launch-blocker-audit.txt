@@ -1,0 +1,72 @@
+I have now reviewed all the key files. Here's my mid-level launch-blocking bug review:
+
+***
+
+## Launch Blocker Review — `plugins/proposed/`
+
+Here's what I found. **No critical data-loss or fatal execution bugs**, but there are **four issues that warrant blocking or near-blocking attention** before launch:
+
+***
+
+### 🔴 Bug 1 — `$is_rendering` Static Leak Between Post Types (`render-agency.php`)
+
+**File:** `render-agency.php` → `ws_handle_agency_render()`
+
+The `static $is_rendering = false;` guard is function-scoped, which is correct on its own — but `ws_handle_agency_render()` has **two early-return paths that reset `$is_rendering = false`**, yet the path where `$post->post_type` is neither `ws-agency` nor `ws-ag-procedure` falls through to a final `$is_rendering = false; return $content;`. That final reset is correct.
+
+**The actual bug:** If `ws_handle_agency_render()` is called while `$is_rendering = true` (e.g., a nested `the_content` call from within a procedure card), the guard fires and returns `$content` — but `$is_rendering` is never reset to `false` in that code path. The static variable stays `true` for the rest of the request, silently suppressing render on any subsequent legitimate call on the same request. Compare to `render-jurisdiction.php` which has the same pattern — but there it's also never reset on the guard-fire path, meaning the second jurisdiction page in the same request (e.g., a REST or widget call after the main query) would render blank.
+
+**Fix:** Reset `$is_rendering = false` before every `return $content` that fires due to the guard, not just on the successful render paths.
+
+***
+
+### 🔴 Bug 2 — `ws_proc_gate_publish` Reads `$_POST['acf']` Without Nonce Verification
+
+**File:** `admin-procedure-watch.php` → `ws_proc_gate_publish()`
+
+```php
+$override_submitted = current_user_can( 'manage_options' )
+    && ! empty( $_POST['acf']['field_proc_stat_override'] );
+// phpcs:ignore WordPress.Security.NonceVerification.Missing
+```
+
+The `phpcs:ignore` comment acknowledges this but doesn't resolve it. `wp_insert_post_data` fires on REST saves, programmatic saves, and quick-edit — contexts where a forged POST body with `acf[field_proc_stat_override]` set could allow a privileged user session to bypass the publish gate without having gone through the ACF form. Since `current_user_can('manage_options')` is already checked, the practical exploit surface is narrow, but the gate is the **primary safety mechanism preventing mismatched procedure data from going public**. A nonce or a `doing_action('save_post')` + `check_admin_referer()` check should guard it.
+
+***
+
+### 🟡 Bug 3 — `ws_get_agency_procedure()` Has No Published-Status Guard for Single-Page Render
+
+**File:** `query-agencies.php` → `ws_build_agency_procedure_row()`
+
+```php
+if ( ! $pid || get_post_type( $pid ) !== 'ws-ag-procedure' || get_post_status( $pid ) !== 'publish' ) {
+    return [];
+}
+```
+
+The guard is present — good. However, `ws_render_single_agency_procedure_page()` in `render-agency.php` calls `ws_get_agency_procedure()` which calls `ws_build_agency_procedure_row()`. If a draft procedure has a publicly guessable permalink (WP doesn't suppress `ws-ag-procedure` permalinks for logged-out users unless the CPT is private), the render function returns `''` correctly — but `ws_handle_agency_render()` then falls through to `return $rendered ?: $content`, returning `$content` (the raw WP post content). A draft `ws-ag-procedure` post with post content would expose that content publicly. **This depends on whether the CPT is registered as `publicly_queryable => false` for drafts** — confirm in `ws-core.php` or `cpt-register.php`.
+
+***
+
+### 🟡 Bug 4 — `ws_get_procedures_for_statute()` LIKE Query Fragile on Integer-Stored ACF Serialized Arrays
+
+**File:** `query-agencies.php` → `ws_get_procedures_for_statute()`
+
+```php
+[ 'value' => '\"' . $statute_id . '\"', 'compare' => 'LIKE' ],
+[ 'value' => ';i:' . $statute_id . ';',  'compare' => 'LIKE' ],
+```
+
+The double-pattern covers the two ACF serialization shapes correctly for mid-array values. However, the `;i:123;` pattern **misses the first element** in an integer-serialized PHP array, which is stored as `a:1:{i:0;i:123;}` — the `123` value is preceded by `;i:0;i:` not `;i:123;`. If a procedure has **only one statute linked** and ACF serializes as integers, this query returns zero rows and the "Filing Procedures Under This Statute" block silently disappears from the statute section. Not a data-loss bug, but it's a silent UI hole on a core content surface. Add a third LIKE pattern: `'i:' . $statute_id . ';}'` to cover the array-tail/sole-element case, or prefer the string shape by ensuring ACF saves via the UI (which reliably produces the `"123"` string shape).
+
+***
+
+### ✅ Things That Looked Fine
+
+- `ws_is_published()` array-of-arrays handling for statutes is correct
+- Transient cache invalidation stash pattern (old+new statute diff on save) is solid
+- Output escaping is consistent throughout all render files — `esc_html`, `esc_url`, `wp_kses_post` applied correctly at output points
+- The `$demoting` static flag in the demotion path prevents infinite loop on `wp_update_post()` — that's handled correctly
+- The `in_the_loop()` + `is_main_query()` guards are in place on both dispatcher functions
+
+The two 🔴 items — the `$is_rendering` static leak and the nonce gap on the publish gate — are the ones I'd call genuine launch blockers. The 🟡 items are worth fixing before launch but won't produce broken pages in the primary editorial workflow.
