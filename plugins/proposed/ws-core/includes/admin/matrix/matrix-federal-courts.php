@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
  * matrix-federal-courts.php
  *
@@ -25,16 +25,6 @@
  * ws_interp_load_court_choices() merges both matrices when the parent statute is
  * federal; for state statutes it uses $ws_state_court_matrix only.
  *
- * VERSION
- * -------
- * 2.3.1  Initial release.
- * 3.7.0  Removed sections 4–5 (state & territory courts) — extracted to
- *         matrix-state-courts.php. Enables context-aware court select: federal
- *         statute = all courts; state statute = state courts only.
- *         Added 'other' sentinel entry (ws_jx_codes = '__manual__', level = 99):
- *         signals the save hook to skip auto-population of ws_jx_interp_affected_jx
- *         and reveals the ws_jx_interp_court_name free-text field.
- *         Gate bumped to 1.1.0.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -356,7 +346,7 @@ $ws_court_matrix = [
 // ════════════════════════════════════════════════════════════════════════════
 
 add_action( 'admin_init', function() {
-    if ( get_option( 'ws_seeded_court_matrix' ) !== '1.1.0' ) {
-        update_option( 'ws_seeded_court_matrix', '1.1.0' );
+    if ( get_option( 'ws_seeded_court_matrix' ) !== '1.0.0' ) {
+        update_option( 'ws_seeded_court_matrix', '1.0.0' );
     }
 } );

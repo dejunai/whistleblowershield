@@ -40,33 +40,6 @@
  * both frontend and admin — including query-jurisdiction.php and all ACF files.
  *
  *
- * VERSION
- * -------
- * 2.3.1  Extracted from admin-hooks.php into its own file.
- *        Moved to Universal Layer so frontend queries can consume it.
- * 2.3.2  Schema alignment pass:
- *        - Renamed ws_wb_authority_label → ws_jx_wb_authority_label
- *        - Renamed ws_legislature_label → ws_jx_legislature_label
- *        - Renamed ws_executive_label → ws_jx_executive_label
- *        Keys now match ACF field names in acf-jurisdiction.php.
- * 2.3.3  Data accuracy pass:
- *        - Updated ws_jx_wb_authority_label for 9 states with dedicated
- *          whistleblower offices (FL, IL, MA, NJ, NY, OH, PA, TX, VA).
- *        - Updated ws_jx_legislature_label for all 50 states to official names.
- * 2.3.4  Inclusion of URLs and Official Government Portals.
- * 3.0.0  Architecture refactor (Phase 6.1):
- *        - Converted from a bare return-array data file to a seeder file.
- *        - Added ws_seed_jurisdiction_matrix() function and admin_init gate.
- *        - Seeder: seeds ws_jurisdiction taxonomy terms, creates jurisdiction
- *          posts, assigns terms, writes ws_jx_term_id post meta, writes
- *          ws_us_term_id option, and sets ws_matrix_source post meta.
- * 3.1.0  Data integrity pass:
- *        - Removed duplicate stub entries that were silently overwriting
- *          fully-populated entries for AL, AK, AZ, AR, CA, CO, CT, DE, FL,
- *          GA, HI, ID, IL, IN, IA, KS, KY, LA, ME, MD, MA, MI, MN, MS, MO,
- *          MT, NE, NV, NH, NJ, MP, AS (orphaned outside array closing brace).
- *        - Added ws_jx_flag_source_url to all 57 entries (Wikimedia Commons).
- *        - Added ws_jx_flag_source_url to seeder $meta_fields write block.
  */
 
  //@todo - entry_points array reserved for prompt generator use — populate from production review data.

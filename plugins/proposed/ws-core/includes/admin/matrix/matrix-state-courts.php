@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
  * matrix-state-courts.php
  *
@@ -38,13 +38,6 @@
  *   state appellate   — {state-abbr}-app   (e.g. ca-app, tx-app)
  *   exceptions noted inline (ny-app, ok-cca, tx-cca, dc-app, pa-cw, pa-sup-app, ny-appdiv)
  *
- * VERSION
- * -------
- * 3.7.0  Extracted from matrix-federal-courts.php sections 4–5. Separated to enable
- *         context-aware court select filtering: state statute parent = state courts only.
- *         All 50 state supreme courts and available intermediate appellate courts
- *         are predefined; the 'other' sentinel in $ws_court_matrix handles any
- *         remaining edge cases.
  */
 
 defined( 'ABSPATH' ) || exit;

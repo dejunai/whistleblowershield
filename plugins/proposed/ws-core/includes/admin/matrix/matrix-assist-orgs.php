@@ -24,7 +24,7 @@
  * SEEDER RULES
  * ------------
  * - All seeded records receive ws_matrix_source = 'assist-org-matrix'.
- * - Gate: ws_seeded_assist_org_matrix / 1.4.0 (Unified Option-Gate Method).
+ * - Gate: ws_seeded_assist_org_matrix / 1.0.0 (Unified Option-Gate Method).
  * - The US ws_jurisdiction term must exist before this seeder runs.
  *   Load order in loader.php guarantees jurisdiction-matrix.php fires first.
  * - ws_disclosure_type slugs must align with ws_seed_disclosure_type_taxonomy()
@@ -36,36 +36,6 @@
  * @link       https://whistleblowershield.org
  * @copyright  Copyright (c) Whistleblower Shield
  *
- * VERSION
- * -------
- * 3.0.0  Initial release (Phase 6.4).
- * 3.1.0  Fixed meta key prefix: ws_ao_* → ws_aorg_* to match ACF registrations.
- *        ws_ao_url → ws_aorg_website_url; ws_ao_phone → ws_aorg_phone.
- *        Mission/provides text moved to post_content (no dedicated ACF meta field).
- *        ws_ao_name and ws_ao_acronym removed (post title is canonical; no acronym field).
- *        Gate bumped to 1.1.0 so existing records are corrected on next admin_init.
- * 3.3.0  Added aorg_type slug to each record; seeder now assigns ws_aorg_type
- *        taxonomy term. Gate bumped to 1.2.0.
- * 3.5.0  Added description key to each record; seeder now writes ws_aorg_description
- *        meta. Gate bumped to 1.3.0. post_content retains plain-text copy for
- *        WP search indexing; ws_aorg_description is the ACF-managed canonical source.
- * 3.6.0  Full structural overhaul — matrix-assist-orgs-extended.php and
- *        matrix-assist-orgs-proposed.txt merged here (both scratch files retired).
- *        Added: internal_id, intake_url, email, cost_model, is_nationwide,
- *        accepts_anon, has_attorneys, services, sectors, disclosure_types.
- *        Seeder now writes all corresponding ACF meta fields and assigns
- *        ws_disclosure_type taxonomy terms by slug. 14 total organizations.
- *        Gate bumped to 1.4.0.
- * 3.7.0  Replaced ws_aorg_employment_sectors post_meta write with
- *        wp_set_object_terms on ws_employment_sector taxonomy.
- *        All sectors slugs remapped: federal → federal-employee,
- *        state → state-local-employee, private → private-sector,
- *        military → military-defense, nonprofit → nonprofit-ngo,
- *        any → all-sectors. Gate bumped to 1.5.0.
- * 3.7.1  is_nationwide corrected for federal-scope-only orgs (POGO,
- *        GAO FraudNet, IG Community, OSC, OPM OIG): 1 → 0. These orgs
- *        serve federal workers under federal law; the us jurisdiction tag
- *        reflects legal scope, not geographic reach. Gate bumped to 1.6.0.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -488,8 +458,8 @@ function ws_seed_assist_org_matrix() {
 // ── Gate ──────────────────────────────────────────────────────────────────────
 
 add_action( 'admin_init', function() {
-    if ( get_option( 'ws_seeded_assist_org_matrix' ) !== '1.6.0' ) {
+    if ( get_option( 'ws_seeded_assist_org_matrix' ) !== '1.0.0' ) {
         ws_seed_assist_org_matrix();
-        update_option( 'ws_seeded_assist_org_matrix', '1.6.0' );
+        update_option( 'ws_seeded_assist_org_matrix', '1.0.0' );
     }
 } );

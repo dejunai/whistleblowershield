@@ -177,6 +177,7 @@ function ws_register_acf_legal_update() {
                     'interpretation' => 'Interpretation Update',
                     'regulation'     => 'Regulatory Change',
                     'policy'         => 'Agency Policy',
+                    'procedure'      => 'Agency Procedure',
                     'internal'       => 'WhistleblowerShield.org Internal Adjustment',
                     'other'          => 'Other',
                 ],

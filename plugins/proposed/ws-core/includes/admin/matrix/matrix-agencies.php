@@ -26,11 +26,6 @@
  * @link       https://whistleblowershield.org
  * @copyright  Copyright (c) Whistleblower Shield
  *
- * VERSION
- * -------
- * 3.0.0  Initial release (Phase 6.2).
- * 3.1.0  Added ws_languages taxonomy assignment (English) to all seeded agencies.
- *        Gate bumped to 1.1.0 so existing records are updated on next admin_init.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -200,8 +195,8 @@ function ws_seed_agency_matrix() {
 // ── Gate ──────────────────────────────────────────────────────────────────────
 
 add_action( 'admin_init', function() {
-    if ( get_option( 'ws_seeded_agency_matrix' ) !== '1.1.0' ) {
+    if ( get_option( 'ws_seeded_agency_matrix' ) !== '1.0.0' ) {
         ws_seed_agency_matrix();
-        update_option( 'ws_seeded_agency_matrix', '1.1.0' );
+        update_option( 'ws_seeded_agency_matrix', '1.0.0' );
     }
 } );

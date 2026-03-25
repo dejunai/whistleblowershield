@@ -44,11 +44,6 @@
  * @link       https://whistleblowershield.org
  * @copyright  Copyright (c) Whistleblower Shield
  *
- * VERSION
- * -------
- * 3.9.0  Initial release. Phase 4 of ws-ag-procedure feature build.
- *        Ten procedures across nine agencies: SEC, OSHA, OSC (×2), MSPB,
- *        NLRB, CFTC, IRS, EPA, DOJ.
  */
 
 defined( 'ABSPATH' ) || exit;

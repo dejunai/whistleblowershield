@@ -121,44 +121,74 @@ function ws_get_agency_procedures( $agency_id ) {
     $rows = [];
 
     foreach ( $q->posts as $post ) {
-
-        $pid = $post->ID;
-
-        // Taxonomy fields use save_terms=1 in ACF — read via WP term functions,
-        // not get_post_meta(). is_wp_error() guard handles unregistered taxonomies
-        // or posts with no terms assigned.
-        $jx_terms   = wp_get_post_terms( $pid, WS_JURISDICTION_TAXONOMY );
-        $disc_types = wp_get_object_terms( $pid, 'ws_disclosure_type' );
-
-        $rows[] = [
-            'id'               => $pid,
-            'title'            => get_the_title( $pid ),
-            'url'              => get_permalink( $pid ),
-            'type'             => get_post_meta( $pid, 'ws_proc_type',                  true ),
-            'jurisdiction'     => ( $jx_terms   && ! is_wp_error( $jx_terms   ) ) ? $jx_terms   : [],
-            'disclosure_types' => ( $disc_types && ! is_wp_error( $disc_types ) ) ? $disc_types : [],
-            'entry_point'      => get_post_meta( $pid, 'ws_proc_entry_point',           true ),
-            'intake_url'       => get_post_meta( $pid, 'ws_proc_intake_url',            true ),
-            'phone'            => get_post_meta( $pid, 'ws_proc_phone',                 true ),
-            'identity_policy'  => get_post_meta( $pid, 'ws_proc_identity_policy',       true ),
-            'intake_only'      => (bool) get_post_meta( $pid, 'ws_proc_intake_only',    true ),
-            'deadline_days'    => (int)  get_post_meta( $pid, 'ws_proc_deadline_days',  true ),
-            'clock_start'      => get_post_meta( $pid, 'ws_proc_deadline_clock_start',  true ),
-            'has_prereqs'      => (bool) get_post_meta( $pid, 'ws_proc_prerequisites',  true ),
-            'prereq_note'      => get_post_meta( $pid, 'ws_proc_prerequisites_note',    true ),
-            // walkthrough is a WYSIWYG field — stored as raw HTML.
-            // Sanitize with wp_kses_post() before output; never echo raw.
-            'walkthrough'      => get_post_meta( $pid, 'ws_proc_walkthrough',           true ),
-            'exclusivity_note' => get_post_meta( $pid, 'ws_proc_exclusivity_note',      true ),
-            'last_reviewed'    => get_post_meta( $pid, 'ws_proc_last_reviewed',         true ),
-            // Standard authorship stamp sub-array (created_by, edited_by, dates).
-            'record'           => ws_build_record_array( $pid ),
-        ];
+        $row = ws_build_agency_procedure_row( (int) $post->ID );
+        if ( $row ) {
+            $rows[] = $row;
+        }
     }
 
     set_transient( $cache_key, $rows, DAY_IN_SECONDS );
 
     return $rows;
+}
+
+/**
+ * Returns one published ws-ag-procedure row for single-procedure rendering.
+ *
+ * @param  int   $procedure_id Procedure post ID.
+ * @return array               Procedure row or [] when not found/not published.
+ */
+function ws_get_agency_procedure( $procedure_id ) {
+    return ws_build_agency_procedure_row( (int) $procedure_id );
+}
+
+/**
+ * Builds one normalized procedure row used by list and single-procedure views.
+ *
+ * @param  int   $pid Procedure post ID.
+ * @return array      Procedure row, or [] when invalid/not published.
+ */
+function ws_build_agency_procedure_row( $pid ) {
+    if ( ! $pid || get_post_type( $pid ) !== 'ws-ag-procedure' || get_post_status( $pid ) !== 'publish' ) {
+        return [];
+    }
+
+    $agency_id  = (int) get_post_meta( $pid, 'ws_proc_agency_id', true );
+    $agency_url = $agency_id ? get_permalink( $agency_id ) : '';
+
+    // Taxonomy fields use save_terms=1 in ACF — read via WP term functions,
+    // not get_post_meta(). is_wp_error() guard handles unregistered taxonomies
+    // or posts with no terms assigned.
+    $jx_terms   = wp_get_post_terms( $pid, WS_JURISDICTION_TAXONOMY );
+    $disc_types = wp_get_object_terms( $pid, 'ws_disclosure_type' );
+
+    return [
+        'id'               => $pid,
+        'title'            => get_the_title( $pid ),
+        'url'              => get_permalink( $pid ),
+        'agency_id'        => $agency_id,
+        'agency_name'      => $agency_id ? get_the_title( $agency_id ) : '',
+        'agency_url'       => $agency_url ? (string) $agency_url : '',
+        'type'             => get_post_meta( $pid, 'ws_proc_type',                  true ),
+        'jurisdiction'     => ( $jx_terms   && ! is_wp_error( $jx_terms   ) ) ? $jx_terms   : [],
+        'disclosure_types' => ( $disc_types && ! is_wp_error( $disc_types ) ) ? $disc_types : [],
+        'entry_point'      => get_post_meta( $pid, 'ws_proc_entry_point',           true ),
+        'intake_url'       => get_post_meta( $pid, 'ws_proc_intake_url',            true ),
+        'phone'            => get_post_meta( $pid, 'ws_proc_phone',                 true ),
+        'identity_policy'  => get_post_meta( $pid, 'ws_proc_identity_policy',       true ),
+        'intake_only'      => (bool) get_post_meta( $pid, 'ws_proc_intake_only',    true ),
+        'deadline_days'    => (int)  get_post_meta( $pid, 'ws_proc_deadline_days',  true ),
+        'clock_start'      => get_post_meta( $pid, 'ws_proc_deadline_clock_start',  true ),
+        'has_prereqs'      => (bool) get_post_meta( $pid, 'ws_proc_prerequisites',  true ),
+        'prereq_note'      => get_post_meta( $pid, 'ws_proc_prerequisites_note',    true ),
+        // walkthrough is a WYSIWYG field — stored as raw HTML.
+        // Sanitize with wp_kses_post() before output; never echo raw.
+        'walkthrough'      => get_post_meta( $pid, 'ws_proc_walkthrough',           true ),
+        'exclusivity_note' => get_post_meta( $pid, 'ws_proc_exclusivity_note',      true ),
+        'last_reviewed'    => get_post_meta( $pid, 'ws_proc_last_reviewed',         true ),
+        // Standard authorship stamp sub-array (created_by, edited_by, dates).
+        'record'           => ws_build_record_array( $pid ),
+    ];
 }
 
 

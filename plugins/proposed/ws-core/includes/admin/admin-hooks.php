@@ -224,6 +224,7 @@ foreach ( [ 'ws_auto_source_method', 'ws_auto_source_name' ] as $_ws_f ) {
     add_filter( "acf/prepare_field/name={$_ws_f}", 'ws_hide_source_fields_for_non_admins' );
 }
 unset( $_ws_f );
+add_filter( 'acf/prepare_field/name=ws_proc_stat_override', 'ws_hide_source_fields_for_non_admins' );
 
 /**
  * Hides source_method and source_name fields from any user below administrator.
@@ -1323,5 +1324,4 @@ add_action( 'deleted_post', function( $post_id ) {
         ws_rebuild_jx_statute_interp_index( $interp_sid );
     }
 } );
-
 

@@ -23,6 +23,10 @@
  *                            Confirms query-jurisdiction.php loaded and assembled
  *                            correctly (depends on query-helpers and query-shared).
  *
+ *   5. Procedure seeder gate — verifies ws_seeded_procedure_matrix reached 1.0.0
+ *                            and confirms published procedure count is non-zero
+ *                            once that gate has been marked complete.
+ *
  * BEHAVIOR
  * --------
  * All checks run on admin_notices (fires after init, after all plugins loaded).
@@ -112,6 +116,23 @@ function ws_health_check_admin_notice() {
     foreach ( $required_fns as $fn => $source ) {
         if ( ! function_exists( $fn ) ) {
             $issues[] = "Query function not callable: <code>{$fn}()</code> (expected from {$source})";
+        }
+    }
+
+    // ── 5. Procedure seeder gate ─────────────────────────────────────────
+    //
+    // ws_seeded_procedure_matrix marks whether the procedure matrix seeder
+    // has run. Once set to 1.0.0, zero published procedures is an integrity
+    // failure worth surfacing in admin notices.
+
+    $proc_seed_gate = (string) get_option( 'ws_seeded_procedure_matrix', '' );
+    if ( $proc_seed_gate === '' || version_compare( $proc_seed_gate, '1.0.0', '<' ) ) {
+        $issues[] = "Procedure seeder gate incomplete: <code>ws_seeded_procedure_matrix</code> expected <code>1.0.0</code>, found <code>" . esc_html( $proc_seed_gate ?: '(not set)' ) . '</code>.';
+    } else {
+        $proc_counts = wp_count_posts( 'ws-ag-procedure' );
+        $proc_total  = (int) ( $proc_counts->publish ?? 0 );
+        if ( $proc_total < 1 ) {
+            $issues[] = 'Procedure seeder gate is marked complete but there are 0 published procedures.';
         }
     }
 
