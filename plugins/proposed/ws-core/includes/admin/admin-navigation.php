@@ -415,7 +415,6 @@ function ws_render_agency_navigation_box( $post ) {
     if ( ! empty( $procedures ) ) {
         echo '<a class="button button-small" href="' . esc_url( $all_url ) . '">View All</a>';
     }
-    echo '</div>';
-    echo '</div>';
-}
-}
+	    echo '</div>';
+	    echo '</div>';
+	}
