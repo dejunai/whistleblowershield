@@ -19,7 +19,7 @@
 //
 // SUPPORTED CPTs
 // --------------
-// jx-summary, jx-statute, jx-citation, jx-interpretation
+// jx-summary, jx-statute, jx-citation, jx-interpretation, ws-ag-procedure
 //
 // AUTO-STAMPED FIELDS ON ws-legal-update
 // ---------------------------------------
@@ -68,7 +68,7 @@ add_action( 'acf/save_post', 'ws_acf_log_major_edit', 20 );
  */
 function ws_acf_log_major_edit( $post_id ) {
 
-	$supported = [ 'jx-summary', 'jx-statute', 'jx-citation', 'jx-interpretation' ];
+	$supported = [ 'jx-summary', 'jx-statute', 'jx-citation', 'jx-interpretation', 'ws-ag-procedure' ];
 
 	$post_type = get_post_type( $post_id );
 	if ( ! in_array( $post_type, $supported, true ) ) {
@@ -156,7 +156,9 @@ function ws_acf_log_major_edit( $post_id ) {
 
 	// ── Update date and type ──────────────────────────────────────────────────
 	update_post_meta( $update_id, 'ws_legal_update_date', $now_local );
-	$update_type = str_replace( 'jx-', '', $post_type );
+	$update_type = ( $post_type === 'ws-ag-procedure' )
+		? 'procedure'
+		: str_replace( 'jx-', '', $post_type );
 	update_post_meta( $update_id, 'ws_legal_update_type', $update_type );
 
 	// ── Law name — pull from the source post's best naming field ─────────────

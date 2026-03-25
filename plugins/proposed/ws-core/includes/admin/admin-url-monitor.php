@@ -6,9 +6,10 @@
  *
  * PURPOSE
  * -------
- * Checks all known URL meta fields across jurisdiction, agency, and assist-org
- * CPTs every 10 days via WP-Cron. Failures (4xx/5xx) and warnings (redirects)
- * are stored in a structured option and surfaced via a dashboard widget.
+ * Checks standard URL meta fields across jurisdiction, agency, and assist-org
+ * CPTs every 10 days via WP-Cron. High-priority procedure intake URLs run on a
+ * separate 3-day schedule. Failures (4xx/5xx) and warnings (redirects) are
+ * stored in a structured option and surfaced via a dashboard widget.
  * Administrator-role users are notified by email on failures and recoveries.
  *
  * BEHAVIOR
@@ -26,7 +27,9 @@
  *
  * CRON SCHEDULE
  * -------------
- * Custom schedule: ws_every_ten_days (864000 seconds).
+ * Custom schedules:
+ *   ws_every_ten_days   (864000 seconds) — standard URLs
+ *   ws_every_three_days (259200 seconds) — high-priority procedure intake URLs
  * WP-Cron fires on page load — interval is approximate on low-traffic sites.
  * For guaranteed timing, add a server-side crontab:
  *
@@ -103,6 +106,12 @@ $ws_url_monitor_map = [
     ],
 ];
 
+$ws_url_monitor_priority_map = [
+    'ws-ag-procedure' => [
+        'ws_proc_intake_url',
+    ],
+];
+
 
 // ════════════════════════════════════════════════════════════════════════════
 // Custom Cron Schedule
@@ -124,6 +133,10 @@ function ws_url_monitor_register_schedule( $schedules ) {
         'interval' => 864000, // 10 days in seconds
         'display'  => __( 'Every 10 Days (WhistleblowerShield URL Monitor)' ),
     ];
+    $schedules['ws_every_three_days'] = [
+        'interval' => 259200, // 3 days in seconds
+        'display'  => __( 'Every 3 Days (WhistleblowerShield Priority URL Monitor)' ),
+    ];
     return $schedules;
 }
 
@@ -144,6 +157,9 @@ function ws_url_monitor_maybe_schedule() {
     if ( ! wp_next_scheduled( 'ws_url_health_check' ) ) {
         wp_schedule_event( time(), 'ws_every_ten_days', 'ws_url_health_check' );
     }
+    if ( ! wp_next_scheduled( 'ws_url_priority_health_check' ) ) {
+        wp_schedule_event( time(), 'ws_every_three_days', 'ws_url_priority_health_check' );
+    }
 }
 
 /**
@@ -155,6 +171,10 @@ function ws_url_monitor_deactivate() {
     if ( $timestamp ) {
         wp_unschedule_event( $timestamp, 'ws_url_health_check' );
     }
+    $priority_timestamp = wp_next_scheduled( 'ws_url_priority_health_check' );
+    if ( $priority_timestamp ) {
+        wp_unschedule_event( $priority_timestamp, 'ws_url_priority_health_check' );
+    }
 }
 
 
@@ -165,14 +185,31 @@ function ws_url_monitor_deactivate() {
 // ════════════════════════════════════════════════════════════════════════════
 
 add_action( 'ws_url_health_check', 'ws_run_url_health_check' );
+add_action( 'ws_url_priority_health_check', 'ws_run_url_priority_health_check' );
 
 /**
  * Loops all monitored CPTs and URL meta keys, checks each URL, classifies
  * the response, updates the log, and sends email digests.
  */
 function ws_run_url_health_check() {
-
     global $ws_url_monitor_map;
+    ws_url_monitor_run_check_for_map( $ws_url_monitor_map );
+}
+
+/**
+ * Runs the high-priority URL check loop (procedures).
+ */
+function ws_run_url_priority_health_check() {
+    global $ws_url_monitor_priority_map;
+    ws_url_monitor_run_check_for_map( $ws_url_monitor_priority_map );
+}
+
+/**
+ * Shared URL monitor loop for a supplied CPT/meta map.
+ *
+ * @param array $monitor_map Post type => URL meta keys map.
+ */
+function ws_url_monitor_run_check_for_map( array $monitor_map ) {
 
     $previous_log = get_option( 'ws_url_monitor_log', [] );
     $new_log      = [];
@@ -187,7 +224,7 @@ function ws_run_url_health_check() {
         $previous_flagged[ $entry['post_id'] . '|' . $entry['meta_key'] ] = $entry;
     }
 
-    foreach ( $ws_url_monitor_map as $post_type => $meta_keys ) {
+    foreach ( $monitor_map as $post_type => $meta_keys ) {
 
         // Limit per CPT — fetching IDs only (fields=ids) is cheap, but an
         // unbounded query on a very large dataset can still cause memory issues
@@ -479,7 +516,8 @@ function ws_url_monitor_render_widget() {
 
     $log      = get_option( 'ws_url_monitor_log', [] );
     $last_run = get_option( 'ws_url_monitor_last_run', 0 );
-    $next_run = wp_next_scheduled( 'ws_url_health_check' );
+    $next_run          = wp_next_scheduled( 'ws_url_health_check' );
+    $next_priority_run = wp_next_scheduled( 'ws_url_priority_health_check' );
 
     // ── Manual trigger ────────────────────────────────────────────────────
 
@@ -488,7 +526,17 @@ function ws_url_monitor_render_widget() {
         && current_user_can( 'manage_options' )
     ) {
         ws_run_url_health_check();
-        echo '<div class="notice notice-success inline"><p>URL health check completed.</p></div>';
+        echo '<div class="notice notice-success inline"><p>Standard URL health check completed.</p></div>';
+        $log      = get_option( 'ws_url_monitor_log', [] );
+        $last_run = get_option( 'ws_url_monitor_last_run', 0 );
+    }
+
+    if ( isset( $_POST['ws_url_monitor_run_priority_now'] )
+        && check_admin_referer( 'ws_url_monitor_trigger_priority' )
+        && current_user_can( 'manage_options' )
+    ) {
+        ws_run_url_priority_health_check();
+        echo '<div class="notice notice-success inline"><p>Priority URL health check completed.</p></div>';
 
         // Refresh values after manual run.
         $log      = get_option( 'ws_url_monitor_log', [] );
@@ -503,10 +551,14 @@ function ws_url_monitor_render_widget() {
     $next_run_str = $next_run
         ? esc_html( date_i18n( 'Y-m-d H:i', $next_run ) )
         : 'Not scheduled';
+    $next_priority_run_str = $next_priority_run
+        ? esc_html( date_i18n( 'Y-m-d H:i', $next_priority_run ) )
+        : 'Not scheduled';
 
     echo '<p style="color:#999;font-size:11px;margin-top:0;">'
         . 'Last run: ' . $last_run_str
-        . ' &nbsp;|&nbsp; Next run: ' . $next_run_str
+        . ' &nbsp;|&nbsp; Next standard run: ' . $next_run_str
+        . ' &nbsp;|&nbsp; Next priority run: ' . $next_priority_run_str
         . '</p>';
 
     // ── Manual trigger form ───────────────────────────────────────────────
@@ -514,7 +566,13 @@ function ws_url_monitor_render_widget() {
     echo '<form method="post">';
     wp_nonce_field( 'ws_url_monitor_trigger' );
     echo '<input type="hidden" name="ws_url_monitor_run_now" value="1">';
-    submit_button( 'Run Check Now', 'secondary small', '', false );
+    submit_button( 'Run Standard Check Now', 'secondary small', '', false );
+    echo '</form>';
+
+    echo '<form method="post" style="margin-top:8px;">';
+    wp_nonce_field( 'ws_url_monitor_trigger_priority' );
+    echo '<input type="hidden" name="ws_url_monitor_run_priority_now" value="1">';
+    submit_button( 'Run Priority Check Now', 'secondary small', '', false );
     echo '</form><br>';
 
     // ── Log output ────────────────────────────────────────────────────────

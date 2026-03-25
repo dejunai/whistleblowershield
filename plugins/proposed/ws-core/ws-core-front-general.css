@@ -251,6 +251,109 @@
     border: 0;
 }
 
+/* ── Shared Buttons (CTAs) ──────────────────────────────────────────────── */
+
+.ws-btn {
+    display: inline-block;
+    padding: 0.5rem 0.85rem;
+    border: 1px solid #2c5282;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 0.88rem;
+    line-height: 1.3;
+    font-weight: 600;
+}
+
+.ws-btn:hover {
+    text-decoration: none;
+}
+
+.ws-btn--primary {
+    background: #2c5282;
+    color: #fff;
+}
+
+.ws-btn--primary:hover {
+    background: #1f3b5d;
+    color: #fff;
+}
+
+.ws-btn--secondary {
+    background: #fff;
+    color: #2c5282;
+}
+
+.ws-btn--secondary:hover {
+    background: #f7fafc;
+    color: #1f3b5d;
+}
+
+/* ── Agency Procedures (render-agency.php) ─────────────────────────────── */
+
+.ws-agency-procedures {
+    margin-top: 1.5rem;
+}
+
+.ws-agency-procedures__group {
+    border-top: 1px solid #e5e7eb;
+    margin-top: 1rem;
+    padding-top: 1rem;
+}
+
+.ws-proc-card {
+    border: 1px solid #d8d2c7;
+    border-radius: 6px;
+    background: #fff;
+    padding: 0.9rem 1rem;
+    margin: 0.85rem 0;
+}
+
+.ws-proc-card__meta {
+    margin: 0.8rem 0;
+}
+
+.ws-proc-card__meta-row {
+    margin: 0.25rem 0;
+}
+
+.ws-proc-card__meta-row dt {
+    font-weight: 700;
+}
+
+.ws-proc-card__meta-row dd {
+    margin: 0.15rem 0 0;
+}
+
+.ws-proc-card__intake-only-notice,
+.ws-proc-card__prereqs-notice,
+.ws-proc-card__exclusivity-notice {
+    border-left: 4px solid #c05621;
+    background: #fffaf0;
+    padding: 0.55rem 0.7rem;
+    margin: 0.75rem 0;
+    font-size: 0.9rem;
+}
+
+.ws-proc-card__walkthrough {
+    margin: 0.8rem 0;
+}
+
+.ws-proc-card__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+    margin-top: 0.8rem;
+}
+
+.ws-proc-card__last-reviewed {
+    margin-top: 0.65rem;
+    color: #666;
+}
+
+.ws-procedure-single__agency {
+    margin: 0 0 0.8rem;
+}
+
 
 /* ── Jurisdiction Index ──────────────────────────────────────────────────── */
 

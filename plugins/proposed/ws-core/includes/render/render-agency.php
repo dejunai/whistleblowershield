@@ -158,7 +158,14 @@ Dispatcher
 add_filter( 'the_content', 'ws_handle_agency_render' );
 
 /**
- * Intercepts the_content for ws-agency posts and appends the procedures section.
+ * Intercepts the_content for ws-agency and ws-ag-procedure posts.
+ *
+ * ws-agency:
+ *   Appends grouped procedure sections beneath editorial content.
+ *
+ * ws-ag-procedure:
+ *   Renders a standalone procedure page using procedure ACF data so
+ *   publicly queryable procedure permalinks do not display as blank pages.
  *
  * Guards against:
  *   - Non-main-query loops (widgets, sidebars, REST contexts).
@@ -182,17 +189,27 @@ function ws_handle_agency_render( $content ) {
         return $content;
     }
 
-    if ( ! $post || $post->post_type !== 'ws-agency' || $is_rendering ) {
+    if ( ! $post || $is_rendering ) {
         return $content;
     }
 
     $is_rendering = true;
 
-    $procedures   = ws_get_agency_procedures( $post->ID );
-    $proc_section = ws_render_agency_procedures( $procedures );
-    $is_rendering = false;
+    if ( $post->post_type === 'ws-agency' ) {
+        $procedures   = ws_get_agency_procedures( $post->ID );
+        $proc_section = ws_render_agency_procedures( $procedures );
+        $is_rendering = false;
+        return $content . $proc_section;
+    }
 
-    return $content . $proc_section;
+    if ( $post->post_type === 'ws-ag-procedure' ) {
+        $rendered     = ws_render_single_agency_procedure_page( $post->ID );
+        $is_rendering = false;
+        return $rendered ?: $content;
+    }
+
+    $is_rendering = false;
+    return $content;
 }
 
 
@@ -439,6 +456,36 @@ function ws_render_agency_procedure_card( $proc ) {
         <?php endif; ?>
 
     </div>
+    <?php
+    return ob_get_clean();
+}
+
+
+/**
+ * Renders full procedure content on single ws-ag-procedure permalinks.
+ *
+ * @param  int    $procedure_id Procedure post ID.
+ * @return string HTML block for single procedure page.
+ */
+function ws_render_single_agency_procedure_page( $procedure_id ) {
+    $proc = ws_get_agency_procedure( (int) $procedure_id );
+    if ( empty( $proc ) ) {
+        return '';
+    }
+
+    ob_start();
+    ?>
+    <section class="ws-procedure-single">
+        <?php if ( ! empty( $proc['agency_name'] ) && ! empty( $proc['agency_url'] ) ) : ?>
+            <p class="ws-procedure-single__agency">
+                <strong>Agency:</strong>
+                <a href="<?php echo esc_url( $proc['agency_url'] ); ?>">
+                    <?php echo esc_html( $proc['agency_name'] ); ?>
+                </a>
+            </p>
+        <?php endif; ?>
+        <?php echo ws_render_agency_procedure_card( $proc ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+    </section>
     <?php
     return ob_get_clean();
 }

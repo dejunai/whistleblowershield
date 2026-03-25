@@ -217,6 +217,69 @@
     /* Theme pass: individual interpretation card styles */
 }
 
+/* ── Statute → Procedure Cross-reference Panel ──────────────────────────── */
+
+.ws-statute-procedures {
+    margin-top: 0.7rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    background: #f8fafc;
+    padding: 0.65rem 0.75rem;
+}
+
+.ws-statute-procedures__heading {
+    margin: 0 0 0.5rem;
+    font-size: 0.82rem;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    color: #334155;
+}
+
+.ws-statute-procedures__list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.ws-statute-procedures__item {
+    margin: 0.35rem 0;
+    line-height: 1.35;
+}
+
+.ws-statute-procedures__agency {
+    color: #475569;
+}
+
+.ws-statute-procedures__badge {
+    display: inline-block;
+    font-size: 0.72rem;
+    padding: 0.08rem 0.42rem;
+    border-radius: 999px;
+    border: 1px solid #cbd5e1;
+    background: #fff;
+    margin-left: 0.4rem;
+}
+
+.ws-statute-procedures__badge--disclosure,
+.ws-statute-procedures__badge--retaliation,
+.ws-statute-procedures__badge--both {
+    background: #eff6ff;
+    border-color: #bfdbfe;
+    color: #1e3a8a;
+}
+
+.ws-statute-procedures__badge--deadline {
+    background: #fff7ed;
+    border-color: #fed7aa;
+    color: #9a3412;
+}
+
+.ws-statute-procedures__badge--intake-only {
+    background: #fef2f2;
+    border-color: #fecaca;
+    color: #991b1b;
+}
+
 
 /* ── Footnote Return Indicator ───────────────────────────────────────────── */
 /*
