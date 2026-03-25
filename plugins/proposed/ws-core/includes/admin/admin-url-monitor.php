@@ -193,7 +193,7 @@ add_action( 'ws_url_priority_health_check', 'ws_run_url_priority_health_check' )
  */
 function ws_run_url_health_check() {
     global $ws_url_monitor_map;
-    ws_url_monitor_run_check_for_map( $ws_url_monitor_map, 'standard' );
+    ws_url_monitor_run_check_for_map( $ws_url_monitor_map );
 }
 
 /**
@@ -201,8 +201,15 @@ function ws_run_url_health_check() {
  */
 function ws_run_url_priority_health_check() {
     global $ws_url_monitor_priority_map;
-    ws_url_monitor_run_check_for_map( $ws_url_monitor_priority_map, 'priority' );
+    ws_url_monitor_run_check_for_map( $ws_url_monitor_priority_map );
 }
+
+/**
+ * Shared URL monitor loop for a supplied CPT/meta map.
+ *
+ * @param array $monitor_map Post type => URL meta keys map.
+ */
+function ws_url_monitor_run_check_for_map( array $monitor_map ) {
 
 /**
  * Shared URL monitor loop for a supplied CPT/meta map.
@@ -518,11 +525,8 @@ function ws_url_monitor_register_widget() {
  */
 function ws_url_monitor_render_widget() {
 
-    $standard_log = get_option( 'ws_url_monitor_log_standard', [] );
-    $priority_log = get_option( 'ws_url_monitor_log_priority', [] );
-    $log          = array_merge( $standard_log, $priority_log );
-    $last_run_standard = (int) get_option( 'ws_url_monitor_last_run_standard', 0 );
-    $last_run_priority = (int) get_option( 'ws_url_monitor_last_run_priority', 0 );
+    $log      = get_option( 'ws_url_monitor_log', [] );
+    $last_run = get_option( 'ws_url_monitor_last_run', 0 );
     $next_run          = wp_next_scheduled( 'ws_url_health_check' );
     $next_priority_run = wp_next_scheduled( 'ws_url_priority_health_check' );
 
@@ -534,11 +538,8 @@ function ws_url_monitor_render_widget() {
     ) {
         ws_run_url_health_check();
         echo '<div class="notice notice-success inline"><p>Standard URL health check completed.</p></div>';
-        $standard_log = get_option( 'ws_url_monitor_log_standard', [] );
-        $priority_log = get_option( 'ws_url_monitor_log_priority', [] );
-        $log          = array_merge( $standard_log, $priority_log );
-        $last_run_standard = (int) get_option( 'ws_url_monitor_last_run_standard', 0 );
-        $last_run_priority = (int) get_option( 'ws_url_monitor_last_run_priority', 0 );
+        $log      = get_option( 'ws_url_monitor_log', [] );
+        $last_run = get_option( 'ws_url_monitor_last_run', 0 );
     }
 
     if ( isset( $_POST['ws_url_monitor_run_priority_now'] )
@@ -572,8 +573,7 @@ function ws_url_monitor_render_widget() {
         : 'Not scheduled';
 
     echo '<p style="color:#999;font-size:11px;margin-top:0;">'
-        . 'Last standard run: ' . $last_run_standard_str
-        . ' &nbsp;|&nbsp; Last priority run: ' . $last_run_priority_str
+        . 'Last run: ' . $last_run_str
         . ' &nbsp;|&nbsp; Next standard run: ' . $next_run_str
         . ' &nbsp;|&nbsp; Next priority run: ' . $next_priority_run_str
         . '</p>';
