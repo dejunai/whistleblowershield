@@ -169,13 +169,12 @@ function ws_get_agency_procedures( $agency_id ) {
 // given jx-statute post. Used by the statute section renderer to surface
 // "Filing Procedures Under This Statute" on jurisdiction pages.
 //
-// Relationship fields (ws_proc_statute_ids) are stored by ACF as a PHP
-// serialized integer array. The meta_query LIKE pattern ';i:{id};' reliably
-// matches any position in the serialized array without false positives:
-//   — Middle/end position:  ...;i:123;...    matches ';i:123;' ✓
-//   — First position:  {i:0;i:123;}          matches ';i:123;' via leading ';'
-//     from the preceding array index ('i:0;') ✓
-//   — No false positive on ID 12 vs 123:  ';i:12;' never appears in ';i:123;' ✓
+// Relationship fields (ws_proc_statute_ids) are stored by ACF as a serialized
+// array of post IDs. Depending on save path these may be serialized as strings
+// (common ACF UI save) or integers (programmatic/meta writes). Query both
+// shapes to avoid false negatives:
+//   — string shape:  ...s:3:"123";...
+//   — integer shape: ...i:123;...
 //
 // Return shape per row:
 //   id            int     Procedure post ID.
@@ -216,12 +215,20 @@ function ws_get_procedures_for_statute( $statute_id ) {
         'orderby'        => 'title',
         'order'          => 'ASC',
         'no_found_rows'  => true,
-        // Serialized PHP integer array: search for ';i:{id};' pattern.
-        'meta_query'     => [ [
-            'key'     => 'ws_proc_statute_ids',
-            'value'   => ';i:' . $statute_id . ';',
-            'compare' => 'LIKE',
-        ] ],
+        // Match both possible serialized value shapes used by ACF/meta writes.
+        'meta_query'     => [
+            'relation' => 'OR',
+            [
+                'key'     => 'ws_proc_statute_ids',
+                'value'   => '"' . $statute_id . '"',
+                'compare' => 'LIKE',
+            ],
+            [
+                'key'     => 'ws_proc_statute_ids',
+                'value'   => ';i:' . $statute_id . ';',
+                'compare' => 'LIKE',
+            ],
+        ],
     ] );
 
     $rows = [];
@@ -261,7 +268,37 @@ function ws_get_procedures_for_statute( $statute_id ) {
 // saves as well as ACF edit-screen saves.
 // ════════════════════════════════════════════════════════════════════════════
 
+/**
+ * Request-level stash for prior ws_proc_agency_id during updates/deletes.
+ *
+ * @param  int      $post_id
+ * @param  int|null $agency_id  Pass an int to write; null to read.
+ * @return int
+ */
+function ws_proc_agency_stash( $post_id, $agency_id = null ) {
+    static $stash = [];
+    if ( null !== $agency_id ) {
+        $stash[ $post_id ] = (int) $agency_id;
+    }
+    return (int) ( $stash[ $post_id ] ?? 0 );
+}
+
+// Capture old agency linkage before post/meta updates are written.
+add_action( 'pre_post_update', function( $post_id ) {
+    if ( get_post_type( $post_id ) !== 'ws-ag-procedure' ) {
+        return;
+    }
+    ws_proc_agency_stash( $post_id, (int) get_post_meta( $post_id, 'ws_proc_agency_id', true ) );
+} );
+
 add_action( 'save_post_ws-ag-procedure', function( $post_id ) {
+
+    // Ignore autosaves/revisions and new inserts with no previous state.
+    if ( wp_is_post_revision( $post_id ) || wp_is_post_autosave( $post_id ) ) {
+        return;
+    }
+
+    $old_agency_id = ws_proc_agency_stash( $post_id );
 
     $agency_id = (int) get_post_meta( $post_id, 'ws_proc_agency_id', true );
 
@@ -269,7 +306,11 @@ add_action( 'save_post_ws-ag-procedure', function( $post_id ) {
         delete_transient( 'ws_agency_procs_' . $agency_id );
     }
 
-} );
+    if ( $old_agency_id && $old_agency_id !== $agency_id ) {
+        delete_transient( 'ws_agency_procs_' . $old_agency_id );
+    }
+
+}, 10, 1 );
 
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -378,6 +419,7 @@ add_action( 'before_delete_post', function( $post_id ) {
     $ids = is_array( $raw ) ? array_map( 'intval', $raw ) : [];
 
     ws_proc_statute_delete_stash( $post_id, $ids );
+    ws_proc_agency_stash( $post_id, (int) get_post_meta( $post_id, 'ws_proc_agency_id', true ) );
 
 } );
 
@@ -393,6 +435,11 @@ add_action( 'deleted_post', function( $post_id ) {
         if ( $statute_id ) {
             delete_transient( 'ws_statute_procs_' . $statute_id );
         }
+    }
+
+    $agency_id = ws_proc_agency_stash( $post_id );
+    if ( $agency_id ) {
+        delete_transient( 'ws_agency_procs_' . $agency_id );
     }
 
 } );
