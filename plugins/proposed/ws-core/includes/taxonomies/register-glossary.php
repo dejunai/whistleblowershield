@@ -35,7 +35,7 @@
  * TRANSIENT
  * ---------
  * ws_glossary_cache — stores the full flat lookup array.
- * Invalidated on edited_ws_glossary and created_ws_glossary hooks.
+ * Invalidated on created_ws_glossary, edited_ws_glossary, and delete_ws_glossary hooks.
  * TTL: 24 hours as a safety net.
  *
  * INTEGRATION
@@ -61,6 +61,9 @@
  *        for capabilities. libxml error state saved and restored.
  *        Docblock corrected: <code> and <pre> added to skip-tags list.
  *        add_action placement moved to after function definition.
+ * 3.8.1  try/catch/finally block in ws_apply_glossary_tooltips() normalized
+ *        to consistent single-tab indentation. Misaligned closing brace on
+ *        the early-return if(!$body) guard corrected.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -152,7 +155,7 @@ function ws_register_glossary_acf_fields() {
     }
 
     acf_add_local_field_group( [
-        'key'      => 'group_ws_glossary_term',
+        'key'      => 'group_glossary_metadata',
         'title'    => 'Glossary Term Settings',
         'active'   => true,
         'location' => [ [ [
@@ -319,7 +322,7 @@ function ws_apply_glossary_tooltips( $html ) {
 		$body = $doc->getElementsByTagName( 'body' )->item( 0 );
 		if ( ! $body ) {
 			return $html;
-			}
+		}
 
 		// ── Walk text nodes ───────────────────────────────────────────────────
 
@@ -411,18 +414,18 @@ function ws_apply_glossary_tooltips( $html ) {
 
 		return $result ?: $html;
 
-		} catch ( Exception $e ) {
-			error_log( sprintf(
-				'[ws-core] Glossary scanner exception: %s (in %s line %d)',
-				$e->getMessage(),
-				__FILE__,
-				__LINE__
-			) );
-			return $html;
+	} catch ( Exception $e ) {
+		error_log( sprintf(
+			'[ws-core] Glossary scanner exception: %s (in %s line %d)',
+			$e->getMessage(),
+			__FILE__,
+			__LINE__
+		) );
+		return $html;
 
-		} finally {
-			libxml_use_internal_errors( $prev_libxml );
-		}
+	} finally {
+		libxml_use_internal_errors( $prev_libxml );
+	}
 }
 
 

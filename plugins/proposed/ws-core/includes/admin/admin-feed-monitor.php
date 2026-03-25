@@ -94,6 +94,13 @@
  *        ws_feed_monitor_last_error instead of silently returning -1.
  *        Added admin_notices banner surfacing feed poll failures to all
  *        admin screens, linking to Tools → Feed Monitor.
+ * 3.8.1  echo $notice wrapped with wp_kses_post(). LOCK_EX flag added to
+ *        file_put_contents() in ws_feed_monitor_write_staged().
+ *        Staged JSON prune step added: pending items older than
+ *        ws_feed_staged_max_age_days (default 90 days) are dropped on each
+ *        poll run to prevent unbounded file growth.
+ *        Default jx_code wrapped in apply_filters('ws_feed_monitor_default_jx_code')
+ *        for non-US deployments.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -358,13 +365,38 @@ function ws_feed_monitor_poll() {
             'source'      => $source,
             'status'      => 'pending',
             'staged_at'   => current_time( 'Y-m-d H:i:s' ),
-            'jx_code'     => 'US', // Default to Federal; reviewer can change.
+            // Default jurisdiction for staged items. Override via the
+            // ws_feed_monitor_default_jx_code filter (e.g. for state-focused deployments).
+            'jx_code'     => apply_filters( 'ws_feed_monitor_default_jx_code', 'US' ),
             'notes'       => '',
         ];
 
         $staged_guids[] = $guid;
         $new_count++;
     }
+
+    // ── Prune stale pending items ─────────────────────────────────────────
+    //
+    // Accepted and rejected items are removed from staging immediately on
+    // each admin action, so only 'pending' items accumulate over time.
+    // Items that have sat in staging past ws_feed_staged_max_age_days (default
+    // 90 days) are pruned automatically each poll run to prevent unbounded
+    // file growth. A reviewer discarding the queue is more useful than
+    // silently accumulating months of unreviewed bills.
+
+    $max_age_days  = (int) apply_filters( 'ws_feed_staged_max_age_days', 90 );
+    $prune_cutoff  = time() - ( $max_age_days * DAY_IN_SECONDS );
+
+    $staged = array_values( array_filter(
+        $staged,
+        function ( $item ) use ( $prune_cutoff ) {
+            if ( ( $item['status'] ?? 'pending' ) !== 'pending' ) {
+                return true; // Non-pending items should not exist here, but keep them if present.
+            }
+            $ts = strtotime( $item['staged_at'] ?? '' );
+            return $ts !== false && $ts >= $prune_cutoff;
+        }
+    ) );
 
     // ── Persist ───────────────────────────────────────────────────────────
 
@@ -406,8 +438,7 @@ function ws_feed_ingest_item( $guid ) {
 
     // ── Resolve ws_jurisdiction term ──────────────────────────────────────
 
-    $jx_code = strtolower( sanitize_text_field( $entry['jx_code'] ?? 'us' ) );
-    $term    = get_term_by( 'slug', $jx_code, WS_JURISDICTION_TERM_ID );
+    $term = ws_jx_term_by_code( sanitize_text_field( $entry['jx_code'] ?? 'us' ) );
 
     // ── Create post ───────────────────────────────────────────────────────
 
@@ -425,7 +456,7 @@ function ws_feed_ingest_item( $guid ) {
     // ── Assign taxonomy term ──────────────────────────────────────────────
 
     if ( $term && ! is_wp_error( $term ) ) {
-        wp_set_object_terms( $post_id, $term->term_id, WS_JURISDICTION_TERM_ID );
+        wp_set_object_terms( $post_id, $term->term_id, WS_JURISDICTION_TAXONOMY );
         update_post_meta( $post_id, 'ws_jx_term_id', $term->term_id );
     }
 
@@ -514,7 +545,7 @@ function ws_feed_monitor_read_staged() {
  */
 function ws_feed_monitor_write_staged( array $staged ) {
     $json = wp_json_encode( $staged, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE );
-    return (bool) file_put_contents( ws_feed_staged_file(), $json );
+    return (bool) file_put_contents( ws_feed_staged_file(), $json, LOCK_EX );
 }
 
 
@@ -621,7 +652,7 @@ function ws_feed_monitor_render_page() {
     ?>
     <div class="wrap">
         <h1>WhistleblowerShield — Feed Monitor</h1>
-        <?php echo $notice; ?>
+        <?php echo wp_kses_post( $notice ); ?>
 
         <?php if ( $last_err ) : ?>
             <div class="notice notice-warning"><p><strong>Last poll error:</strong> <?php echo esc_html( $last_err ); ?></p></div>

@@ -390,7 +390,7 @@ function ws_seed_assist_org_matrix() {
     global $_ws_assist_org_matrix;
 
     // Resolve the US jurisdiction term ID.
-    $us_term = get_term_by( 'slug', 'us', WS_JURISDICTION_TERM_ID );
+    $us_term = ws_jx_term_by_code( 'us' );
     if ( ! $us_term || is_wp_error( $us_term ) ) {
         return; // Jurisdiction terms not yet seeded — bail.
     }
@@ -447,6 +447,10 @@ function ws_seed_assist_org_matrix() {
             }
         }
 
+        // ACF shadow key — tells ACF which field definition manages ws_aorg_services
+        // so the checkbox renders correctly in the edit screen without a first-save wipe.
+        update_post_meta( $post_id, '_ws_aorg_services', 'field_aorg_services' );
+
         // ── Taxonomies ───────────────────────────────────────────────────────
 
         // Organization type (single slug).
@@ -473,7 +477,7 @@ function ws_seed_assist_org_matrix() {
         wp_set_object_terms( $post_id, 'english', 'ws_languages' );
 
         // Jurisdiction: US.
-        wp_set_object_terms( $post_id, $us_term_id, WS_JURISDICTION_TERM_ID );
+        wp_set_object_terms( $post_id, $us_term_id, WS_JURISDICTION_TAXONOMY );
 
         // ── Seeder stamp ─────────────────────────────────────────────────────
         update_post_meta( $post_id, 'ws_matrix_source', 'assist-org-matrix' );

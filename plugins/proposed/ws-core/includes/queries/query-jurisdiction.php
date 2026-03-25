@@ -243,8 +243,7 @@ function ws_get_term_id_by_code( $jx_code ) {
         return 0;
     }
 
-    $slug = strtolower( sanitize_text_field( $jx_code ) );
-    $term = get_term_by( 'slug', $slug, WS_JURISDICTION_TERM_ID );
+    $term = ws_jx_term_by_code( sanitize_text_field( $jx_code ) );
 
     if ( ! $term || is_wp_error( $term ) ) {
         return 0;
@@ -289,7 +288,7 @@ function ws_get_id_by_code( $jx_code ) {
             'fields'         => 'ids',
             'no_found_rows'  => true,
             'tax_query'      => [ [
-                'taxonomy' => WS_JURISDICTION_TERM_ID,
+                'taxonomy' => WS_JURISDICTION_TAXONOMY,
                 'field'    => 'term_id',
                 'terms'    => $term_id,
             ] ],
@@ -352,7 +351,7 @@ function ws_get_jurisdiction_data( $input = null ) {
     }
 
     $flag     = get_field( 'ws_jx_flag', $post_id );
-    $jx_terms = wp_get_post_terms( $post_id, WS_JURISDICTION_TERM_ID, [ 'fields' => 'slugs' ] );
+    $jx_terms = wp_get_post_terms( $post_id, WS_JURISDICTION_TAXONOMY, [ 'fields' => 'slugs' ] );
     $jx_code  = ( ! is_wp_error( $jx_terms ) && ! empty( $jx_terms ) ) ? strtoupper( $jx_terms[0] ) : '';
 
     return [
@@ -430,7 +429,7 @@ function ws_get_jx_summary_data( $jx_term_id ) {
         'fields'         => 'ids',
         'no_found_rows'  => true,
         'tax_query'      => [ [
-            'taxonomy' => WS_JURISDICTION_TERM_ID,
+            'taxonomy' => WS_JURISDICTION_TAXONOMY,
             'field'    => 'term_id',
             'terms'    => $term_id,
         ] ],
@@ -505,7 +504,7 @@ function ws_get_jx_statute_data( $jx_term_id ) {
                 'compare' => '=',
             ] ],
             'tax_query'      => [ [
-                'taxonomy' => WS_JURISDICTION_TERM_ID,
+                'taxonomy' => WS_JURISDICTION_TAXONOMY,
                 'field'    => 'term_id',
                 'terms'    => $tid,
             ] ],
@@ -602,7 +601,7 @@ function ws_get_jx_statute_data( $jx_term_id ) {
 // ════════════════════════════════════════════════════════════════════════════
 
 function ws_get_jx_term_id( $post_id ) {
-    $terms = wp_get_post_terms( $post_id, WS_JURISDICTION_TERM_ID );
+    $terms = wp_get_post_terms( $post_id, WS_JURISDICTION_TAXONOMY );
     if ( empty( $terms ) || is_wp_error( $terms ) ) {
         return 0;
     }
@@ -635,7 +634,7 @@ function ws_get_us_term_id() {
         return $us_term_id;
     }
 
-    $term = get_term_by( 'slug', 'us', WS_JURISDICTION_TERM_ID );
+    $term = ws_jx_term_by_code( 'us' );
     $us_term_id = ( $term && ! is_wp_error( $term ) ) ? (int) $term->term_id : 0;
     return $us_term_id;
 }
@@ -682,7 +681,7 @@ function ws_get_jx_citation_data( $jx_term_id ) {
                 'compare' => '=',
             ] ],
             'tax_query'      => [ [
-                'taxonomy' => WS_JURISDICTION_TERM_ID,
+                'taxonomy' => WS_JURISDICTION_TAXONOMY,
                 'field'    => 'term_id',
                 'terms'    => $tid,
             ] ],
@@ -775,7 +774,7 @@ function ws_get_jx_interpretation_data( $jx_term_id ) {
                 'compare' => '=',
             ] ],
             'tax_query'      => [ [
-                'taxonomy' => WS_JURISDICTION_TERM_ID,
+                'taxonomy' => WS_JURISDICTION_TAXONOMY,
                 'field'    => 'term_id',
                 'terms'    => $tid,
             ] ],
@@ -854,7 +853,7 @@ function ws_get_agency_data( $jx_term_id ) {
         'order'          => 'ASC',
         'no_found_rows'  => true,
         'tax_query'      => [ [
-            'taxonomy' => WS_JURISDICTION_TERM_ID,
+            'taxonomy' => WS_JURISDICTION_TAXONOMY,
             'field'    => 'term_id',
             'terms'    => $term_id,
         ] ],
@@ -922,7 +921,7 @@ function ws_get_assist_org_data( $jx_term_id ) {
         'order'          => 'ASC',
         'no_found_rows'  => true,
         'tax_query'      => [ [
-            'taxonomy' => WS_JURISDICTION_TERM_ID,
+            'taxonomy' => WS_JURISDICTION_TAXONOMY,
             'field'    => 'term_id',
             'terms'    => $term_id,
         ] ],
@@ -1193,7 +1192,7 @@ function ws_get_jurisdiction_index_data() {
             foreach ( $query->posts as $post ) {
 
                 $type     = get_field( 'ws_jurisdiction_class', $post->ID ) ?: 'state';
-                $jx_slugs = wp_get_post_terms( $post->ID, WS_JURISDICTION_TERM_ID, [ 'fields' => 'slugs' ] );
+                $jx_slugs = wp_get_post_terms( $post->ID, WS_JURISDICTION_TAXONOMY, [ 'fields' => 'slugs' ] );
                 $code     = ( ! is_wp_error( $jx_slugs ) && ! empty( $jx_slugs ) ) ? strtoupper( $jx_slugs[0] ) : '';
 
                 $index_items[] = [
@@ -1235,8 +1234,10 @@ function ws_get_jurisdiction_index_data() {
 // @return array            Array of data items ready for the render layer.
 //
 // CACHING
-// Site-wide calls ($jx_id = 0) are cached as a single transient keyed by
-// WS_CACHE_LEGAL_UPDATES_SITEWIDE. Invalidated on every ws-legal-update save.
+// Sitewide calls ($jx_id = 0) with $count ≤ 100 are served from a single
+// 100-item transient (WS_CACHE_LEGAL_UPDATES_SITEWIDE). The result is sliced
+// to $count before returning — no per-count keys needed, single delete on save.
+// Calls with $count > 100 bypass the cache and query directly.
 // Per-jurisdiction calls are never cached.
 // ════════════════════════════════════════════════════════════════════════════
 
@@ -1247,17 +1248,23 @@ function ws_get_legal_updates_data( $jx_id = 0, $count = 0 ) {
 	}
 
     // ── Sitewide cache ────────────────────────────────────────────────────
-    if ( ! $jx_id ) {
+    // One 100-item transient covers all sitewide requests ≤ 100 — slice on
+    // the way out. Requests > 100 skip the cache and query at full count.
+    if ( ! $jx_id && $count <= 100 ) {
         $cached = get_transient( WS_CACHE_LEGAL_UPDATES_SITEWIDE );
         if ( false !== $cached ) {
-            return $cached;
+            return array_slice( $cached, 0, $count );
         }
     }
+
+    // Always fetch 100 for sitewide cacheable calls so the stored set covers
+    // any subsequent request ≤ 100. Fetch exact $count otherwise.
+    $fetch_count = ( ! $jx_id && $count <= 100 ) ? 100 : $count;
 
     $query_args = [
         'post_type'      => 'ws-legal-update',
         'post_status'    => 'publish',
-        'posts_per_page' => $count,
+        'posts_per_page' => $fetch_count,
         'orderby'        => 'date',
         'order'          => 'DESC',
         'no_found_rows'  => true,
@@ -1267,7 +1274,7 @@ function ws_get_legal_updates_data( $jx_id = 0, $count = 0 ) {
         $term_id = ws_get_jx_term_id( $jx_id );
         if ( $term_id ) {
             $query_args['tax_query'] = [ [
-                'taxonomy' => WS_JURISDICTION_TERM_ID,
+                'taxonomy' => WS_JURISDICTION_TAXONOMY,
                 'field'    => 'term_id',
                 'terms'    => $term_id,
             ] ];
@@ -1320,9 +1327,10 @@ function ws_get_legal_updates_data( $jx_id = 0, $count = 0 ) {
         ];
     }
 
-    // Cache sitewide results only.
-    if ( ! $jx_id ) {
+    // Cache the full 100-item set for sitewide cacheable calls.
+    if ( ! $jx_id && $count <= 100 ) {
         set_transient( WS_CACHE_LEGAL_UPDATES_SITEWIDE, $items, HOUR_IN_SECONDS );
+        return array_slice( $items, 0, $count );
     }
 
     return $items;
@@ -1403,8 +1411,7 @@ function ws_get_reference_page_data( $parent_post_id ) {
 // ════════════════════════════════════════════════════════════════════════════
 
 // Invalidate the sitewide legal updates cache whenever any legal update post
-// is saved or published. The single _100 key covers all large sitewide callers
-// since they all share the same fetched-and-sliced transient.
+// is saved. Single key — all count variants are served from this one transient.
 add_action( 'save_post_ws-legal-update', function() {
     delete_transient( WS_CACHE_LEGAL_UPDATES_SITEWIDE );
 } );
@@ -1417,7 +1424,7 @@ add_action( 'save_post_jurisdiction', function( $post_id ) {
     delete_transient( WS_CACHE_JX_INDEX );
 
     // Resolve the assigned ws_jurisdiction term once for both operations.
-    $terms = wp_get_post_terms( $post_id, WS_JURISDICTION_TERM_ID );
+    $terms = wp_get_post_terms( $post_id, WS_JURISDICTION_TAXONOMY );
 
     if ( ! empty( $terms ) && ! is_wp_error( $terms ) ) {
         // Clear the per-term ID cache so ws_get_id_by_code() reflects any

@@ -333,13 +333,13 @@ function ws_register_acf_jx_interpretations() {
                 'label'         => 'Affected Jurisdictions',
                 'name'          => 'ws_jx_interp_affected_jx',
                 'type'          => 'taxonomy',
-                'taxonomy'      => WS_JURISDICTION_TERM_ID,
+                'taxonomy'      => WS_JURISDICTION_TAXONOMY,
                 'field_type'    => 'multi_select',
                 'instructions'  => 'Jurisdictions bound by this ruling. Auto-computed on save from the selected court\'s geographic scope (federal or state court matrix). Empty = SCOTUS (all jurisdictions). Override manually only when the court\'s scope does not reflect the ruling\'s actual reach.',
                 'required'      => 0,
                 'add_term'      => 0,
                 'save_terms'    => 0,
-                'load_terms'    => 0,
+                'load_terms'    => 1,
                 'return_format' => 'id',
             ],
 
@@ -438,7 +438,7 @@ function ws_interp_load_court_choices( $field ) {
     }
 
     // Determine statute scope. Unknown parent defaults to showing all courts.
-    $is_federal = ! $statute_id || has_term( 'us', WS_JURISDICTION_TERM_ID, $statute_id );
+    $is_federal = ! $statute_id || has_term( 'us', WS_JURISDICTION_TAXONOMY, $statute_id );
 
     $candidates = $is_federal
         ? array_merge( $ws_court_matrix, $ws_state_court_matrix ?: [] )
@@ -539,7 +539,7 @@ function ws_interp_auto_populate_affected_jx( $post_id ) {
     // Resolve each USPS code to a ws_jurisdiction term ID.
     $term_ids = [];
     foreach ( $jx_codes as $code ) {
-        $term = get_term_by( 'slug', strtolower( $code ), WS_JURISDICTION_TERM_ID );
+        $term = ws_jx_term_by_code( $code );
         if ( $term && ! is_wp_error( $term ) ) {
             $term_ids[] = $term->term_id;
         }

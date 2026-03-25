@@ -183,7 +183,7 @@ function ws_register_acf_jx_summary() {
                 'type'  => 'tab',
             ],
             [
-                'key'           => 'field_plain_english_reviewed',
+                'key'           => 'field_jx_sum_plain_reviewed',
                 'label'         => 'Plain Language Reviewed',
                 'name'          => 'ws_plain_english_reviewed',
                 'type'          => 'true_false',
@@ -193,29 +193,6 @@ function ws_register_acf_jx_summary() {
                 'ui_off_text'   => 'Pending',
                 'default_value' => 0,
             ],
-            [
-                'key'           => 'field_plain_english_by',
-                'label'         => 'Summarized By',
-                'name'          => 'ws_auto_plain_english_by',
-                'type'          => 'user',
-                'instructions'  => 'Auto-stamped on first save after plain language content is created.',
-                'role'          => [ 'author', 'editor', 'administrator' ],
-                'return_format' => 'id',
-                'readonly'      => 1,
-                'disabled'      => 1,
-            ],
-            [
-                'key'           => 'field_plain_english_reviewed_by',
-                'label'         => 'Reviewed By',
-                'name'          => 'ws_auto_plain_english_reviewed_by',
-                'type'          => 'user',
-                'instructions'  => 'Auto-stamped when Plain Language Reviewed is first enabled.',
-                'role'          => [ 'author', 'editor', 'administrator' ],
-                'return_format' => 'id',
-                'readonly'      => 1,
-                'disabled'      => 1,
-            ],
-
 
         ], // end fields
 

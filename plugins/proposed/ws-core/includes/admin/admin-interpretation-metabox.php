@@ -97,11 +97,11 @@ function ws_render_interpretation_metabox( $post ) {
     //                      interpretations inherit the correct jurisdiction.
     // post_title         — WordPress core pre-fills the title field.
 
-    $statute_terms = get_the_terms( $post->ID, WS_JURISDICTION_TERM_ID );
+    $statute_terms = get_the_terms( $post->ID, WS_JURISDICTION_TAXONOMY );
     $statute_term  = ( $statute_terms && ! is_wp_error( $statute_terms ) ) ? $statute_terms[0] : null;
     $add_url = admin_url( 'post-new.php?post_type=jx-interpretation&statute_id=' . $post->ID );
     if ( $statute_term ) {
-        $add_url .= '&tax_input[' . WS_JURISDICTION_TERM_ID . '][]=' . $statute_term->term_id;
+        $add_url .= '&tax_input[' . WS_JURISDICTION_TAXONOMY . '][]=' . $statute_term->term_id;
     }
     $post_title = get_the_title( $post );
     if ( $post_title ) {

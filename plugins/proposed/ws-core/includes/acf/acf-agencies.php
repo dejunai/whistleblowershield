@@ -118,9 +118,9 @@ function ws_register_acf_agencies() {
             [
                 'key'           => 'field_agency_jurisdiction',
                 'label'         => 'Jurisdiction(s)',
-                'name'          => WS_JURISDICTION_TERM_ID,
+                'name'          => WS_JURISDICTION_TAXONOMY,
                 'type'          => 'taxonomy',
-                'taxonomy'      => WS_JURISDICTION_TERM_ID,
+                'taxonomy'      => WS_JURISDICTION_TAXONOMY,
                 'field_type'    => 'multi_select',
                 'instructions'  => 'Assign all jurisdictions this agency has authority over. Use US for federal/nationwide agencies.',
                 'add_term'      => 0,

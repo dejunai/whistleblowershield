@@ -8,9 +8,9 @@
  * -------
  * This CPT stores individual citation records associated with a
  * jurisdiction — case law, statutes, regulatory references, and
- * secondary sources. Citations are reusable across summaries and
- * are selectively rendered on the public jurisdiction page via the
- * [ws_jx_case_law] shortcode based on their Attach toggle.
+ * secondary sources. Citations are selectively rendered on the
+ * public jurisdiction page via the [ws_jx_citation] shortcode
+ * based on their Attach toggle (ws_attach_flag).
  *
  * ARCHITECTURE
  * ------------
@@ -18,24 +18,23 @@
  *      └── jx-citation (private dataset, many per jurisdiction)
  *
  * Citations are linked to their parent jurisdiction via the
- * ws_jx_code field (e.g. "CA", "TX", "federal"). This field is
- * the primary query key used by the shortcode render layer.
- * The ws_jurisdiction post_object field provides the admin UI
- * relationship and supports two-way sync.
+ * ws_jurisdiction taxonomy term (USPS slug, e.g. 'ca', 'us').
+ * This replaced the legacy ws_jx_code post meta field in v3.0.0.
+ * All queries go through the query layer (query-jurisdiction.php).
  *
  * RENDER MODEL
  * ------------
- * The [ws_jx_case_law] shortcode queries all jx-citation records
- * where:
- *   - ws_jx_code matches the current jurisdiction
- *   - ws_jx_cite_attach is true (1)
+ * The [ws_jx_citation] shortcode (renamed from [ws_jx_case_law]
+ * in v3.6.0) queries all jx-citation records where:
+ *   - ws_jurisdiction taxonomy term matches the current jurisdiction
+ *   - ws_attach_flag is true (1)
  *
- * Records are ordered by ws_jx_cite_position (numeric, ascending).
- * The shortcode renders the full ws-case-law section including
- * footnote anchors and Unicode return links.
+ * Records are ordered by ws_display_order (numeric, ascending).
+ * The shortcode renders the full ws-citations section including
+ * footnote anchors and accessible return links.
  *
- * Citations where ws_jx_cite_attach is false are stored for
- * reference and admin review but do not appear on the public page.
+ * Citations where ws_attach_flag is false are stored for reference
+ * and admin review but do not appear on the curated summary view.
  *
  * @package    WhistleblowerShield
  * @since      2.3.0

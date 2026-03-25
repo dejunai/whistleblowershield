@@ -86,7 +86,7 @@ function ws_register_cpt_statutes() {
             'ws_disclosure_targets',
             'ws_fee_shifting',
             'ws_employer_defense',
-            WS_JURISDICTION_TERM_ID,
+            WS_JURISDICTION_TAXONOMY,
         ],
 
         // ── REST ──────────────────────────────────────────────────────────

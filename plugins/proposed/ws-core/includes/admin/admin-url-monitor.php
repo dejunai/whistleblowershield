@@ -69,6 +69,9 @@
  *        why the query layer is not used in WP-Cron context.
  * 3.2.2  Added admin_notices banner surfacing active URL failures to all
  *        admin screens, linking to the Dashboard widget.
+ * 3.8.1  posts_per_page => 1000 ceiling on get_posts() in cron handler.
+ *        detected timestamp now preserved for existing warnings/failures so
+ *        cron reruns no longer reset the "first seen" date to today.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -186,10 +189,13 @@ function ws_run_url_health_check() {
 
     foreach ( $ws_url_monitor_map as $post_type => $meta_keys ) {
 
+        // Limit per CPT — fetching IDs only (fields=ids) is cheap, but an
+        // unbounded query on a very large dataset can still cause memory issues
+        // on cron. 1000 per CPT covers any realistic editorial scale.
         $posts = get_posts( [
             'post_type'      => $post_type,
             'post_status'    => 'publish',
-            'posts_per_page' => -1,
+            'posts_per_page' => 1000,
             'fields'         => 'ids',
             'no_found_rows'  => true,
         ] );
@@ -255,6 +261,10 @@ function ws_run_url_health_check() {
                 } elseif ( $status >= 300 && $status < 400 ) {
 
                     // Warning — redirect detected.
+                    // Preserve the original detected timestamp if this URL was
+                    // already in the log so the admin can see when it first appeared
+                    // rather than having the date reset on every cron run.
+                    $is_new_warning = ! isset( $previous_flagged[ $log_key ] );
                     $entry = [
                         'post_id'    => $post_id,
                         'post_title' => $post_title,
@@ -263,19 +273,22 @@ function ws_run_url_health_check() {
                         'url'        => $url,
                         'status'     => $status,
                         'type'       => 'warning',
-                        'detected'   => current_time( 'Y-m-d H:i:s' ),
+                        'detected'   => $is_new_warning
+                            ? current_time( 'Y-m-d H:i:s' )
+                            : $previous_flagged[ $log_key ]['detected'],
                     ];
 
                     $new_log[] = $entry;
 
-                    // Only email if this is a new warning (not in previous log).
-                    if ( ! isset( $previous_flagged[ $log_key ] ) ) {
+                    if ( $is_new_warning ) {
                         $new_warnings[] = $entry;
                     }
 
                 } elseif ( $status >= 400 ) {
 
                     // Failure — 4xx or 5xx.
+                    // Same timestamp-preservation logic as warnings above.
+                    $is_new_failure = ! isset( $previous_flagged[ $log_key ] );
                     $entry = [
                         'post_id'    => $post_id,
                         'post_title' => $post_title,
@@ -284,13 +297,14 @@ function ws_run_url_health_check() {
                         'url'        => $url,
                         'status'     => $status,
                         'type'       => 'failure',
-                        'detected'   => current_time( 'Y-m-d H:i:s' ),
+                        'detected'   => $is_new_failure
+                            ? current_time( 'Y-m-d H:i:s' )
+                            : $previous_flagged[ $log_key ]['detected'],
                     ];
 
                     $new_log[] = $entry;
 
-                    // Only email if this is a new failure (not in previous log).
-                    if ( ! isset( $previous_flagged[ $log_key ] ) ) {
+                    if ( $is_new_failure ) {
                         $new_failures[] = $entry;
                     }
                 }

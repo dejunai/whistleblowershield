@@ -25,6 +25,10 @@
  * 3.8.0  jx-interpretation Court column updated to use ws_court_lookup()
  *        for label resolution. 'other' court key shows the free-text
  *        ws_jx_interp_court_name value instead of the raw key.
+ * 3.8.1  ws_agency_code column migrated here from cpt-agencies.php.
+ *        Duplicate manage_ws-agency_posts_columns / _custom_column hooks in
+ *        that file removed — admin-columns.php is the single source for all
+ *        CPT column definitions.
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit;
@@ -74,7 +78,7 @@ function ws_render_jx_status_column( $column, $post_id ) {
     if ( ! isset( $cpt_map[ $column ] ) ) return;
 
     // Resolve jurisdiction term for this post.
-    $terms   = wp_get_post_terms( $post_id, WS_JURISDICTION_TERM_ID );
+    $terms   = wp_get_post_terms( $post_id, WS_JURISDICTION_TAXONOMY );
     $term_id = ( ! is_wp_error( $terms ) && ! empty( $terms ) ) ? $terms[0]->term_id : 0;
 
     $related_id = 0;
@@ -85,7 +89,7 @@ function ws_render_jx_status_column( $column, $post_id ) {
             'posts_per_page' => 1,
             'fields'         => 'ids',
             'tax_query'      => [ [
-                'taxonomy' => WS_JURISDICTION_TERM_ID,
+                'taxonomy' => WS_JURISDICTION_TAXONOMY,
                 'field'    => 'term_id',
                 'terms'    => $term_id,
             ] ],
@@ -131,7 +135,7 @@ function ws_add_statute_columns( $columns ) {
 add_action( 'manage_jx-statute_posts_custom_column', 'ws_render_statute_column', 10, 2 );
 function ws_render_statute_column( $column, $post_id ) {
     if ( $column === 'ws_jx' ) {
-        $terms = get_the_terms( $post_id, WS_JURISDICTION_TERM_ID );
+        $terms = get_the_terms( $post_id, WS_JURISDICTION_TAXONOMY );
         if ( $terms && ! is_wp_error( $terms ) ) {
             echo esc_html( implode( ', ', wp_list_pluck( $terms, 'name' ) ) );
         } else {
@@ -174,7 +178,7 @@ function ws_add_citation_columns( $columns ) {
 add_action( 'manage_jx-citation_posts_custom_column', 'ws_render_citation_column', 10, 2 );
 function ws_render_citation_column( $column, $post_id ) {
     if ( $column === 'ws_jx' ) {
-        $terms = get_the_terms( $post_id, WS_JURISDICTION_TERM_ID );
+        $terms = get_the_terms( $post_id, WS_JURISDICTION_TAXONOMY );
         if ( $terms && ! is_wp_error( $terms ) ) {
             echo esc_html( implode( ', ', wp_list_pluck( $terms, 'name' ) ) );
         } else {
@@ -215,7 +219,7 @@ function ws_add_interp_columns( $columns ) {
 add_action( 'manage_jx-interpretation_posts_custom_column', 'ws_render_interp_column', 10, 2 );
 function ws_render_interp_column( $column, $post_id ) {
     if ( $column === 'ws_jx' ) {
-        $terms = get_the_terms( $post_id, WS_JURISDICTION_TERM_ID );
+        $terms = get_the_terms( $post_id, WS_JURISDICTION_TAXONOMY );
         if ( $terms && ! is_wp_error( $terms ) ) {
             echo esc_html( implode( ', ', wp_list_pluck( $terms, 'name' ) ) );
         } else {
@@ -268,7 +272,7 @@ function ws_add_legal_update_columns( $columns ) {
 add_action( 'manage_ws-legal-update_posts_custom_column', 'ws_render_legal_update_column', 10, 2 );
 function ws_render_legal_update_column( $column, $post_id ) {
     if ( $column === 'ws_jx' ) {
-        $terms = get_the_terms( $post_id, WS_JURISDICTION_TERM_ID );
+        $terms = get_the_terms( $post_id, WS_JURISDICTION_TAXONOMY );
         if ( $terms && ! is_wp_error( $terms ) ) {
             echo esc_html( implode( ', ', wp_list_pluck( $terms, 'name' ) ) );
         } else {
@@ -296,6 +300,7 @@ function ws_add_agency_columns( $columns ) {
         $new[ $key ] = $label;
         if ( $key === 'title' ) {
             $new['ws_jx']           = 'Jurisdiction';
+            $new['ws_agency_code']  = 'Agency Code';
             $new['ws_process_type'] = 'Process Types';
             $new['ws_languages']    = 'Languages';
         }
@@ -305,8 +310,11 @@ function ws_add_agency_columns( $columns ) {
 
 add_action( 'manage_ws-agency_posts_custom_column', 'ws_render_agency_column', 10, 2 );
 function ws_render_agency_column( $column, $post_id ) {
-    if ( $column === 'ws_jx' ) {
-        $terms = get_the_terms( $post_id, WS_JURISDICTION_TERM_ID );
+    if ( $column === 'ws_agency_code' ) {
+        // Direct meta read — admin list table display only.
+        echo esc_html( get_post_meta( $post_id, 'ws_agency_code', true ) );
+    } elseif ( $column === 'ws_jx' ) {
+        $terms = get_the_terms( $post_id, WS_JURISDICTION_TAXONOMY );
         if ( $terms && ! is_wp_error( $terms ) ) {
             echo esc_html( implode( ', ', wp_list_pluck( $terms, 'name' ) ) );
         } else {
@@ -323,6 +331,70 @@ function ws_render_agency_column( $column, $post_id ) {
         $terms = get_the_terms( $post_id, 'ws_languages' );
         if ( $terms && ! is_wp_error( $terms ) ) {
             echo esc_html( implode( ', ', wp_list_pluck( $terms, 'name' ) ) );
+        } else {
+            echo '<span style="color:#999;">—</span>';
+        }
+    }
+}
+
+
+// ════════════════════════════════════════════════════════════════════════════
+// ws-ag-procedure columns: Agency, Type, Disclosure Types, Deadline
+// ════════════════════════════════════════════════════════════════════════════
+
+add_filter( 'manage_ws-ag-procedure_posts_columns', 'ws_add_procedure_columns' );
+function ws_add_procedure_columns( $columns ) {
+    $new = [];
+    foreach ( $columns as $key => $label ) {
+        $new[ $key ] = $label;
+        if ( $key === 'title' ) {
+            $new['ws_proc_agency']           = 'Agency';
+            $new['ws_proc_type']             = 'Type';
+            $new['ws_proc_disclosure_types'] = 'Disclosure Types';
+            $new['ws_proc_deadline']         = 'Deadline';
+        }
+    }
+    return $new;
+}
+
+add_action( 'manage_ws-ag-procedure_posts_custom_column', 'ws_render_procedure_column', 10, 2 );
+function ws_render_procedure_column( $column, $post_id ) {
+    if ( $column === 'ws_proc_agency' ) {
+        // Direct meta read — admin list table display only.
+        $agency_id = (int) get_post_meta( $post_id, 'ws_proc_agency_id', true );
+        if ( $agency_id ) {
+            $edit_url = get_edit_post_link( $agency_id );
+            echo '<a href="' . esc_url( $edit_url ) . '">' . esc_html( get_the_title( $agency_id ) ) . '</a>';
+        } else {
+            echo '<span style="color:#dc3232;">—</span>';
+        }
+    } elseif ( $column === 'ws_proc_type' ) {
+        $type   = get_post_meta( $post_id, 'ws_proc_type', true );
+        $labels = [
+            'disclosure'  => 'Disclosure',
+            'retaliation' => 'Retaliation',
+            'both'        => 'Both',
+        ];
+        echo esc_html( $labels[ $type ] ?? '—' );
+    } elseif ( $column === 'ws_proc_disclosure_types' ) {
+        $terms = get_the_terms( $post_id, 'ws_disclosure_type' );
+        if ( $terms && ! is_wp_error( $terms ) ) {
+            echo esc_html( implode( ', ', wp_list_pluck( $terms, 'name' ) ) );
+        } else {
+            echo '<span style="color:#999;">—</span>';
+        }
+    } elseif ( $column === 'ws_proc_deadline' ) {
+        $days  = (int) get_post_meta( $post_id, 'ws_proc_deadline_days', true );
+        $start = get_post_meta( $post_id, 'ws_proc_deadline_clock_start', true );
+        if ( $days > 0 ) {
+            $start_labels = [
+                'adverse_action' => 'adverse action',
+                'knowledge'      => 'date of knowledge',
+                'last_act'       => 'last act',
+                'varies'         => 'varies',
+            ];
+            $start_label = $start_labels[ $start ] ?? '';
+            echo esc_html( $days . ' days' . ( $start_label ? ' from ' . $start_label : '' ) );
         } else {
             echo '<span style="color:#999;">—</span>';
         }
@@ -351,7 +423,7 @@ function ws_add_assist_org_columns( $columns ) {
 add_action( 'manage_ws-assist-org_posts_custom_column', 'ws_render_assist_org_column', 10, 2 );
 function ws_render_assist_org_column( $column, $post_id ) {
     if ( $column === 'ws_jx' ) {
-        $terms = get_the_terms( $post_id, WS_JURISDICTION_TERM_ID );
+        $terms = get_the_terms( $post_id, WS_JURISDICTION_TAXONOMY );
         if ( $terms && ! is_wp_error( $terms ) ) {
             echo esc_html( implode( ', ', wp_list_pluck( $terms, 'name' ) ) );
         } else {

@@ -149,9 +149,9 @@ function ws_acf_log_major_edit( $post_id ) {
 
 	// ── Attach jurisdiction from source post ─────────────────────────────────────
 	// Write to taxonomy table (save_terms=1 on the ACF field) so tax_query works.
-	$jx_terms = wp_get_post_terms( $post_id, WS_JURISDICTION_TERM_ID, [ 'fields' => 'ids' ] );
+	$jx_terms = wp_get_post_terms( $post_id, WS_JURISDICTION_TAXONOMY, [ 'fields' => 'ids' ] );
 	if ( ! is_wp_error( $jx_terms ) && ! empty( $jx_terms ) ) {
-		wp_set_post_terms( $update_id, [ (int) $jx_terms[0] ], WS_JURISDICTION_TERM_ID );
+		wp_set_post_terms( $update_id, [ (int) $jx_terms[0] ], WS_JURISDICTION_TAXONOMY );
 	}
 
 	// ── Update date and type ──────────────────────────────────────────────────
@@ -163,9 +163,11 @@ function ws_acf_log_major_edit( $post_id ) {
 	// Each law CPT has its own official_name field; try each in order, falling back to post title.
 	// jx-summary has no naming field — fall back to post title.
 	$law_name = ( $post_type !== 'jx-summary' )
-		? get_post_meta( $post_id, 'ws_jx_statute_official_name', true ) 
-		?: get_post_meta( $post_id, 'ws_jx_citation_official_name', true )
-		?: get_post_meta( $post_id, 'ws_jx_interp_official_name', true )
+		? (
+			get_post_meta( $post_id, 'ws_jx_statute_official_name', true )
+			?: get_post_meta( $post_id, 'ws_jx_citation_official_name', true )
+			?: get_post_meta( $post_id, 'ws_jx_interp_official_name', true )
+		)
 		: '';
 	if ( ! $law_name ) {
 		$law_name = get_the_title( $post_id );

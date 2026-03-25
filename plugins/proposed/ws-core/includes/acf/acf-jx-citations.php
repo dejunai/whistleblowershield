@@ -355,7 +355,7 @@ function ws_jx_cite_no_citations_notice() {
     if ( ! $post ) return;
 
     // Get the ws_jurisdiction taxonomy term assigned to this jx-summary.
-    $terms = wp_get_post_terms( $post->ID, WS_JURISDICTION_TERM_ID );
+    $terms = wp_get_post_terms( $post->ID, WS_JURISDICTION_TAXONOMY );
     if ( empty( $terms ) || is_wp_error( $terms ) ) return;
 
     $term_id = $terms[0]->term_id;
@@ -373,7 +373,7 @@ function ws_jx_cite_no_citations_notice() {
             ],
         ],
         'tax_query' => [ [
-            'taxonomy' => WS_JURISDICTION_TERM_ID,
+            'taxonomy' => WS_JURISDICTION_TAXONOMY,
             'field'    => 'term_id',
             'terms'    => $term_id,
         ] ],

@@ -46,13 +46,19 @@
  *
  * Files are loaded in dependency order:
  *
+ *      Universal layer (frontend + admin):
  *      1) CPT definitions
- *      2) ACF field definitions
- *      3) query layer
- *      4) rendering helpers
- *      5) shortcodes
- *      6) taxonomies
- *      7) admin tools
+ *      2) Query layer
+ *      3) Taxonomies
+ *
+ *      Admin layer (is_admin() only):
+ *      4) Matrix seeders
+ *      5) ACF field definitions
+ *      6) Admin tools
+ *
+ *      Frontend layer (! is_admin() only):
+ *      7) Rendering helpers
+ *      8) Shortcodes
  *
  *
  * VERSION
@@ -75,6 +81,11 @@
  * 3.6.1  admin-health-check.php added to ADMIN LAYER.
  * 3.7.0  matrix-state-courts.php added to MATRIX LAYER between
  *        matrix-federal-courts.php and matrix-assist-orgs.php.
+ * 3.9.0  cpt-ag-procedures added to CPT LAYER. query-agencies added to QUERY
+ *        LAYER. acf-ag-procedures added to ACF LAYER. render-agency added to
+ *        ASSEMBLY LAYER. admin-procedure-watch added to ADMIN LAYER.
+ *        matrix-ag-procedures added to MATRIX LAYER (between matrix-agencies
+ *        and admin-matrix-watch).
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit;
@@ -87,7 +98,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 	// CPT Layer: Must load everywhere so WordPress understands the URLs
 	$cpt_files = [
 		'cpt-jurisdictions', 'cpt-jx-summaries', 'cpt-jx-statutes', 'cpt-legal-updates',
-		'cpt-jx-citations', 'cpt-agencies', 'cpt-assist-orgs',
+		'cpt-jx-citations', 'cpt-agencies', 'cpt-ag-procedures', 'cpt-assist-orgs',
 		'cpt-jx-interpretations', 'cpt-references',
 	];
 	foreach ( $cpt_files as $file ) {
@@ -115,12 +126,13 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 	}
 
 	// QUERY Layer: The "Data API" for both Admin and Frontend
-	// Load order is non-negotiable: helpers → shared → jurisdiction.
+	// Load order is non-negotiable: helpers → shared → jurisdiction → agencies.
 	//   query-helpers.php      — pure utilities (no WP meta reads)
 	//   query-shared.php       — cross-CPT sub-array builders (depend on helpers)
 	//   query-jurisdiction.php — jurisdiction dataset functions (depend on shared)
+	//   query-agencies.php     — agency/procedure dataset functions (depend on shared)
 	$query_files = [
-		'query-helpers', 'query-shared', 'query-jurisdiction',
+		'query-helpers', 'query-shared', 'query-jurisdiction', 'query-agencies',
 	];
 	foreach ( $query_files as $file ) {
 		$path = WS_CORE_PATH . "includes/queries/{$file}.php";
@@ -193,7 +205,7 @@ if ( is_admin() ) {
 	$matrix_files = [
 		'matrix-helpers',      // Shared helpers — must load before all seeders.
 		'matrix-jurisdictions', 'matrix-fed-statutes', 'matrix-federal-courts', 'matrix-state-courts',
-		'matrix-assist-orgs', 'matrix-agencies', 'admin-matrix-watch',
+		'matrix-assist-orgs', 'matrix-agencies', 'matrix-ag-procedures', 'admin-matrix-watch',
 	];
 	foreach ( $matrix_files as $file ) {
 		$path = WS_CORE_PATH . "includes/admin/matrix/{$file}.php";
@@ -218,10 +230,16 @@ if ( is_admin() ) {
 		}
 	}
 	
-    // ACF Layer: Huge memory save by keeping these out of the frontend
+    // ACF Layer: Huge memory save by keeping these out of the frontend.
+    // BLIND SPOT: ACF field definitions are not registered in REST API or WP-CLI
+    // contexts (both of which have is_admin() === false). REST endpoints will not
+    // return ACF fields, and WP-CLI scripts will not have field definitions
+    // available. If either context ever needs ACF field data, move the relevant
+    // ACF load outside the is_admin() guard or add an explicit is_rest() / is_cli()
+    // check here.
     $acf_files = [
         'acf-jurisdictions', 'acf-jx-summaries', 'acf-jx-statutes', 'acf-legal-updates',
-        'acf-jx-citations', 'acf-agencies', 'acf-assist-orgs', 'acf-major-edit',
+        'acf-jx-citations', 'acf-agencies', 'acf-ag-procedures', 'acf-assist-orgs', 'acf-major-edit',
         'acf-source-verify', 'acf-jx-interpretations', 'acf-references',
         'acf-stamp-fields', 'acf-plain-english-fields',
     ];
@@ -256,7 +274,7 @@ if ( is_admin() ) {
 		'admin-navigation', // Note: admin-navigation.php MUST load first
 		'admin-audit-trail', 'admin-columns', 'admin-feed-monitor',
 		'admin-hooks', 'admin-interpretation-metabox', 'admin-citation-metabox', 'admin-url-monitor',
-		'admin-major-edit-hook', 'jurisdiction-dashboard', 'admin-health-check',
+		'admin-major-edit-hook', 'admin-procedure-watch', 'jurisdiction-dashboard', 'admin-health-check',
 	];
 	foreach ( $admin_files as $file ) {
 		$path = WS_CORE_PATH . "includes/admin/{$file}.php";
@@ -297,8 +315,12 @@ if ( ! is_admin() ) {
 	// render-section.php  — jurisdiction-page section renderers (header, summary, statutes, etc.)
 	// render-jurisdiction.php — the_content assembler that stitches shortcodes together
 	// render-directory.php — Directory page renderers (card grid, empty state, taxonomy guide stub)
+	//
+	// NOTE: Missing files in this layer are logged to the error log (see error_log() calls below)
+	// but do NOT trigger admin_notices — this block runs only on ! is_admin(), so admin_notices
+	// would never fire here. Check the server error log if assembly layer output is silently broken.
 	$render_files = [
-		'render-general', 'render-section', 'render-jurisdiction', 'render-directory',
+		'render-general', 'render-section', 'render-jurisdiction', 'render-directory', 'render-agency',
 	];
 	foreach ( $render_files as $file ) {
 		$path = WS_CORE_PATH . "includes/render/{$file}.php";

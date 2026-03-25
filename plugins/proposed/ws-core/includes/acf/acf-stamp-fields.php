@@ -113,7 +113,7 @@ function ws_register_acf_stamp_fields() {
         'instruction_placement' => 'label',
         'active'                => true,
 
-        // Attaches to all 8 supported CPTs.
+        // Attaches to all 9 supported CPTs.
         // jurisdiction is intentionally excluded — see file header.
         'location' => [
             [ [ 'param' => 'post_type', 'operator' => '==', 'value' => 'jx-summary'        ] ],
@@ -121,6 +121,7 @@ function ws_register_acf_stamp_fields() {
             [ [ 'param' => 'post_type', 'operator' => '==', 'value' => 'jx-citation'        ] ],
             [ [ 'param' => 'post_type', 'operator' => '==', 'value' => 'jx-interpretation'  ] ],
             [ [ 'param' => 'post_type', 'operator' => '==', 'value' => 'ws-agency'          ] ],
+            [ [ 'param' => 'post_type', 'operator' => '==', 'value' => 'ws-ag-procedure'    ] ],
             [ [ 'param' => 'post_type', 'operator' => '==', 'value' => 'ws-assist-org'      ] ],
             [ [ 'param' => 'post_type', 'operator' => '==', 'value' => 'ws-legal-update'    ] ],
             [ [ 'param' => 'post_type', 'operator' => '==', 'value' => 'ws-reference'       ] ],

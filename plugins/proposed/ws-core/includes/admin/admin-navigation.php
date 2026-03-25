@@ -61,6 +61,9 @@
  *          query to ws_jurisdiction taxonomy query with attach_flag meta.
  * 3.1.0  Added Legal Updates, Agencies, and Assist-Orgs count rows.
  *        All three use taxonomy-scoped count queries with View All links.
+ * 3.9.0  Added ws_add_agency_navigation_box() and ws_render_agency_navigation_box()
+ *        for the ws-agency edit screen. Lists attached procedures with edit
+ *        links and an Add Procedure button that pre-fills the parent agency.
  */
 if (!defined('ABSPATH')) {
     exit;
@@ -99,9 +102,9 @@ Render Navigation Box
 function ws_render_jx_navigation_box($post) {
 
     // Resolve taxonomy term slug for this jurisdiction (used to scope addendum queries).
-    $jx_slugs  = wp_get_post_terms( $post->ID, WS_JURISDICTION_TERM_ID, [ 'fields' => 'slugs' ] );
+    $jx_slugs  = wp_get_post_terms( $post->ID, WS_JURISDICTION_TAXONOMY, [ 'fields' => 'slugs' ] );
     $term_slug = ( ! is_wp_error( $jx_slugs ) && ! empty( $jx_slugs ) ) ? $jx_slugs[0] : '';
-    $term      = $term_slug ? get_term_by( 'slug', $term_slug, WS_JURISDICTION_TERM_ID ) : null;
+    $term      = $term_slug ? ws_jx_term_by_code( $term_slug ) : null;
     $term_id   = ( $term && ! is_wp_error( $term ) ) ? $term->term_id : 0;
 
     // Look up existing addendum posts via taxonomy (replaces get_field on relationship fields).
@@ -114,7 +117,7 @@ function ws_render_jx_navigation_box($post) {
             'post_status'    => [ 'publish', 'draft', 'pending' ],
             'posts_per_page' => 1,
             'fields'         => 'ids',
-            'tax_query'      => [ [ 'taxonomy' => WS_JURISDICTION_TERM_ID, 'field' => 'term_id', 'terms' => $term_id ] ],
+            'tax_query'      => [ [ 'taxonomy' => WS_JURISDICTION_TAXONOMY, 'field' => 'term_id', 'terms' => $term_id ] ],
         ] );
         if ( ! empty( $summary_ids ) ) {
             $summary_post = get_post( $summary_ids[0] );
@@ -125,7 +128,7 @@ function ws_render_jx_navigation_box($post) {
             'post_status'    => [ 'publish', 'draft', 'pending' ],
             'posts_per_page' => 1,
             'fields'         => 'ids',
-            'tax_query'      => [ [ 'taxonomy' => WS_JURISDICTION_TERM_ID, 'field' => 'term_id', 'terms' => $term_id ] ],
+            'tax_query'      => [ [ 'taxonomy' => WS_JURISDICTION_TAXONOMY, 'field' => 'term_id', 'terms' => $term_id ] ],
         ] );
         if ( ! empty( $statute_ids ) ) {
             $statutes_post = get_post( $statute_ids[0] );
@@ -166,7 +169,7 @@ function ws_render_admin_link($label, $related, $post_type, $parent_id) {
         // new-post screen auto-assigns the ws_jurisdiction taxonomy term via
         // the wp_insert_post hook in admin-hooks.php.
         $parent_name = get_the_title( $parent_id );
-        $jx_slugs    = wp_get_post_terms( $parent_id, WS_JURISDICTION_TERM_ID, [ 'fields' => 'slugs' ] );
+        $jx_slugs    = wp_get_post_terms( $parent_id, WS_JURISDICTION_TAXONOMY, [ 'fields' => 'slugs' ] );
         $term_slug   = ( ! is_wp_error( $jx_slugs ) && ! empty( $jx_slugs ) ) ? $jx_slugs[0] : '';
         $create_url  = add_query_arg( [
             'post_type'  => $post_type,
@@ -197,7 +200,7 @@ Shared by:
 
 function ws_get_attached_citation_count( $post_id ) {
 
-    $terms = wp_get_post_terms( $post_id, WS_JURISDICTION_TERM_ID );
+    $terms = wp_get_post_terms( $post_id, WS_JURISDICTION_TAXONOMY );
 
     if ( empty( $terms ) || is_wp_error( $terms ) ) {
         return 0;
@@ -218,7 +221,7 @@ function ws_get_attached_citation_count( $post_id ) {
             ],
         ],
         'tax_query' => [ [
-            'taxonomy' => WS_JURISDICTION_TERM_ID,
+            'taxonomy' => WS_JURISDICTION_TAXONOMY,
             'field'    => 'term_id',
             'terms'    => $term_id,
         ] ],
@@ -244,30 +247,31 @@ filtered by taxonomy term.
 
 function ws_render_cpt_count_row( $post_id, $term_slug, $post_type, $label ) {
 
-    $terms   = wp_get_post_terms( $post_id, WS_JURISDICTION_TERM_ID );
+    $terms   = wp_get_post_terms( $post_id, WS_JURISDICTION_TAXONOMY );
     $term_id = ( ! is_wp_error( $terms ) && ! empty( $terms ) ) ? (int) $terms[0]->term_id : 0;
 
     $count = 0;
     if ( $term_id ) {
-        $results = get_posts( [
+        $q = new WP_Query( [
             'post_type'      => $post_type,
             'post_status'    => 'publish',
-            'posts_per_page' => -1,
+            'posts_per_page' => 1,
             'fields'         => 'ids',
+            'no_found_rows'  => false,
             'tax_query'      => [ [
-                'taxonomy' => WS_JURISDICTION_TERM_ID,
+                'taxonomy' => WS_JURISDICTION_TAXONOMY,
                 'field'    => 'term_id',
                 'terms'    => $term_id,
             ] ],
         ] );
-        $count = count( $results );
+        $count = (int) $q->found_posts;
     }
 
     $badge_color = $count > 0 ? '#46b450' : '#dc3232';
 
     $all_url = add_query_arg( [
         'post_type'            => $post_type,
-        WS_JURISDICTION_TERM_ID => $term_slug,
+        WS_JURISDICTION_TAXONOMY => $term_slug,
     ], admin_url( 'edit.php' ) );
 
     echo '<div style="margin-bottom: 12px; padding: 8px; border: 1px solid #ccd0d4; border-radius: 4px; background: #fff;">';
@@ -298,7 +302,7 @@ threshold badge, plus Add Citation and View All buttons.
 
 function ws_render_citation_row( $post_id ) {
 
-    $jx_slugs  = wp_get_post_terms( $post_id, WS_JURISDICTION_TERM_ID, [ 'fields' => 'slugs' ] );
+    $jx_slugs  = wp_get_post_terms( $post_id, WS_JURISDICTION_TAXONOMY, [ 'fields' => 'slugs' ] );
     $term_slug = ( ! is_wp_error( $jx_slugs ) && ! empty( $jx_slugs ) ) ? $jx_slugs[0] : '';
     $count     = ws_get_attached_citation_count( $post_id );
 
@@ -317,7 +321,7 @@ function ws_render_citation_row( $post_id ) {
 
     $all_url = add_query_arg( [
         'post_type'      => 'jx-citation',
-        WS_JURISDICTION_TERM_ID => $term_slug,
+        WS_JURISDICTION_TAXONOMY => $term_slug,
     ], admin_url( 'edit.php' ) );
 
     echo '<div style="margin-bottom: 12px; padding: 8px; border: 1px solid #ccd0d4; border-radius: 4px; background: #fff;">';
@@ -328,4 +332,90 @@ function ws_render_citation_row( $post_id ) {
     echo '<a class="button button-small" href="' . esc_url( $all_url ) . '">View All</a>';
     echo '</div>';
     echo '</div>';
+}
+
+
+// ════════════════════════════════════════════════════════════════════════════
+// Agency Navigation Box
+//
+// Adds a Procedures panel to the ws-agency edit screen listing all
+// procedures attached to this agency. Provides direct edit links and
+// an Add Procedure button that pre-fills the parent agency via ?agency_id=.
+//
+// The agency_id URL parameter is read by ws_proc_prefill_agency_id() in
+// acf-ag-procedures.php, which pre-selects the parent agency on auto-draft
+// posts — matching the pattern used for interpretations and statutes.
+// ════════════════════════════════════════════════════════════════════════════
+
+add_action( 'add_meta_boxes', 'ws_add_agency_navigation_box' );
+
+function ws_add_agency_navigation_box() {
+    add_meta_box(
+        'ws_agency_procedures',
+        'Procedures',
+        'ws_render_agency_navigation_box',
+        'ws-agency',
+        'side',
+        'default'
+    );
+}
+
+function ws_render_agency_navigation_box( $post ) {
+
+    // Query procedures attached to this agency via ws_proc_agency_id meta.
+    $procedures = get_posts( [
+        'post_type'      => 'ws-ag-procedure',
+        'post_status'    => [ 'publish', 'draft', 'pending' ],
+        'posts_per_page' => 50,
+        'no_found_rows'  => true,
+        'meta_query'     => [ [
+            'key'     => 'ws_proc_agency_id',
+            'value'   => $post->ID,
+            'compare' => '=',
+        ] ],
+    ] );
+
+    $type_labels = [
+        'disclosure'  => 'Disclosure',
+        'retaliation' => 'Retaliation',
+        'both'        => 'Both',
+    ];
+
+    $add_url = add_query_arg( [
+        'post_type' => 'ws-ag-procedure',
+        'agency_id' => $post->ID,
+    ], admin_url( 'post-new.php' ) );
+
+    $all_url = add_query_arg( [
+        'post_type' => 'ws-ag-procedure',
+    ], admin_url( 'edit.php' ) );
+
+    echo '<div style="line-height:1.6;">';
+
+    if ( empty( $procedures ) ) {
+        echo '<p style="color:#999;font-size:12px;margin:0 0 8px;">No procedures yet.</p>';
+    } else {
+        echo '<ul style="margin:0 0 10px;padding-left:0;list-style:none;">';
+        foreach ( $procedures as $proc ) {
+            $type     = get_post_meta( $proc->ID, 'ws_proc_type', true );
+            $type_lbl = $type_labels[ $type ] ?? '';
+            $status   = get_post_status( $proc->ID );
+            $color    = ( $status === 'publish' ) ? '#46b450' : '#ffa500';
+            echo '<li style="margin-bottom:6px;padding:6px;background:#f9f9f9;border:1px solid #e5e5e5;border-radius:3px;">';
+            echo '<a href="' . esc_url( get_edit_post_link( $proc->ID ) ) . '" style="font-weight:600;">' . esc_html( get_the_title( $proc->ID ) ) . '</a><br>';
+            echo '<span style="font-size:11px;color:#666;">' . esc_html( $type_lbl ) . '</span> ';
+            echo '<span style="font-size:11px;color:' . esc_attr( $color ) . ';">● ' . esc_html( ucfirst( $status ) ) . '</span>';
+            echo '</li>';
+        }
+        echo '</ul>';
+    }
+
+    echo '<div style="display:flex;gap:5px;flex-wrap:wrap;">';
+    echo '<a class="button button-small button-primary" href="' . esc_url( $add_url ) . '">Add Procedure</a>';
+    if ( ! empty( $procedures ) ) {
+        echo '<a class="button button-small" href="' . esc_url( $all_url ) . '">View All</a>';
+    }
+    echo '</div>';
+    echo '</div>';
+}
 }

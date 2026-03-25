@@ -79,7 +79,7 @@ function ws_render_jurisdiction_dashboard() {
     // ── Serve from cache if available ─────────────────────────────────────
     $cached = get_transient( 'ws_jx_dashboard_html' );
     if ( false !== $cached ) {
-        echo $cached; // Already escaped when built.
+        echo wp_kses_post( $cached );
         echo '</div>';
         return;
     }
@@ -111,7 +111,7 @@ function ws_render_jurisdiction_dashboard() {
     foreach ( $jurisdictions as $jx ) {
 
         // Resolve ws_jurisdiction term for this jurisdiction post.
-        $terms   = wp_get_post_terms( $jx->ID, WS_JURISDICTION_TERM_ID );
+        $terms   = wp_get_post_terms( $jx->ID, WS_JURISDICTION_TAXONOMY );
         $term_id = ( ! is_wp_error( $terms ) && ! empty( $terms ) ) ? (int) $terms[0]->term_id : 0;
 
         echo '<tr>';
@@ -200,7 +200,7 @@ function ws_jx_dashboard_one_status( $term_id, $post_type ) {
         'post_status'    => [ 'publish', 'draft', 'pending' ],
         'posts_per_page' => 1,
         'fields'         => 'ids',
-        'tax_query'      => [ [ 'taxonomy' => WS_JURISDICTION_TERM_ID, 'field' => 'term_id', 'terms' => $term_id ] ],
+        'tax_query'      => [ [ 'taxonomy' => WS_JURISDICTION_TAXONOMY, 'field' => 'term_id', 'terms' => $term_id ] ],
     ] );
     return ! empty( $ids ) ? get_post_status( $ids[0] ) : null;
 }
@@ -219,14 +219,16 @@ function ws_jx_dashboard_count( $term_id, $post_type, $attach_only = false ) {
     $args = [
         'post_type'      => $post_type,
         'post_status'    => 'publish',
-        'posts_per_page' => -1,
+        'posts_per_page' => 1,
         'fields'         => 'ids',
-        'tax_query'      => [ [ 'taxonomy' => WS_JURISDICTION_TERM_ID, 'field' => 'term_id', 'terms' => $term_id ] ],
+        'no_found_rows'  => false,
+        'tax_query'      => [ [ 'taxonomy' => WS_JURISDICTION_TAXONOMY, 'field' => 'term_id', 'terms' => $term_id ] ],
     ];
     if ( $attach_only ) {
         $args['meta_query'] = [ [ 'key' => 'ws_attach_flag', 'value' => '1', 'compare' => '=' ] ];
     }
-    return (int) count( get_posts( $args ) );
+    $q = new WP_Query( $args );
+    return (int) $q->found_posts;
 }
 
 /**

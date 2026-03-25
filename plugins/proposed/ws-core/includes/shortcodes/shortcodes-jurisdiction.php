@@ -258,6 +258,14 @@ function ws_shortcode_jx_statutes() {
                    . '</div>';
         }
 
+        // Authoritative cross-reference: procedures that operate under this statute.
+        // Queries ws-ag-procedure posts linking to this statute via ws_proc_statute_ids.
+        // Returns '' when none exist — no section rendered for statutes with no procedures.
+        $procs = ws_get_procedures_for_statute( $statute['id'] );
+        if ( ! empty( $procs ) ) {
+            $html .= ws_render_statute_procedures( $procs );
+        }
+
         return $html;
     };
 

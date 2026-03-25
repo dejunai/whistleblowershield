@@ -183,7 +183,7 @@ function ws_register_acf_jx_statutes() {
                 'field_type'    => 'multi_select',
                 'instructions'  => 'Classify the types of misconduct this law protects.',
                 'add_term'      => 0,
-                'save_terms'    => 0,
+                'save_terms'    => 1,
                 'load_terms'    => 1,
                 'return_format' => 'id',
             ],
@@ -197,7 +197,7 @@ function ws_register_acf_jx_statutes() {
                 'field_type'    => 'multi_select',
                 'instructions'  => 'Select the employee types or worker classifications protected by this statute.',
                 'add_term'      => 0,
-                'save_terms'    => 0,
+                'save_terms'    => 1,
                 'load_terms'    => 1,
                 'return_format' => 'id',
             ],
@@ -211,7 +211,7 @@ function ws_register_acf_jx_statutes() {
                 'field_type'    => 'multi_select',
                 'instructions'  => 'Who must the disclosure be made to for protection to apply under this statute?',
                 'add_term'      => 0,
-                'save_terms'    => 0,
+                'save_terms'    => 1,
                 'load_terms'    => 1,
                 'return_format' => 'id',
             ],
@@ -408,7 +408,7 @@ function ws_register_acf_jx_statutes() {
                 'field_type'    => 'checkbox',
                 'instructions'  => 'Which whistleblower process areas does this statute address?',
                 'add_term'      => 0,
-                'save_terms'    => 0,
+                'save_terms'    => 1,
                 'load_terms'    => 1,
                 'return_format' => 'id',
             ],
@@ -422,7 +422,7 @@ function ws_register_acf_jx_statutes() {
                 'field_type'    => 'checkbox',
                 'instructions'  => 'Select the adverse actions covered by this statute.',
                 'add_term'      => 0,
-                'save_terms'    => 0,
+                'save_terms'    => 1,
                 'load_terms'    => 1,
                 'return_format' => 'id',
             ],
@@ -436,7 +436,7 @@ function ws_register_acf_jx_statutes() {
                 'field_type'    => 'checkbox',
                 'instructions'  => 'Select the fee shifting rule that applies to this statute.',
                 'add_term'      => 0,
-                'save_terms'    => 0,
+                'save_terms'    => 1,
                 'load_terms'    => 1,
                 'return_format' => 'id',
             ],
@@ -450,7 +450,7 @@ function ws_register_acf_jx_statutes() {
                 'field_type'    => 'checkbox',
                 'instructions'  => 'What can a whistleblower recover under this specific law?',
                 'add_term'      => 0,
-                'save_terms'    => 0,
+                'save_terms'    => 1,
                 'load_terms'    => 1,
                 'return_format' => 'id',
             ],
@@ -505,7 +505,7 @@ function ws_register_acf_jx_statutes() {
                 'field_type'    => 'checkbox',
                 'instructions'  => 'Select the defense standard(s) available to the employer under this statute.',
                 'add_term'      => 0,
-                'save_terms'    => 0,
+                'save_terms'    => 1,
                 'load_terms'    => 1,
                 'return_format' => 'id',
             ],
@@ -642,7 +642,7 @@ function ws_register_acf_jx_statutes() {
             //
             // Content-owned field — not a stamp. Editable by editors to
             // signal when the statute record was last meaningfully reviewed
-            // for accuracy. Retained outside tabs for visibility.
+            // for accuracy. Rendered inside the Links tab.
 
             [
                 'key'          => 'field_jx_statute_last_reviewed',

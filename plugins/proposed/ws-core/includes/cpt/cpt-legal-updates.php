@@ -105,9 +105,14 @@ function ws_register_cpt_legal_update() {
         'capability_type' => 'post',
 
         // ── Admin Menu ────────────────────────────────────────────────────
+        // Position 25: before the content CPT directory block (Citations 27,
+        // Agencies 28, Interpretations 29, Assist Orgs 30). Legal Updates is
+        // an editorial/changelog tool — positioned separately from the public
+        // directory CPTs to avoid the menu_position 30 collision with
+        // ws-assist-org (cpt-assist-orgs.php).
 
         'menu_icon'       => 'dashicons-media-document',
-        'menu_position'   => 30,
+        'menu_position'   => 25,
 
     ];
 

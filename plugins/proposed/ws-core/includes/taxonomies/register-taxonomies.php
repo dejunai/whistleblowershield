@@ -75,6 +75,14 @@
  *        filtering in the Phase 2 filter panel — no meta_query in the cascade.
  *        Removed deprecated taxonomy registrations (ws_remedy_type,
  *        ws_coverage_scope, ws_retaliation_forms) — no live data to migrate.
+ * 3.8.1  ws_seed_disclosure_taxonomy() refactored to use
+ *        ws_bulk_insert_hierarchical() — consistent with all other hierarchical
+ *        seeders. Data structure changed from name-keyed (with slug property)
+ *        to slug-keyed (with name property) to match the helper's contract.
+ * 3.9.0  ws-ag-procedure added to ws_jurisdiction and ws_disclosure_type
+ *        object_type arrays. Required for ACF save_terms/load_terms to work
+ *        correctly on procedure edit screens and for seeder wp_set_object_terms
+ *        calls to register correctly in the taxonomy UI.
  *
  */
 
@@ -98,7 +106,7 @@ function ws_register_taxonomies() {
     if ( ! taxonomy_exists( 'ws_disclosure_type' ) ) {
         register_taxonomy(
             'ws_disclosure_type',
-            [ 'jx-statute', 'jx-citation', 'ws-agency', 'ws-assist-org' ],
+            [ 'jx-statute', 'jx-citation', 'ws-agency', 'ws-ag-procedure', 'ws-assist-org' ],
             [
                 'label'             => 'Disclosure Categories',
                 'labels'            => [
@@ -316,10 +324,10 @@ function ws_register_taxonomies() {
     // Private taxonomy — terms are canonical USPS-code slugs (e.g. 'us', 'ca', 'tx').
     // Terms are seeded in jurisdiction-matrix.php via ws_seeded_jurisdiction_taxonomy gate.
 
-    if ( ! taxonomy_exists( WS_JURISDICTION_TERM_ID ) ) {
+    if ( ! taxonomy_exists( WS_JURISDICTION_TAXONOMY ) ) {
         register_taxonomy(
-            WS_JURISDICTION_TERM_ID,
-            [ 'jurisdiction', 'jx-statute', 'jx-summary', 'jx-citation', 'jx-interpretation', 'ws-agency', 'ws-assist-org' ],
+            WS_JURISDICTION_TAXONOMY,
+            [ 'jurisdiction', 'jx-statute', 'jx-summary', 'jx-citation', 'jx-interpretation', 'ws-agency', 'ws-ag-procedure', 'ws-assist-org' ],
             [
                 'label'             => 'Jurisdictions',
                 'labels'            => [
@@ -643,10 +651,9 @@ add_action( 'admin_init', function() {
  * Seeds ws_disclosure_type with its hierarchical structure.
  */
 function ws_seed_disclosure_taxonomy() {
-    $taxonomy  = 'ws_disclosure_type';
-    $structure = [
-        'Workplace & Employment' => [
-            'slug'     => 'workplace-employment',
+    $hierarchy = [
+        'workplace-employment' => [
+            'name'     => 'Workplace & Employment',
             'children' => [
                 'retaliation-protection'     => 'Retaliation Protection',
                 'wrongful-termination'       => 'Wrongful Termination',
@@ -655,8 +662,8 @@ function ws_seed_disclosure_taxonomy() {
                 'collective-bargaining'      => 'Collective Bargaining Rights',
             ],
         ],
-        'Financial & Corporate' => [
-            'slug'     => 'financial-corporate',
+        'financial-corporate' => [
+            'name'     => 'Financial & Corporate',
             'children' => [
                 'securities-commodities-fraud'  => 'Securities & Commodities Fraud',
                 'consumer-financial-protection' => 'Consumer Financial Protection',
@@ -665,8 +672,8 @@ function ws_seed_disclosure_taxonomy() {
                 'tax-evasion-fraud'             => 'Tax Evasion & Fraud',
             ],
         ],
-        'Government Accountability' => [
-            'slug'     => 'government-accountability',
+        'government-accountability' => [
+            'name'     => 'Government Accountability',
             'children' => [
                 'procurement-spending-fraud' => 'Procurement & Spending Fraud',
                 'public-corruption-ethics'   => 'Public Corruption & Ethics',
@@ -674,8 +681,8 @@ function ws_seed_disclosure_taxonomy() {
                 'military-defense-reporting' => 'Military & Defense Reporting',
             ],
         ],
-        'Public Health & Safety' => [
-            'slug'     => 'public-health-safety',
+        'public-health-safety' => [
+            'name'     => 'Public Health & Safety',
             'children' => [
                 'healthcare-medicare-fraud' => 'Healthcare & Medicare Fraud',
                 'environmental-protection'  => 'Environmental Protection',
@@ -684,8 +691,8 @@ function ws_seed_disclosure_taxonomy() {
                 'transportation-safety'     => 'Transportation & Aviation Safety',
             ],
         ],
-        'Privacy & Data Integrity' => [
-            'slug'     => 'privacy-data-integrity',
+        'privacy-data-integrity' => [
+            'name'     => 'Privacy & Data Integrity',
             'children' => [
                 'cybersecurity-disclosure'  => 'Cybersecurity Disclosure',
                 'hipaa-patient-privacy'     => 'HIPAA & Patient Privacy',
@@ -693,8 +700,8 @@ function ws_seed_disclosure_taxonomy() {
                 'education-privacy-ferpa'   => 'Education Privacy (FERPA)',
             ],
         ],
-        'National Security' => [
-            'slug'     => 'national-security',
+        'national-security' => [
+            'name'     => 'National Security',
             'children' => [
                 'intelligence-community'       => 'Intelligence Community Reporting',
                 'classified-information'       => 'Classified Information Disclosures',
@@ -702,29 +709,7 @@ function ws_seed_disclosure_taxonomy() {
             ],
         ],
     ];
-
-    foreach ( $structure as $parent_name => $data ) {
-        $existing_parent = term_exists( $data['slug'], $taxonomy );
-        if ( ! $existing_parent ) {
-            $parent = wp_insert_term( $parent_name, $taxonomy, [ 'slug' => $data['slug'] ] );
-        } else {
-            $parent = is_array( $existing_parent )
-                ? $existing_parent
-                : [ 'term_id' => $existing_parent ];
-        }
-        if ( is_wp_error( $parent ) ) {
-            continue;
-        }
-        $parent_id = (int) $parent['term_id'];
-        foreach ( $data['children'] as $child_slug => $child_name ) {
-            if ( ! term_exists( $child_slug, $taxonomy ) ) {
-                wp_insert_term( $child_name, $taxonomy, [
-                    'slug'   => $child_slug,
-                    'parent' => $parent_id,
-                ] );
-            }
-        }
-    }
+    ws_bulk_insert_hierarchical( $hierarchy, 'ws_disclosure_type' );
 }
 
 /**
@@ -916,7 +901,7 @@ function ws_seed_case_stage_taxonomy() {
  * Display order: Federal first, DC second, states alphabetical, territories alphabetical.
  */
 function ws_seed_jurisdiction_taxonomy() {
-    $taxonomy = WS_JURISDICTION_TERM_ID;
+    $taxonomy = WS_JURISDICTION_TAXONOMY;
     $terms    = [
         'us' => 'Federal',
         'dc' => 'District of Columbia',

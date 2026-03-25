@@ -1083,12 +1083,12 @@ function ws_seed_jurisdiction_matrix() {
         $slug = strtolower( $code );
         $name = $jx['title'];
 
-        $existing = term_exists( $slug, WS_JURISDICTION_TERM_ID );
+        $existing = term_exists( $slug, WS_JURISDICTION_TAXONOMY );
 
         if ( $existing ) {
             $term_id = is_array( $existing ) ? (int) $existing['term_id'] : (int) $existing;
         } else {
-            $result = wp_insert_term( $name, WS_JURISDICTION_TERM_ID, [ 'slug' => $slug ] );
+            $result = wp_insert_term( $name, WS_JURISDICTION_TAXONOMY, [ 'slug' => $slug ] );
             if ( is_wp_error( $result ) ) {
                 continue;
             }
@@ -1175,7 +1175,7 @@ function ws_seed_jurisdiction_matrix() {
         // call at runtime. The data is derivable from the taxonomy relationship but
         // the direct lookup is faster and simpler in contexts where only the ID is needed.
         if ( $term_id ) {
-            wp_set_object_terms( $post_id, $term_id, WS_JURISDICTION_TERM_ID );
+            wp_set_object_terms( $post_id, $term_id, WS_JURISDICTION_TAXONOMY );
             update_post_meta( $post_id, 'ws_jx_term_id', $term_id );
         }
 

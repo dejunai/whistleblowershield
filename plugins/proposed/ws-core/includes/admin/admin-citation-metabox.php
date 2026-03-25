@@ -87,12 +87,12 @@ function ws_render_citation_metabox( $post ) {
     //                      may carry more than one jurisdiction term.
     // post_title         — WordPress core pre-fills the title field.
 
-    $terms   = wp_get_post_terms( $post->ID, WS_JURISDICTION_TERM_ID );
+    $terms   = wp_get_post_terms( $post->ID, WS_JURISDICTION_TAXONOMY );
     $add_url = admin_url( 'post-new.php?post_type=jx-citation&statute_id=' . $post->ID );
 
     if ( ! empty( $terms ) && ! is_wp_error( $terms ) ) {
         foreach ( $terms as $term ) {
-            $add_url .= '&tax_input[' . WS_JURISDICTION_TERM_ID . '][]=' . $term->term_id;
+            $add_url .= '&tax_input[' . WS_JURISDICTION_TAXONOMY . '][]=' . $term->term_id;
         }
     }
 

@@ -23,7 +23,7 @@
  * Description: Core architecture for WhistleblowerShield. Proposed replacement
  *              plugin — radical refactor of v2.3.1. Not an upgrade of the live plugin.
  *              Assembles public whistleblower protection pages for 57 U.S. jurisdictions.
- * Version:     3.8.0
+ * Version:     3.9.0
  * Author:      Whistleblower Shield
  * Author URI:  https://whistleblowershield.org
  *
@@ -324,25 +324,170 @@
  *      13). Seeder and gate added. Replaces ws_aorg_employment_sectors ACF
  *      checkbox field. acf-assist-orgs.php field converted to taxonomy type.
  *
+ * POST-AUDIT PASS (v3.8.1)
+ * -------------------------
+ * Full-codebase audit (Perplexity-assisted). All Tier 2 functional bugs and
+ * Tier 3 code-quality items resolved. Tier 1 design decisions deferred.
+ *
+ * Functional fixes (Tier 2):
+ *   1. PHP 8 fatal: operator precedence in $law_name ternary fixed in
+ *      admin-major-edit-hook.php — jx-citation and jx-interpretation CPTs
+ *      were reaching an unreachable branch and receiving the wrong name.
+ *   2. Output escaping: three sinks in render-section.php wrapped with
+ *      wp_kses_post() / esc_attr(); echo $notice in admin-feed-monitor.php
+ *      wrapped with wp_kses_post().
+ *   3. Race condition: LOCK_EX flag added to file_put_contents() in
+ *      admin-feed-monitor.php (ws_feed_monitor_write_staged).
+ *   4. Memory: get_posts( -1 ) removed from admin-url-monitor.php,
+ *      jurisdiction-dashboard.php, and admin-navigation.php. Replaced with
+ *      WP_Query( posts_per_page => 1 / 1000 ) as appropriate.
+ *   5. Legal updates cache: single WS_CACHE_LEGAL_UPDATES_SITEWIDE key stores
+ *      100 items; requests ≤ 100 served via array_slice(); requests > 100 or
+ *      per-jurisdiction calls bypass the cache entirely.
+ *   6. ws_presave_needs_review() stash helper added to admin-hooks.php:
+ *      captures ws_needs_review value at acf/save_post priority 5 (before ACF
+ *      writes at 10) so the priority-20 role gate can restore the pre-save
+ *      value for non-admin users rather than reading the already-committed one.
+ *   7. WS_MATRIX_SEEDING_IN_PROGRESS define moved outside the foreach loop in
+ *      matrix-fed-statutes.php and matrix-agencies.php — was defined inside
+ *      the loop so wp_update_post() calls on iterations 2+ did not see it.
+ *   8. ACF shadow key added to matrix-assist-orgs.php for ws_aorg_services so
+ *      ACF recognizes seeder-written meta without a first-save wipe.
+ *   9. wp_date('Y') replaces date('Y') in shortcodes-general.php [ws_footer]
+ *      so the copyright year respects the WP timezone setting.
+ *
+ * Code quality (Tier 3):
+ *  10. Dead is_page() condition removed from ws_core_enqueue_assets() —
+ *      is_page() is always true when is_singular() is true.
+ *  11. Contact email in render-general.php wrapped in
+ *      apply_filters( 'ws_contact_email', ... ) — overridable without
+ *      editing plugin files.
+ *  12. Duplicate ws-agency column hooks in cpt-agencies.php removed.
+ *      ws_agency_code column migrated to admin-columns.php alongside all
+ *      other CPT column definitions.
+ *  13. ws-legal-update menu_position moved from 30 → 25, resolving
+ *      collision with ws-assist-org (cpt-assist-orgs.php).
+ *  14. ws-core-front.js: version history updated; HTML contract for filter
+ *      tab <button> elements documented in comments.
+ *  15. loader.php: assembly-layer silent-failure behavior and ACF admin-only
+ *      scope (REST API / WP-CLI blind spot) documented in comments.
+ *  16. ws_seed_disclosure_taxonomy() in register-taxonomies.php refactored
+ *      to use ws_bulk_insert_hierarchical() — now consistent with all other
+ *      hierarchical taxonomy seeders.
+ *  17. cpt-jx-citations.php docblock updated — removed references to retired
+ *      ws_jx_code join, [ws_jx_case_law] shortcode, ws_jx_cite_attach, and
+ *      ws_jx_cite_position; replaced with current taxonomy/meta key names.
+ *  18. register-glossary.php try/catch/finally block indentation normalized
+ *      to consistent single-tab style.
+ *
+ * Tech debt (Tier 4):
+ *  19. feed-staged.json unbounded growth resolved: ws_feed_monitor_poll()
+ *      now prunes 'pending' items older than ws_feed_staged_max_age_days
+ *      (default 90 days, filterable) on each write. Accepted/rejected items
+ *      are still removed immediately on the admin action.
+ *  20. Hardcoded 'US' jx_code default in ws_feed_monitor_poll() replaced
+ *      with apply_filters( 'ws_feed_monitor_default_jx_code', 'US' ).
+ *  21. URL monitor detected timestamp preserved across cron reruns.
+ *      admin-url-monitor.php now retains the original 'detected' value for
+ *      known warnings/failures — the admin UI shows first-seen date, not
+ *      last-confirmed date.
+ *
+ * v3.9.0 — ws-ag-procedure: Filing Procedures Feature (Phases 1–3)
+ * -----------------------------------------------------------------
+ * Adds the ws-ag-procedure CPT, the full front-end render pipeline for
+ * the "What do I do next?" end-user workflow on agency pages, and statute
+ * cross-reference validation for editorial accuracy.
+ *
+ * Phase 1 — Structure:
+ *   1. cpt-ag-procedures.php: registers ws-ag-procedure CPT.
+ *      publicly_queryable, has_archive => false, no editor (ACF only).
+ *      menu_position 29 (after ws-agency at 28).
+ *   2. acf-ag-procedures.php: 17-field group covering procedure identity
+ *      (type, jurisdiction, disclosure types), filing details (entry point,
+ *      intake URL, phone, identity policy, intake-only flag, deadline days,
+ *      deadline clock start, prerequisites), plain English walkthrough
+ *      (wysiwyg), mutual exclusivity note, and last-verified date.
+ *      Pre-fill hook (acf/load_value) reads ?agency_id= URL param on
+ *      auto-draft posts — mirrors the jx-interpretation pre-fill pattern.
+ *   3. admin-columns.php: Agency (linked), Type, Disclosure Types, Deadline
+ *      columns added for ws-ag-procedure list screen.
+ *   4. admin-navigation.php: Agency navigation box updated with Procedures
+ *      section — lists procedures with type label, status badge, and
+ *      [Add Procedure] button that passes ?agency_id= for pre-fill.
+ *   5. acf-stamp-fields.php: ws-ag-procedure added as 9th CPT in location
+ *      rules so stamp fields (created_by, created_date, etc.) are attached.
+ *
+ * Phase 2 — Query + Render:
+ *   6. query-agencies.php (new, Universal Layer): ws_get_agency_procedures()
+ *      queries published procedures for a given agency. Per-agency transient
+ *      cache (ws_agency_procs_{id}, 24h). Invalidated on procedure save.
+ *   7. render-agency.php (new, Assembly Layer): ws_handle_agency_render()
+ *      intercepts the_content for ws-agency posts and appends a structured
+ *      procedures section. Procedures grouped by type: disclosure first,
+ *      retaliation second, both last. Each card renders: intake-only warning,
+ *      identity policy, filing deadline with clock-start label, entry point,
+ *      prerequisites notice, step-by-step walkthrough, mutual exclusivity
+ *      note, CTA buttons (intake form URL, direct phone), last-verified date.
+ *   8. cpt-ag-procedures.php: exclude_from_search set to false (Phase 2).
+ *   9. loader.php: query-agencies added to Universal Layer query array;
+ *      render-agency added to Assembly Layer render array.
+ *
+ * Phase 3 — Statute Cross-Reference:
+ *  10. acf-ag-procedures.php: ws_proc_statute_ids relationship field added
+ *      (Related Statutes tab). Auto-scoped via ws_proc_scope_statute_picker()
+ *      — narrows picker to statutes matching the procedure's own jurisdiction
+ *      and disclosure types. Manual taxonomy filter UI also available.
+ *  11. query-agencies.php: ws_get_procedures_for_statute() added. Returns
+ *      all published procedures that link a given jx-statute via
+ *      ws_proc_statute_ids. Cached per statute (ws_statute_procs_{id}, 24h).
+ *      Stash+diff cache invalidation pattern handles ACF edit-screen saves
+ *      (old and new statute IDs cleared on each save). before_delete_post /
+ *      deleted_post pair handles procedure deletion.
+ *  12. render-section.php: ws_render_statute_procedures() added. Compact
+ *      cross-reference panel rendered below each statute block on the
+ *      jurisdiction page — procedure title, agency link, type badge,
+ *      deadline badge, intake-only badge. Calls ws_get_procedures_for_statute()
+ *      from the shortcodes-jurisdiction.php statute chunk builder.
+ *  13. admin-procedure-watch.php (new, Admin Layer): statute link validation
+ *      on acf/save_post. Hard mismatch (zero disclosure-type intersection)
+ *      demotes to draft and sets ws_proc_stat_flagged. Broad-scope advisory
+ *      (no disclosure types set + statute links) writes ws_proc_stat_broad_scope.
+ *      wp_insert_post_data publish gate blocks flagged procedures from all
+ *      publish paths (quick edit, bulk, REST, programmatic). Admin override
+ *      field (field_proc_stat_override) clears the flag and writes an
+ *      append-only audit log (ws_proc_stat_override_log) before resetting
+ *      to 0. Admin notice on procedure edit screen surfaces both hard-mismatch
+ *      and broad-scope advisory states.
+ *  14. loader.php: admin-procedure-watch added to Admin Layer file array.
+ *
+ * Phase 4 — Seeder:
+ *  15. register-taxonomies.php: ws-ag-procedure added to ws_jurisdiction and
+ *      ws_disclosure_type object_type arrays so ACF save_terms/load_terms
+ *      and the seeder's wp_set_object_terms calls resolve correctly.
+ *  16. matrix-ag-procedures.php (new, Matrix Layer): seeds 10 procedures
+ *      across nine federal agencies (SEC, OSHA, OSC ×2, MSPB, NLRB, CFTC,
+ *      IRS, EPA, DOJ). Each procedure sets type, disclosure types, entry
+ *      point, intake URL, identity policy, deadline, prerequisites,
+ *      walkthrough, exclusivity note. Jurisdiction assigned to US.
+ *      Statute cross-references written where applicable. Cache transients
+ *      (agency and per-statute) cleared after each record. Gate:
+ *      ws_seeded_procedure_matrix / 1.0.0.
+ *  17. loader.php: matrix-ag-procedures added to Matrix Layer file array
+ *      (between matrix-agencies and admin-matrix-watch).
+ *
  */
 
 defined( 'ABSPATH' ) || exit;
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
-define( 'WS_CORE_VERSION', '3.8.0' );
+define( 'WS_CORE_VERSION', '3.9.0' );
 define( 'WS_CORE_PATH',    plugin_dir_path( __FILE__ ) );
 define( 'WS_CORE_URL',     plugin_dir_url( __FILE__ ) );
 
-// WS_JURISDICTION_TERM_ID holds the taxonomy *slug* ('ws_jurisdiction'), not
-// an integer term_id. Yes, the _ID suffix conventionally implies an integer.
-// No, that convention is not being followed here. The name was chosen because
-// this constant is passed wherever WordPress expects a "taxonomy identifier"
-// — wp_get_post_terms(), has_term(), tax_query 'taxonomy' key, get_term_by()
-// second arg, etc. — and "TERM_ID" reads correctly at every call site.
-// Storing the slug string is intentional and is not changing. Complaints can
-// be directed to /dev/null.
-define( 'WS_JURISDICTION_TERM_ID', 'ws_jurisdiction' );
+// The registered taxonomy slug. Passed wherever WordPress expects a taxonomy
+// identifier — wp_get_post_terms(), has_term(), tax_query 'taxonomy' key, etc.
+define( 'WS_JURISDICTION_TAXONOMY', 'ws_jurisdiction' );
 
 // Transient keys for the two jurisdiction-level query caches. Both are
 // invalidated together by ws_invalidate_jurisdiction_caches() whenever a
@@ -351,7 +496,9 @@ define( 'WS_CACHE_ALL_JURISDICTIONS', 'ws_all_jurisdictions_cache' );
 define( 'WS_CACHE_JX_INDEX',          'ws_jx_index_cache'          );
 
 // Transient key for the sitewide legal updates cache.
-// All sitewide calls ($jx_id = 0) are cached; per-jurisdiction calls are not.
+// Stores up to 100 items; sliced to the requested count on read.
+// Sitewide calls with count > 100 bypass the cache entirely.
+// Per-jurisdiction calls are never cached.
 // Invalidated on every ws-legal-update save.
 define( 'WS_CACHE_LEGAL_UPDATES_SITEWIDE', 'ws_legal_updates_sitewide' );
 
@@ -443,7 +590,7 @@ function ws_core_init() {
 //   ws-core-front-general.css — shortcodes usable on any page type:
 //       disclaimer, footer, legal updates, jurisdiction index, directory,
 //       reference materials page, ref-materials button, term tooltip.
-//       Loaded on all singular posts/pages (is_singular || is_page).
+//       Loaded on all singular posts/pages (is_singular()).
 //
 //   ws-core-front-jx.css — jurisdiction CPT pages only:
 //       header, flag, gov offices, summary, trust badge, sources,
@@ -459,7 +606,8 @@ add_action( 'wp_enqueue_scripts', 'ws_core_enqueue_assets' );
 function ws_core_enqueue_assets() {
 
     // General styles + JS: any singular post or page.
-    if ( is_singular() || is_page() ) {
+    // is_page() is always true when is_singular() is true — condition omitted.
+    if ( is_singular() ) {
 
         wp_enqueue_style(
             'ws-core-front-general',

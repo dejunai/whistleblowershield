@@ -163,9 +163,9 @@ add_action( 'wp_insert_post', function( $post_id, $post, $update ) {
     if ( ! in_array( $post->post_type, $addendum_types, true ) ) return;
 
     $term_slug = sanitize_key( $_GET['ws_jx_term'] );
-    $term      = get_term_by( 'slug', $term_slug, WS_JURISDICTION_TERM_ID );
+    $term      = ws_jx_term_by_code( $term_slug );
     if ( $term && ! is_wp_error( $term ) ) {
-        wp_set_object_terms( $post_id, $term->term_id, WS_JURISDICTION_TERM_ID );
+        wp_set_object_terms( $post_id, $term->term_id, WS_JURISDICTION_TAXONOMY );
     }
 }, 10, 3 );
 
@@ -439,6 +439,7 @@ function ws_acf_plain_english_guards( $post_id ) {
         delete_post_meta( $post_id, 'ws_auto_plain_english_by' );
         delete_post_meta( $post_id, 'ws_auto_plain_english_date' );
         delete_post_meta( $post_id, 'ws_auto_plain_english_reviewed_date' );
+        delete_post_meta( $post_id, 'ws_auto_plain_english_reviewed_by' );
     }
 }
 
@@ -478,7 +479,7 @@ add_action( 'admin_notices', function() {
 // To add stamp support to a new CPT, add one entry to $ws_stamp_cpts.
 
 $ws_stamp_cpts = [
-    'jurisdiction'      => [ 'author_acf_key' => 'field_last_edited_author' ],
+    'jurisdiction'      => [ 'author_acf_key' => 'field_jx_last_edited_author' ],
     'jx-summary'        => [ 'author_acf_key' => 'field_last_edited_author' ],
     'jx-citation'       => [ 'author_acf_key' => 'field_last_edited_author' ],
     'jx-statute'        => [ 'author_acf_key' => 'field_last_edited_author' ],
@@ -834,7 +835,7 @@ function ws_stamp_source_method( $post_id ) {
 // First save only — never overwrites an existing value.
 // ════════════════════════════════════════════════════════════════════════════
 
-add_action( 'acf/save_post', 'ws_stamp_source_name', 5 );
+add_action( 'acf/save_post', 'ws_stamp_source_name', 6 );
 
 function ws_stamp_source_name( $post_id ) {
 
@@ -910,9 +911,17 @@ function ws_stamp_verified_by_date( $post_id ) {
         return;
     }
 
-    $incoming = isset( $_POST['acf']['field_verification_status'] )
-        ? sanitize_text_field( $_POST['acf']['field_verification_status'] )
-        : '';
+    $incoming = '';
+    if ( ! empty( $_POST['acf'] ) ) {
+        foreach ( $_POST['acf'] as $field_key => $field_value ) {
+            $field_obj = acf_get_field( $field_key );
+            if ( ! $field_obj ) continue;
+            if ( $field_obj['name'] === 'ws_verification_status' ) {
+                $incoming = sanitize_text_field( (string) $field_value );
+                break;
+            }
+        }
+    }
 
     if ( $incoming !== 'verified' ) {
         return;
@@ -935,6 +944,7 @@ function ws_stamp_verified_by_date( $post_id ) {
 // Three server-side enforcements:
 //
 //   1. needs_review — admin only. Non-admin saves revert to pre-save value.
+//      Pre-save value is stashed at priority 5 (before ACF writes at 10).
 //
 //   2. verification_status revert — non-admins cannot set status back to
 //      'unverified' once it is 'verified'. Attempt is silently reverted.
@@ -944,6 +954,30 @@ function ws_stamp_verified_by_date( $post_id ) {
 //      This is the server-side enforcement of the ACF conditional logic gate
 //      in acf-source-verify.php.
 // ════════════════════════════════════════════════════════════════════════════
+
+// Priority 5: stash ws_needs_review before ACF writes the submitted value at priority 10.
+// ws_presave_needs_review() acts as both setter (priority-5 hook) and getter (priority-20).
+add_action( 'acf/save_post', function( $post_id ) {
+    if ( in_array( get_post_type( $post_id ), ws_source_verify_post_types(), true ) ) {
+        ws_presave_needs_review( $post_id, get_post_meta( $post_id, 'ws_needs_review', true ) );
+    }
+}, 5 );
+
+/**
+ * Stash/retrieve the pre-save ws_needs_review value.
+ * Called at priority 5 (setter) and priority 20 (getter).
+ *
+ * @param  int         $post_id
+ * @param  string|null $set     Pass a string to store; omit (or null) to retrieve.
+ * @return string|null          Stored value, or null if never set.
+ */
+function ws_presave_needs_review( $post_id, $set = null ) {
+    static $stash = [];
+    if ( $set !== null ) {
+        $stash[ $post_id ] = $set;
+    }
+    return $stash[ $post_id ] ?? null;
+}
 
 add_action( 'acf/save_post', 'ws_enforce_source_verify_roles', 20 );
 
@@ -955,29 +989,41 @@ function ws_enforce_source_verify_roles( $post_id ) {
 
     $is_admin = current_user_can( 'manage_options' );
 
+    // Resolve the submitted verification_status by field name, not hardcoded key.
+    $incoming_status = '';
+    if ( ! empty( $_POST['acf'] ) ) {
+        foreach ( $_POST['acf'] as $field_key => $field_value ) {
+            $field_obj = acf_get_field( $field_key );
+            if ( ! $field_obj ) continue;
+            if ( $field_obj['name'] === 'ws_verification_status' ) {
+                $incoming_status = sanitize_text_field( (string) $field_value );
+                break;
+            }
+        }
+    }
+
     // ── 1. needs_review: admin only ───────────────────────────────────────
+    // Use the pre-save value stashed at priority 5 — get_post_meta() at priority 20
+    // returns the submitted (ACF-written) value, not the pre-save value.
     if ( ! $is_admin ) {
-        $previous_needs_review = get_post_meta( $post_id, 'ws_needs_review', true );
-        update_post_meta( $post_id, 'ws_needs_review', $previous_needs_review );
+        $previous_needs_review = ws_presave_needs_review( $post_id );
+        if ( $previous_needs_review !== null ) {
+            update_post_meta( $post_id, 'ws_needs_review', $previous_needs_review );
+        }
     }
 
     // ── 2. verification_status: non-admins cannot revert to 'unverified' ─
     if ( ! $is_admin ) {
         $previous_status = get_post_meta( $post_id, 'ws_verification_status', true );
-        $incoming_status = isset( $_POST['acf']['field_verification_status'] )
-            ? sanitize_text_field( $_POST['acf']['field_verification_status'] )
-            : $previous_status;
+        $effective_status = $incoming_status !== '' ? $incoming_status : $previous_status;
 
-        if ( $previous_status === 'verified' && $incoming_status !== 'verified' ) {
+        if ( $previous_status === 'verified' && $effective_status !== 'verified' ) {
             update_post_meta( $post_id, 'ws_verification_status', 'verified' );
         }
     }
 
     // ── 3. source_name gate: no role may verify without a source_name ─────
-    $source_name     = trim( (string) get_post_meta( $post_id, 'ws_auto_source_name', true ) );
-    $incoming_status = isset( $_POST['acf']['field_verification_status'] )
-        ? sanitize_text_field( $_POST['acf']['field_verification_status'] )
-        : '';
+    $source_name = trim( (string) get_post_meta( $post_id, 'ws_auto_source_name', true ) );
 
     if ( $incoming_status === 'verified' && $source_name === '' ) {
         update_post_meta( $post_id, 'ws_verification_status', 'unverified' );

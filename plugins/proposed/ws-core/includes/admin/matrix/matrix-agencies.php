@@ -134,19 +134,19 @@ function ws_seed_agency_matrix() {
     global $_ws_agency_matrix;
 
     // Resolve the US jurisdiction term ID.
-    $us_term = get_term_by( 'slug', 'us', WS_JURISDICTION_TERM_ID );
+    $us_term = ws_jx_term_by_code( 'us' );
     if ( ! $us_term || is_wp_error( $us_term ) ) {
         return; // Taxonomy terms not yet seeded — bail.
     }
     $us_term_id = (int) $us_term->term_id;
 
+    if ( ! defined( 'WS_MATRIX_SEEDING_IN_PROGRESS' ) ) {
+        define( 'WS_MATRIX_SEEDING_IN_PROGRESS', true );
+    }
+
     foreach ( $_ws_agency_matrix as $agency ) {
 
         $existing = get_page_by_path( $agency['slug'], OBJECT, 'ws-agency' );
-		
-		if ( ! defined( 'WS_MATRIX_SEEDING_IN_PROGRESS' ) ) {
-			define( 'WS_MATRIX_SEEDING_IN_PROGRESS', true );
-		}
 
         if ( $existing ) {
             $post_id = $existing->ID;
@@ -183,7 +183,7 @@ function ws_seed_agency_matrix() {
         }
 
         // Assign US jurisdiction term.
-        wp_set_object_terms( $post_id, $us_term_id, WS_JURISDICTION_TERM_ID );
+        wp_set_object_terms( $post_id, $us_term_id, WS_JURISDICTION_TAXONOMY );
 
         // Assign ws_languages: English (all seeded federal agencies operate in English).
         $english_term = get_term_by( 'slug', 'english', 'ws_languages' );

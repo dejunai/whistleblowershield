@@ -266,7 +266,7 @@ function ws_render_jx_summary_section( $content, $review_html = '' ) {
         </div>
         <?php if ( $review_html ) : ?>
             <footer>
-                <?php echo $review_html; ?>
+                <?php echo wp_kses_post( $review_html ); ?>
             </footer>
         <?php endif; ?>
     </section>
@@ -297,7 +297,7 @@ function ws_render_plain_english_reviewed_badge( $plain_reviewed, $reviewer_name
             $parts[] = 'on ' . esc_attr( date_i18n( get_option( 'date_format' ), strtotime( $reviewed_date ) ) );
         }
         $tooltip = ! empty( $parts ) ? implode( ' ', $parts ) : 'Reviewed';
-        return '<span class="ws-trust-badge ws-trust-badge--reviewed" title="' . $tooltip . '">'
+        return '<span class="ws-trust-badge ws-trust-badge--reviewed" title="' . esc_attr( $tooltip ) . '">'
              . 'Editor Reviewed'
              . '</span>';
     }
@@ -398,7 +398,7 @@ function ws_render_jx_citations( $items, $section_class = '' ) {
     <section class="ws-case-law<?php echo $extra; ?>">
         <hr class="ws-section-divider">
         <?php foreach ( $items as $item ) : ?>
-            <?php echo $item; ?><br>
+            <?php echo wp_kses_post( $item ); ?><br>
         <?php endforeach; ?>
     </section>
     <?php
@@ -502,4 +502,92 @@ function ws_render_jx_interpretations( $interps ) {
  */
 function ws_render_jx_limitations( $content ) {
     return '<section class="ws-limitations">' . $content . '</section>';
+}
+
+
+// ════════════════════════════════════════════════════════════════════════════
+// ws_render_statute_procedures( $procedures )
+//
+// Renders a compact cross-reference panel beneath a statute block on the
+// jurisdiction page: "Filing Procedures Under This Statute". Called from
+// the $build_statute_chunk closure in shortcodes-jurisdiction.php.
+//
+// Deliberately compact — shows enough for the end-user to recognise the
+// path forward and link to the full procedure card on the agency page.
+// Not a full procedure card render (that lives in render-agency.php).
+//
+// Sections per item:
+//   — Procedure title (linked to individual procedure permalink)
+//   — Agency name (linked to agency page)
+//   — Type badge (disclosure / retaliation / both)
+//   — Filing deadline if set (e.g. "180-day deadline")
+//   — "Intake Only" badge if intake_only is true
+//
+// @param  array  $procedures  Rows from ws_get_procedures_for_statute().
+// @return string  HTML block, or '' when $procedures is empty.
+// ════════════════════════════════════════════════════════════════════════════
+
+function ws_render_statute_procedures( $procedures ) {
+
+    if ( empty( $procedures ) ) {
+        return '';
+    }
+
+    /** @var array<string,string> Procedure type slug → short display label. */
+    $type_labels = [
+        'disclosure'  => 'Disclosure',
+        'retaliation' => 'Retaliation',
+        'both'        => 'Disclosure &amp; Retaliation',
+    ];
+
+    ob_start();
+    ?>
+    <div class="ws-statute-procedures">
+        <h6 class="ws-statute-procedures__heading">Filing Procedures Under This Statute</h6>
+        <ul class="ws-statute-procedures__list" role="list">
+            <?php foreach ( $procedures as $proc ) : ?>
+                <li class="ws-statute-procedures__item" role="listitem">
+
+                    <a href="<?php echo esc_url( $proc['url'] ); ?>"
+                       class="ws-statute-procedures__proc-link">
+                        <?php echo esc_html( $proc['title'] ); ?>
+                    </a>
+
+                    <?php if ( ! empty( $proc['agency_name'] ) && ! empty( $proc['agency_url'] ) ) : ?>
+                        <span class="ws-statute-procedures__agency">
+                            — <a href="<?php echo esc_url( $proc['agency_url'] ); ?>">
+                                <?php echo esc_html( $proc['agency_name'] ); ?>
+                              </a>
+                        </span>
+                    <?php endif; ?>
+
+                    <?php
+                    $type_label = $type_labels[ $proc['type'] ?? '' ] ?? '';
+                    if ( $type_label ) :
+                    ?>
+                        <span class="ws-statute-procedures__badge ws-statute-procedures__badge--type
+                                     ws-statute-procedures__badge--<?php echo esc_attr( $proc['type'] ); ?>">
+                            <?php echo wp_kses( $type_label, [] ); ?>
+                        </span>
+                    <?php endif; ?>
+
+                    <?php if ( ! empty( $proc['deadline_days'] ) ) : ?>
+                        <span class="ws-statute-procedures__badge ws-statute-procedures__badge--deadline">
+                            <?php echo absint( $proc['deadline_days'] ); ?>-day deadline
+                        </span>
+                    <?php endif; ?>
+
+                    <?php if ( ! empty( $proc['intake_only'] ) ) : ?>
+                        <span class="ws-statute-procedures__badge ws-statute-procedures__badge--intake-only"
+                              title="This agency receives and refers reports only — it does not investigate.">
+                            Intake Only
+                        </span>
+                    <?php endif; ?>
+
+                </li>
+            <?php endforeach; ?>
+        </ul>
+    </div>
+    <?php
+    return ob_get_clean();
 }

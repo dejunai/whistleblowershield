@@ -281,7 +281,13 @@ function ws_render_jx_curated( $post, $jx_term_id ) {
     }
 
     // Legal updates — shortcode returns empty if none exist.
-    $legal_updates = do_shortcode( '[ws_legal_updates jx="' . esc_attr( $post->post_name ) . '" count="5"]' );
+    // Pass the USPS code (e.g. 'ca'), not the WP post slug (e.g. 'california').
+    // The [ws_legal_updates] shortcode resolves jx via taxonomy slug, not post slug.
+    $jx_info = ws_get_jurisdiction_data( $post->ID );
+    $jx_code = $jx_info ? strtolower( $jx_info['code'] ) : '';
+    $legal_updates = $jx_code
+        ? do_shortcode( '[ws_legal_updates jx="' . esc_attr( $jx_code ) . '" count="5"]' )
+        : '';
     if ( $legal_updates ) {
         $output      .= $legal_updates;
         $has_content  = true;

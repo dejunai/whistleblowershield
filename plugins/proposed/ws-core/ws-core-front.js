@@ -9,6 +9,7 @@
  *   2.4.0 — Added tooltip keyboard/screen reader accessibility and external
  *            link screen reader hints. Fixed early return that prevented
  *            accessibility code from running on non-index pages.
+ *   3.8.0 — No JS changes; version bumped to match plugin.
  */
 
 ( function () {
@@ -23,6 +24,11 @@
     // Expects:
     //   .ws-jx-filter-btn[data-filter]  — filter buttons in .ws-jx-filter-nav
     //   .ws-jx-card[data-type]          — jurisdiction cards in .ws-jx-grid
+    //
+    // HTML contract: filter buttons are rendered as native <button> elements
+    // by ws_render_jurisdiction_index() in render-general.php. The selector
+    // '.ws-jx-filter-btn' works on any element, but click handling and
+    // classList depend on the rendered markup using <button> tags.
 
     var filterNav = document.querySelector( '.ws-jx-filter-nav' );
 

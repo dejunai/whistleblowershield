@@ -188,7 +188,7 @@ function ws_register_acf_jurisdiction_fields() {
                 'label'         => 'Jurisdiction USPS Code',
                 'name'          => 'ws_jurisdiction_term_id',
                 'type'          => 'taxonomy',
-                'taxonomy'      => WS_JURISDICTION_TERM_ID,
+                'taxonomy'      => WS_JURISDICTION_TAXONOMY,
                 'field_type'    => 'select',
                 'instructions'  => 'Internal taxonomy field. Seeder-populated. Drives the ws_jurisdiction term assignment for this jurisdiction record.',
 				'required'      => 1,
@@ -420,7 +420,7 @@ function ws_register_acf_jurisdiction_fields() {
             // Hidden fields: create_author, date_created, date_created_gmt, last_edited_gmt
 
             [
-                'key'           => 'field_create_author',
+                'key'           => 'field_jx_create_author',
                 'label'         => 'Created By',
                 'name'          => 'ws_auto_create_author',
                 'type'          => 'user',
@@ -433,7 +433,7 @@ function ws_register_acf_jurisdiction_fields() {
             ],
 
             [
-                'key'          => 'field_date_created',
+                'key'          => 'field_jx_date_created',
                 'label'        => 'Date Created',
                 'name'         => 'ws_auto_date_created',
                 'type'         => 'text',
@@ -466,7 +466,7 @@ function ws_register_acf_jurisdiction_fields() {
 
             // Visible fields: last_edited, last_edited_author
 			[
-                'key'           => 'field_last_edited_author',
+                'key'           => 'field_jx_last_edited_author',
                 'label'         => 'Last Editor',
                 'name'          => 'ws_auto_last_edited_author',
                 'type'          => 'user',
@@ -476,7 +476,7 @@ function ws_register_acf_jurisdiction_fields() {
             ],
 			
             [
-                'key'          => 'field_last_edited',
+                'key'          => 'field_jx_last_edited',
                 'label'        => 'Date Last Edited',
                 'name'         => 'ws_auto_last_edited',
                 'type'         => 'text',

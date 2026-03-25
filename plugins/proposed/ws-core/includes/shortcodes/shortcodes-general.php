@@ -96,7 +96,7 @@ add_shortcode( 'ws_nla_disclaimer_notice', function() {
 add_shortcode( 'ws_footer', function() {
 
     return ws_render_footer( [
-        'year'         => date( 'Y' ),
+        'year'         => wp_date( 'Y' ),
         'policy_links' => [
             'Privacy Policy'     => '/privacy-policy/',
             'Disclaimer'         => '/disclaimer/',

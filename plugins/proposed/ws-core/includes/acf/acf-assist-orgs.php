@@ -211,9 +211,9 @@ function ws_register_acf_assist_org() {
             [
                 'key'           => 'field_aorg_jurisdiction',
                 'label'         => 'Jurisdictions Served',
-                'name'          => WS_JURISDICTION_TERM_ID,
+                'name'          => WS_JURISDICTION_TAXONOMY,
                 'type'          => 'taxonomy',
-                'taxonomy'      => WS_JURISDICTION_TERM_ID,
+                'taxonomy'      => WS_JURISDICTION_TAXONOMY,
                 'field_type'    => 'checkbox',
                 'instructions'  => 'Select every jurisdiction where this organization can provide assistance. If nationwide, enable the toggle above and leave this blank.',
                 'required'      => 0,

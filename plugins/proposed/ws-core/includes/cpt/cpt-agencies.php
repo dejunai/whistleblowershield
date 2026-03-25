@@ -84,28 +84,7 @@ function ws_register_cpt_agencies() {
     register_post_type( 'ws-agency', $args );
 }
 
-/**
- * Optional: Customize the admin columns to show the Agency Code and
- * Jurisdiction codes for easier management.
- */
-add_filter( 'manage_ws-agency_posts_columns', 'ws_agencies_columns' );
-function ws_agencies_columns( $columns ) {
-    $columns['ws_agency_code']      = 'Agency Code';
-    $columns['ws_jurisdiction_col'] = 'Jurisdictions';
-    return $columns;
-}
-
-add_action( 'manage_ws-agency_posts_custom_column', 'ws_agencies_column_data', 10, 2 );
-function ws_agencies_column_data( $column, $post_id ) {
-    switch ( $column ) {
-        case 'ws_agency_code':
-            echo esc_html( get_post_meta( $post_id, 'ws_agency_code', true ) );
-            break;
-        case 'ws_jurisdiction_col':
-            $terms = wp_get_post_terms( $post_id, WS_JURISDICTION_TERM_ID, [ 'fields' => 'slugs' ] );
-            if ( ! is_wp_error( $terms ) && ! empty( $terms ) ) {
-                echo esc_html( implode( ', ', array_map( 'strtoupper', $terms ) ) );
-            }
-            break;
-    }
-}
+// Admin columns for ws-agency are registered in admin-columns.php (ws_add_agency_columns /
+// ws_render_agency_column). Do not register manage_ws-agency_posts_columns or
+// manage_ws-agency_posts_custom_column hooks here — duplicate registrations cause
+// conflicting column sets. All CPT column logic lives in admin-columns.php.
