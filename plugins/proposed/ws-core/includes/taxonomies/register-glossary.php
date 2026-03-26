@@ -64,6 +64,11 @@
  * 3.8.1  try/catch/finally block in ws_apply_glossary_tooltips() normalized
  *        to consistent single-tab indentation. Misaligned closing brace on
  *        the early-return if(!$body) guard corrected.
+ * 3.10.0 Three terms added: whistleblower, internal-reporting, compliance-program.
+ *        Seven definitions rewritten for plain-language clarity — away from
+ *        legal-test framing toward the whistleblower's perspective:
+ *        qui-tam, false-claims-act, original-source, retaliation,
+ *        contributing-factor, back-pay, treble-damages.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -491,31 +496,36 @@ function ws_seed_glossary_taxonomy() {
     $taxonomy = 'ws_glossary';
     $terms    = [
 
-        // ── Core Whistleblower Law ────────────────────────────────────────
+        // ── Core Whistleblower Terms ──────────────────────────────────────
 
+        'whistleblower' => [
+            'name'    => 'Whistleblower',
+            'desc'    => 'A person who reports illegal activity, fraud, safety violations, or other wrongdoing — typically by their employer or within their organization — to someone in a position to act on it.',
+            'aliases' => 'whistle-blower|whistle blower',
+        ],
         'qui-tam' => [
             'name'    => 'Qui Tam',
-            'desc'    => 'A provision allowing a private citizen (the relator) to sue on behalf of the government and share in any monetary recovery for fraud against the government.',
+            'desc'    => 'A type of lawsuit where a private citizen reports fraud against the government and — if the case succeeds — receives a percentage of what the government recovers. Filed under the False Claims Act.',
             'aliases' => 'qui tam action|qui tam lawsuit|qui tam suit',
         ],
         'relator' => [
             'name'    => 'Relator',
-            'desc'    => 'A private citizen who files a qui tam lawsuit under the False Claims Act on behalf of the government.',
+            'desc'    => 'The private citizen who files a qui tam lawsuit. The relator brings the case on behalf of the government and shares in any financial recovery.',
             'aliases' => 'whistleblower plaintiff|qui tam relator',
         ],
         'false-claims-act' => [
             'name'    => 'False Claims Act',
-            'desc'    => 'Federal law imposing liability on anyone who defrauds governmental programs. Allows private citizens to file qui tam suits and share in the government\'s recovery.',
+            'desc'    => 'A federal law that protects and rewards people who report fraud against the government. Whistleblowers can file a lawsuit, and if the government recovers money, they receive a share — typically 15–30%.',
             'aliases' => 'FCA|Lincoln Law',
         ],
         'protected-disclosure' => [
             'name'    => 'Protected Disclosure',
-            'desc'    => 'A report or complaint about suspected fraud, waste, or legal violations that is legally shielded from retaliation.',
+            'desc'    => 'A report of suspected wrongdoing that the law shields from retaliation. Whether your report qualifies as protected depends on what you reported, who you reported it to, and which law applies.',
             'aliases' => 'protected activity|protected report|protected complaint',
         ],
         'original-source' => [
             'name'    => 'Original Source',
-            'desc'    => 'Under the False Claims Act, a person with direct and independent knowledge of the fraud who voluntarily disclosed it to the government before filing suit.',
+            'desc'    => 'Under the False Claims Act, a person who has firsthand knowledge of the fraud — not just information from news or public records — and reported it to the government before filing a lawsuit.',
             'aliases' => '',
         ],
 
@@ -523,50 +533,60 @@ function ws_seed_glossary_taxonomy() {
 
         'retaliation' => [
             'name'    => 'Retaliation',
-            'desc'    => 'Adverse action taken by an employer against an employee because of a protected disclosure or whistleblower activity.',
+            'desc'    => 'When an employer punishes an employee for reporting wrongdoing or engaging in other protected activity. Retaliation can include firing, demotion, pay cuts, harassment, or other harmful actions.',
             'aliases' => 'whistleblower retaliation|retaliatory action',
         ],
         'adverse-action' => [
             'name'    => 'Adverse Action',
-            'desc'    => 'Any employment action that materially harms the whistleblower, including demotion, suspension, termination, or hostile reassignment.',
+            'desc'    => 'Any action by an employer that harms an employee\'s job, pay, or working conditions — including termination, demotion, suspension, pay reduction, or hostile reassignment.',
             'aliases' => 'adverse employment action|materially adverse action',
         ],
         'constructive-discharge' => [
             'name'    => 'Constructive Discharge',
-            'desc'    => 'When an employer makes working conditions so intolerable that a reasonable employee is forced to resign, treated legally as an involuntary termination.',
+            'desc'    => 'When an employer deliberately makes working conditions so unbearable that an employee feels forced to quit. Courts treat this as an involuntary termination, not a voluntary resignation.',
             'aliases' => 'forced resignation|constructive termination',
         ],
         'contributing-factor' => [
             'name'    => 'Contributing Factor',
-            'desc'    => 'A causation standard requiring only that protected activity was one factor in the adverse action, not the sole cause.',
+            'desc'    => 'Under many whistleblower laws, you do not have to prove that retaliation was the only reason for the adverse action — only that your protected activity was one of the reasons.',
             'aliases' => 'contributing factor standard',
+        ],
+        'internal-reporting' => [
+            'name'    => 'Internal Reporting',
+            'desc'    => 'Reporting wrongdoing through channels inside your organization — such as a supervisor, HR department, ethics hotline, or compliance officer — rather than to a government agency.',
+            'aliases' => 'internal complaint|internal disclosure|internal report',
+        ],
+        'compliance-program' => [
+            'name'    => 'Compliance Program',
+            'desc'    => 'An organization\'s internal system for detecting and preventing legal violations — typically including a code of conduct, training, and a reporting mechanism such as a hotline.',
+            'aliases' => '',
         ],
 
         // ── Remedies & Recovery ───────────────────────────────────────────
 
         'back-pay' => [
             'name'    => 'Back Pay',
-            'desc'    => 'Compensation for lost wages and benefits from the date of the adverse action to the date of judgment or settlement.',
+            'desc'    => 'Money you are owed for wages and benefits lost between the time you were retaliated against and the time your case is resolved.',
             'aliases' => 'lost wages|back wages',
         ],
         'front-pay' => [
             'name'    => 'Front Pay',
-            'desc'    => 'Compensation for future lost wages when reinstatement is not feasible.',
+            'desc'    => 'Compensation for future lost wages when returning to your old job is not possible — for example, when the workplace relationship has broken down beyond repair.',
             'aliases' => 'future lost earnings',
         ],
         'reinstatement' => [
             'name'    => 'Reinstatement',
-            'desc'    => 'A remedy requiring an employer to return a wrongfully terminated whistleblower to their former position.',
+            'desc'    => 'A court order requiring your employer to give you your job back after a wrongful termination.',
             'aliases' => '',
         ],
         'treble-damages' => [
             'name'    => 'Treble Damages',
-            'desc'    => 'A False Claims Act remedy providing three times the government\'s actual damages caused by the fraud.',
+            'desc'    => 'A False Claims Act penalty that requires a wrongdoer to pay three times the amount of harm caused. For whistleblowers, this multiplier significantly increases the government\'s recovery — and the relator\'s share.',
             'aliases' => 'triple damages',
         ],
         'bounty' => [
             'name'    => 'Bounty',
-            'desc'    => 'The whistleblower\'s share of a government recovery — typically 15–30% under the False Claims Act and SEC/CFTC programs.',
+            'desc'    => 'The financial award a whistleblower receives when their report leads to a successful government enforcement action. Typically 15–30% of the amount recovered under the False Claims Act and SEC/CFTC programs.',
             'aliases' => 'whistleblower award|whistleblower reward|relator\'s share',
         ],
 
@@ -574,12 +594,12 @@ function ws_seed_glossary_taxonomy() {
 
         'sarbanes-oxley' => [
             'name'    => 'Sarbanes-Oxley Act',
-            'desc'    => 'Federal law providing whistleblower protections for employees of publicly traded companies who report securities fraud or other violations.',
+            'desc'    => 'A federal law protecting employees of publicly traded companies who report securities fraud, accounting violations, or other corporate wrongdoing.',
             'aliases' => 'SOX|Sarbanes-Oxley',
         ],
         'dodd-frank' => [
             'name'    => 'Dodd-Frank Act',
-            'desc'    => 'Federal law establishing the SEC and CFTC whistleblower programs with financial awards and anti-retaliation protections for reporting securities and commodities fraud.',
+            'desc'    => 'A federal law that created the SEC and CFTC whistleblower programs. Offers financial awards for reporting securities and commodities fraud and protects whistleblowers from retaliation.',
             'aliases' => 'Dodd-Frank',
         ],
 
@@ -587,32 +607,32 @@ function ws_seed_glossary_taxonomy() {
 
         'statute-of-limitations' => [
             'name'    => 'Statute of Limitations',
-            'desc'    => 'The deadline by which a whistleblower must file a complaint or lawsuit. Missing this deadline typically bars the claim entirely.',
+            'desc'    => 'The deadline for filing a complaint or lawsuit. If you miss it, your legal claim is typically gone permanently — no matter how strong your case is.',
             'aliases' => 'filing deadline|limitations period',
         ],
         'tolling' => [
             'name'    => 'Tolling',
-            'desc'    => 'A legal doctrine that pauses or extends the statute of limitations, such as when fraud was actively concealed.',
+            'desc'    => 'A legal exception that can pause or extend a filing deadline — for example, when the employer actively concealed the retaliation, or when the whistleblower was a minor.',
             'aliases' => 'equitable tolling',
         ],
         'administrative-exhaustion' => [
             'name'    => 'Administrative Exhaustion',
-            'desc'    => 'The requirement under some statutes to first file a complaint with an agency (e.g., OSHA) before proceeding to federal court.',
+            'desc'    => 'Some laws require you to file a complaint with a government agency first — such as OSHA — before you can take your case to federal court. Skipping this step can forfeit your right to sue.',
             'aliases' => 'exhaust administrative remedies|administrative complaint',
         ],
         'seal' => [
             'name'    => 'Seal',
-            'desc'    => 'Under the False Claims Act, qui tam complaints are filed under seal — kept confidential while the government investigates — for at least 60 days.',
+            'desc'    => 'Under the False Claims Act, qui tam lawsuits are filed confidentially while the government decides whether to investigate. The case stays sealed — hidden from the public and the defendant — for at least 60 days.',
             'aliases' => 'filed under seal|complaint under seal',
         ],
         'intervention' => [
             'name'    => 'Intervention',
-            'desc'    => 'The government\'s decision to join and take over a qui tam lawsuit after investigation. Government intervention significantly increases recovery prospects.',
+            'desc'    => 'When the government decides to join a qui tam lawsuit and take the lead on prosecuting it. Government intervention greatly improves the odds of a successful outcome.',
             'aliases' => 'government intervention|DOJ intervention',
         ],
         'declination' => [
             'name'    => 'Declination',
-            'desc'    => 'The government\'s decision not to intervene in a qui tam case, leaving the relator to proceed independently.',
+            'desc'    => 'When the government decides not to join a qui tam lawsuit. The whistleblower can still pursue the case independently, but without the government\'s resources behind it.',
             'aliases' => 'government declination',
         ],
     ];

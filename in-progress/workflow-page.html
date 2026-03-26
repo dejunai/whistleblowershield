@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>How We Use AI — WhistleblowerShield.org</title>
+</head>
+<body>
+
+<!--
+  AI Workflow Page
+  Target audience: developers, journalists, researchers — not the primary user personas.
+  Placement: linked quietly from the editorial or policy page. Not homepage.
+  This page answers: "Is there a human in the loop? Should I trust this?"
+-->
+
+<h1>How We Use AI</h1>
+
+<p>AI is not a shortcut here. It is a deliberate architectural choice made with the
+end user in mind: a worker, potentially in crisis, who needs accurate information
+they can act on.</p>
+
+<p>This page documents how AI is used, why each tool was chosen, and what the human
+layer looks like. It is written for developers and researchers, not for people
+seeking legal guidance.</p>
+
+<hr>
+
+<h2>What AI Does Not Do</h2>
+
+<p>Before the toolchain: the constraints matter more than the capabilities.</p>
+
+<ul>
+  <li><strong>AI does not publish anything.</strong> Every record passes through human review before it enters the database or appears on the site.</li>
+  <li><strong>AI does not determine whether a statute applies to a specific situation.</strong> The site is a reference, not legal advice. That distinction is architectural, not a disclaimer.</li>
+  <li><strong>AI does not resolve taxonomy proposals.</strong> When a model identifies a legal concept that doesn't fit an existing category, it flags it. A human decides whether the category should be added, modified, or left as-is.</li>
+  <li><strong>AI does not verify that a cited case is still good law.</strong> That is a human reviewer responsibility flagged explicitly in the review queue.</li>
+</ul>
+
+<hr>
+
+<h2>The Toolchain</h2>
+
+<p>Each tool has a defined lane. No single model is trusted to do everything.</p>
+
+<h3>Claude (Anthropic) — Architecture and reasoning</h3>
+<p>Used for system design, architectural decisions, and keeping the end user visible
+throughout the build. The reasoning-partner quality produces something that pushes
+back when a design decision drifts from the mission, surfaces downstream consequences
+of upstream choices, and maintains awareness of the person the site is built to serve.</p>
+
+<h3>Claude Code — Large-scale implementation</h3>
+<p>Used for mechanical execution: codebase-wide audits, global find-and-replace passes,
+file generation at scale. Fast and thorough for tasks where completeness matters more
+than judgment. Implements decisions made in the reasoning layer — it does not replace it.</p>
+
+<h3>Perplexity — Uninformed audit</h3>
+<p>Used specifically because it has no prior context on the project. Fresh eyes on code
+files catch drift, inconsistency, and documentation rot that familiarity obscures.
+The absence of architectural knowledge is the feature, not a limitation.</p>
+
+<h3>Gemini, ChatGPT, Grok — First-pass legal research</h3>
+<p>Used to generate structured data for the 57-jurisdiction legal dataset. Each model
+produces a batch; a human reviews the output before anything reaches the database.
+These models are positioned as first-pass researchers, not authorities. The research
+prompt encodes this directly:</p>
+
+<blockquote>
+  <p>A record with five confident, sourced fields is more valuable than a record with
+  fifteen fields where three are invented. Honest gaps do not cause harm.
+  Confidently wrong records do.</p>
+</blockquote>
+
+<hr>
+
+<h2>The Data Pipeline</h2>
+
+<p>Legal data enters the system through a structured JSON pipeline. Every batch
+produced by an AI model carries:</p>
+
+<ul>
+  <li>A <strong>meta block</strong> identifying the model, version, jurisdiction, and generation date.</li>
+  <li>An <strong>integrity block</strong> — the model's honest self-report on what it could not confirm,
+  which citations it omitted because sources could not be verified, and whether the batch
+  was truncated for quality reasons.</li>
+  <li>A <strong>completion sentinel</strong> that the ingest tool checks before processing — a missing
+  or empty sentinel aborts ingest entirely, preventing partial batches from silently
+  producing incomplete records.</li>
+</ul>
+
+<p>The integrity block is not a formality. Models are explicitly instructed that honest
+error reporting is more valuable than clean-looking output. An unreported error that
+passes through ingest is far more costly than one that surfaces in the review queue.</p>
+
+<p>All records enter a human review queue before publication. The AI produces the draft.
+A human verifies it.</p>
+
+<hr>
+
+<h2>Source Discipline</h2>
+
+<p>The research prompt enforces a strict approved-source hierarchy.</p>
+
+<p><strong>Statute sources, in priority order:</strong></p>
+<ol>
+  <li>Official legislature URL for the jurisdiction</li>
+  <li><code>uscode.house.gov</code> / <code>congress.gov</code> for federal statutes</li>
+  <li><code>legiscan.com</code> — acceptable secondary source</li>
+  <li><code>law.justia.com</code> — acceptable secondary source</li>
+</ol>
+
+<p><strong>Case law sources, in priority order:</strong></p>
+<ol>
+  <li>Official court websites</li>
+  <li><code>courtlistener.com</code> — PACER-sourced</li>
+  <li><code>casetext.com</code></li>
+  <li><code>law.justia.com</code></li>
+</ol>
+
+<p>Models attempt sources in order, use the first that yields a trustworthy result,
+and stop. <code>scholar.google.com</code> is explicitly rejected — URLs are unstable and
+canonical identity cannot be confirmed. If no approved source yields a verifiable URL,
+the field is omitted. A missing URL is correct output. A fabricated URL is not.</p>
+
+<hr>
+
+<h2>Taxonomy Discipline</h2>
+
+<p>All legal data is classified against a controlled vocabulary covering disclosure
+types, protected classes, disclosure targets, adverse action types, process types,
+remedies, and fee shifting. Models may only use registered term slugs in record arrays.</p>
+
+<p>When a legal concept does not fit an existing category, models are instructed to
+propose a new term rather than approximate with an existing one or invent a slug and
+insert it directly. Proposals surface in the batch output and are resolved by a human
+before any term is added to the vocabulary. The taxonomy grows from evidence,
+not assumption.</p>
+
+<hr>
+
+<p><em>WhistleblowerShield.org is an independent public-interest project.<br>
+Built by one developer. Maintained by one developer. Reviewed by humans.</em></p>
+
+</body>
+</html>

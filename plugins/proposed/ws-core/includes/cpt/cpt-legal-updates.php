@@ -174,6 +174,18 @@ function ws_queue_legal_update_delete_block_notice() {
     set_transient( 'ws_legal_update_delete_blocked_' . get_current_user_id(), 1, 2 * MINUTE_IN_SECONDS );
 }
 
+// Hide the "Move to Trash" link in the publish metabox on the edit screen.
+// #delete-action is the standard WP container for this link. CSS is the correct
+// hook here — there is no PHP filter to remove it without gutting the whole
+// publish metabox.
+add_action( 'admin_head', function() {
+    $screen = get_current_screen();
+    if ( ! $screen || $screen->post_type !== 'ws-legal-update' ) {
+        return;
+    }
+    echo '<style>#delete-action { display: none !important; }</style>';
+} );
+
 // Remove delete/trash affordances from Legal Updates list rows.
 add_filter( 'post_row_actions', function( $actions, $post ) {
     if ( $post instanceof WP_Post && $post->post_type === 'ws-legal-update' ) {
