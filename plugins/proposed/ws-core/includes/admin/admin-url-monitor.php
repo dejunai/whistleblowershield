@@ -201,15 +201,8 @@ function ws_run_url_health_check() {
  */
 function ws_run_url_priority_health_check() {
     global $ws_url_monitor_priority_map;
-    ws_url_monitor_run_check_for_map( $ws_url_monitor_priority_map );
+    ws_url_monitor_run_check_for_map( $ws_url_monitor_priority_map, 'priority' );
 }
-
-/**
- * Shared URL monitor loop for a supplied CPT/meta map.
- *
- * @param array $monitor_map Post type => URL meta keys map.
- */
-function ws_url_monitor_run_check_for_map( array $monitor_map ) {
 
 /**
  * Shared URL monitor loop for a supplied CPT/meta map.
@@ -220,156 +213,165 @@ function ws_url_monitor_run_check_for_map( array $monitor_map ) {
 function ws_url_monitor_run_check_for_map( array $monitor_map, $scope = 'standard' ) {
 
     $scope            = ( $scope === 'priority' ) ? 'priority' : 'standard';
+    $lock_option      = "ws_url_monitor_lock_{$scope}";
     $log_option       = "ws_url_monitor_log_{$scope}";
     $last_run_option  = "ws_url_monitor_last_run_{$scope}";
-    $previous_log     = get_option( $log_option, [] );
-    $new_log      = [];
-    $new_failures = [];
-    $new_warnings = [];
-    $recoveries   = [];
-
-    // Build a lookup of previously flagged URLs for recovery detection.
-    // Keyed by "post_id|meta_key" for O(1) lookup.
-    $previous_flagged = [];
-    foreach ( $previous_log as $entry ) {
-        $previous_flagged[ $entry['post_id'] . '|' . $entry['meta_key'] ] = $entry;
+    if ( ! add_option( $lock_option, time(), '', false ) ) {
+        return;
     }
 
-    foreach ( $monitor_map as $post_type => $meta_keys ) {
+    try {
+        $previous_log = get_option( $log_option, [] );
+        $new_log      = [];
+        $new_failures = [];
+        $new_warnings = [];
+        $recoveries   = [];
 
-        // Limit per CPT — fetching IDs only (fields=ids) is cheap, but an
-        // unbounded query on a very large dataset can still cause memory issues
-        // on cron. 1000 per CPT covers any realistic editorial scale.
-        $posts = get_posts( [
-            'post_type'      => $post_type,
-            'post_status'    => 'publish',
-            'posts_per_page' => 1000,
-            'fields'         => 'ids',
-            'no_found_rows'  => true,
-        ] );
-
-        if ( empty( $posts ) ) {
-            continue;
+        // Build a lookup of previously flagged URLs for recovery detection.
+        // Keyed by "post_id|meta_key" for O(1) lookup.
+        $previous_flagged = [];
+        foreach ( $previous_log as $entry ) {
+            $previous_flagged[ $entry['post_id'] . '|' . $entry['meta_key'] ] = $entry;
         }
 
-        foreach ( $posts as $post_id ) {
+        foreach ( $monitor_map as $post_type => $meta_keys ) {
 
-            foreach ( $meta_keys as $meta_key ) {
+            // Limit per CPT — fetching IDs only (fields=ids) is cheap, but an
+            // unbounded query on a very large dataset can still cause memory issues
+            // on cron. 1000 per CPT covers any realistic editorial scale.
+            $posts = get_posts( [
+                'post_type'      => $post_type,
+                'post_status'    => 'publish',
+                'posts_per_page' => 1000,
+                'fields'         => 'ids',
+                'no_found_rows'  => true,
+            ] );
 
-                // Direct meta read — URL monitor needs the raw stored value to perform HTTP
-                // validation. The query layer returns rendered shortcode output, not individual
-                // field values, and is not available in this WP-Cron context.
-                $url = get_post_meta( $post_id, $meta_key, true );
+            if ( empty( $posts ) ) {
+                continue;
+            }
 
-                // Skip empty or non-string values.
-                if ( empty( $url ) || ! is_string( $url ) ) {
-                    continue;
-                }
+            foreach ( $posts as $post_id ) {
 
-                $url = esc_url_raw( trim( $url ) );
-                if ( ! filter_var( $url, FILTER_VALIDATE_URL ) ) {
-                    continue;
-                }
+                foreach ( $meta_keys as $meta_key ) {
 
-                $log_key = $post_id . '|' . $meta_key;
+                    // Direct meta read — URL monitor needs the raw stored value to perform HTTP
+                    // validation. The query layer returns rendered shortcode output, not individual
+                    // field values, and is not available in this WP-Cron context.
+                    $url = get_post_meta( $post_id, $meta_key, true );
 
-                $response = wp_remote_head( $url, [
-                    'timeout'     => 10,
-                    'redirection' => 0, // Do not follow redirects — detect them as warnings.
-                    'user-agent'  => 'WhistleblowerShield URL Monitor/1.0',
-                ] );
-
-                // WP_Error means unreachable — skip silently, retry next run.
-                if ( is_wp_error( $response ) ) {
-                    // If previously flagged, preserve the existing log entry
-                    // so it is not silently cleared by an unreachable response.
-                    if ( isset( $previous_flagged[ $log_key ] ) ) {
-                        $new_log[] = $previous_flagged[ $log_key ];
+                    // Skip empty or non-string values.
+                    if ( empty( $url ) || ! is_string( $url ) ) {
+                        continue;
                     }
-                    continue;
-                }
 
-                $status     = (int) wp_remote_retrieve_response_code( $response );
-                $post_title = get_the_title( $post_id );
+                    $url = esc_url_raw( trim( $url ) );
+                    if ( ! filter_var( $url, FILTER_VALIDATE_URL ) ) {
+                        continue;
+                    }
 
-                if ( $status >= 200 && $status < 300 ) {
+                    $log_key = $post_id . '|' . $meta_key;
 
-                    // Pass — check for recovery.
-                    if ( isset( $previous_flagged[ $log_key ] ) ) {
-                        $recoveries[] = [
+                    $response = wp_remote_head( $url, [
+                        'timeout'     => 10,
+                        'redirection' => 0, // Do not follow redirects — detect them as warnings.
+                        'user-agent'  => 'WhistleblowerShield URL Monitor/1.0',
+                    ] );
+
+                    // WP_Error means unreachable — skip silently, retry next run.
+                    if ( is_wp_error( $response ) ) {
+                        // If previously flagged, preserve the existing log entry
+                        // so it is not silently cleared by an unreachable response.
+                        if ( isset( $previous_flagged[ $log_key ] ) ) {
+                            $new_log[] = $previous_flagged[ $log_key ];
+                        }
+                        continue;
+                    }
+
+                    $status     = (int) wp_remote_retrieve_response_code( $response );
+                    $post_title = get_the_title( $post_id );
+
+                    if ( $status >= 200 && $status < 300 ) {
+
+                        // Pass — check for recovery.
+                        if ( isset( $previous_flagged[ $log_key ] ) ) {
+                            $recoveries[] = [
+                                'post_id'    => $post_id,
+                                'post_title' => $post_title,
+                                'post_type'  => $post_type,
+                                'meta_key'   => $meta_key,
+                                'url'        => $url,
+                                'status'     => $status,
+                            ];
+                        }
+
+                    } elseif ( $status >= 300 && $status < 400 ) {
+
+                        // Warning — redirect detected.
+                        // Preserve the original detected timestamp if this URL was
+                        // already in the log so the admin can see when it first appeared
+                        // rather than having the date reset on every cron run.
+                        $is_new_warning = ! isset( $previous_flagged[ $log_key ] );
+                        $entry = [
                             'post_id'    => $post_id,
                             'post_title' => $post_title,
                             'post_type'  => $post_type,
                             'meta_key'   => $meta_key,
                             'url'        => $url,
                             'status'     => $status,
+                            'type'       => 'warning',
+                            'detected'   => $is_new_warning
+                                ? current_time( 'Y-m-d H:i:s' )
+                                : $previous_flagged[ $log_key ]['detected'],
                         ];
-                    }
 
-                } elseif ( $status >= 300 && $status < 400 ) {
+                        $new_log[] = $entry;
 
-                    // Warning — redirect detected.
-                    // Preserve the original detected timestamp if this URL was
-                    // already in the log so the admin can see when it first appeared
-                    // rather than having the date reset on every cron run.
-                    $is_new_warning = ! isset( $previous_flagged[ $log_key ] );
-                    $entry = [
-                        'post_id'    => $post_id,
-                        'post_title' => $post_title,
-                        'post_type'  => $post_type,
-                        'meta_key'   => $meta_key,
-                        'url'        => $url,
-                        'status'     => $status,
-                        'type'       => 'warning',
-                        'detected'   => $is_new_warning
-                            ? current_time( 'Y-m-d H:i:s' )
-                            : $previous_flagged[ $log_key ]['detected'],
-                    ];
+                        if ( $is_new_warning ) {
+                            $new_warnings[] = $entry;
+                        }
 
-                    $new_log[] = $entry;
+                    } elseif ( $status >= 400 ) {
 
-                    if ( $is_new_warning ) {
-                        $new_warnings[] = $entry;
-                    }
+                        // Failure — 4xx or 5xx.
+                        // Same timestamp-preservation logic as warnings above.
+                        $is_new_failure = ! isset( $previous_flagged[ $log_key ] );
+                        $entry = [
+                            'post_id'    => $post_id,
+                            'post_title' => $post_title,
+                            'post_type'  => $post_type,
+                            'meta_key'   => $meta_key,
+                            'url'        => $url,
+                            'status'     => $status,
+                            'type'       => 'failure',
+                            'detected'   => $is_new_failure
+                                ? current_time( 'Y-m-d H:i:s' )
+                                : $previous_flagged[ $log_key ]['detected'],
+                        ];
 
-                } elseif ( $status >= 400 ) {
+                        $new_log[] = $entry;
 
-                    // Failure — 4xx or 5xx.
-                    // Same timestamp-preservation logic as warnings above.
-                    $is_new_failure = ! isset( $previous_flagged[ $log_key ] );
-                    $entry = [
-                        'post_id'    => $post_id,
-                        'post_title' => $post_title,
-                        'post_type'  => $post_type,
-                        'meta_key'   => $meta_key,
-                        'url'        => $url,
-                        'status'     => $status,
-                        'type'       => 'failure',
-                        'detected'   => $is_new_failure
-                            ? current_time( 'Y-m-d H:i:s' )
-                            : $previous_flagged[ $log_key ]['detected'],
-                    ];
-
-                    $new_log[] = $entry;
-
-                    if ( $is_new_failure ) {
-                        $new_failures[] = $entry;
+                        if ( $is_new_failure ) {
+                            $new_failures[] = $entry;
+                        }
                     }
                 }
             }
         }
-    }
 
-    // Persist updated log and last-run timestamp.
-    update_option( $log_option,      $new_log );
-    update_option( $last_run_option, time() );
+        // Persist updated log and last-run timestamp.
+        update_option( $log_option,      $new_log );
+        update_option( $last_run_option, time() );
 
-    // Send email digests.
-    if ( ! empty( $new_failures ) || ! empty( $new_warnings ) ) {
-        ws_url_monitor_send_failure_email( $new_failures, $new_warnings );
-    }
-    if ( ! empty( $recoveries ) ) {
-        ws_url_monitor_send_recovery_email( $recoveries );
+        // Send email digests.
+        if ( ! empty( $new_failures ) || ! empty( $new_warnings ) ) {
+            ws_url_monitor_send_failure_email( $new_failures, $new_warnings );
+        }
+        if ( ! empty( $recoveries ) ) {
+            ws_url_monitor_send_recovery_email( $recoveries );
+        }
+    } finally {
+        delete_option( $lock_option );
     }
 }
 
@@ -525,8 +527,11 @@ function ws_url_monitor_register_widget() {
  */
 function ws_url_monitor_render_widget() {
 
-    $log      = get_option( 'ws_url_monitor_log', [] );
-    $last_run = get_option( 'ws_url_monitor_last_run', 0 );
+    $standard_log      = get_option( 'ws_url_monitor_log_standard', [] );
+    $priority_log      = get_option( 'ws_url_monitor_log_priority', [] );
+    $log               = array_merge( $standard_log, $priority_log );
+    $last_run_standard = (int) get_option( 'ws_url_monitor_last_run_standard', 0 );
+    $last_run_priority = (int) get_option( 'ws_url_monitor_last_run_priority', 0 );
     $next_run          = wp_next_scheduled( 'ws_url_health_check' );
     $next_priority_run = wp_next_scheduled( 'ws_url_priority_health_check' );
 
@@ -538,8 +543,11 @@ function ws_url_monitor_render_widget() {
     ) {
         ws_run_url_health_check();
         echo '<div class="notice notice-success inline"><p>Standard URL health check completed.</p></div>';
-        $log      = get_option( 'ws_url_monitor_log', [] );
-        $last_run = get_option( 'ws_url_monitor_last_run', 0 );
+        $standard_log      = get_option( 'ws_url_monitor_log_standard', [] );
+        $priority_log      = get_option( 'ws_url_monitor_log_priority', [] );
+        $log               = array_merge( $standard_log, $priority_log );
+        $last_run_standard = (int) get_option( 'ws_url_monitor_last_run_standard', 0 );
+        $last_run_priority = (int) get_option( 'ws_url_monitor_last_run_priority', 0 );
     }
 
     if ( isset( $_POST['ws_url_monitor_run_priority_now'] )
@@ -573,7 +581,8 @@ function ws_url_monitor_render_widget() {
         : 'Not scheduled';
 
     echo '<p style="color:#999;font-size:11px;margin-top:0;">'
-        . 'Last run: ' . $last_run_str
+        . 'Last standard run: ' . $last_run_standard_str
+        . ' &nbsp;|&nbsp; Last priority run: ' . $last_run_priority_str
         . ' &nbsp;|&nbsp; Next standard run: ' . $next_run_str
         . ' &nbsp;|&nbsp; Next priority run: ' . $next_priority_run_str
         . '</p>';
