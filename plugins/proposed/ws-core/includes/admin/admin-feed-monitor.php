@@ -207,6 +207,9 @@ add_action( 'admin_init', 'ws_feed_monitor_maybe_schedule' );
 function ws_feed_monitor_maybe_schedule() {
     $token = get_option( 'ws_feed_monitor_token', '' );
     if ( empty( $token ) ) {
+        // If credentials were removed after a schedule was created, unschedule
+        // any lingering poll event so cron does not keep firing failed requests.
+        wp_clear_scheduled_hook( 'ws_feed_monitor_poll_event' );
         return; // Do not schedule until credentials are configured.
     }
     if ( ! wp_next_scheduled( 'ws_feed_monitor_poll_event' ) ) {
@@ -219,10 +222,7 @@ function ws_feed_monitor_maybe_schedule() {
  * Call via register_deactivation_hook() in ws-core.php.
  */
 function ws_feed_monitor_deactivate() {
-    $timestamp = wp_next_scheduled( 'ws_feed_monitor_poll_event' );
-    if ( $timestamp ) {
-        wp_unschedule_event( $timestamp, 'ws_feed_monitor_poll_event' );
-    }
+    wp_clear_scheduled_hook( 'ws_feed_monitor_poll_event' );
 }
 
 add_action( 'ws_feed_monitor_poll_event', 'ws_feed_monitor_poll' );
@@ -589,13 +589,13 @@ function ws_feed_monitor_render_page() {
 
     if ( isset( $_POST['ws_feed_action'] ) && check_admin_referer( 'ws_feed_monitor_action' ) ) {
 
-        $action = sanitize_key( $_POST['ws_feed_action'] );
+        $action = sanitize_key( wp_unslash( $_POST['ws_feed_action'] ) );
 
         // Save settings
         if ( $action === 'save_settings' ) {
-            update_option( 'ws_feed_monitor_token',   sanitize_text_field( $_POST['ws_feed_token']   ?? '' ) );
-            update_option( 'ws_feed_monitor_app_id',  sanitize_text_field( $_POST['ws_feed_app_id']  ?? '' ) );
-            update_option( 'ws_feed_monitor_app_key', sanitize_text_field( $_POST['ws_feed_app_key'] ?? '' ) );
+            update_option( 'ws_feed_monitor_token',   sanitize_text_field( wp_unslash( $_POST['ws_feed_token']   ?? '' ) ) );
+            update_option( 'ws_feed_monitor_app_id',  sanitize_text_field( wp_unslash( $_POST['ws_feed_app_id']  ?? '' ) ) );
+            update_option( 'ws_feed_monitor_app_key', sanitize_text_field( wp_unslash( $_POST['ws_feed_app_key'] ?? '' ) ) );
             ws_feed_monitor_maybe_schedule();
             $notice = '<div class="notice notice-success"><p>Settings saved.</p></div>';
         }
@@ -610,7 +610,7 @@ function ws_feed_monitor_render_page() {
 
         // Accept item
         if ( $action === 'accept' && ! empty( $_POST['ws_feed_guid'] ) ) {
-            $guid = sanitize_text_field( $_POST['ws_feed_guid'] );
+            $guid = sanitize_text_field( wp_unslash( $_POST['ws_feed_guid'] ) );
 
             // Save any edits first.
             ws_feed_monitor_save_item_edits( $guid );
@@ -623,7 +623,7 @@ function ws_feed_monitor_render_page() {
 
         // Reject item
         if ( $action === 'reject' && ! empty( $_POST['ws_feed_guid'] ) ) {
-            $guid   = sanitize_text_field( $_POST['ws_feed_guid'] );
+            $guid   = sanitize_text_field( wp_unslash( $_POST['ws_feed_guid'] ) );
             $staged = ws_feed_monitor_read_staged();
             $staged = array_filter( $staged, fn( $i ) => $i['guid'] !== $guid );
             ws_feed_monitor_write_staged( array_values( $staged ) );
@@ -632,7 +632,7 @@ function ws_feed_monitor_render_page() {
 
         // Save edits only
         if ( $action === 'save_edits' && ! empty( $_POST['ws_feed_guid'] ) ) {
-            $guid   = sanitize_text_field( $_POST['ws_feed_guid'] );
+            $guid   = sanitize_text_field( wp_unslash( $_POST['ws_feed_guid'] ) );
             ws_feed_monitor_save_item_edits( $guid );
             $notice = '<div class="notice notice-success"><p>Item edits saved.</p></div>';
         }
@@ -811,10 +811,14 @@ function ws_feed_monitor_save_item_edits( $guid ) {
             continue;
         }
         if ( isset( $_POST['ws_feed_jx_code'] ) ) {
-            $item['jx_code'] = strtoupper( sanitize_text_field( $_POST['ws_feed_jx_code'] ) );
+            $normalized = strtoupper( preg_replace( '/[^A-Za-z]/', '', sanitize_text_field( wp_unslash( $_POST['ws_feed_jx_code'] ) ) ) );
+            $normalized = substr( $normalized, 0, 2 );
+            if ( $normalized !== '' ) {
+                $item['jx_code'] = $normalized;
+            }
         }
         if ( isset( $_POST['ws_feed_notes'] ) ) {
-            $item['notes'] = sanitize_textarea_field( $_POST['ws_feed_notes'] );
+            $item['notes'] = sanitize_textarea_field( wp_unslash( $_POST['ws_feed_notes'] ) );
         }
         break;
     }

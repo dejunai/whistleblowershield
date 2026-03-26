@@ -164,8 +164,8 @@ function ws_render_jurisdiction_dashboard() {
 // Clears the dashboard transient whenever any CPT tracked by the dashboard
 // is saved or deleted. Covers all eight CPT types shown in the matrix.
 
-add_action( 'save_post',   'ws_jx_dashboard_invalidate_cache' );
-add_action( 'delete_post', 'ws_jx_dashboard_invalidate_cache' );
+add_action( 'save_post',          'ws_jx_dashboard_invalidate_cache' );
+add_action( 'before_delete_post', 'ws_jx_dashboard_invalidate_cache' );
 
 /**
  * Deletes the dashboard HTML transient when a tracked CPT post is modified.
@@ -173,6 +173,10 @@ add_action( 'delete_post', 'ws_jx_dashboard_invalidate_cache' );
  * @param int $post_id
  */
 function ws_jx_dashboard_invalidate_cache( $post_id ) {
+    if ( wp_is_post_revision( $post_id ) || wp_is_post_autosave( $post_id ) ) {
+        return;
+    }
+
     static $tracked = [
         'jurisdiction', 'jx-summary', 'jx-statute', 'jx-citation',
         'jx-interpretation', 'ws-legal-update', 'ws-agency', 'ws-assist-org',
