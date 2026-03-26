@@ -139,6 +139,20 @@ function ws_register_acf_legal_update() {
                 'ui_off_text'   => '',
             ],
 
+            // ── Public Visibility ────────────────────────────────────────
+
+            [
+                'key'           => 'field_legal_update_hide_public',
+                'label'         => 'Hide from Public Change Log',
+                'name'          => 'ws_legal_update_hide_public',
+                'type'          => 'true_false',
+                'instructions'  => 'Enable only when this update must be excluded from frontend/public change-log rendering.',
+                'default_value' => 0,
+                'ui'            => 1,
+                'ui_on_text'    => 'Hidden',
+                'ui_off_text'   => 'Visible',
+            ],
+
             // ── Update Date ───────────────────────────────────────────────
 
             [

@@ -1217,8 +1217,9 @@ function ws_get_all_jurisdictions() {
 //          'counts' => [ 'all', 'state', 'territory', 'district', 'federal' ]
 //      ]
 //
-// Result is cached for 24 hours — invalidated on jurisdiction save.
-// The summary check per jurisdiction runs only at cache fill time.
+// Result is cached for 24 hours — invalidated on jurisdiction/jx-summary
+// saves and jx-summary deletes. The summary check per jurisdiction runs
+// only at cache fill time.
 // ════════════════════════════════════════════════════════════════════════════
 
 function ws_get_jurisdiction_index_data() {
@@ -1338,6 +1339,22 @@ function ws_get_legal_updates_data( $jx_id = 0, $count = 0 ) {
         'orderby'        => 'date',
         'order'          => 'DESC',
         'no_found_rows'  => true,
+        // Hidden updates remain in admin but are excluded from public render.
+        'meta_query'     => [
+            'relation' => 'AND',
+            [
+                'relation' => 'OR',
+                [
+                    'key'     => 'ws_legal_update_hide_public',
+                    'compare' => 'NOT EXISTS',
+                ],
+                [
+                    'key'     => 'ws_legal_update_hide_public',
+                    'value'   => '1',
+                    'compare' => '!=',
+                ],
+            ],
+        ],
     ];
 
     if ( $jx_id ) {
@@ -1350,11 +1367,11 @@ function ws_get_legal_updates_data( $jx_id = 0, $count = 0 ) {
             ] ];
         }
         // Jurisdiction-scoped calls restrict to summary-safe update types only.
-        $query_args['meta_query'] = [ [
+        $query_args['meta_query'][] = [
             'key'     => 'ws_legal_update_type',
             'value'   => WS_LEGAL_UPDATE_SUMMARY_TYPES,
             'compare' => 'IN',
-        ] ];
+        ];
     }
 
     $updates = get_posts( $query_args );
@@ -1471,9 +1488,11 @@ function ws_get_reference_page_data( $parent_post_id ) {
 // ════════════════════════════════════════════════════════════════════════════
 // Cache Invalidation + ws_jx_term_id Write
 //
-// Fires on save_post_jurisdiction. Clears all jurisdiction transients to keep
-// the list cache, index cache, and per-term ID cache consistent with the
-// saved state.
+// Clears jurisdiction/index transients when jurisdiction or jx-summary
+// content changes so summary-gated index rows stay accurate.
+//
+// Also handles per-term ID cache clear + ws_jx_term_id write on
+// save_post_jurisdiction.
 //
 // Also writes ws_jx_term_id post meta, providing a direct post->term_id
 // mapping for seeders and admin tooling without a get_term_by() call at
@@ -1485,13 +1504,22 @@ function ws_get_reference_page_data( $parent_post_id ) {
 add_action( 'save_post_ws-legal-update', function() {
     delete_transient( WS_CACHE_LEGAL_UPDATES_SITEWIDE );
 } );
+add_action( 'before_delete_post', function( $post_id ) {
+    if ( get_post_type( $post_id ) === 'ws-legal-update' ) {
+        delete_transient( WS_CACHE_LEGAL_UPDATES_SITEWIDE );
+    }
+} );
+
+function ws_invalidate_jurisdiction_list_and_index_caches() {
+    delete_transient( WS_CACHE_ALL_JURISDICTIONS );
+    delete_transient( WS_CACHE_JX_INDEX );
+}
 
 
 add_action( 'save_post_jurisdiction', function( $post_id ) {
 
     // Clear list and index caches.
-    delete_transient( WS_CACHE_ALL_JURISDICTIONS );
-    delete_transient( WS_CACHE_JX_INDEX );
+    ws_invalidate_jurisdiction_list_and_index_caches();
 
     // Resolve the assigned ws_jurisdiction term once for both operations.
     $terms = wp_get_post_terms( $post_id, WS_JURISDICTION_TAXONOMY );
@@ -1505,4 +1533,13 @@ add_action( 'save_post_jurisdiction', function( $post_id ) {
         update_post_meta( $post_id, 'ws_jx_term_id', $terms[0]->term_id );
     }
 
+} );
+
+// Index membership is gated by linked jx-summary existence/publication.
+// Invalidate jurisdiction list + index whenever a summary is changed or removed.
+add_action( 'save_post_jx-summary', 'ws_invalidate_jurisdiction_list_and_index_caches' );
+add_action( 'before_delete_post', function( $post_id ) {
+    if ( get_post_type( $post_id ) === 'jx-summary' ) {
+        ws_invalidate_jurisdiction_list_and_index_caches();
+    }
 } );

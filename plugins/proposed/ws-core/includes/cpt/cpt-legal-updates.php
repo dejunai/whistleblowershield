@@ -120,3 +120,85 @@ function ws_register_cpt_legal_update() {
     // and audit trail CPT list in admin-audit-trail.php.
     register_post_type( 'ws-legal-update', $args );
 }
+
+// ── Deletion Lock: Legal Updates are immutable changelog records ────────────
+//
+// Legal updates must never be deleted (including by administrators). If a
+// record must be removed from public render, use the "hide from public log"
+// flag in the Legal Update metadata.
+
+add_filter( 'pre_trash_post', 'ws_block_legal_update_trash', 10, 3 );
+add_filter( 'pre_delete_post', 'ws_block_legal_update_delete', 10, 3 );
+
+/**
+ * Blocks trash attempts for ws-legal-update posts.
+ *
+ * @param  mixed    $trash            Short-circuit value from prior filters.
+ * @param  WP_Post  $post             Post object being trashed.
+ * @param  string   $previous_status  Prior post status before trash.
+ * @return mixed
+ */
+function ws_block_legal_update_trash( $trash, $post, $previous_status ) {
+    if ( $post instanceof WP_Post && $post->post_type === 'ws-legal-update' ) {
+        ws_queue_legal_update_delete_block_notice();
+        return false;
+    }
+    return $trash;
+}
+
+/**
+ * Blocks permanent delete attempts for ws-legal-update posts.
+ *
+ * @param  mixed    $delete       Short-circuit value from prior filters.
+ * @param  WP_Post  $post         Post object being deleted.
+ * @param  bool     $force_delete True when bypassing trash.
+ * @return mixed
+ */
+function ws_block_legal_update_delete( $delete, $post, $force_delete ) {
+    if ( $post instanceof WP_Post && $post->post_type === 'ws-legal-update' ) {
+        ws_queue_legal_update_delete_block_notice();
+        return false;
+    }
+    return $delete;
+}
+
+/**
+ * Stores a one-time admin notice for the current user after a blocked delete.
+ *
+ * @return void
+ */
+function ws_queue_legal_update_delete_block_notice() {
+    if ( ! is_admin() || ! is_user_logged_in() ) {
+        return;
+    }
+    set_transient( 'ws_legal_update_delete_blocked_' . get_current_user_id(), 1, 2 * MINUTE_IN_SECONDS );
+}
+
+// Remove delete/trash affordances from Legal Updates list rows.
+add_filter( 'post_row_actions', function( $actions, $post ) {
+    if ( $post instanceof WP_Post && $post->post_type === 'ws-legal-update' ) {
+        unset( $actions['trash'], $actions['delete'] );
+    }
+    return $actions;
+}, 10, 2 );
+
+// Remove bulk delete/trash actions on the Legal Updates list table.
+add_filter( 'bulk_actions-edit-ws-legal-update', function( $actions ) {
+    unset( $actions['trash'], $actions['delete'] );
+    return $actions;
+} );
+
+// If a blocked delete/trash attempt occurs, show a clear admin notice.
+add_action( 'admin_notices', function() {
+    if ( ! is_user_logged_in() ) {
+        return;
+    }
+    $key = 'ws_legal_update_delete_blocked_' . get_current_user_id();
+    if ( ! get_transient( $key ) ) {
+        return;
+    }
+    delete_transient( $key );
+    echo '<div class="notice notice-warning is-dismissible"><p>';
+    echo esc_html__( 'Legal Updates are a permanent sitewide changelog and cannot be deleted. If one should be hidden from public output, ask an administrator to enable the "Hide from Public Change Log" flag.', 'ws-core' );
+    echo '</p></div>';
+} );
