@@ -146,10 +146,11 @@ defined( 'ABSPATH' ) || exit;
 
 /** @var array<string,string> Cost model slug → display label. */
 $_ws_dir_cost_labels = [
-    'pro_bono'        => 'Pro Bono',
     'free'            => 'Free',
+    'pro-bono'        => 'Pro Bono',
+    'sliding-scale'   => 'Sliding Scale',
     'contingency'     => 'Contingency Fee',
-    'fee_for_service' => 'Fee for Service',
+    'fee-for-service' => 'Fee for Service',
     'mixed'           => 'Mixed',
 ];
 
@@ -247,8 +248,8 @@ function ws_render_directory_card( $org ) {
     $type_name = ( $org['type'] instanceof WP_Term ) ? $org['type']->name : '';
     $type_slug = ( $org['type'] instanceof WP_Term ) ? $org['type']->slug : '';
 
-    $cost_raw   = $org['cost_model'] ?? '';
-    $cost_label = $_ws_dir_cost_labels[ $cost_raw ] ?? '';
+    $cost_slug  = $org['cost_model'][0] ?? '';
+    $cost_label = $_ws_dir_cost_labels[ $cost_slug ] ?? '';
 
     $services = is_array( $org['services'] ) ? $org['services'] : [];
 
@@ -262,7 +263,7 @@ function ws_render_directory_card( $org ) {
     <div class="ws-aorg-card" id="<?php echo esc_attr( $anchor_id ); ?>"
          role="listitem"
          data-type="<?php echo esc_attr( $type_slug ); ?>"
-         data-cost="<?php echo esc_attr( $cost_raw ); ?>">
+         data-cost="<?php echo esc_attr( $cost_slug ); ?>">
 
         <?php // ── Header: name + badge row ────────────────────────────────────── ?>
         <div class="ws-aorg-card__header">

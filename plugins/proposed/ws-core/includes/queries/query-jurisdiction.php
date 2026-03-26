@@ -207,13 +207,24 @@
  *        the [ws_assist_org_directory] shortcode. Returns all published ws-assist-org
  *        records scoped to the 'us' ws_jurisdiction term, with optional $filters for
  *        type (ws_aorg_type slug), sector (ws_employment_sector slug), stage (ws_case_stage
- *        slug), and cost_model. Sector filtering uses tax_query on ws_employment_sector.
+ *        slug), and cost_model. Sector and cost_model filtering use tax_query.
  *        Return shape is identical to ws_get_assist_org_data().
  * 3.8.0  court key in ws_get_jx_interpretation_data() resolved to short label via
  *        ws_court_lookup(); 'other' court key resolves to ws_jx_interp_court_name
  *        free-text value. Dead ws_ref_approved gate removed from ws_get_ref_materials()
  *        — was silently excluding all references. ws_get_reference_page_url() updated
  *        to accept $section param for anchor targeting.
+ * 3.9.0  ws_get_jurisdiction_index_data(): summary gate added — jurisdictions without
+ *        a linked jx-summary are excluded from the index. A published jurisdiction
+ *        post with no summary is a stub; surfacing it in the index is misleading.
+ *        ws_jx_term_by_code() and ws_court_lookup() moved here from matrix-helpers.php
+ *        (defined in query-helpers.php — available in Universal Layer).
+ *        ws_parse_jx_limitations_meta() added as frontend fallback for the
+ *        ws_jx_limitations repeater field. limitations query key updated accordingly.
+ *        ws_process_type get_field() calls given get_post_meta() fallback.
+ *        ws_aorg_services: both services keys in ws_get_assist_org_data() and
+ *        ws_get_jx_assist_org_data() updated from get_post_meta() to
+ *        wp_get_object_terms( 'ws_aorg_service' ); additional_services key added.
  */
 
 
@@ -403,6 +414,43 @@ function ws_get_jurisdiction_data( $input = null ) {
 
 
 // ════════════════════════════════════════════════════════════════════════════
+// ws_parse_jx_limitations_meta()
+//
+// Frontend fallback for the ws_jx_limitations ACF repeater.
+//
+// ACF field definitions are only registered in the admin layer, so
+// get_field() returns false on the frontend for repeater fields. This
+// function reads the raw post meta keys that ACF writes for repeaters
+// and returns them in the same shape get_field() would return:
+//   [ ['ws_jx_limit_label' => '...', 'ws_jx_limit_text' => '...'], ... ]
+//
+// Only called when get_field() returns false (frontend or WP-CLI context).
+//
+// @param  int    $sid  jx-summary post ID.
+// @return array        Rows array, or empty array if none saved.
+// ════════════════════════════════════════════════════════════════════════════
+
+function ws_parse_jx_limitations_meta( $sid ) {
+    $count = (int) get_post_meta( $sid, 'ws_jx_limitations', true );
+    if ( ! $count ) {
+        return [];
+    }
+    $rows = [];
+    for ( $i = 0; $i < $count; $i++ ) {
+        $label = (string) get_post_meta( $sid, "ws_jx_limitations_{$i}_ws_jx_limit_label", true );
+        $text  = (string) get_post_meta( $sid, "ws_jx_limitations_{$i}_ws_jx_limit_text",  true );
+        if ( $label || $text ) {
+            $rows[] = [
+                'ws_jx_limit_label' => $label,
+                'ws_jx_limit_text'  => $text,
+            ];
+        }
+    }
+    return $rows;
+}
+
+
+// ════════════════════════════════════════════════════════════════════════════
 // Dataset: Summary
 //
 // Retrieves the jx-summary post assigned to the given ws_jurisdiction term
@@ -449,7 +497,7 @@ function ws_get_jx_summary_data( $jx_term_id ) {
         // Content fields
         'content'       => get_post_meta( $sid, 'ws_jurisdiction_summary_wysiwyg', true ),
         'sources'       => get_post_meta( $sid, 'ws_jx_summary_sources',   true ),
-        'limitations'   => get_post_meta( $sid, 'ws_jx_limitations_wysiwyg', true ),
+        'limitations'   => get_field( 'ws_jx_limitations', $sid ) ?: ws_parse_jx_limitations_meta( $sid ),
         'notes'         => get_post_meta( $sid, 'ws_jx_summary_notes',        true ),
         // jx-summary is inherently plain English; ws_has_plain_english is
         // implicitly true and no per-record toggle is stored or returned here.
@@ -802,7 +850,7 @@ function ws_get_jx_interpretation_data( $jx_term_id ) {
                 'favorable'     => (bool) get_post_meta( $iid, 'ws_jx_interp_favorable', true ),
                 'summary'       => get_post_meta( $iid, 'ws_jx_interp_summary',          true ),
                 'parent_statute_id' => (int) get_post_meta( $iid, 'ws_jx_interp_statute_id', true ),
-                'process_type'  => get_field( 'ws_process_type', $iid ),
+                'process_type'  => get_field( 'ws_process_type', $iid ) ?: get_post_meta( $iid, 'ws_process_type', true ),
                 'attach_flag'   => (bool) get_post_meta( $iid, 'ws_attach_flag',         true ),
                 'last_reviewed' => get_post_meta( $iid, 'ws_jx_interp_last_reviewed',    true ),
                 'ref_materials' => ws_get_ref_materials( $iid ),
@@ -872,7 +920,7 @@ function ws_get_agency_data( $jx_term_id ) {
             'name'                  => get_post_meta( $aid, 'ws_agency_name',                    true ),
             'logo'                  => get_field( 'ws_agency_logo', $aid ),
             'disclosure_type'       => get_field( 'ws_agency_disclosure_type', $aid ),
-            'process_type'          => get_field( 'ws_process_type', $aid ),
+            'process_type'          => get_field( 'ws_process_type', $aid ) ?: get_post_meta( $aid, 'ws_process_type', true ),
             'website_url'           => get_post_meta( $aid, 'ws_agency_url',                     true ),
             'reporting_url'         => get_post_meta( $aid, 'ws_agency_reporting_url',           true ),
             'phone'                 => get_post_meta( $aid, 'ws_agency_phone',                   true ),
@@ -942,7 +990,8 @@ function ws_get_assist_org_data( $jx_term_id ) {
             'logo'                 => get_field( 'ws_aorg_logo', $oid ),
             'serves_nationwide'    => (bool) get_post_meta( $oid, 'ws_aorg_serves_nationwide',   true ),
             'disclosure_type'      => get_field( 'ws_aorg_disclosure_type', $oid ),
-            'services'             => get_post_meta( $oid, 'ws_aorg_services',                   true ),
+            'services'             => wp_get_object_terms( $oid, 'ws_aorg_service', [ 'fields' => 'slugs' ] ),
+            'additional_services'  => get_post_meta( $oid, 'ws_aorg_additional_services',        true ),
             'employment_sectors'   => wp_get_object_terms( $oid, 'ws_employment_sector', [ 'fields' => 'slugs' ] ),
             'website_url'          => get_post_meta( $oid, 'ws_aorg_website_url',                true ),
             'intake_url'           => get_post_meta( $oid, 'ws_aorg_intake_url',                 true ),
@@ -951,7 +1000,7 @@ function ws_get_assist_org_data( $jx_term_id ) {
             'mailing_address'      => get_post_meta( $oid, 'ws_aorg_mailing_address',            true ),
             'languages'            => get_field( 'ws_languages', $oid ),
             'additional_languages' => get_post_meta( $oid, 'ws_aorg_additional_languages',       true ),
-            'cost_model'           => get_post_meta( $oid, 'ws_aorg_cost_model',                 true ),
+            'cost_model'           => wp_get_object_terms( $oid, 'ws_aorg_cost_model', [ 'fields' => 'slugs' ] ),
             'income_limit'         => get_post_meta( $oid, 'ws_aorg_income_limit',               true ),
             'income_limit_notes'   => get_post_meta( $oid, 'ws_aorg_income_limit_notes',         true ),
             'anonymous'            => (bool) get_post_meta( $oid, 'ws_aorg_accepts_anonymous',   true ),
@@ -995,7 +1044,7 @@ function ws_get_assist_org_data( $jx_term_id ) {
 //   'type'       — ws_aorg_type slug (e.g. 'nonprofit', 'legal-aid')
 //   'sector'     — ws_employment_sector slug (e.g. 'federal-employee')
 //   'stage'      — ws_case_stage slug (e.g. 'pre-report', 'retaliation-active')
-//   'cost_model' — cost model value (e.g. 'pro_bono', 'free', 'contingency')
+//   'cost_model' — cost model slug (e.g. 'pro-bono', 'free', 'contingency')
 //
 // All filtering is performed at the query level via tax_query / meta_query.
 // No post-query filtering is used.
@@ -1052,12 +1101,12 @@ function ws_get_nationwide_assist_org_data( $filters = [] ) {
         ];
     }
 
-    // Optional meta filter: cost model (scalar string — safe for meta_query).
+    // Optional taxonomy filter: cost model.
     if ( ! empty( $filters['cost_model'] ) ) {
-        $query_args['meta_query'][] = [
-            'key'     => 'ws_aorg_cost_model',
-            'value'   => sanitize_text_field( $filters['cost_model'] ),
-            'compare' => '=',
+        $query_args['tax_query'][] = [
+            'taxonomy' => 'ws_aorg_cost_model',
+            'field'    => 'slug',
+            'terms'    => sanitize_key( $filters['cost_model'] ),
         ];
     }
 
@@ -1078,7 +1127,8 @@ function ws_get_nationwide_assist_org_data( $filters = [] ) {
             'logo'                 => get_field( 'ws_aorg_logo', $oid ),
             'serves_nationwide'    => (bool) get_post_meta( $oid, 'ws_aorg_serves_nationwide',   true ),
             'disclosure_type'      => get_field( 'ws_aorg_disclosure_type', $oid ),
-            'services'             => get_post_meta( $oid, 'ws_aorg_services',                   true ),
+            'services'             => wp_get_object_terms( $oid, 'ws_aorg_service', [ 'fields' => 'slugs' ] ),
+            'additional_services'  => get_post_meta( $oid, 'ws_aorg_additional_services',        true ),
             'employment_sectors'   => wp_get_object_terms( $oid, 'ws_employment_sector', [ 'fields' => 'slugs' ] ),
             'website_url'          => get_post_meta( $oid, 'ws_aorg_website_url',                true ),
             'intake_url'           => get_post_meta( $oid, 'ws_aorg_intake_url',                 true ),
@@ -1087,7 +1137,7 @@ function ws_get_nationwide_assist_org_data( $filters = [] ) {
             'mailing_address'      => get_post_meta( $oid, 'ws_aorg_mailing_address',            true ),
             'languages'            => get_field( 'ws_languages', $oid ),
             'additional_languages' => get_post_meta( $oid, 'ws_aorg_additional_languages',       true ),
-            'cost_model'           => get_post_meta( $oid, 'ws_aorg_cost_model',                 true ),
+            'cost_model'           => wp_get_object_terms( $oid, 'ws_aorg_cost_model', [ 'fields' => 'slugs' ] ),
             'income_limit'         => get_post_meta( $oid, 'ws_aorg_income_limit',               true ),
             'income_limit_notes'   => get_post_meta( $oid, 'ws_aorg_income_limit_notes',         true ),
             'anonymous'            => (bool) get_post_meta( $oid, 'ws_aorg_accepts_anonymous',   true ),
@@ -1154,6 +1204,13 @@ function ws_get_all_jurisdictions() {
 // plus a count breakdown by type. Used to power the jurisdiction index
 // shortcode and any type-filtered display views.
 //
+// SUMMARY GATE
+// ------------
+// A published jurisdiction post with no linked jx-summary is a stub —
+// it has no useful content for end users. Only jurisdictions with a
+// linked jx-summary are included in the index. Jurisdictions that have
+// not yet been summarised are silently excluded.
+//
 // Return shape:
 //      [
 //          'items'  => [ [ 'name', 'code', 'type', 'url' ], ... ],
@@ -1161,6 +1218,7 @@ function ws_get_all_jurisdictions() {
 //      ]
 //
 // Result is cached for 24 hours — invalidated on jurisdiction save.
+// The summary check per jurisdiction runs only at cache fill time.
 // ════════════════════════════════════════════════════════════════════════════
 
 function ws_get_jurisdiction_index_data() {
@@ -1191,9 +1249,21 @@ function ws_get_jurisdiction_index_data() {
         if ( $query->have_posts() ) {
             foreach ( $query->posts as $post ) {
 
-                $type     = get_field( 'ws_jurisdiction_class', $post->ID ) ?: 'state';
-                $jx_slugs = wp_get_post_terms( $post->ID, WS_JURISDICTION_TAXONOMY, [ 'fields' => 'slugs' ] );
-                $code     = ( ! is_wp_error( $jx_slugs ) && ! empty( $jx_slugs ) ) ? strtoupper( $jx_slugs[0] ) : '';
+                $jx_terms = wp_get_post_terms( $post->ID, WS_JURISDICTION_TAXONOMY );
+
+                if ( is_wp_error( $jx_terms ) || empty( $jx_terms ) ) {
+                    continue;
+                }
+
+                $jx_term = $jx_terms[0];
+
+                // Gate: exclude stubs — jurisdiction must have a linked jx-summary.
+                if ( ! ws_get_jx_summary_data( $jx_term->term_id ) ) {
+                    continue;
+                }
+
+                $type = get_field( 'ws_jurisdiction_class', $post->ID ) ?: 'state';
+                $code = strtoupper( $jx_term->slug );
 
                 $index_items[] = [
                     'name' => get_the_title( $post->ID ),

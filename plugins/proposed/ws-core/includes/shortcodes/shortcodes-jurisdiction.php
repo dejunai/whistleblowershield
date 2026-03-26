@@ -124,6 +124,9 @@
  *         QUERY LAYER RETURN REFERENCE block: added reviewed_date to PLAIN
  *         SUB-ARRAY; removed duplicate copy from shortcodes-general.php.
  *         [ws_jx_case_law] renamed to [ws_jx_citation]; shortcode tag updated.
+ * 3.9.0  [ws_jx_limitations] updated: ws_jx_limitations field changed from
+ *         wysiwyg to repeater. Shortcode now passes array to render layer
+ *         directly; wp_kses_post() call removed (plain text fields, no HTML).
  * 3.7.0  [ws_jx_interpretation] implemented. "→ External References" button
  *         included — handled inside ws_render_jx_interpretations() in
  *         render-section.php. Shortcode wired into assembler after citations.
@@ -454,9 +457,9 @@ function ws_shortcode_jx_interpretation() {
 
 // ── [ws_jx_limitations] ──────────────────────────────────────────────────────
 //
-// Reads ws_jx_limitations wysiwyg from the linked jx-summary post.
-// Renders the ws-limitations section wrapper around that content.
-// Returns empty string silently if the field is empty or no summary
+// Reads the ws_jx_limitations repeater from the linked jx-summary post
+// and renders the Limitations and Ramifications section.
+// Returns empty string silently if no rows are saved or no summary
 // is linked to the current jurisdiction.
 
 add_shortcode( 'ws_jx_limitations', 'ws_shortcode_jx_limitations' );
@@ -471,9 +474,7 @@ function ws_shortcode_jx_limitations() {
     $data = ws_get_jx_summary_data( $term_id );
     if ( ! $data || empty( $data['limitations'] ) ) return '';
 
-    // wp_kses_post() is correct here for the same reason as ws_shortcode_jx_summary() —
-    // limitations content is an ACF WYSIWYG meta field, not post_content.
-    return ws_render_jx_limitations( wp_kses_post( $data['limitations'] ) );
+    return ws_render_jx_limitations( $data['limitations'] );
 }
 
 
@@ -667,7 +668,7 @@ function ws_shortcode_jx_limitations() {
 //   mailing_address      string  Mailing address
 //   languages            mixed   ACF select value (supported languages)
 //   additional_languages string  Free-text additional language notes
-//   cost_model           string  Cost model identifier (free, sliding_scale, etc.)
+//   cost_model           string  Cost model slug (free, pro-bono, sliding-scale, etc.)
 //   income_limit         string  Income threshold for eligibility (if applicable)
 //   income_limit_notes   string  Notes on income limit or eligibility criteria
 //   anonymous            bool    True when anonymous inquiries are accepted

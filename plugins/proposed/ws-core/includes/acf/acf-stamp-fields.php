@@ -20,12 +20,11 @@
  *
  * EXCLUDED CPTs
  * -------------
- * jurisdiction — Option D: jurisdiction records are seeder-generated,
- * not human-authored. The create_author concept does not map cleanly
- * to a WordPress user ID for matrix-seeded posts. jurisdiction retains
- * its own Record Management tab in acf-jurisdictions.php with a text
- * field for Created By that the seeder can populate with a human-readable
- * provenance string (e.g. "Matrix Seeder"). See acf-jurisdictions.php.
+ * jurisdiction — Records are seeder-generated; create_author does not map
+ * to a meaningful WordPress user ID. jurisdiction carries its own slim
+ * Record Management tab in acf-jurisdictions.php limited to last_edited
+ * and last_edited_author (written by admin-hooks.php on every ACF save).
+ * create_author, date_created, and verify fields are intentionally absent.
  *
  * FIELDS
  * ------

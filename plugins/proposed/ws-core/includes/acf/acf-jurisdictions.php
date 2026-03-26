@@ -136,6 +136,10 @@
  *          consistency with all other CPT groups.
  *        - field_create_author instructions: standardised to 'Stamped
  *          automatically on first save. Read only.'
+ * 3.9.0  Record Management tab trimmed: removed field_jx_create_author,
+ *        field_jx_date_created, and field_date_created_gmt. Jurisdiction
+ *        records are seeder-generated — create authorship is not meaningful.
+ *        last_edited, last_edited_gmt, last_edited_author retained.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -398,60 +402,21 @@ function ws_register_acf_jurisdiction_fields() {
             // ────────────────────────────────────────────────────────────────
             // Tab: Record Management
             //
-            // Author and date created fields are hidden from the editor UI but
-            // retained in the database for audit purposes. Date updated and
-            // last editor are visible and managed automatically.
+            // Jurisdiction records are seeder-generated — create_author and
+            // date_created are not meaningful and are not tracked here.
+            // Matrix-watch handles the audit trail for post-install edits.
             //
-            // Last Editor is editable by administrators to allow attribution
-            // to be preserved when a minor correction is made by someone other
-            // than the credited author.
+            // last_edited and last_edited_author are stamped automatically
+            // on every ACF save by admin-hooks.php. Last Editor is editable
+            // by administrators to credit a different contributor when needed.
             //
-            // Date fields store values as Y-m-d strings. Local dates respect
-            // the timezone configured in WordPress Settings → General.
-            // GMT dates record the equivalent UTC value (hidden from UI).
+            // GMT date is hidden from the UI but written to the database.
             // ────────────────────────────────────────────────────────────────
 
             [
                 'key'   => 'field_record_tab',
                 'label' => 'Record Management',
                 'type'  => 'tab',
-            ],
-
-            // Hidden fields: create_author, date_created, date_created_gmt, last_edited_gmt
-
-            [
-                'key'           => 'field_jx_create_author',
-                'label'         => 'Created By',
-                'name'          => 'ws_auto_create_author',
-                'type'          => 'user',
-                'instructions'  => 'Stamped automatically on first save. Read only.',
-                'role'          => [ 'author', 'editor', 'administrator' ],
-                'return_format' => 'id',
-                'readonly'      => 1,
-                'disabled'      => 1,
-                'wrapper'       => [ 'class' => 'hidden' ],
-            ],
-
-            [
-                'key'          => 'field_jx_date_created',
-                'label'        => 'Date Created',
-                'name'         => 'ws_auto_date_created',
-                'type'         => 'text',
-                'instructions' => 'Date this record was created. Set automatically.',
-                'readonly'     => 1,
-                'disabled'     => 1,
-                'wrapper'      => [ 'class' => 'hidden' ],
-            ],
-
-            [
-                'key'          => 'field_date_created_gmt',
-                'label'        => 'Date Created (GMT)',
-                'name'         => '_ws_auto_date_created_gmt',
-                'type'         => 'text',
-                'instructions' => 'UTC date this record was created. Set automatically.',
-                'readonly'     => 1,
-                'disabled'     => 1,
-                'wrapper'      => [ 'class' => 'hidden' ],
             ],
 
             [
@@ -463,8 +428,6 @@ function ws_register_acf_jurisdiction_fields() {
                 'disabled'     => 1,
                 'wrapper'      => [ 'class' => 'hidden' ],
             ],
-
-            // Visible fields: last_edited, last_edited_author
 			[
                 'key'           => 'field_jx_last_edited_author',
                 'label'         => 'Last Editor',

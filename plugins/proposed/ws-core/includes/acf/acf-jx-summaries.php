@@ -78,6 +78,11 @@
  *          ('Auto-stamped when Plain Language Reviewed is first enabled.').
  *        - plain_english_by instructions: aligned with other CPTs
  *          ('Auto-stamped on first save after plain language content is created.').
+ * 3.9.0  ws_jx_limitations field changed from wysiwyg to two-subfield repeater
+ *        (ws_jx_limit_label + ws_jx_limit_text). Meta key renamed from
+ *        ws_jx_limitations_wysiwyg to ws_jx_limitations. Query, render, and
+ *        shortcode layers updated to match. Any existing wysiwyg content will
+ *        need manual migration.
  * 3.4.0  Stamp field centralization:
  *        - Removed stamp fields (last_edited_author, date_created, last_edited,
  *          create_author) from Authorship & Review tab — now registered centrally
@@ -157,13 +162,34 @@ function ws_register_acf_jx_summary() {
             [
                 'key'          => 'field_jx_limitations',
                 'label'        => 'Limitations & Ramifications',
-                'name'         => 'ws_jx_limitations_wysiwyg',
-                'type'         => 'wysiwyg', // @todo - consider using 'repeater' type
-                'instructions' => 'Content for the Limitations and Ramifications section. Rendered automatically after the case law section on the jurisdiction page via [ws_jx_limitations]. Use the editor toolbar for all formatting — do NOT paste raw Markdown.',
-                'tabs'         => 'all',
-                'toolbar'      => 'full',
-                'media_upload' => 0,
-                'delay'        => 0,
+                'name'         => 'ws_jx_limitations',
+                'type'         => 'repeater',
+                'instructions' => 'Each row is one limitation. Label: short name shown in bold (e.g. "Media Reporting"). Description: plain-language explanation. Rendered automatically after the case law section via [ws_jx_limitations].',
+                'button_label' => 'Add Limitation',
+                'layout'       => 'table',
+                'min'          => 0,
+                'max'          => 0,
+                'sub_fields'   => [
+                    [
+                        'key'          => 'field_jx_limit_label',
+                        'label'        => 'Label',
+                        'name'         => 'ws_jx_limit_label',
+                        'type'         => 'text',
+                        'instructions' => 'Short bold heading (e.g. "Media Reporting", "Personal Grievances").',
+                        'required'     => 1,
+                        'wrapper'      => [ 'width' => '25' ],
+                    ],
+                    [
+                        'key'          => 'field_jx_limit_text',
+                        'label'        => 'Description',
+                        'name'         => 'ws_jx_limit_text',
+                        'type'         => 'textarea',
+                        'instructions' => 'Plain-language explanation. No HTML.',
+                        'required'     => 1,
+                        'rows'         => 3,
+                        'wrapper'      => [ 'width' => '75' ],
+                    ],
+                ],
             ],
 
             // ── Tab: Authorship & Review ──────────────────────────────────

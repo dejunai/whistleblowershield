@@ -60,7 +60,7 @@ $_ws_assist_org_matrix = [
         'ws_aorg_phone'        => '(202) 457-0034',
         'ws_aorg_email'        => 'info@whistleblower.org',
         'aorg_type'            => 'nonprofit',
-        'cost_model'           => 'pro_bono',
+        'cost_model'           => 'pro-bono',
         'is_nationwide'        => 1,
         'accepts_anon'         => 1,
         'has_attorneys'        => 1,
@@ -318,7 +318,7 @@ $_ws_assist_org_matrix = [
         'ws_aorg_phone'        => '',
         'ws_aorg_email'        => '',
         'aorg_type'            => 'bar-program',
-        'cost_model'           => 'paid',
+        'cost_model'           => 'fee-for-service',
         'is_nationwide'        => 1,
         'accepts_anon'         => 0,
         'has_attorneys'        => 0,
@@ -339,7 +339,7 @@ $_ws_assist_org_matrix = [
         'ws_aorg_phone'        => '',
         'ws_aorg_email'        => '',
         'aorg_type'            => 'bar-program',
-        'cost_model'           => 'paid',
+        'cost_model'           => 'fee-for-service',
         'is_nationwide'        => 1,
         'accepts_anon'         => 0,
         'has_attorneys'        => 0,
@@ -404,11 +404,9 @@ function ws_seed_assist_org_matrix() {
             'ws_aorg_intake_url'         => $org['ws_aorg_intake_url']  ?? '',
             'ws_aorg_phone'              => $org['ws_aorg_phone']       ?? '',
             'ws_aorg_email'              => $org['ws_aorg_email']       ?? '',
-            'ws_aorg_cost_model'         => $org['cost_model']          ?? '',
             'ws_aorg_serves_nationwide'  => $org['is_nationwide']       ?? 0,
             'ws_aorg_accepts_anonymous'  => $org['accepts_anon']        ?? 0,
             'ws_aorg_licensed_attorneys' => $org['has_attorneys']       ?? 0,
-            'ws_aorg_services'           => $org['services']            ?? [],
         ];
 
         foreach ( $meta as $key => $value ) {
@@ -417,15 +415,16 @@ function ws_seed_assist_org_matrix() {
             }
         }
 
-        // ACF shadow key — tells ACF which field definition manages ws_aorg_services
-        // so the checkbox renders correctly in the edit screen without a first-save wipe.
-        update_post_meta( $post_id, '_ws_aorg_services', 'field_aorg_services' );
-
         // ── Taxonomies ───────────────────────────────────────────────────────
 
         // Organization type (single slug).
         if ( ! empty( $org['aorg_type'] ) ) {
             wp_set_object_terms( $post_id, $org['aorg_type'], 'ws_aorg_type' );
+        }
+
+        // Cost model (single slug — must match ws_aorg_cost_model seeder).
+        if ( ! empty( $org['cost_model'] ) ) {
+            wp_set_object_terms( $post_id, $org['cost_model'], 'ws_aorg_cost_model' );
         }
 
         // Disclosure types (array of slugs — must match ws_disclosure_type seeder).
@@ -436,6 +435,11 @@ function ws_seed_assist_org_matrix() {
         // Case stages (array of slugs).
         if ( ! empty( $org['case_stages'] ) ) {
             wp_set_object_terms( $post_id, $org['case_stages'], 'ws_case_stage' );
+        }
+
+        // Services offered (array of ws_aorg_service slugs — must match seeder).
+        if ( ! empty( $org['services'] ) ) {
+            wp_set_object_terms( $post_id, $org['services'], 'ws_aorg_service' );
         }
 
         // Employment sectors (array of ws_employment_sector slugs).

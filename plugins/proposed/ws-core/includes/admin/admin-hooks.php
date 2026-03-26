@@ -143,6 +143,10 @@
  *        ws_jx_statute_interp_ids). Stash-and-rebuild pattern via four
  *        acf/save_post hooks (priorities 5 and 25) for citations and
  *        interpretations. Delete hooks maintain integrity on post removal.
+ * 3.9.0  Rule 3b added to ws_acf_plain_english_guards(): substantial content
+ *        change (similar_text() < 75%) resets plain_english_reviewed and its
+ *        stamps. Admin notice queued on trigger. Typos and minor edits do not
+ *        fire — only rewrites that materially change the plain English content.
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit;
@@ -345,9 +349,12 @@ function ws_acf_autofill_current_editor( $value, $post_id, $field ) {
 //             The plain_english string is preserved in case the admin re-enables.
 //             plain_english_by and plain_english_date are also cleared.
 //
-//   //@todo — Revisit Rule 3 when plain_english change-detection is implemented.
-//             A future pass should compare pre/post save values of plain_english
-//             to detect content changes and conditionally reset plain_english_reviewed.
+//   Rule 3b — Substantial content change resets review stamp. If has_plain_english
+//             remains on but the plain_english content has changed significantly
+//             (similar_text() similarity drops below 75%), plain_english_reviewed
+//             and its associated stamps are cleared. Typos and minor edits do not
+//             trigger this — only rewrites that materially change the content.
+//             An admin notice is queued so the editor knows why the stamp cleared.
 //
 // Applies to: jx-statute, jx-citation, jx-interpretation, ws-agency, ws-assist-org.
 // jx-summary is excluded — it is inherently plain English and carries no
@@ -442,6 +449,49 @@ function ws_acf_plain_english_guards( $post_id ) {
         delete_post_meta( $post_id, 'ws_auto_plain_english_reviewed_date' );
         delete_post_meta( $post_id, 'ws_auto_plain_english_reviewed_by' );
     }
+
+    // ── Rule 3b: substantial content change resets review stamp ───────────────
+    //
+    // Only runs when:
+    //   - has_plain_english is still on (toggle-off is handled by Rule 3 above)
+    //   - plain_english_reviewed is currently 1 in stored meta (nothing to reset otherwise)
+    //   - a previous plain_english value exists to compare against (new records are skipped)
+    //
+    // Comparison strips HTML tags and normalises case before calling similar_text()
+    // so tag changes in the wysiwyg do not skew the score. Threshold: 75%.
+
+    if ( $submitted_has_plain && $submitted_plain_english !== '' ) {
+
+        $stored_plain_reviewed = (int) get_post_meta( $post_id, 'ws_plain_english_reviewed', true );
+
+        if ( $stored_plain_reviewed ) {
+
+            $stored_content    = strtolower( trim( strip_tags( get_post_meta( $post_id, 'ws_plain_english_wysiwyg', true ) ) ) );
+            $submitted_content = strtolower( trim( strip_tags( $submitted_plain_english ) ) );
+
+            // Skip if no previous content to compare against (first-time save).
+            if ( $stored_content !== '' ) {
+
+                similar_text( $stored_content, $submitted_content, $similarity_pct );
+
+                if ( $similarity_pct < 75.0 ) {
+
+                    foreach ( $_POST['acf'] as $field_key => $field_value ) {
+                        $field_obj = acf_get_field( $field_key );
+                        if ( ! $field_obj ) continue;
+                        if ( in_array( $field_obj['name'], [ 'ws_plain_english_reviewed', 'ws_auto_plain_english_reviewed_by' ], true ) ) {
+                            $_POST['acf'][ $field_key ] = 0;
+                        }
+                    }
+
+                    delete_post_meta( $post_id, 'ws_auto_plain_english_reviewed_date' );
+                    delete_post_meta( $post_id, 'ws_auto_plain_english_reviewed_by' );
+
+                    set_transient( 'ws_plain_rewrite_notice_' . get_current_user_id(), true, 30 );
+                }
+            }
+        }
+    }
 }
 
 
@@ -457,6 +507,22 @@ add_action( 'admin_notices', function() {
         . '<p><strong>WhistleblowerShield:</strong> '
         . 'The Plain Reviewed flag requires Editor access or above. '
         . 'The plain_english_reviewed and plain_english_reviewed_by fields were not saved.</p>'
+        . '</div>';
+} );
+
+
+// ── Admin notice: plain_reviewed cleared due to substantial content change ────
+
+add_action( 'admin_notices', function() {
+    $transient = 'ws_plain_rewrite_notice_' . get_current_user_id();
+    if ( ! get_transient( $transient ) ) {
+        return;
+    }
+    delete_transient( $transient );
+    echo '<div class="notice notice-warning is-dismissible">'
+        . '<p><strong>WhistleblowerShield:</strong> '
+        . 'The Plain Language content has changed substantially. '
+        . 'The Plain Reviewed flag has been cleared — please re-review before marking as reviewed.</p>'
         . '</div>';
 } );
 
@@ -684,6 +750,42 @@ function ws_sync_additional_languages_term( $post_id ) {
         wp_set_object_terms( $post_id, $additional_term->term_id, 'ws_languages', true );
     } else {
         wp_remove_object_terms( $post_id, $additional_term->term_id, 'ws_languages' );
+    }
+}
+
+// ── Auto-assign ws_aorg_service "additional" term ─────────────────────────────
+//
+// When ws_aorg_additional_services (ws-assist-org) is non-empty, the "additional"
+// ws_aorg_service term is assigned automatically so the taxonomy filter can surface
+// these records. When the field is cleared, the term is removed.
+//
+// Runs at priority 25 (after ACF fields commit at 10, after stamps at 20).
+
+add_action( 'acf/save_post', 'ws_sync_additional_services_term', 25 );
+
+/**
+ * Syncs the ws_aorg_service "additional" term based on the additional-services
+ * field value for ws-assist-org posts.
+ *
+ * @param  int|string $post_id  Post ID passed by acf/save_post.
+ */
+function ws_sync_additional_services_term( $post_id ) {
+
+    if ( get_post_type( $post_id ) !== 'ws-assist-org' ) {
+        return;
+    }
+
+    $additional_term = get_term_by( 'slug', 'additional', 'ws_aorg_service' );
+    if ( ! $additional_term || is_wp_error( $additional_term ) ) {
+        return; // Taxonomy not yet seeded — bail silently.
+    }
+
+    $value = trim( (string) get_post_meta( $post_id, 'ws_aorg_additional_services', true ) );
+
+    if ( $value !== '' ) {
+        wp_set_object_terms( $post_id, $additional_term->term_id, 'ws_aorg_service', true );
+    } else {
+        wp_remove_object_terms( $post_id, $additional_term->term_id, 'ws_aorg_service' );
     }
 }
 

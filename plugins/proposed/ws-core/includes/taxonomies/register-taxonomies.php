@@ -516,6 +516,77 @@ function ws_register_taxonomies() {
             ]
         );
     }
+
+    // ── 14. Assist-Org Cost Model ─────────────────────────────────────────
+    //
+    // New in 3.9.0. Flat taxonomy classifying the cost structure of a
+    // ws-assist-org record. Applied to ws-assist-org only. Single-value
+    // (equivalent to the former select field).
+    // Replaces ws_aorg_cost_model ACF select field — enables tax_query
+    // filtering for Phase 2 filter panel.
+
+    if ( ! taxonomy_exists( 'ws_aorg_cost_model' ) ) {
+        register_taxonomy(
+            'ws_aorg_cost_model',
+            [ 'ws-assist-org' ],
+            [
+                'label'             => 'Cost Structure',
+                'labels'            => [
+                    'name'              => 'Cost Structures',
+                    'singular_name'     => 'Cost Structure',
+                    'search_items'      => 'Search Cost Structures',
+                    'all_items'         => 'All Cost Structures',
+                    'edit_item'         => 'Edit Cost Structure',
+                    'update_item'       => 'Update Cost Structure',
+                    'add_new_item'      => 'Add New Cost Structure',
+                    'new_item_name'     => 'New Cost Structure Name',
+                    'menu_name'         => 'Cost Structure',
+                ],
+                'public'            => false,
+                'hierarchical'      => false,
+                'show_ui'           => true,
+                'show_in_rest'      => true,
+                'show_admin_column' => true,
+                'capabilities'      => ws_get_taxonomy_caps(),
+            ]
+        );
+    }
+
+    // ── 15. Assist-Org Service ────────────────────────────────────────────
+    //
+    // New in 3.9.0. Flat taxonomy classifying the services offered by a
+    // ws-assist-org record. Applied to ws-assist-org only.
+    // Replaces ws_aorg_services ACF checkbox field — enables tax_query
+    // filtering for Phase 2 filter panel.
+    // 'additional' sentinel term auto-assigned when ws_aorg_additional_services
+    // companion field is non-empty (mirrors ws_languages pattern).
+
+    if ( ! taxonomy_exists( 'ws_aorg_service' ) ) {
+        register_taxonomy(
+            'ws_aorg_service',
+            [ 'ws-assist-org' ],
+            [
+                'label'             => 'Services Offered',
+                'labels'            => [
+                    'name'              => 'Services Offered',
+                    'singular_name'     => 'Service',
+                    'search_items'      => 'Search Services',
+                    'all_items'         => 'All Services',
+                    'edit_item'         => 'Edit Service',
+                    'update_item'       => 'Update Service',
+                    'add_new_item'      => 'Add New Service',
+                    'new_item_name'     => 'New Service Name',
+                    'menu_name'         => 'Services Offered',
+                ],
+                'public'            => false,
+                'hierarchical'      => false,
+                'show_ui'           => true,
+                'show_in_rest'      => true,
+                'show_admin_column' => true,
+                'capabilities'      => ws_get_taxonomy_caps(),
+            ]
+        );
+    }
 }
 add_action( 'init', 'ws_register_taxonomies' );
 
@@ -638,6 +709,14 @@ add_action( 'admin_init', function() {
     if ( get_option( 'ws_seeded_employment_sector' ) !== '1.0.0' ) {
         ws_seed_employment_sector_taxonomy();
         update_option( 'ws_seeded_employment_sector', '1.0.0' );
+    }
+    if ( get_option( 'ws_seeded_aorg_service' ) !== '1.0.0' ) {
+        ws_seed_aorg_service_taxonomy();
+        update_option( 'ws_seeded_aorg_service', '1.0.0' );
+    }
+    if ( get_option( 'ws_seeded_aorg_cost_model' ) !== '1.0.0' ) {
+        ws_seed_aorg_cost_model_taxonomy();
+        update_option( 'ws_seeded_aorg_cost_model', '1.0.0' );
     }
 
 } );
@@ -1087,6 +1166,55 @@ function ws_seed_employment_sector_taxonomy() {
         'military-defense'     => 'Military & Defense Contractors',
         'nonprofit-ngo'        => 'Nonprofit & NGO Employee',
         'all-sectors'          => 'All Employment Sectors',
+    ];
+    foreach ( $terms as $slug => $name ) {
+        if ( ! term_exists( $slug, $taxonomy ) ) {
+            wp_insert_term( $name, $taxonomy, [ 'slug' => $slug ] );
+        }
+    }
+}
+
+/**
+ * Seeds ws_aorg_cost_model with flat cost structure terms.
+ *
+ * New in 3.9.0. Replaces ws_aorg_cost_model ACF select field.
+ */
+function ws_seed_aorg_cost_model_taxonomy() {
+    $taxonomy = 'ws_aorg_cost_model';
+    $terms    = [
+        'free'            => 'Free of Charge',
+        'pro-bono'        => 'Pro Bono',
+        'sliding-scale'   => 'Sliding Scale Fee',
+        'contingency'     => 'Contingency Fee',
+        'fee-for-service' => 'Fee for Service',
+        'mixed'           => 'Mixed / Varies',
+    ];
+    foreach ( $terms as $slug => $name ) {
+        if ( ! term_exists( $slug, $taxonomy ) ) {
+            wp_insert_term( $name, $taxonomy, [ 'slug' => $slug ] );
+        }
+    }
+}
+
+/**
+ * Seeds ws_aorg_service with flat service terms.
+ *
+ * New in 3.9.0. Replaces ws_aorg_services ACF checkbox.
+ * 'additional' is the sentinel term for free-text overflow.
+ */
+function ws_seed_aorg_service_taxonomy() {
+    $taxonomy = 'ws_aorg_service';
+    $terms    = [
+        'legal-rep'    => 'Full Legal Representation',
+        'consultation' => 'Legal Consultation / Advice',
+        'referral'     => 'Intake & Referral',
+        'doc-review'   => 'Document Review',
+        'hotline'      => 'Whistleblower Hotline',
+        'retaliation'  => 'Retaliation Defense',
+        'financial'    => 'Financial Assistance',
+        'advocacy'     => 'Policy Advocacy',
+        'media'        => 'Media & Communications Support',
+        'additional'   => 'Additional Services',
     ];
     foreach ( $terms as $slug => $name ) {
         if ( ! term_exists( $slug, $taxonomy ) ) {

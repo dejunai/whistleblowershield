@@ -68,6 +68,10 @@
  *        ws_render_legal_updates, ws_render_jurisdiction_index) moved to
  *        render-general.php. This file now contains jurisdiction-page
  *        section renderers only.
+ * 3.9.0  ws_render_jx_limitations() updated: now accepts a repeater array
+ *        instead of a sanitized HTML string. Renders label + description
+ *        rows as <p><strong>Label:</strong> text</p>. h2 heading moved
+ *        into this function (previously lived inside the wysiwyg content).
  * 3.7.0  ws_render_jx_interpretations() added. Renders court interpretation
  *        cards (case name, court/year/citation, favorable indicator, summary,
  *        External References button). Called by [ws_jx_interpretation].
@@ -491,17 +495,45 @@ function ws_render_jx_interpretations( $interps ) {
 
 
 /**
- * Renders the limitations section wrapper.
+ * Renders the Limitations and Ramifications section from a repeater array.
  *
- * Wraps sanitized WYSIWYG content in the .ws-limitations section element.
- * Content must already be passed through wp_kses_post() by the caller.
- * Called by ws_shortcode_jx_limitations().
+ * Each row produces one paragraph: the label bolded, followed by the
+ * description as normal text. Both values are plain text — no HTML is
+ * expected or allowed in the source data.
  *
- * @param  string $content  Sanitized HTML content.
- * @return string           HTML section block.
+ * Called by ws_shortcode_jx_limitations(). Returns empty string when
+ * $limitations is empty so the section heading is never rendered without
+ * content.
+ *
+ * @param  array  $limitations  Rows from ws_jx_limitations repeater.
+ *                              Each row: ['ws_jx_limit_label' => '', 'ws_jx_limit_text' => '']
+ * @return string               HTML section block, or '' when empty.
  */
-function ws_render_jx_limitations( $content ) {
-    return '<section class="ws-limitations">' . $content . '</section>';
+function ws_render_jx_limitations( $limitations ) {
+    if ( empty( $limitations ) || ! is_array( $limitations ) ) {
+        return '';
+    }
+
+    $items = '';
+    foreach ( $limitations as $row ) {
+        $label = sanitize_text_field( $row['ws_jx_limit_label'] ?? '' );
+        $text  = sanitize_text_field( $row['ws_jx_limit_text']  ?? '' );
+        if ( ! $label && ! $text ) {
+            continue;
+        }
+        $items .= '<p>';
+        if ( $label ) {
+            $items .= '<strong>' . esc_html( $label ) . ':</strong> ';
+        }
+        $items .= esc_html( $text );
+        $items .= '</p>';
+    }
+
+    if ( ! $items ) {
+        return '';
+    }
+
+    return '<section class="ws-limitations"><h2>Limitations and Ramifications</h2>' . $items . '</section>';
 }
 
 

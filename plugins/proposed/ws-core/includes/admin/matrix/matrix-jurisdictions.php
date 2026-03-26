@@ -42,8 +42,6 @@
  *
  */
 
- //@todo - entry_points array reserved for prompt generator use — populate from production review data.
-
 defined( 'ABSPATH' ) || exit;
 
 $_ws_jx_matrix = [

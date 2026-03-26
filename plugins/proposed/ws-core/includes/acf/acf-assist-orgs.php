@@ -24,7 +24,8 @@
  *   ws_aorg_serves_nationwide    Serves all U.S. jurisdictions (true_false)
  *   ws_jurisdiction            Jurisdictions served (ws_jurisdiction taxonomy, checkbox)
  *   ws_aorg_disclosure_type      Misconduct categories handled (taxonomy)
- *   ws_aorg_services             Services offered (checkbox)
+ *   ws_aorg_services             Services offered (taxonomy checkbox, ws_aorg_service)
+ *   ws_aorg_additional_services  Additional services not in taxonomy (textarea)
  *   ws_aorg_employment_sectors   Employment sectors served (taxonomy checkbox, ws_employment_sector)
  *
  * Contact & Intake tab:
@@ -37,7 +38,7 @@
  *   ws_aorg_additional_languages   Additional languages not in taxonomy list (text)
  *
  * Eligibility & Cost tab:
- *   ws_aorg_cost_model           Cost structure (select, required)
+ *   ws_aorg_cost_model           Cost structure (taxonomy radio, ws_aorg_cost_model)
  *   ws_aorg_income_limit         Income eligibility required (true_false)
  *   ws_aorg_income_limit_notes   Income limit details (textarea, conditional)
  *   ws_aorg_accepts_anonymous    Can assist anonymous clients (true_false)
@@ -87,6 +88,12 @@
  *        to taxonomy type (ws_employment_sector) with save_terms: 1. Enables
  *        tax_query filtering throughout the Phase 2 filter cascade — no
  *        meta_query required at any level.
+ * 3.9.0  ws_aorg_cost_model field converted from select (ACF choices) to taxonomy
+ *        radio (ws_aorg_cost_model). Enables tax_query filtering in Phase 2.
+ *        ws_aorg_services field converted from checkbox (ACF choices) to taxonomy
+ *        type (ws_aorg_service) with save_terms: 1. Adds ws_aorg_additional_services
+ *        textarea companion field; 'additional' sentinel term auto-assigned via
+ *        ws_sync_additional_services_term() in admin-hooks.php.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -240,25 +247,30 @@ function ws_register_acf_assist_org() {
             ],
 
             [
-                'key'          => 'field_aorg_services',
-                'label'        => 'Services Offered',
-                'name'         => 'ws_aorg_services',
-                'type'         => 'checkbox',
-                'instructions' => 'Select all services this organization provides to whistleblowers.',
-                'required'     => 1,
-                'choices'      => [
-                    'legal_rep'    => 'Full Legal Representation',
-                    'consultation' => 'Legal Consultation / Advice',
-                    'referral'     => 'Intake & Referral',
-                    'doc_review'   => 'Document Review',
-                    'hotline'      => 'Whistleblower Hotline',
-                    'retaliation'  => 'Retaliation Defense',
-                    'financial'    => 'Financial Assistance',
-                    'advocacy'     => 'Policy Advocacy',
-                    'media'        => 'Media & Communications Support',
-                ],
-                'layout'        => 'vertical',
-                'return_format' => 'value',
+                'key'           => 'field_aorg_services',
+                'label'         => 'Services Offered',
+                'name'          => 'ws_aorg_services',
+                'type'          => 'taxonomy',
+                'taxonomy'      => 'ws_aorg_service',
+                'instructions'  => 'Select all services this organization provides to whistleblowers.',
+                'required'      => 1,
+                'field_type'    => 'checkbox',
+                'add_term'      => 0,
+                'save_terms'    => 1,
+                'load_terms'    => 1,
+                'return_format' => 'id',
+                'allow_null'    => 0,
+            ],
+
+            [
+                'key'               => 'field_aorg_additional_services',
+                'label'             => 'Additional Services',
+                'name'              => 'ws_aorg_additional_services',
+                'type'              => 'textarea',
+                'instructions'      => 'Describe any services not covered by the list above. The "Additional Services" checkbox will be auto-assigned when this field is non-empty.',
+                'required'          => 0,
+                'rows'              => 3,
+                'conditional_logic' => 0,
             ],
 
             [
@@ -375,19 +387,16 @@ function ws_register_acf_assist_org() {
                 'key'           => 'field_aorg_cost_model',
                 'label'         => 'Cost Structure',
                 'name'          => 'ws_aorg_cost_model',
-                'type'          => 'select',
+                'type'          => 'taxonomy',
+                'taxonomy'      => 'ws_aorg_cost_model',
                 'instructions'  => 'Select the primary cost model for whistleblower services at this organization.',
                 'required'      => 1,
-                'choices'       => [
-                    'free'          => 'Free of Charge',
-                    'pro_bono'      => 'Pro Bono (Case-by-Case Selection)',
-                    'sliding_scale' => 'Sliding Scale Fee',
-                    'paid'          => 'Paid Services',
-                ],
-                'default_value' => 'free',
+                'field_type'    => 'radio',
+                'add_term'      => 0,
+                'save_terms'    => 1,
+                'load_terms'    => 1,
+                'return_format' => 'id',
                 'allow_null'    => 0,
-                'ui'            => 1,
-                'return_format' => 'value',
             ],
 
             [
