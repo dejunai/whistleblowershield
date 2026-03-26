@@ -27,9 +27,11 @@
  * Procedures are linked to their parent agency via the ws_proc_agency_id
  * post meta key (ACF post_object field, stores integer post ID).
  *
- * Taxonomy fields (jurisdiction, disclosure_types) use save_terms=1 in ACF,
- * so their values are read via wp_get_post_terms() / wp_get_object_terms(),
- * not get_post_meta(). Simple scalar fields use get_post_meta() directly.
+ * Taxonomy fields (jurisdiction, disclosure_types, procedure_type) use
+ * save_terms=1 in ACF, so their values are read via wp_get_post_terms() /
+ * wp_get_object_terms(), not get_post_meta(). Simple scalar fields use
+ * get_post_meta() directly. ws_procedure_type is single-value — the query
+ * layer returns its slug as a plain string (first term slug, or '').
  *
  * CACHING
  * -------
@@ -47,6 +49,10 @@
  * ---------------
  * 3.9.0  Initial. ws_get_agency_procedures() + per-agency transient cache.
  *        Phase 2 of ws-ag-procedure feature build.
+ * 3.10.0 ws_proc_type get_post_meta() reads replaced with wp_get_object_terms()
+ *        on ws_procedure_type in both ws_build_agency_procedure_row() and
+ *        ws_get_procedures_for_statute(). Returns first term slug as plain
+ *        string; empty string when no term assigned.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -159,8 +165,16 @@ function ws_build_agency_procedure_row( $pid ) {
     // Taxonomy fields use save_terms=1 in ACF — read via WP term functions,
     // not get_post_meta(). is_wp_error() guard handles unregistered taxonomies
     // or posts with no terms assigned.
-    $jx_terms   = wp_get_post_terms( $pid, WS_JURISDICTION_TAXONOMY );
-    $disc_types = wp_get_object_terms( $pid, 'ws_disclosure_type' );
+    $jx_terms    = wp_get_post_terms( $pid, WS_JURISDICTION_TAXONOMY );
+    $disc_types  = wp_get_object_terms( $pid, 'ws_disclosure_type' );
+
+    // ws_procedure_type is a single-value taxonomy. Return the slug string
+    // so render-agency.php can use it as an array key without further
+    // processing. Empty string when no term is assigned (draft/incomplete).
+    $proc_type_terms = wp_get_object_terms( $pid, 'ws_procedure_type', [ 'fields' => 'slugs' ] );
+    $proc_type       = ( ! is_wp_error( $proc_type_terms ) && ! empty( $proc_type_terms ) )
+                       ? $proc_type_terms[0]
+                       : '';
 
     return [
         'id'               => $pid,
@@ -169,7 +183,7 @@ function ws_build_agency_procedure_row( $pid ) {
         'agency_id'        => $agency_id,
         'agency_name'      => $agency_id ? get_the_title( $agency_id ) : '',
         'agency_url'       => $agency_url ? (string) $agency_url : '',
-        'type'             => get_post_meta( $pid, 'ws_proc_type',                  true ),
+        'type'             => $proc_type,
         'jurisdiction'     => ( $jx_terms   && ! is_wp_error( $jx_terms   ) ) ? $jx_terms   : [],
         'disclosure_types' => ( $disc_types && ! is_wp_error( $disc_types ) ) ? $disc_types : [],
         'entry_point'      => get_post_meta( $pid, 'ws_proc_entry_point',           true ),
@@ -268,11 +282,15 @@ function ws_get_procedures_for_statute( $statute_id ) {
         $pid       = $post->ID;
         $agency_id = (int) get_post_meta( $pid, 'ws_proc_agency_id', true );
 
+        // ws_procedure_type is single-value — take first slug, empty string if unset.
+        $pt_terms = wp_get_object_terms( $pid, 'ws_procedure_type', [ 'fields' => 'slugs' ] );
+        $pt_slug  = ( ! is_wp_error( $pt_terms ) && ! empty( $pt_terms ) ) ? $pt_terms[0] : '';
+
         $rows[] = [
             'id'            => $pid,
             'title'         => get_the_title( $pid ),
             'url'           => get_permalink( $pid ),
-            'type'          => get_post_meta( $pid, 'ws_proc_type',         true ),
+            'type'          => $pt_slug,
             'agency_id'     => $agency_id,
             'agency_name'   => $agency_id ? get_the_title( $agency_id )  : '',
             'agency_url'    => $agency_id ? (string) get_permalink( $agency_id ) : '',

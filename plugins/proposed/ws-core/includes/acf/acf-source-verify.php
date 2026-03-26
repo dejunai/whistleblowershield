@@ -90,6 +90,9 @@
  *        source_name locked readonly/disabled; both source fields hidden from
  *        roles below administrator via ws_hide_source_fields_for_non_admins().
  *        Docblock updated to reflect three-path ingest design.
+ * 3.10.0 ws-ag-procedure added to location rules. Omission — matrix-seeded
+ *        procedures are high-staleness-risk records and require the same
+ *        source verification and ws_needs_review workflow as other seeded CPTs.
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit;
@@ -118,6 +121,7 @@ function ws_register_source_verify_field_group() {
             [ [ 'param' => 'post_type', 'operator' => '==', 'value' => 'jx-citation'       ] ],
             [ [ 'param' => 'post_type', 'operator' => '==', 'value' => 'jx-interpretation' ] ],
             [ [ 'param' => 'post_type', 'operator' => '==', 'value' => 'ws-agency'         ] ],
+            [ [ 'param' => 'post_type', 'operator' => '==', 'value' => 'ws-ag-procedure'   ] ],
             [ [ 'param' => 'post_type', 'operator' => '==', 'value' => 'ws-assist-org'     ] ],
             [ [ 'param' => 'post_type', 'operator' => '==', 'value' => 'jx-summary'        ] ],
             [ [ 'param' => 'post_type', 'operator' => '==', 'value' => 'ws-reference'      ] ],

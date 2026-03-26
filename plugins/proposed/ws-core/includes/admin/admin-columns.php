@@ -29,6 +29,9 @@
  *        Duplicate manage_ws-agency_posts_columns / _custom_column hooks in
  *        that file removed — admin-columns.php is the single source for all
  *        CPT column definitions.
+ * 3.10.0 ws-ag-procedure Type column: get_post_meta( 'ws_proc_type' ) replaced
+ *        with wp_get_object_terms( 'ws_procedure_type' ). ws_procedure_type is
+ *        now a taxonomy; direct taxonomy read is correct in admin list context.
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit;
@@ -369,13 +372,17 @@ function ws_render_procedure_column( $column, $post_id ) {
             echo '<span style="color:#dc3232;">—</span>';
         }
     } elseif ( $column === 'ws_proc_type' ) {
-        $type   = get_post_meta( $post_id, 'ws_proc_type', true );
+        // ws_procedure_type is a taxonomy — read via wp_get_object_terms(),
+        // not get_post_meta(). Direct taxonomy read is correct here: admin
+        // list table context does not route through the query layer.
+        $terms  = wp_get_object_terms( $post_id, 'ws_procedure_type', [ 'fields' => 'slugs' ] );
+        $slug   = ( ! is_wp_error( $terms ) && ! empty( $terms ) ) ? $terms[0] : '';
         $labels = [
             'disclosure'  => 'Disclosure',
             'retaliation' => 'Retaliation',
             'both'        => 'Both',
         ];
-        echo esc_html( $labels[ $type ] ?? '—' );
+        echo esc_html( $labels[ $slug ] ?? '—' );
     } elseif ( $column === 'ws_proc_disclosure_types' ) {
         $terms = get_the_terms( $post_id, 'ws_disclosure_type' );
         if ( $terms && ! is_wp_error( $terms ) ) {

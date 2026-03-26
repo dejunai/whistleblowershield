@@ -61,6 +61,79 @@
  *      8) Shortcodes
  *
  *
+ * IMPORTANT — TAXONOMY TWO-PHASE BEHAVIOUR
+ * -----------------------------------------
+ * require_once on register-taxonomies.php registers the taxonomy
+ * registration functions and hooks them to 'init'. It does NOT
+ * immediately make terms available. Actual term seeding fires on
+ * 'admin_init' inside self-gating closures. This means:
+ *
+ *      After require_once:   taxonomy slugs are registered,
+ *                            CPT ↔ taxonomy associations exist,
+ *                            wp_set_object_terms() will work.
+ *
+ *      Terms available:      only after admin_init fires, which
+ *                            is after plugins_loaded → loader.php
+ *                            has completed. Matrix seeders that call
+ *                            ws_jx_term_by_code() are also gated on
+ *                            admin_init, so terms are guaranteed to
+ *                            exist before any seeder tries to read them.
+ *
+ *
+ * MATRIX LAYER DEPENDENCY CHAIN
+ * ------------------------------
+ * The matrix load order is non-negotiable. Each level depends on the
+ * previous level having run its admin_init gate first:
+ *
+ *      matrix-helpers.php
+ *          Defines ws_matrix_assign_terms() and other shared utilities.
+ *          No dependencies. Must load before every seeder.
+ *
+ *      matrix-jurisdictions.php
+ *          Seeds the 57 ws_jurisdiction taxonomy terms (including 'us')
+ *          and creates the 57 jurisdiction CPT posts.
+ *          ALL other seeders depend on the 'us' term existing.
+ *
+ *      matrix-fed-statutes.php
+ *          Seeds jx-statute posts scoped to the 'us' jurisdiction term.
+ *          Depends on: matrix-jurisdictions (us term).
+ *          matrix-ag-procedures depends on these posts existing.
+ *
+ *      matrix-federal-courts.php
+ *      matrix-state-courts.php
+ *          Define the $ws_court_matrix and $ws_state_court_matrix
+ *          in-memory arrays only. NO posts are created. These are
+ *          PHP variable definitions — no database writes, no admin_init
+ *          gate. They must load before acf-jx-interpretations.php and
+ *          query-jurisdiction.php consume ws_court_lookup(), but since
+ *          those files are in the ACF and Universal layers respectively,
+ *          loading courts here in the matrix block satisfies that need.
+ *
+ *      matrix-assist-orgs.php
+ *          Seeds ws-assist-org posts. Depends on: us term.
+ *          No dependency on fed-statutes or agencies — order relative
+ *          to those two is arbitrary but kept stable for predictability.
+ *
+ *      matrix-agencies.php
+ *          Seeds ws-agency posts. Depends on: us term.
+ *          matrix-ag-procedures depends on these posts existing.
+ *
+ *      matrix-ag-procedures.php
+ *          Seeds ws-ag-procedure posts. Hard dependencies:
+ *            — matrix-agencies must have run (resolves agency_slug via
+ *              get_page_by_path() against ws-agency posts).
+ *            — matrix-fed-statutes must have run (resolves statute_slugs
+ *              via ws_procedure_matrix_resolve_statute_ids() against
+ *              jx-statute posts).
+ *          Must be last post-creating seeder before admin-matrix-watch.
+ *
+ *      admin-matrix-watch.php
+ *          Registers the save_post divergence detection hook and the
+ *          dashboard widget. No seeding. Must load last so it does not
+ *          flag the seeders above as divergences — the
+ *          WS_MATRIX_SEEDING_IN_PROGRESS constant guards this.
+ *
+ *
  * VERSION
  * -------
  * 2.1.0  Modular loader introduced
@@ -86,6 +159,12 @@
  *        ASSEMBLY LAYER. admin-procedure-watch added to ADMIN LAYER.
  *        matrix-ag-procedures added to MATRIX LAYER (between matrix-agencies
  *        and admin-matrix-watch).
+ * 3.10.0 LOADING STRATEGY section expanded with TAXONOMY TWO-PHASE BEHAVIOUR
+ *        and MATRIX LAYER DEPENDENCY CHAIN documentation. Matrix layer comment
+ *        block replaced with full per-file dependency rationale. Taxonomy layer
+ *        inline comment clarified: require_once registers functions only —
+ *        terms are not available until admin_init fires. admin-navigation
+ *        must-load-first comment expanded to name the shared helper it defines.
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit;
@@ -159,8 +238,13 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 	}
 
 	// TAXONOMY Layer: Must load everywhere — registers CPT taxonomy associations
-	// for URL rewriting, REST API, and frontend queries. Seeding functions inside
-	// this file run only on admin_init and are self-gating.
+	// for URL rewriting, REST API, and frontend queries.
+	//
+	// IMPORTANT: require_once here only registers the taxonomy registration
+	// functions and hooks them to 'init'. Terms are NOT yet available after
+	// this line. Actual term seeding fires on 'admin_init' inside self-gating
+	// closures in register-taxonomies.php — well after this loader completes.
+	// See TAXONOMY TWO-PHASE BEHAVIOUR in the docblock above.
 	$taxonomy_files = [
 		'register-taxonomies', 'register-glossary',
 	];
@@ -196,10 +280,23 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 */
 if ( is_admin() ) {
 
-    // LOAD ORDER IS NON-NEGOTIABLE: taxonomies must be registered before any seeder runs.
-    // register-taxonomies.php is loaded in the Universal Layer above — it always runs first.
-    // jurisdiction-matrix.php seeds ws_jurisdiction terms (including US) first — load before
-    // agency, fed-statutes, and assist-org matrices which depend on the US term existing.
+    // MATRIX LAYER LOAD ORDER — NON-NEGOTIABLE
+	//
+	// See MATRIX LAYER DEPENDENCY CHAIN in the docblock above for the full
+	// rationale. Summary of hard constraints:
+	//
+	//   matrix-helpers        — shared utilities, must be first
+	//   matrix-jurisdictions  — seeds 'us' term + jurisdiction posts;
+	//                           all other seeders depend on 'us' term
+	//   matrix-fed-statutes   — seeds jx-statute posts;
+	//                           matrix-ag-procedures depends on these
+	//   matrix-federal-courts — IN-MEMORY ONLY ($ws_court_matrix array)
+	//   matrix-state-courts   — IN-MEMORY ONLY ($ws_state_court_matrix array)
+	//   matrix-assist-orgs    — seeds ws-assist-org posts; depends on us term
+	//   matrix-agencies       — seeds ws-agency posts;
+	//                           matrix-ag-procedures depends on these
+	//   matrix-ag-procedures  — depends on BOTH fed-statutes AND agencies posts
+	//   admin-matrix-watch    — divergence detection only; must be last
 	//
 	// MATRIX Layer: Loaded from /includes/admin/matrix/
 	$matrix_files = [
@@ -271,7 +368,8 @@ if ( is_admin() ) {
 	//
 	// ADMIN Layer: Loaded from /includes/admin/
 	$admin_files = [
-		'admin-navigation', // Note: admin-navigation.php MUST load first
+		'admin-navigation', // MUST load first — defines ws_get_attached_citation_count()
+		                    // which is called by admin-columns.php and jurisdiction-dashboard.php.
 		'admin-audit-trail', 'admin-columns', 'admin-feed-monitor',
 		'admin-hooks', 'admin-interpretation-metabox', 'admin-citation-metabox', 'admin-url-monitor',
 		'admin-major-edit-hook', 'admin-procedure-watch', 'jurisdiction-dashboard', 'admin-health-check',

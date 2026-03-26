@@ -147,6 +147,13 @@
  *        change (similar_text() < 75%) resets plain_english_reviewed and its
  *        stamps. Admin notice queued on trigger. Typos and minor edits do not
  *        fire — only rewrites that materially change the plain English content.
+ * 3.10.0 ws-ag-procedure added to $ws_stamp_cpts. acf-stamp-fields.php already
+ *        attached stamp fields to this CPT via its location rules — this entry
+ *        was the missing counterpart that enables ws_acf_write_stamp_fields()
+ *        to actually write created/last-edited meta on procedure saves.
+ *        ws-ag-procedure added to ws_source_verify_post_types(). Omission —
+ *        matrix-seeded procedures require source verification and ws_needs_review
+ *        coverage identical to other seeded CPTs.
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit;
@@ -552,6 +559,7 @@ $ws_stamp_cpts = [
     'jx-statute'        => [ 'author_acf_key' => 'field_last_edited_author' ],
     'jx-interpretation' => [ 'author_acf_key' => 'field_last_edited_author' ],
     'ws-agency'         => [ 'author_acf_key' => 'field_last_edited_author' ],
+    'ws-ag-procedure'   => [ 'author_acf_key' => 'field_last_edited_author' ],
     'ws-legal-update'   => [ 'author_acf_key' => 'field_last_edited_author' ],
     'ws-assist-org'     => [ 'author_acf_key' => 'field_last_edited_author' ],
     // ws-reference uses shared field keys — unique key retired in v3.4.0.
@@ -881,6 +889,7 @@ function ws_source_verify_post_types() {
         'jx-citation',
         'jx-interpretation',
         'ws-agency',
+        'ws-ag-procedure',
         'ws-assist-org',
         'jx-summary',
         'ws-reference',

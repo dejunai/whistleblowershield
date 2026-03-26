@@ -37,6 +37,9 @@
  * VERSION
  * -------
  * 3.9.0  Initial registration. Phase 1 of ws-ag-procedure feature build.
+ * 3.10.0 ws_proc_type select field replaced with ws_procedure_type taxonomy
+ *        field (radio UI, save_terms: 1, load_terms: 1). Field name changed
+ *        from ws_proc_type to ws_procedure_type to match taxonomy slug.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -99,21 +102,19 @@ function ws_register_acf_ag_procedures() {
                 'ui'            => 1,
             ],
             [
-                'key'          => 'field_proc_type',
-                'label'        => 'Procedure Type',
-                'name'         => 'ws_proc_type',
-                'type'         => 'select',
-                'instructions' => 'Disclosure = reporting wrongdoing. Retaliation = filing a complaint after adverse action. Both = single procedure covers both.',
-                'required'     => 1,
-                'choices'      => [
-                    'disclosure'  => 'Disclosure — Report Wrongdoing',
-                    'retaliation' => 'Retaliation — File Complaint',
-                    'both'        => 'Both — Covers Disclosure and Retaliation',
-                ],
-                'default_value' => '',
+                'key'           => 'field_proc_type',
+                'label'         => 'Procedure Type',
+                'name'          => 'ws_procedure_type',
+                'type'          => 'taxonomy',
+                'taxonomy'      => 'ws_procedure_type',
+                'field_type'    => 'radio',
+                'instructions'  => 'Disclosure = reporting wrongdoing. Retaliation = filing a complaint after adverse action. Both = single procedure covers both.',
+                'required'      => 1,
+                'add_term'      => 0,
+                'save_terms'    => 1,
+                'load_terms'    => 1,
+                'return_format' => 'id',
                 'allow_null'    => 0,
-                'ui'            => 1,
-                'return_format' => 'value',
             ],
 
             // ── Jurisdiction(s) ───────────────────────────────────────────

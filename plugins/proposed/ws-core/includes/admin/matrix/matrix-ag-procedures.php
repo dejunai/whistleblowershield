@@ -44,6 +44,14 @@
  * @link       https://whistleblowershield.org
  * @copyright  Copyright (c) Whistleblower Shield
  *
+ * VERSION
+ * -------
+ * 3.9.0  Initial. Seeds 10 procedures across 9 federal agencies.
+ * 3.10.0 ws_proc_type removed from scalar meta write. Procedure type now
+ *        assigned via wp_set_object_terms( 'ws_procedure_type' ). Data array
+ *        key ws_proc_type retained as the slug source — resolved to a taxonomy
+ *        term by the seeder loop rather than written as post meta.
+ *
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -447,7 +455,6 @@ function ws_seed_procedure_matrix() {
 
         $meta = [
             'ws_proc_agency_id'               => $agency_id,
-            'ws_proc_type'                    => $proc['ws_proc_type'],
             'ws_proc_entry_point'             => $proc['ws_proc_entry_point'],
             'ws_proc_intake_url'              => $proc['ws_proc_intake_url'],
             'ws_proc_identity_policy'         => $proc['ws_proc_identity_policy'],
@@ -475,6 +482,15 @@ function ws_seed_procedure_matrix() {
 
         if ( ! empty( $proc['disclosure_types'] ) ) {
             ws_matrix_assign_terms( $post_id, $proc['disclosure_types'], 'ws_disclosure_type' );
+        }
+
+        // ── Assign procedure type (taxonomy table) ─────────────────────────
+        // ws_procedure_type replaces the former ws_proc_type meta key.
+        // Single-value taxonomy — wp_set_object_terms with append=false
+        // ensures exactly one term is assigned per record.
+
+        if ( ! empty( $proc['ws_proc_type'] ) ) {
+            wp_set_object_terms( $post_id, $proc['ws_proc_type'], 'ws_procedure_type', false );
         }
 
         // ── Link related statutes ──────────────────────────────────────────

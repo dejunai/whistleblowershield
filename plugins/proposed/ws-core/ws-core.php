@@ -23,7 +23,7 @@
  * Description: Core architecture for WhistleblowerShield. Proposed replacement
  *              plugin — radical refactor of v2.3.1. Not an upgrade of the live plugin.
  *              Assembles public whistleblower protection pages for 57 U.S. jurisdictions.
- * Version:     3.9.0
+ * Version:     3.10.0
  * Author:      Whistleblower Shield
  * Author URI:  https://whistleblowershield.org
  *
@@ -475,13 +475,43 @@
  *  17. loader.php: matrix-ag-procedures added to Matrix Layer file array
  *      (between matrix-agencies and admin-matrix-watch).
  *
+ * v3.10.0 — ws_procedure_type Taxonomy + Source Verify Coverage
+ * --------------------------------------------------------------
+ * Converts ws_proc_type ACF select field to a proper taxonomy and closes
+ * two omissions in the ws-ag-procedure feature build.
+ *
+ *   1. register-taxonomies.php: ws_procedure_type taxonomy registered (flat,
+ *      ws-ag-procedure only). Three terms: disclosure, retaliation, both.
+ *      Replaces ws_proc_type ACF select field. Seeder: ws_seed_proc_type_taxonomy().
+ *      Gate: ws_seeded_procedure_type / 1.0.0. Enables tax_query filtering
+ *      in the Phase 2 filter cascade.
+ *   2. acf-ag-procedures.php: ws_proc_type select field replaced with
+ *      ws_procedure_type taxonomy field (radio UI, save_terms: 1,
+ *      load_terms: 1). Field name changed from ws_proc_type to
+ *      ws_procedure_type to match taxonomy slug.
+ *   3. matrix-ag-procedures.php: ws_proc_type removed from scalar meta write.
+ *      Procedure type now assigned via wp_set_object_terms( 'ws_procedure_type' ).
+ *      Data array key ws_proc_type retained as slug source — resolved to a
+ *      taxonomy term by the seeder loop.
+ *   4. query-agencies.php: both get_post_meta( 'ws_proc_type' ) reads replaced
+ *      with wp_get_object_terms( 'ws_procedure_type' ) in
+ *      ws_build_agency_procedure_row() and ws_get_procedures_for_statute().
+ *      Returns first term slug as plain string; empty string when unassigned.
+ *   5. admin-columns.php: ws-ag-procedure Type column meta read replaced with
+ *      wp_get_object_terms( 'ws_procedure_type' ).
+ *   6. admin-hooks.php: ws-ag-procedure added to ws_source_verify_post_types().
+ *      Omission — matrix-seeded procedures require source verification and
+ *      ws_needs_review coverage identical to other seeded CPTs.
+ *   7. acf-source-verify.php: ws-ag-procedure added to location rules.
+ *      Same omission as above — source verify fields now attach to procedures.
+ *
  */
 
 defined( 'ABSPATH' ) || exit;
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
-define( 'WS_CORE_VERSION', '3.9.0' );
+define( 'WS_CORE_VERSION', '3.10.0' );
 define( 'WS_CORE_PATH',    plugin_dir_path( __FILE__ ) );
 define( 'WS_CORE_URL',     plugin_dir_url( __FILE__ ) );
 

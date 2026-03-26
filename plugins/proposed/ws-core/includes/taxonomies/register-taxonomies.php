@@ -83,6 +83,10 @@
  *        object_type arrays. Required for ACF save_terms/load_terms to work
  *        correctly on procedure edit screens and for seeder wp_set_object_terms
  *        calls to register correctly in the taxonomy UI.
+ * 3.10.0 Added ws_procedure_type taxonomy (ws-ag-procedure). Flat, three terms:
+ *        disclosure, retaliation, both. Replaces ws_proc_type ACF select field.
+ *        Enables tax_query filtering in Phase 2 filter cascade. Seeder:
+ *        ws_seed_proc_type_taxonomy(). Gate: ws_seeded_procedure_type / 1.0.0.
  *
  */
 
@@ -587,6 +591,42 @@ function ws_register_taxonomies() {
             ]
         );
     }
+
+    // ── 16. Procedure Type ────────────────────────────────────────────────
+    //
+    // New in 3.10.0. Flat taxonomy classifying the purpose of a
+    // ws-ag-procedure record. Applied to ws-ag-procedure only.
+    // Three stable terms: disclosure, retaliation, both.
+    // Replaces ws_proc_type ACF select field — enables tax_query filtering
+    // in the Phase 2 filter cascade. Single-value per record (radio UI).
+    // Terms are seeded via ws_seed_proc_type_taxonomy().
+
+    if ( ! taxonomy_exists( 'ws_procedure_type' ) ) {
+        register_taxonomy(
+            'ws_procedure_type',
+            [ 'ws-ag-procedure' ],
+            [
+                'label'             => 'Procedure Types',
+                'labels'            => [
+                    'name'              => 'Procedure Types',
+                    'singular_name'     => 'Procedure Type',
+                    'search_items'      => 'Search Procedure Types',
+                    'all_items'         => 'All Procedure Types',
+                    'edit_item'         => 'Edit Procedure Type',
+                    'update_item'       => 'Update Procedure Type',
+                    'add_new_item'      => 'Add New Procedure Type',
+                    'new_item_name'     => 'New Procedure Type Name',
+                    'menu_name'         => 'Procedure Types',
+                ],
+                'public'            => false,
+                'hierarchical'      => false,
+                'show_ui'           => true,
+                'show_in_rest'      => true,
+                'show_admin_column' => true,
+                'capabilities'      => ws_get_taxonomy_caps(),
+            ]
+        );
+    }
 }
 add_action( 'init', 'ws_register_taxonomies' );
 
@@ -717,6 +757,10 @@ add_action( 'admin_init', function() {
     if ( get_option( 'ws_seeded_aorg_cost_model' ) !== '1.0.0' ) {
         ws_seed_aorg_cost_model_taxonomy();
         update_option( 'ws_seeded_aorg_cost_model', '1.0.0' );
+    }
+    if ( get_option( 'ws_seeded_procedure_type' ) !== '1.0.0' ) {
+        ws_seed_proc_type_taxonomy();
+        update_option( 'ws_seeded_procedure_type', '1.0.0' );
     }
 
 } );
@@ -1237,6 +1281,30 @@ function ws_seed_employer_defense_taxonomy() {
         'statutory-exception-claim'         => 'Statutory Exception Claim',
         'mixed-motive-defense'              => 'Mixed Motive Defense',
         'no-protected-activity'             => 'Disclosure was not Protected',
+    ];
+    foreach ( $terms as $slug => $name ) {
+        if ( ! term_exists( $slug, $taxonomy ) ) {
+            wp_insert_term( $name, $taxonomy, [ 'slug' => $slug ] );
+        }
+    }
+}
+
+/**
+ * Seeds ws_procedure_type with its three flat terms.
+ *
+ * New in 3.10.0. Replaces the ws_proc_type ACF select field on ws-ag-procedure.
+ * These three terms are stable — the set is not expected to grow.
+ *
+ *   disclosure  — procedure for reporting wrongdoing to the agency
+ *   retaliation — procedure for filing a complaint after adverse action
+ *   both        — single procedure that covers both disclosure and retaliation
+ */
+function ws_seed_proc_type_taxonomy() {
+    $taxonomy = 'ws_procedure_type';
+    $terms    = [
+        'disclosure'  => 'Disclosure',
+        'retaliation' => 'Retaliation',
+        'both'        => 'Both',
     ];
     foreach ( $terms as $slug => $name ) {
         if ( ! term_exists( $slug, $taxonomy ) ) {
