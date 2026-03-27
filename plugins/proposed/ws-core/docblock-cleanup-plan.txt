@@ -1,0 +1,19 @@
+**Shortcode files** — no ceiling on documentation depth. These are written for a lay contributor who may have no prior context on the plugin. Full `@param`/`@return`, query return shape glossary, inline explanations of why things work the way they do, notes on what not to do and why. If a shortcode has a non-obvious behavior (auto-context resolution, federal append, the `jx` attribute being optional on jurisdiction pages), it gets explained in plain language right there in the file.
+
+Everything else stays lean. Shortcodes are the exception by design.
+
+---
+
+**Full plan:**
+
+| Layer | Per-file | README.md |
+|---|---|---|
+| `cpt/` | Version stamp + one-liners | Slug list, conventions, menu_position table |
+| `taxonomies/` | Version stamp + one-liners | Gate standard, two-phase behaviour, helper note |
+| `acf/` | Version stamp + one-liners | Shared group patterns, save_terms, menu_order stacking |
+| `matrix/` | Version stamp + one-liners | Seeding constant, divergence pattern, gate bump procedure |
+| `queries/` | Version stamp + one-liners + full `@param`/`@return` | Contract, load order, return key policy, caching |
+| `admin/` | Version stamp + one-liners | Hook priority table, layer boundary, direct meta reads |
+| `render/` | Version stamp + one-liners | Render contract, sanitization paths, assembler pattern |
+| `shortcodes/` | No ceiling — lay contributor standard | Brief: "documented per file, contributor entry point" |
+
