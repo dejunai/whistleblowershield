@@ -220,6 +220,9 @@ foreach ( [ 'ws_auto_date_created', 'ws_auto_last_edited', 'ws_auto_last_edited_
 }
 unset( $_ws_f );
 
+// Legal update visibility control is admin-only.
+add_filter( 'acf/load_field/name=ws_legal_update_hide_public', 'ws_acf_lock_for_non_admins' );
+
 foreach ( [ 'last_reviewed', 'ws_auto_plain_english_reviewed_by', 'ws_auto_plain_english_reviewed_date' ] as $_ws_f ) {
     add_filter( "acf/load_field/name={$_ws_f}", 'ws_acf_lock_for_non_editors' );
 }
@@ -1435,4 +1438,3 @@ add_action( 'deleted_post', function( $post_id ) {
         ws_rebuild_jx_statute_interp_index( $interp_sid );
     }
 } );
-
