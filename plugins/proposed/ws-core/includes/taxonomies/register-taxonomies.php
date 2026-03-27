@@ -631,9 +631,9 @@ function ws_bulk_insert_hierarchical( array $hierarchy, string $taxonomy ) {
 
 add_action( 'admin_init', function() {
 
-    if ( get_option( 'ws_seeded_disclosure_type' ) !== '1.1.0' ) {
+    if ( get_option( 'ws_seeded_disclosure_type' ) !== '1.0.0' ) {
         ws_seed_disclosure_taxonomy();
-        update_option( 'ws_seeded_disclosure_type', '1.1.0' );
+        update_option( 'ws_seeded_disclosure_type', '1.0.0' );
     }
     if ( get_option( 'ws_seeded_process_type' ) !== '1.0.0' ) {
         ws_seed_process_taxonomy();
