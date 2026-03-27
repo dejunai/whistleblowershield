@@ -90,7 +90,7 @@ add_shortcode( 'ws_nla_disclaimer_notice', function() {
         . 'consult with a qualified legal professional regarding the specifics '
         . 'of their situation before initiating any formal disclosure or legal action.';
 
-    return ws_render_nla_disclaimer( $notice_text );
+    return ws_render_not_legal_advice_disclaimer( $notice_text );
 
 } );
 

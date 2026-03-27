@@ -19,7 +19,7 @@
  *
  * FUNCTIONS
  * ---------
- *   ws_render_nla_disclaimer()      "Not legal advice" notice box.
+ *   ws_render_not_legal_advice_disclaimer()  "Not legal advice" notice box.
  *   ws_render_footer()              Site-wide footer block.
  *   ws_render_legal_updates()       Legal updates list.
  *   ws_render_jurisdiction_index()  Filterable jurisdiction index grid.
@@ -35,7 +35,7 @@
  * VERSION HISTORY
  * ---------------
  * 3.6.0  Extracted from section-renderer.php as part of render-layer split.
- *        ws_render_nla_disclaimer(), ws_render_footer(), ws_render_legal_updates(),
+ *        ws_render_not_legal_advice_disclaimer(), ws_render_footer(), ws_render_legal_updates(),
  *        and ws_render_jurisdiction_index() previously defined in that file.
  * 3.8.1  Contact email in ws_render_footer() wrapped in
  *        apply_filters( 'ws_contact_email', 'admin@whistleblowershield.org' ).
@@ -56,7 +56,7 @@ defined( 'ABSPATH' ) || exit;
  * @param  string $text  The disclaimer text to display.
  * @return string        HTML notice block.
  */
-function ws_render_nla_disclaimer( $text ) {
+function ws_render_not_legal_advice_disclaimer( $text ) {
     return '<div class="ws-summary-notice"><strong>NOTICE:</strong> ' . wp_kses_post( $text ) . '</div>';
 }
 

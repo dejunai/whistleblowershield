@@ -82,10 +82,14 @@ function ws_resolve_display_name( $user_id ) {
 // For callers that only need the term ID, use ws_get_term_id_by_code() in
 // query-jurisdiction.php, which delegates here.
 //
-// @param  string      $code  USPS jurisdiction code (e.g. 'ca', 'us', 'tx').
-// @return WP_Term|false      Term object, or false if not found.
 // ════════════════════════════════════════════════════════════════════════════
 
+/**
+ * Resolves a USPS jurisdiction code to a ws_jurisdiction WP_Term object.
+ *
+ * @param  string       $code  USPS jurisdiction code (e.g. 'ca', 'us', 'tx').
+ * @return WP_Term|false       Term object, or false if not found.
+ */
 function ws_jx_term_by_code( $code ) {
     $code = (string) $code;
     if ( defined( 'WP_DEBUG' ) && WP_DEBUG && $code !== strtolower( $code ) ) {
@@ -117,10 +121,14 @@ function ws_jx_term_by_code( $code ) {
 // This function does NOT silently normalize — it asserts in WP_DEBUG mode
 // so typos are caught during development, not silently swallowed.
 //
-// @param  string $court_key  The stored ws_jx_interp_court meta value.
-// @return array|null         Court entry array, or null if not found.
 // ════════════════════════════════════════════════════════════════════════════
 
+/**
+ * Returns the court entry array for a given court key.
+ *
+ * @param  string     $court_key  The stored ws_jx_interp_court meta value.
+ * @return array|null             Court entry array, or null if not found.
+ */
 function ws_court_lookup( $court_key ) {
     global $ws_court_matrix, $ws_state_court_matrix;
     if ( ! $court_key ) {

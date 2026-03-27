@@ -378,6 +378,9 @@ function ws_acf_plain_english_guards( $post_id ) {
     }
 
     // ── Rule 3: has_plain_english toggle-off clears plain_reviewed fields ─────
+    //
+    // Direct meta read — acf/save_post fires during a save; reading stored state
+    // here to compare the previous value against the submitted value before ACF writes.
 
     $stored_has_plain = (int) get_post_meta( $post_id, 'ws_has_plain_english', true );
 
@@ -409,6 +412,7 @@ function ws_acf_plain_english_guards( $post_id ) {
 
     if ( $submitted_has_plain && $submitted_plain_english !== '' ) {
 
+        // Direct meta reads — acf/save_post context; reading stored values to compare against submitted content.
         $stored_plain_reviewed = (int) get_post_meta( $post_id, 'ws_plain_english_reviewed', true );
 
         if ( $stored_plain_reviewed ) {

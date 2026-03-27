@@ -65,7 +65,7 @@
  *        layer return keys (query-jurisdiction.php v3.3.2).
  * 3.6.0  Renamed section-renderer.php → render-section.php for naming
  *        convention alignment (verb-noun, matches render-jurisdiction.php).
- *        General-purpose renderers (ws_render_nla_disclaimer, ws_render_footer,
+ *        General-purpose renderers (ws_render_not_legal_advice_disclaimer, ws_render_footer,
  *        ws_render_legal_updates, ws_render_jurisdiction_index) moved to
  *        render-general.php. This file now contains jurisdiction-page
  *        section renderers only.

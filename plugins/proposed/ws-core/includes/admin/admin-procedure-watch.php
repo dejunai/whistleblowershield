@@ -102,6 +102,8 @@ function ws_proc_check_statute_links( $post_id ) {
     }
 
     // ── Read statute IDs and procedure disclosure types ────────────────────
+    // Direct meta and taxonomy reads — acf/save_post context; validation logic that
+    // runs during a save cannot route through the query layer's frontend read functions.
 
     $statute_ids_raw = get_post_meta( $post_id, 'ws_proc_statute_ids', true );
     $statute_ids     = is_array( $statute_ids_raw ) ? array_map( 'intval', array_filter( $statute_ids_raw ) ) : [];
@@ -229,6 +231,8 @@ function ws_proc_gate_publish( $data, $postarr ) {
         return $data;
     }
 
+    // Direct meta read — wp_insert_post_data fires before the post is saved; reading the flag
+    // state here to gate publish. Query layer is not appropriate in this filter context.
     if ( ! get_post_meta( $post_id, 'ws_proc_stat_flagged', true ) ) {
         return $data; // Not flagged — allow publish.
     }
@@ -281,6 +285,7 @@ function ws_proc_stat_admin_notice() {
 
     $post_id    = $post->ID;
     $is_admin   = current_user_can( 'manage_options' );
+    // Direct meta reads — admin notice display only; query layer is for front-end shortcode rendering.
     $flagged    = (bool) get_post_meta( $post_id, 'ws_proc_stat_flagged',    true );
     $broad      = (bool) get_post_meta( $post_id, 'ws_proc_stat_broad_scope', true );
     $detail_raw = get_post_meta( $post_id, 'ws_proc_stat_flag_detail',       true );

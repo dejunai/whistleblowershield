@@ -1007,13 +1007,9 @@ $_ws_jx_matrix = [
 // Gate: ws_seeded_jurisdiction_matrix / 1.0.0 (Unified Option-Gate Method).
 // ════════════════════════════════════════════════════════════════════════════
 
-error_log( 'load-time matrix type=' . gettype( $_ws_jx_matrix ) );
-
 function ws_seed_jurisdiction_matrix() {
-	global $_ws_jx_matrix;
+    global $_ws_jx_matrix;
 
-    error_log( 'seed: isset=' . ( isset( $_ws_jx_matrix ) ? 'yes' : 'no' ) );
-	error_log( 'seed: type=' . gettype( $_ws_jx_matrix ) );
     // ── Step 1: Seed taxonomy terms ───────────────────────────────────────
 
     $term_map = []; // slug → term_id

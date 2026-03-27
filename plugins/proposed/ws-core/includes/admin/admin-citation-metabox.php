@@ -157,6 +157,7 @@ function ws_render_citation_metabox( $post ) {
             </thead>
             <tbody>
                 <?php foreach ( $citations as $cite_id ) :
+                    // Direct meta reads — admin metabox display only; query layer is for front-end shortcode rendering.
                     $official_name = get_post_meta( $cite_id, 'ws_jx_citation_official_name', true );
                     $type_key      = get_post_meta( $cite_id, 'ws_jx_citation_type', true );
                     $attached      = get_post_meta( $cite_id, 'ws_attach_flag', true );

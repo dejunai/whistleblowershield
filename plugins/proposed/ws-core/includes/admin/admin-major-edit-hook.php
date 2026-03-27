@@ -113,6 +113,7 @@ function ws_acf_log_major_edit( $post_id ) {
 	// ── Law name — pull from the source post's best naming field ─────────────
 	// Each law CPT has its own official_name field; try each in order, falling back to post title.
 	// jx-summary has no naming field — fall back to post title.
+	// Direct meta reads — acf/save_post context; reading from the source post to populate the new ws-legal-update record.
 	$law_name = ( $post_type !== 'jx-summary' )
 		? (
 			get_post_meta( $post_id, 'ws_jx_statute_official_name', true )
