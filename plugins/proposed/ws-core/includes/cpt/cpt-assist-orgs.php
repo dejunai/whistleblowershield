@@ -19,7 +19,7 @@
  * 1.0.0   Initial release.
  * 1.0.1   menu_position corrected from 31 to 30.
  * 3.7.0   ws_employment_sector taxonomy added.
- *)
+ */
 
 defined( 'ABSPATH' ) || exit;
 
