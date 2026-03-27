@@ -14,6 +14,7 @@ defined( 'ABSPATH' ) || exit;
 // Assist-Org Data
 // ════════════════════════════════════════════════════════════════════════════
 
+global $_ws_assist_org_matrix;
 $_ws_assist_org_matrix = [
 
     // ── Dedicated whistleblower nonprofits / legal aid ────────────────────
@@ -326,7 +327,6 @@ $_ws_assist_org_matrix = [
 // ════════════════════════════════════════════════════════════════════════════
 
 function ws_seed_assist_org_matrix() {
-    global $_ws_assist_org_matrix;
 
     // Resolve the US jurisdiction term ID.
     $us_term = ws_jx_term_by_code( 'us' );

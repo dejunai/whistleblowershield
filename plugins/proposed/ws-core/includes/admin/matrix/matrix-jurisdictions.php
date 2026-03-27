@@ -9,6 +9,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
+global $_ws_jx_matrix;
 $_ws_jx_matrix = [
 
     // ── Federal ───────────────────────────────────────────────────────────────
@@ -1008,7 +1009,6 @@ $_ws_jx_matrix = [
 // ════════════════════════════════════════════════════════════════════════════
 
 function ws_seed_jurisdiction_matrix() {
-    global $_ws_jx_matrix;
 
     // ── Step 1: Seed taxonomy terms ───────────────────────────────────────
 

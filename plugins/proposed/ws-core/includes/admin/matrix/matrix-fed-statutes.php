@@ -14,6 +14,7 @@ defined( 'ABSPATH' ) || exit;
 // Federal Statute Data
 // ════════════════════════════════════════════════════════════════════════════
 
+global $_ws_fed_statutes_matrix;
 $_ws_fed_statutes_matrix = [
 
     [
@@ -185,7 +186,6 @@ $_ws_fed_statutes_matrix = [
 // ════════════════════════════════════════════════════════════════════════════
 
 function ws_seed_fed_statutes_matrix() {
-    global $_ws_fed_statutes_matrix;
 
     // Resolve the US jurisdiction term ID.
     $us_term = ws_jx_term_by_code( 'us' );

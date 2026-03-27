@@ -14,6 +14,7 @@ defined( 'ABSPATH' ) || exit;
 // Agency Data
 // ════════════════════════════════════════════════════════════════════════════
 
+global $_ws_agency_matrix;
 $_ws_agency_matrix = [
 
     [
@@ -105,7 +106,6 @@ $_ws_agency_matrix = [
 // ════════════════════════════════════════════════════════════════════════════
 
 function ws_seed_agency_matrix() {
-    global $_ws_agency_matrix;
 
     // Resolve the US jurisdiction term ID.
     $us_term = ws_jx_term_by_code( 'us' );
