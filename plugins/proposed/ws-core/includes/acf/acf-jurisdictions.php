@@ -1,145 +1,51 @@
 <?php
 /**
- * acf-jurisdiction.php
+ * acf-jurisdictions.php
  *
- * Registers Advanced Custom Fields (ACF Pro) used by the `jurisdiction` CPT.
+ * ACF Pro field group for the `jurisdiction` CPT.
+ * Group key: group_jurisdiction_metadata
  *
- * PURPOSE
- * -------
- * This field group defines the metadata used to render the jurisdiction
- * header and maintain canonical identifiers for each supported U.S.
- * jurisdiction.
+ * FIELDS
+ * ------
+ * Identity tab:
+ *   ws_jurisdiction_term_id   Taxonomy field — links post to ws_jurisdiction term (save_terms: 1).
+ *   ws_jx_code                Read-only display of the USPS code. Canonical code is the term slug.
+ *   ws_jurisdiction_class     Select: state / federal / territory / district.
+ *   ws_jurisdiction_name      Display name used in page headings.
  *
- * Each Jurisdiction record represents one of the supported jurisdictions:
+ * Government Leadership URLs tab:
+ *   ws_jx_gov_portal_url / _label      Main government portal.
+ *   ws_jx_executive_url / _label       Governor / mayor / president URL and title.
+ *   ws_jx_wb_authority_url / _label    Whistleblower authority office.
+ *   ws_jx_legislature_url / _label     Legislature URL and name.
+ *   Authority and legislature labels are auto-selected on first save from
+ *   jurisdiction class and post slug; both are manually overridable.
  *
- *   • 50 U.S. States
- *   • Federal Government (US)
- *   • District of Columbia (DC)
- *   • U.S. Territories
- *       - Puerto Rico              (PR)
- *       - Guam                     (GU)
- *       - U.S. Virgin Islands      (VI)
- *       - American Samoa           (AS)
- *       - Northern Mariana Islands (MP)
+ * Flag tab:
+ *   ws_jx_flag                Image field (WordPress media library).
+ *   ws_jx_flag_attribution    Wikimedia Commons attribution string.
+ *   ws_jx_flag_source_url     Canonical Wikimedia SVG URL.
+ *   ws_jx_flag_license        License identifier (e.g. "Public Domain").
  *
- * DATA CATEGORIES
- * ---------------
- * 1. Jurisdiction Identity
- *      ws_jurisdiction_class
- *      ws_jurisdiction_name
- *      (Jurisdiction code is now the slug of the assigned ws_jurisdiction taxonomy term)
+ * Record Management tab:
+ *   _ws_auto_last_edited_gmt  Hidden GMT audit timestamp.
+ *   ws_auto_last_edited_author  Last editor (admin-overridable for attribution).
+ *   ws_auto_last_edited       Local date of last edit (Y-m-d).
+ *   Create authorship fields are omitted — jurisdiction records are seeder-generated.
  *
- * 2. Government Links
- *      government portal (url + label)
- *      executive office (url + label)
- *      whistleblower authority (url + label)
- *      legislature (url + label)
- *
- * 3. Flag Metadata
- *      flag image
- *      attribution
- *      source URL
- *      license
- *
- * 4. Record Management
- *      author             (hidden; set once on first save)
- *      date created       (hidden; set once on first save, local + GMT)
- *      date updated       (refreshed on every save, local + GMT)
- *      last editor        (auto-filled, admin-overridable)
- *
- * 5. Dataset Relationships
- *      Links jurisdiction to its associated legal datasets:
- *      summary, statutes, citations, interpretations.
- *
- * JURISDICTION IDENTITY
- * ---------------------
- * The canonical two-letter code for each jurisdiction is stored as the slug
- * of the assigned ws_jurisdiction taxonomy term (e.g., 'ca', 'tx', 'us').
- * The ws_jx_code text field has been retired; code is now derived from
- * the taxonomy term slug.
- *
- * POST SLUGS (Territories)
- * ------------------------
- * The following slugs are used for territory auto-selection logic:
- *      guam
- *      puerto-rico
- *      us-virgin-islands
- *      american-samoa
- *      northern-mariana-islands
- *
- * NOTES
- * -----
- * Government Links allow flexible labeling across jurisdictions.
- * Examples:
- *      Governor / Mayor
- *      Attorney General / Secretary of Justice / U.S. Office of Special Counsel
- *
- * Whistleblower Authority Label and Legislature Name are auto-selected on
- * first save based on Jurisdiction Class and post slug. Both can be manually
- * overridden after the first save.
- *
- * Record Management fields are read-only in the UI. Author and date created
- * fields are hidden from the editor interface but retained for data integrity.
- * Last Editor is auto-filled on save but can be manually overridden by an
- * administrator to preserve attribution.
+ * Territory post slugs used by auto-selection logic:
+ *   guam, puerto-rico, us-virgin-islands, american-samoa, northern-mariana-islands
  *
  * @package    WhistleblowerShield
  * @since      1.0.0
- * @author     Whistleblower Shield
- * @link       https://whistleblowershield.org
- * @copyright  Copyright (c) Whistleblower Shield
  *
- * VERSION HISTORY
- * ---------------
- * 1.0.0  Initial release.
- * 1.8.0  Relationship field post_type filters updated from
- *            jurisdiction-summary/resources/procedures/statutes
- *        to  jx-summary/s/s/jx-statutes
- * 2.1.0  Refactored for ws-core architecture. Added ws_jx_code, legislature,
- *        record management fields (author, date created, date updated,
- *        last editor), tabs, inline field instructions throughout,
- *        auto-selection of Legal Authority Label and Legislature Label
- *        on first save, and PHP 8.0 backstop for str_starts_with.
- * 2.1.1  Schema normalization pass:
- *        - Standardized meta names to ws_jx_* prefix (ws_jurisdiction_* for
- *          Identity tab class/name fields).
- *        - Standardized field keys to field_jx_* pattern (removed ws_ noise).
- *        - Renamed head_of_government → executive for brevity.
- *        - Renamed legal_authority → wb_authority for accuracy (AG is not
- *          always the whistleblower authority).
- *        - Renamed jurisdiction_type → jurisdiction_class for legal tone.
- *        - Renamed flag_attribution_url → flag_source_url for clarity.
- *        - Added ws_jx_related_citations and ws_jx_related_interpretations.
- *        - Removed deprecated jx-resources relationship field.
- *        - Removed redundant Gov URL instructions message block.
- *        - Hidden GMT date fields and author/date_created from editor UI.
- *        - Revised all instructions for lay-editor clarity.
- *        - Shortened select choice keys for cleaner code.
- *        - Updated auto-fill function to match new field names and values.
- * 3.0.0  Architecture refactor (Phase 3.2):
- *        - Removed ws_jx_code text field. Jurisdiction code is now the slug
- *          of the assigned ws_jurisdiction taxonomy term.
- *        Phase 3.6:
- *        - Removed Related Content tab and all ws_jx_related_* relationship
- *          fields (summary, statutes, citations, interpretations). Jurisdiction
- *          scoping is now fully taxonomy-based; admin-relationships.php removed.
- * 3.1.1  Pass 2 ACF audit fixes:
- *        - Corrected 'requied' typo to 'required' on field_jurisdiction_tax
- *          and field_jx_code (fields were silently not required).
- *        - Changed field_create_author from type=text to type=user with
- *          role and return_format=id, matching all other CPT groups.
- * 3.1.2  Pass 3 ACF audit — instructions fixes:
- *        - field_jurisdiction_tax: replaced visible instructions with internal
- *          note (field is hidden; instruction was never displayed).
- *        - field_jx_code: clarified as read-only seeder-populated display field.
- *        - field_create_author label: 'Create Author' → 'Created By' for
- *          consistency with all other CPT groups.
- *        - field_create_author instructions: standardised to 'Stamped
- *          automatically on first save. Read only.'
- * 3.9.0  Record Management tab trimmed: removed field_jx_create_author,
- *        field_jx_date_created, and field_date_created_gmt. Jurisdiction
- *        records are seeder-generated — create authorship is not meaningful.
- *        last_edited, last_edited_gmt, last_edited_author retained.
+ * VERSION
+ * -------
+ * 1.0.0   Initial release.
+ * 2.1.0   ws-core refactor: tabs, record management fields, auto-selection logic.
+ * 3.0.0   ws_jx_code retired as join key; taxonomy term slug is now canonical.
+ *         Related Content tab and ws_jx_related_* fields removed.
+ * 3.9.0   Record Management tab trimmed; create authorship fields removed.
  */
 
 defined( 'ABSPATH' ) || exit;

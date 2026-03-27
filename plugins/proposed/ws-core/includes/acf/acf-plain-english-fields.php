@@ -2,119 +2,46 @@
 /**
  * acf-plain-english-fields.php
  *
- * Registers the centralized Plain Language ACF field group shared
- * across content CPTs that support plain language companion documents.
- *
- * PURPOSE
- * -------
- * Provides a single authoritative registration of the plain language
- * fields used on supported CPTs. Prior to this file, these fields were
- * duplicated inline inside each CPT's ACF registration file.
- * Centralizing here eliminates that duplication and ensures consistent
- * field definitions, keys, and behavior across all supported CPTs.
+ * Centralized Plain Language ACF field group shared across content CPTs.
+ * Group key: group_plain_english_metadata  (menu_order 85)
  *
  * ATTACHED CPTs
  * -------------
  * jx-statute, jx-citation, jx-interpretation, ws-agency
  *
- * These are the CPTs whose primary content is legal source material
- * (statutes, case law, court interpretations) or complex institutional
- * descriptions (agencies) that may warrant a plain-language companion.
- *
- * EXCLUDED CPTs — and why
+ * EXCLUDED CPTs (and why)
  * -----------------------
- * jx-summary     — IS the plain language document. It does not translate
- *                  legalese; it is the synthesis. It carries its own
- *                  reviewed fields in acf-jx-summaries.php with a badge
- *                  rendered independently by its shortcode path.
- *
- * ws-assist-org  — Assist org content is plain language by nature.
- *                  No translation layer is needed or appropriate.
- *
- * ws-legal-update — Time-stamped news/changelog entries. No plain
- *                   language companion use case exists.
- *
- * ws-reference   — Outbound links with metadata. No prose content
- *                  requiring simplification.
- *
- * jurisdiction   — A structured data container (metadata, URLs, flags).
- *                  Not explanatory prose. Plain language companions
- *                  belong on the child CPTs that carry the actual legal
- *                  content (statutes, citations, interpretations).
+ * jx-summary      — IS the plain language document; carries its own review fields.
+ * ws-assist-org   — Content is plain language by nature; no overlay needed.
+ * ws-legal-update — Changelog entries; no plain language companion use case.
+ * ws-reference    — Outbound links with metadata; no prose to simplify.
+ * jurisdiction    — Structured metadata container; not explanatory prose.
  *
  * FIELDS
  * ------
- *   has_plain_english         Toggle: plain language version exists.
- *                             Triggers conditional display of the wysiwyg.
+ * ws_has_plain_english              Toggle — enables plain language content field.
+ * ws_plain_english_wysiwyg          The plain language content (conditional on toggle).
+ * ws_plain_english_reviewed         Toggle — marks content as human-reviewed.
+ * ws_auto_plain_english_reviewed_by User ID of reviewer. Stamped once on toggle-on; cleared on toggle-off.
+ * ws_auto_plain_english_reviewed_date  Local Y-m-d of first review. Same lifecycle.
+ * ws_auto_plain_english_by          User ID of summarizer. Stamped once on first plain language save.
+ * ws_auto_plain_english_date        Local Y-m-d of first plain language save.
  *
- *   plain_english_wysiwyg     The plain language content itself.
- *                             Conditional on has_plain_english = 1.
- *
- *   plain_english_reviewed    Toggle: a human has reviewed and approved
- *                             the plain language content. Requires editor
- *                             rank or above (enforced in admin-hooks.php).
- *
- *   ws_auto_plain_english_reviewed_by  WP user ID of the reviewer. Stamped
- *                             once when plain_english_reviewed is first
- *                             enabled. Cleared on toggle-off.
- *
- *   ws_auto_plain_english_reviewed_date  Local date (Y-m-d) the plain language
- *                             content was first reviewed. Stamped once when
- *                             plain_english_reviewed is first enabled.
- *                             Cleared on has_plain_english toggle-off.
- *
- *   ws_auto_plain_english_by  WP user ID of the summarizer. Stamped once
- *                             on first save after has_plain_english is
- *                             enabled and content exists.
- *
- *   ws_auto_plain_english_date  Local date (Y-m-d) the plain language content
- *                             was first saved. Stamped once. Cleared on
- *                             has_plain_english toggle-off.
- *
- * RENDER LAYER
- * ------------
- * The build_trust_badge() call in each CPT's render/shortcode path decides
- * whether to render a plain language reviewed badge. jx-summary's render
- * path calls its own badge variant independently — it does not use these
- * fields. No conditional logic is needed in this registration file.
- *
- * INTEGRITY GUARDS
- * ----------------
- * ws_acf_plain_english_guards() in admin-hooks.php (priority 5) enforces:
- *   Rule 1 — has_plain_english requires non-empty plain_english_wysiwyg.
- *   Rule 2 — plain_english_reviewed requires editor rank or above.
- *   Rule 3 — has_plain_english toggle-off clears reviewed fields and stamps.
- *
- * STAMP WRITES
- * ------------
- * ws_auto_plain_english_reviewed_by + ws_auto_plain_english_reviewed_date — ws_acf_stamp_plain_reviewed_by() priority 25.
- * ws_auto_plain_english_by + ws_auto_plain_english_date — ws_acf_stamp_summarized_fields() priority 25.
- * All functions in admin-hooks.php. None reference ACF field keys —
- * all read/write post meta directly by key name.
- *
- * HOOKS
- * -----
- * Registered on acf/init, consistent with all other ACF files in ws-core.
+ * INTEGRITY GUARDS (admin-hooks.php, priority 5)
+ * -----------------------------------------------
+ * Rule 1 — has_plain_english requires non-empty plain_english_wysiwyg.
+ * Rule 2 — plain_english_reviewed requires editor rank or above.
+ * Rule 3 — has_plain_english toggle-off clears all reviewed fields and stamps.
  *
  * @package    WhistleblowerShield
  * @since      3.4.0
- * @author     Whistleblower Shield
- * @link       https://whistleblowershield.org
- * @copyright  Copyright (c) Whistleblower Shield
  *
- * VERSION HISTORY
- * ---------------
+ * VERSION
+ * -------
  * 3.4.0  Initial release. Centralizes plain language fields previously
- *        duplicated in acf-jx-statutes.php, acf-jx-citations.php,
- *        acf-jx-interpretations.php, and acf-agencies.php.
- *        ws-assist-org plain language tab retired — content is plain
- *        language by nature; feature does not apply.
- * 3.5.0  Sanity pass (ws-core v3.1.0): group key renamed
- *        group_ws_plain_english_fields → group_plain_english_metadata per new ACF key rules.
- * 3.6.0  ws_auto_ pass (ws-core v3.2.0): stamp field meta keys prefixed:
- *        plain_english_reviewed_by → ws_auto_plain_english_reviewed_by,
- *        plain_english_by → ws_auto_plain_english_by,
- *        plain_english_date → ws_auto_plain_english_date.
+ *        duplicated across four individual CPT ACF files.
+ * 3.5.0  Group key renamed: group_ws_plain_english_fields → group_plain_english_metadata.
+ * 3.6.0  Stamp field meta keys prefixed with ws_auto_.
  */
 
 defined( 'ABSPATH' ) || exit;

@@ -2,105 +2,57 @@
 /**
  * acf-jx-interpretations.php
  *
- * Registers ACF Pro fields for the `jx-interpretation` CPT.
+ * ACF Pro field group for the `jx-interpretation` CPT.
+ * Group key: group_jx_interpretation_metadata
  *
- * PURPOSE
- * -------
- * Provides structured metadata for individual court interpretations of
- * whistleblower statutes. Fields cover case identity, the holding,
- * process type classification, and authorship stamps. Covers both federal
- * court decisions (SCOTUS, circuits, districts) and state court decisions.
+ * Stamp fields: group_stamp_metadata (acf-stamp-fields.php, menu_order 90)
+ * Plain English: group_plain_english_metadata (acf-plain-english-fields.php, menu_order 85)
+ * Source verify: group_source_verify_metadata (acf-source-verify.php)
+ * Major edit: group_major_edit_metadata (acf-major-edit.php, menu_order 99)
  *
- * FIELD SUMMARY
- * -------------
+ * FIELDS
+ * ------
  * Case Identity tab:
- *   ws_jx_interp_court         Court (select, populated by ws_interp_load_court_choices)
- *   ws_jx_interp_court_name    Court Name (text, conditional on court == 'other')
- *   ws_jx_interp_year          Decision Year (number)
- *   ws_jx_interp_favorable     Favorable to Whistleblower? (true_false)
- *   ws_jx_interp_official_name Official name — full case name (text, required)
- *   ws_jx_interp_common_name   Common/informal name (text, optional)
- *   ws_jx_interp_case_citation Citation (text)
- *   ws_jx_interp_url           Opinion URL (url)
+ *   ws_jx_interp_court         Select — populated by ws_interp_load_court_choices().
+ *                               Context-aware: federal statute = all courts merged;
+ *                               state statute = state courts only.
+ *   ws_jx_interp_court_name    Text — free-text court name (conditional on court = 'other').
+ *   ws_jx_interp_year          Number — year of decision.
+ *   ws_jx_interp_favorable     True/false — outcome favored whistleblower.
+ *   ws_jx_interp_official_name Text — full case name (required).
+ *   ws_jx_interp_common_name   Text — short/informal name (optional).
+ *   ws_jx_interp_case_citation Text — reporter citation.
+ *   ws_jx_interp_url           URL — link to court opinion.
  *
  * Summary tab:
- *   ws_jx_interp_summary  Summary (textarea)
- *   ws_process_type        Process Type (taxonomy multi_select)
- *   ws_attach_flag         Editorial curation flag (true_false). Marks this record as
- *                          one of the ~3–5 highlighted interpretations shown on the
- *                          jurisdiction summary page. NOT a visibility gate — unflagged
- *                          interpretations are accessible via taxonomy queries.
- *   ws_display_order       Render order among flagged items (number, conditional on ws_attach_flag)
+ *   ws_jx_interp_summary       Textarea — plain-language summary of the holding.
+ *   ws_process_type            Taxonomy — ws_process_type terms (save_terms: 1).
+ *   ws_attach_flag             True/false — surface on jurisdiction summary page.
+ *   ws_display_order           Number — render order among flagged items (conditional).
+ *   ws_jx_interp_last_reviewed Text — last verified date (Y-m-d).
  *
  * Relationships tab:
- *   ws_jx_interp_statute_id   Parent Statute (post_object, jx-statute)
- *   ws_jx_interp_affected_jx  Affected Jurisdictions (taxonomy multi_select, ws_jurisdiction)
- *                              Auto-computed on save from the court's ws_jx_codes in
- *                              $ws_court_matrix / $ws_state_court_matrix. Empty = SCOTUS
- *                              (all jurisdictions). __manual__ = skip auto-population (other).
+ *   ws_jx_interp_statute_id    Post object — parent jx-statute (single, required).
+ *   ws_jx_interp_affected_jx   Taxonomy — ws_jurisdiction terms. Auto-computed on
+ *                               save from the court's ws_jx_codes in the court matrix.
+ *                               Empty = SCOTUS (all jx). 'other' court = skip.
+ *                               save_terms: 0 — prevents taxonomy query pollution.
  *
- * Jurisdiction scope is provided by the ws_jurisdiction taxonomy — US term
- * for federal court interpretations; state term for state court decisions.
- * Assigned via the taxonomy UI or auto-assigned on Create Now flow.
- *
- * Authorship & Review:
- *   Stamp fields registered centrally in acf-stamp-fields.php (menu_order 90).
- *   ws_jx_interp_last_reviewed    Last verified date (text) — content-owned,
- *                                  retained in this group.
- *
- * WORKFLOW
- * --------
- * Records are created via the "Add New Interpretation" meta box on the
- * jx-statute edit screen. The statute_id URL parameter pre-fills the
- * parent statute relationship field.
- *
- * PRE-POPULATION
- * --------------
- * ws_statute_id is pre-populated via acf/load_value (not acf/load_field).
- * acf/load_field cannot pre-select stored post IDs on post_object fields —
- * it only sets a default_value which ACF ignores when a relationship is
- * rendered. Instead, acf/load_value writes the statute_id from the URL
- * parameter into the field's live value when the post is an auto-draft,
- * which ACF then renders as the pre-selected item.
+ * Reference Materials tab:
+ *   ws_ref_materials            Relationship — links to ws-reference posts.
  *
  * @package    WhistleblowerShield
  * @since      2.4.0
- * @author     Whistleblower Shield
- * @link       https://whistleblowershield.org
- * @copyright  Copyright (c) Whistleblower Shield
  *
  * VERSION
  * -------
  * 2.4.0  Initial release.
- * 2.4.1  Bug #5 fix: replaced acf/load_field pre-population of
- *         ws_statute_id with acf/load_value checked against auto-draft
- *         status. acf/load_field default_value is silently ignored by
- *         ACF for post_object fields and does not pre-select anything.
- * 3.0.0  Architecture refactor (Phase 3.5):
- *        - Removed ws_jx_code field (retired; scope now via ws_jurisdiction taxonomy).
- *        - Added attach_flag toggle and order number field.
- *        - Updated Relationships tab comment; updated docblock.
- * 3.1.1  Pass 2 ACF audit fix:
- *        - Renamed tab key tab_ws_interp_plain_language → field_ws_interp_plain_language
- *          for convention consistency.
- * 3.1.2  Field keys corrected to match naming convention (field_ + meta name without ws_ prefix).
- * 3.4.0  Stamp field centralization:
- *        - Removed Authorship & Review tab and all stamp fields — now registered
- *          centrally in acf-stamp-fields.php (group_stamp_metadata, menu_order 90).
- *        - Removed Plain Language tab and all plain English fields — now registered
- *          centrally in acf-plain-english-fields.php (menu_order 85).
- *        - ws_interp_last_reviewed retained as a content-owned field.
- * 3.6.0  FIELD SUMMARY corrected: all ws_interp_* meta names updated to
- *         ws_jx_interp_* to match actual ACF field name values. ws_statute_id
- *         corrected to ws_jx_interp_statute_id. Added ws_jx_interp_affected_jx
- *         (taxonomy multi_select, save_terms=0) with auto-population hook that
- *         resolves the court's ws_jx_codes from the court matrix on every save.
- * 3.7.0  Added ws_jx_interp_court_name conditional text field (reveals when
- *         court = 'other'). ws_interp_load_court_choices() rewritten — context-
- *         aware: federal statute merges both $ws_court_matrix and
- *         $ws_state_court_matrix; state statute uses $ws_state_court_matrix only.
- *         ws_interp_auto_populate_affected_jx() updated to use ws_court_lookup()
- *         and skip auto-population when ws_jx_codes === '__manual__' (other).
+ * 3.0.0  Architecture refactor: ws_jx_code join retired; taxonomy-based scoping.
+ *        Affected jurisdictions auto-populated from court matrix.
+ * 3.4.0  Stamp fields centralized to acf-stamp-fields.php.
+ * 3.8.0  Court matrix split (federal + state). ws_jx_interp_court_name
+ *        conditional field added for 'other' court sentinel.
+ *        Field summary corrected to match current meta key names.
  */
 
 defined( 'ABSPATH' ) || exit;

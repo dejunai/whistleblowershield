@@ -30,11 +30,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-/**
- * 1. Register the Menu Item
- * This is the function you wrote—it is definitely NOT obsolete. 
- * It places the "Jurisdiction Status" link in your Admin Sidebar.
- */
+// Registers the Jurisdiction Dashboard menu item in the WordPress admin sidebar.
 add_action('admin_menu', function() {
     add_menu_page(
         'Jurisdiction Dashboard',   // Page Title
