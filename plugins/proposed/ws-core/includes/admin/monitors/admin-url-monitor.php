@@ -27,7 +27,7 @@
  *
  * CRON SCHEDULE
  * -------------
- * Custom schedules:
+ * Custom schedules: - now set by loader.php in the Universal Layer
  *   ws_every_ten_days   (864000 seconds) — standard URLs
  *   ws_every_three_days (259200 seconds) — high-priority procedure intake URLs
  * WP-Cron fires on page load — interval is approximate on low-traffic sites.
@@ -117,30 +117,8 @@ $ws_url_monitor_priority_map = [
 // ════════════════════════════════════════════════════════════════════════════
 // Custom Cron Schedule
 //
-// Registers a ws_every_ten_days interval. WordPress does not include a
-// 10-day schedule natively.
+// added custom schedules to the loader.php in the Universal Layer
 // ════════════════════════════════════════════════════════════════════════════
-
-add_filter( 'cron_schedules', 'ws_url_monitor_register_schedule' );
-
-/**
- * Adds the ws_every_ten_days cron schedule.
- *
- * @param  array $schedules  Existing WP-Cron schedules.
- * @return array
- */
-function ws_url_monitor_register_schedule( $schedules ) {
-    $schedules['ws_every_ten_days'] = [
-        'interval' => 864000, // 10 days in seconds
-        'display'  => __( 'Every 10 Days (WhistleblowerShield URL Monitor)' ),
-    ];
-    $schedules['ws_every_three_days'] = [
-        'interval' => 259200, // 3 days in seconds
-        'display'  => __( 'Every 3 Days (WhistleblowerShield Priority URL Monitor)' ),
-    ];
-    return $schedules;
-}
-
 
 // ════════════════════════════════════════════════════════════════════════════
 // Cron Event Registration
@@ -149,12 +127,12 @@ function ws_url_monitor_register_schedule( $schedules ) {
 // on plugin deactivation.
 // ════════════════════════════════════════════════════════════════════════════
 
-add_action( 'admin_init', 'ws_url_monitor_maybe_schedule' );
+add_action( 'admin_init', 'ws_url_monitor_schedule' );
 
 /**
  * Schedules the ws_url_health_check event if not already scheduled.
  */
-function ws_url_monitor_maybe_schedule() {
+function ws_url_monitor_schedule() {
     if ( ! wp_next_scheduled( 'ws_url_health_check' ) ) {
         wp_schedule_event( time(), 'ws_every_ten_days', 'ws_url_health_check' );
     }

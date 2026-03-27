@@ -138,13 +138,13 @@ function ws_feed_monitor_ensure_data_dir() {
 // Cron Schedule + Event
 // ════════════════════════════════════════════════════════════════════════════
 
-add_action( 'admin_init', 'ws_feed_monitor_maybe_schedule' );
+add_action( 'admin_init', 'ws_feed_monitor_schedule' );
 
 /**
  * Schedules the daily feed poll if not already scheduled.
  * Skips scheduling if no API token is configured.
  */
-function ws_feed_monitor_maybe_schedule() {
+function ws_feed_monitor_schedule() {
     $token = get_option( 'ws_feed_monitor_token', '' );
     if ( empty( $token ) ) {
         // If credentials were removed after a schedule was created, unschedule

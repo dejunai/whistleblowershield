@@ -265,7 +265,19 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 		}
 	}
 
-
+	// CRON SCHEDULES: Must register universally — WP-Cron fires on frontend
+	// requests where is_admin() is false and admin-url-monitor.php never loads.
+	add_filter( 'cron_schedules', function( $schedules ) {
+		$schedules['ws_every_ten_days'] = [
+			'interval' => 864000,
+			'display'  => 'Once every ten days',
+		];
+		$schedules['ws_every_three_days'] = [
+			'interval' => 259200,
+			'display'  => 'Once every three days',
+		];
+		return $schedules;
+	} );
 /*
 ---------------------------------------------------------
 2. ADMIN LAYER (Only for Editor/Dashboard)
