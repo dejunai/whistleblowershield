@@ -30,6 +30,7 @@
  *
  * @package    WhistleblowerShield
  * @since      3.9.0
+ * @version 3.10.0
  * @author     Whistleblower Shield
  * @link       https://whistleblowershield.org
  * @copyright  Copyright (c) Whistleblower Shield

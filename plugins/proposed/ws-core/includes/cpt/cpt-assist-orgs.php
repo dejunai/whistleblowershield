@@ -1,50 +1,25 @@
 <?php
 /**
- * cpt-assist-org.php
+ * cpt-assist-orgs.php — Registers the ws-assist-org CPT.
  *
- * Registers the Whistleblower Assistance Organization Custom Post Type.
+ * Directory of organizations that help whistleblowers: legal aid clinics,
+ * nonprofits, advocacy groups, law firms, government ombudsmen.
+ * Distinct from ws-agency (enforcement bodies). Agencies receive reports.
+ * Assist organizations help the whistleblower navigate the process.
  *
- * PURPOSE
- * -------
- * This CPT is the directory of organizations that provide direct
- * assistance to whistleblowers — legal aid clinics, nonprofits,
- * advocacy groups, law firms, and government ombudsmen.
+ * Scoped via ws_jurisdiction taxonomy. Nationwide orgs carry the 'us' term
+ * and ws_aorg_serves_nationwide = 1.
  *
- * This CPT is distinct from ws-agency (government oversight and
- * enforcement bodies). Agencies receive reports. Assistance
- * Organizations help the whistleblower navigate the process.
- *
- * ARCHITECTURE
- * ------------
- * Assistance Organizations are a top-level public directory.
- * They are linked to jurisdictions via the ws_ao_jurisdictions
- * checkbox field and classified by disclosure type.
- *
- * INTENDED USE
- * ------------
- * A layperson seeking help selects their jurisdiction and the
- * type of misconduct they witnessed. The directory surfaces
- * relevant organizations with their contact details, eligibility
- * requirements, and cost model — enabling informed outreach
- * without requiring legal knowledge.
- *
- * MENU POSITION
- * -------------
- * Citations 27 → Agencies 28 → Interpretations 29 → Assist Orgs 30
- *
- * @package    WhistleblowerShield
- * @since      1.0.0
- * @author     Whistleblower Shield
- * @link       https://whistleblowershield.org
- * @copyright  Copyright (c) Whistleblower Shield
+ * @package WhistleblowerShield
+ * @since   1.0.0
+ * @version 3.10.0
  *
  * VERSION
  * -------
- * 1.0.0  Initial release.
- * 1.0.1  Bug #10 fix: menu_position corrected from 31 to 30 to align
- *         with the agreed admin menu order:
- *         Citations 27 → Agencies 28 → Interpretations 29 → Assist Orgs 30.
- */
+ * 1.0.0   Initial release.
+ * 1.0.1   menu_position corrected from 31 to 30.
+ * 3.7.0   ws_employment_sector taxonomy added.
+ *)
 
 defined( 'ABSPATH' ) || exit;
 

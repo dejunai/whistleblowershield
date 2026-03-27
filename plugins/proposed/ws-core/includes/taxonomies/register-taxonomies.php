@@ -1,93 +1,26 @@
 <?php
 /**
- * register-taxonomies.php
+ * register-taxonomies.php — Registers all ws-core taxonomies and seeds initial terms.
  *
- * Registers all shared taxonomies for the ws-core plugin and seeds
- * their initial term structures on first admin load.
+ * @package WhistleblowerShield
+ * @since   2.1.0
+ * @version 3.10.0
  *
  * VERSION
  * -------
- * 2.1.0  Initial: ws_disclosure_type
- * 2.3.1  Added ws_process_type taxonomy and seed.
- * 2.4.0  STABILIZATION PASS:
- *        - Hard Delete: Removed empty string from all taxonomy associations.
- *        - New Taxonomies: Added ws_coverage_scope, ws_retaliation_forms,
- *          ws_languages, ws_case_stage.
- *        - Security: Implemented capability mapping to lock vocabulary to
- *          Administrators.
- *        - UI: Added comprehensive labels for all taxonomies.
- * 2.4.1  Bug fixes:
- *        - ws-assist-org added to ws_disclosure_type object types so that
- *          save_terms works correctly on assist-org edit screens (Bug #9).
- *        - ws_languages and ws_case_stage object type corrected from
- *          'assist-org' to 'ws-assist-org' (Bug #2).
- *        - Missing comma after ws_languages entry in ws_seed_v240_taxonomies()
- *          fixed (Bug #1 — was a fatal PHP parse error).
- *        - ws_seed_remedy_taxonomy() now calls update_option() so the gate
- *          check does not re-run on every admin_init (Bug #3).
- * 3.0.0  ARCHITECTURE REFACTOR (Phase 2 + 3.1):
- *        - Empty string removed from ws_disclosure_type object types array.
- *        - Registered ws_jurisdiction taxonomy (private, non-hierarchical) —
- *          replaces ws_jx_code post meta as the jurisdiction join mechanism.
- *        - All seed gates migrated to Unified Option-Gate Method (key prefix
- *          ws_seeded_*, version string '1.0.0').
- *        - Grouped ws_v240_taxonomies_seeded gate split into four individual
- *          gates: ws_seeded_coverage_scope, ws_seeded_retaliation_forms,
- *          ws_seeded_languages_taxonomy, ws_seeded_case_stage.
- *        - ws_seed_v240_taxonomies() replaced by four dedicated functions.
- * 3.1.0  TAXONOMY RENAME + EXPANSION PASS:
- *        - ws_coverage_scope  → ws_protected_class (aligns with JSON field name).
- *        - ws_retaliation_forms → ws_adverse_action_types (aligns with JSON
- *          field name adverse_action; cleaner legal terminology).
- *        - ws_remedy_type → ws_remedies (aligns with JSON field name).
- *        - New Taxonomy: ws_disclosure_targets (Who was the disclosure made to?).
- *          Replaces proposed ws_protected_audience — disclosure_targets is
- *          more precise and consistent with site terminology.
- *        - New Taxonomy: ws_fee_shifting (Fee shifting rules).
- *        - ws_protected_class seeded with hierarchical employee type structure
- *          incorporating terms from prior ws_coverage_scope.
- *        - ws_adverse_action_types seeded with expanded adverse action terms.
- *        - ws_remedies seeded with expanded remedy terms.
- *        - ws_disclosure_targets seeded with hierarchical recipient structure.
- *        - ws_fee_shifting seeded with four flat terms.
- *        - ws_bulk_insert_hierarchical() helper added.
- *        - Gate typo fixed: ws_seed_jruisdiction_taxonomy →
- *          ws_seed_jurisdiction_taxonomy.
- *        - Gate keys added for all new and renamed taxonomies.
- * 3.1.1  Bug fix: corrected 'ws-jurisdiction' to 'jurisdiction' in ws_jurisdiction
- *        taxonomy object type array. Mismatch prevented ws_jurisdiction (and all
- *        other taxonomies) from appearing on jurisdiction post edit screens.
- * 3.2.0  Added ws_employer_defense taxonomy stub (jx-statute). No seeder —
- *        terms to be defined once the taxonomy table is validated against
- *        real statute data.
- * 3.3.0  Added ws_aorg_type taxonomy (ws-assist-org). Replaces ws_aorg_type
- *         ACF select field. Terms: nonprofit, legal-aid, law-firm, bar-program,
- *         advocacy, oversight-office (replaces opaque 'ombudsman'), union.
- *         matrix-assist-orgs gate bumped to 1.2.0 to assign type terms on
- *         existing seeded records.
- * 3.6.0  Added National Security parent term + 3 children to ws_disclosure_type
- *        seeder to cover matrix slugs used by Whistleblower Aid and similar orgs.
- *        Children: intelligence-community, classified-information,
- *        export-sanctions-compliance. Gate ws_seeded_disclosure_type bumped to
- *        1.1.0 so existing sites pick up the new terms on next admin_init.
- * 3.7.0  Added ws_employment_sector taxonomy (ws-assist-org). Replaces
- *        ws_aorg_employment_sectors ACF checkbox field to enable tax_query
- *        filtering in the Phase 2 filter panel — no meta_query in the cascade.
- *        Removed deprecated taxonomy registrations (ws_remedy_type,
- *        ws_coverage_scope, ws_retaliation_forms) — no live data to migrate.
- * 3.8.1  ws_seed_disclosure_taxonomy() refactored to use
- *        ws_bulk_insert_hierarchical() — consistent with all other hierarchical
- *        seeders. Data structure changed from name-keyed (with slug property)
- *        to slug-keyed (with name property) to match the helper's contract.
- * 3.9.0  ws-ag-procedure added to ws_jurisdiction and ws_disclosure_type
- *        object_type arrays. Required for ACF save_terms/load_terms to work
- *        correctly on procedure edit screens and for seeder wp_set_object_terms
- *        calls to register correctly in the taxonomy UI.
- * 3.10.0 Added ws_procedure_type taxonomy (ws-ag-procedure). Flat, three terms:
- *        disclosure, retaliation, both. Replaces ws_proc_type ACF select field.
- *        Enables tax_query filtering in Phase 2 filter cascade. Seeder:
- *        ws_seed_proc_type_taxonomy(). Gate: ws_seeded_procedure_type / 1.0.0.
- *
+ * 2.1.0   Initial: ws_disclosure_type.
+ * 2.3.1   ws_process_type added.
+ * 2.4.0   ws_coverage_scope, ws_retaliation_forms, ws_languages, ws_case_stage added.
+ * 3.0.0   ws_jurisdiction registered; all gates migrated to Unified Option-Gate Method.
+ * 3.1.0   Taxonomy rename pass: ws_protected_class, ws_adverse_action_types, ws_remedies,
+ *         ws_disclosure_targets, ws_fee_shifting. ws_bulk_insert_hierarchical() added.
+ * 3.2.0   ws_employer_defense added (jx-statute).
+ * 3.3.0   ws_aorg_type added (ws-assist-org).
+ * 3.6.0   National Security parent + 3 children added to ws_disclosure_type.
+ * 3.7.0   ws_employment_sector added. Deprecated taxonomies removed.
+ * 3.8.1   ws_seed_disclosure_taxonomy() refactored to ws_bulk_insert_hierarchical().
+ * 3.9.0   ws-ag-procedure added to ws_jurisdiction and ws_disclosure_type object_types.
+ * 3.10.0  ws_procedure_type added (ws-ag-procedure). Replaces ws_proc_type ACF select.
  */
 
 defined( 'ABSPATH' ) || exit;

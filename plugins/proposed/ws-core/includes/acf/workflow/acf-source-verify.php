@@ -1,98 +1,41 @@
 <?php
 /**
- * File: acf-source-verify.php
+ * acf-source-verify.php — Source & Verification ACF field group.
  *
- * WhistleblowerShield Core Plugin
+ * Group key: group_source_verify_metadata  (menu_order 95)
  *
- * PURPOSE
- * -------
- * Registers a single ACF field group — "Source & Verification" — that
- * attaches to all research-content CPTs via location rules. Centralising
- * these fields in one file ensures consistent field keys, names, and
- * behaviour across every post type without duplication.
+ * Attaches to: jx-statute, jx-citation, jx-interpretation, ws-agency,
+ *              ws-ag-procedure, ws-assist-org, jx-summary, ws-reference
  *
- * FIELD GROUP
- * -----------
- *   Source & Verification (tab, side column)
+ * Fields:
+ *   ws_auto_source_method    Locked readonly. One of the WS_SOURCE_* constants.
+ *                            Three write paths: matrix seeders write directly;
+ *                            human-created defaults to WS_SOURCE_HUMAN_CREATED;
+ *                            ingest tooling calls ws_set_source_method().
+ *                            Admin-only visibility. Immutable after first write.
+ *   ws_auto_source_name      Locked readonly. Specific origin within the method.
+ *                            'Direct' for matrix_seed and human_created.
+ *                            Required before verification_status can be 'verified'.
+ *   ws_auto_verified_by      Readonly. Display name of first verifier.
+ *   ws_auto_verified_date    Readonly. Local Y-m-d of verification transition.
+ *   ws_verification_status   Select. Hidden until source_name is non-empty.
+ *                            Author+ may set to 'verified'. Admin may revert.
+ *   ws_needs_review          True/false. Admin-only.
  *
- *   Provenance cluster:
- *     source_method      Locked readonly. Auto-stamped at creation.
- *                        Three write paths: ingest tooling calls
- *                        ws_set_source_method(); manual admin creation
- *                        defaults to human_created; matrix seeder writes
- *                        matrix_seed directly. Admin-only visibility.
- *     source_name        Locked readonly. Auto-stamped at creation.
- *                        Identifies the specific source within the method
- *                        (e.g. 'Claude AI', 'Direct'). Three write paths:
- *                        ingest tooling calls ws_set_source_name();
- *                        human_created and matrix_seed default to 'Direct';
- *                        other methods leave empty until ingest sets it.
- *                        Admin-only visibility. Required before
- *                        verification_status can be set to 'verified'.
- *     verified_by        Readonly text. Display name of the user who
- *                        first set verification_status to 'verified'.
- *                        Auto-stamped by hook; never editable.
- *     verified_date      Readonly text. Local datetime of the
- *                        verification transition. Auto-stamped by hook;
- *                        never editable.
+ * Hook dependencies (admin-hooks.php):
+ *   priority 5  — ws_stamp_source_method, ws_default_verification_status
+ *   priority 6  — ws_stamp_source_name
+ *   priority 20 — ws_stamp_verified_by_date, ws_enforce_source_verify_roles
  *
- *   Status cluster:
- *     verification_status  Select. Hidden until source_name has a value.
- *                          Author+ may set to 'verified'. Admin may
- *                          revert to 'unverified'. Server-side hook
- *                          enforces both rules.
- *     needs_review         True/False. Admin-only. When true, all
- *                          front-end render blocking is active regardless
- *                          of verification_status. Admin sets and clears.
- *
- * ATTACHED CPTs
- * -------------
- *   jx-statute, jx-citation, jx-interpretation, ws-agency,
- *   ws-assist-org, jx-summary, ws-reference
- *
- * POLICY NOTE
- * -----------
- *   jx-summary posts must always carry source_method = 'human_created'.
- *   This is enforced in admin-hooks.php, not here. The field group itself
- *   applies no CPT-specific logic.
- *
- * CONDITIONAL LOGIC
- * -----------------
- *   verification_status is hidden until source_name is non-empty.
- *   This is enforced both in ACF conditional logic (UI layer) and in
- *   ws_enforce_source_verify_roles() (server-side layer).
- *
- * HOOK DEPENDENCIES
- * -----------------
- *   All write logic lives in admin-hooks.php:
- *     - source_method set at acf/save_post priority 5 (first save only)
- *     - source_name auto-set to 'Direct' for matrix_seed + human_created
- *     - verification_status defaulted at priority 5 (first save only)
- *     - verified_by + verified_date stamped on transition to 'verified'
- *     - needs_review and verification_status role-gating at priority 20
- *
- * INGEST NOTE
- * -----------
- *   JSON ingest files should include a header block specifying
- *   source_method and source_name so the import tooling can stamp
- *   every record in the batch consistently without prompting.
- *   See ingest tooling documentation for the expected header schema.
- *
+ * @package WhistleblowerShield
+ * @since   1.0.0
+ * @version 3.10.0
  *
  * VERSION
  * -------
- * 1.0.0  Initial implementation
- * 1.1.0  Added source_name field; conditional logic on verification_status;
- *        added feed_import constant; updated method table.
- * 1.2.0  ws_auto_ pass (ws-core v3.2.0): stamp field meta keys prefixed:
- *        source_method → ws_auto_source_method, source_name → ws_auto_source_name,
- *        verified_by → ws_auto_verified_by, verified_date → ws_auto_verified_date.
- *        source_name locked readonly/disabled; both source fields hidden from
- *        roles below administrator via ws_hide_source_fields_for_non_admins().
- *        Docblock updated to reflect three-path ingest design.
- * 3.10.0 ws-ag-procedure added to location rules. Omission — matrix-seeded
- *        procedures are high-staleness-risk records and require the same
- *        source verification and ws_needs_review workflow as other seeded CPTs.
+ * 1.0.0   Initial release.
+ * 3.4.0   Centralized into acf/workflow/. Three-path ingest design documented.
+ * 3.10.0  ws-ag-procedure added to location rules.
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit;

@@ -1,50 +1,20 @@
 <?php
 /**
- * cpt-jx-citations.php
+ * cpt-jx-citations.php — Registers the jx-citation CPT.
  *
- * Registers the Jurisdiction Citation Custom Post Type.
+ * Stores case law and regulatory citations for a jurisdiction.
+ * Scoped via ws_jurisdiction taxonomy term. Not publicly queryable —
+ * content surfaces on jurisdiction pages via the Assembly Layer only.
+ * attach_flag + ws_display_order control what appears on curated summary views.
  *
- * PURPOSE
- * -------
- * This CPT stores individual citation records associated with a
- * jurisdiction — case law, statutes, regulatory references, and
- * secondary sources. Citations are selectively rendered on the
- * public jurisdiction page via the [ws_jx_citation] shortcode
- * based on their Attach toggle (ws_attach_flag).
- *
- * ARCHITECTURE
- * ------------
- * jurisdiction (public CPT)
- *      └── jx-citation (private dataset, many per jurisdiction)
- *
- * Citations are linked to their parent jurisdiction via the
- * ws_jurisdiction taxonomy term (USPS slug, e.g. 'ca', 'us').
- * This replaced the legacy ws_jx_code post meta field in v3.0.0.
- * All queries go through the query layer (query-jurisdiction.php).
- *
- * RENDER MODEL
- * ------------
- * The [ws_jx_citation] shortcode (renamed from [ws_jx_case_law]
- * in v3.6.0) queries all jx-citation records where:
- *   - ws_jurisdiction taxonomy term matches the current jurisdiction
- *   - ws_attach_flag is true (1)
- *
- * Records are ordered by ws_display_order (numeric, ascending).
- * The shortcode renders the full ws-citations section including
- * footnote anchors and accessible return links.
- *
- * Citations where ws_attach_flag is false are stored for reference
- * and admin review but do not appear on the curated summary view.
- *
- * @package    WhistleblowerShield
- * @since      2.3.0
- * @author     Whistleblower Shield
- * @link       https://whistleblowershield.org
- * @copyright  Copyright (c) Whistleblower Shield
+ * @package WhistleblowerShield
+ * @since   2.3.0
+ * @version 3.10.0
  *
  * VERSION
  * -------
- * 2.3.0  Initial release.
+ * 2.3.0   Initial release.
+ * 3.0.0   ws_jx_code join retired; ws_jurisdiction taxonomy used throughout.
  */
 
 defined( 'ABSPATH' ) || exit;

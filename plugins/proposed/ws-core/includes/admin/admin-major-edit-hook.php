@@ -1,62 +1,11 @@
 <?php
-// ════════════════════════════════════════════════════════════════════════════
-// Major Edit Logger
-//
-// Fires on acf/save_post at priority 20 for the four content CPTs that feed
-// the ws-legal-update changelog system.
-//
-// BEHAVIOR
-// --------
-// If is_major_edit = 1 and major_edit_description is non-empty:
-//   1. Creates a ws-legal-update post (published) with auto-stamped metadata.
-//   2. Resets is_major_edit and major_edit_description on the source post.
-//   3. Queues an admin_notices confirmation.
-//
-// If is_major_edit = 1 but major_edit_description is empty:
-//   1. Resets is_major_edit to 0 on the source post.
-//   2. Queues an admin_notices warning — no changelog entry is created.
-//      An empty description is worse than no entry at all.
-//
-// SUPPORTED CPTs
-// --------------
-// jx-summary, jx-statute, jx-citation, jx-interpretation, ws-ag-procedure
-//
-// AUTO-STAMPED FIELDS ON ws-legal-update
-// ---------------------------------------
-// post_title                        — "[Source Title] — [CPT Label] Update"
-// post_date / post_author           — current time / current user (WP core)
-// ws_legal_update_summary_wysiwyg   — the description text
-// ws_legal_update_effective_date    — today (Y-m-d local)
-// ws_legal_update_source_post_id    — source post ID
-// ws_legal_update_source_post_type  — source post type slug
-// ws_legal_update_date              — today (Y-m-d local); mirrors effective_date
-// ws_legal_update_type              — derived from CPT slug (jx-statute→statute etc.)
-// ws_legal_update_law_name          — official name from source post's naming field;
-//                                     falls back to post title for jx-summary
-// ws_jurisdiction (taxonomy)        — term from source post; written via
-//                                     wp_set_post_terms() to taxonomy table
-// stamp fields (ws_auto_date_created etc.) — written by ws_acf_write_stamp_fields()
-//                                     at priority 20 on the new post's next
-//                                     acf/save_post — not triggered here since
-//                                     we use wp_insert_post directly. Stamp
-//                                     fields are written manually below.
-//
-// VERSION
-// -------
-// 1.0.0  Initial release — basic wp_insert_post + description/effective_date/
-//        source_post_id/source_post_type meta writes; stamp fields written manually.
-// 1.1.0  Legal update system overhaul:
-//        - Jurisdiction attached from source post via wp_set_post_terms() into
-//          ws_jurisdiction taxonomy table (not post_meta). Enables tax_query in
-//          the query layer.
-//        - ws_legal_update_date written (Y-m-d local) alongside effective_date.
-//        - ws_legal_update_type derived from source CPT slug (jx-statute→statute, etc.).
-//        - ws_legal_update_law_name auto-filled from the source post's best naming
-//          field: ws_jx_statute_official_name, ws_jx_citation_official_name, ws_jx_interp_official_name,
-//          or post title for jx-summary (has no official name field).
-// 1.2.0  Added inline comment to direct meta reads in ws_acf_log_major_edit()
-//        explaining why direct reads are used on acf/save_post.
-// ════════════════════════════════════════════════════════════════════════════
+/**
+ * admin-major-edit-hook.php — Major Edit Logger — creates ws-legal-update posts on flagged saves.
+ *
+ * @package WhistleblowerShield
+ * @since   3.2.0
+ * @version 3.10.0
+ */
 
 add_action( 'acf/save_post', 'ws_acf_log_major_edit', 20 );
 

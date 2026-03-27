@@ -1,31 +1,10 @@
 <?php
 /**
- * agency-matrix.php
+ * matrix-agencies.php — Seeds nationwide federal agencies relevant to whistleblower protection.
  *
- * Seeds nationwide federal agencies relevant to whistleblower protection.
- *
- * PURPOSE
- * -------
- * Creates ws-agency CPT posts for major federal agencies that intake,
- * investigate, or enforce whistleblower protections under federal law.
- * All records are scoped to the US ws_jurisdiction taxonomy term.
- *
- * Only nationwide federal agencies are seeded here. State-level agencies
- * are managed via the admin UI, not by this seeder.
- *
- * SEEDER RULES
- * ------------
- * - All seeded records receive ws_matrix_source = 'agency-matrix'.
- * - Gate: ws_seeded_agency_matrix / 1.0.0 (Unified Option-Gate Method).
- * - The US ws_jurisdiction term must exist before this seeder runs.
- *   Load order in loader.php guarantees jurisdiction-matrix.php fires first.
- *
- * @package    WhistleblowerShield
- * @since      3.0.0
- * @author     Whistleblower Shield
- * @link       https://whistleblowershield.org
- * @copyright  Copyright (c) Whistleblower Shield
- *
+ * @package WhistleblowerShield
+ * @since   3.0.0
+ * @version 3.10.0
  */
 
 defined( 'ABSPATH' ) || exit;

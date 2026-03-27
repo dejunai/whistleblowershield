@@ -64,6 +64,10 @@
  * 3.9.0  Added ws_add_agency_navigation_box() and ws_render_agency_navigation_box()
  *        for the ws-agency edit screen. Lists attached procedures with edit
  *        links and an Add Procedure button that pre-fills the parent agency.
+ *
+ * @package WhistleblowerShield
+ * @since   2.1.0
+ * @version 3.10.0
  */
 if (!defined('ABSPATH')) {
     exit;

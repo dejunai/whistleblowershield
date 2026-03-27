@@ -24,6 +24,10 @@
  *        ws_jurisdiction taxonomy queries — no ACF relationship fields.
  * 3.6.1  Added 10-minute transient cache with auto-invalidation on save/delete
  *        and manual refresh button.
+ *
+ * @package WhistleblowerShield
+ * @since   2.1.0
+ * @version 3.10.0
  */
 
 if (!defined('ABSPATH')) {

@@ -1,99 +1,33 @@
 <?php
 /**
- * acf-assist-orgs.php
+ * acf-assist-orgs.php — ACF Pro fields for the ws-assist-org CPT.
  *
- * Registers ACF Pro fields for the `ws-assist-org` CPT.
+ * Group key: group_assist_org_metadata
+ * Stamp fields: group_stamp_metadata (acf-stamp-fields.php, menu_order 90)
+ * Source verify: group_source_verify_metadata (acf-source-verify.php)
  *
- * PURPOSE
- * -------
- * Provides structured fields for Whistleblower Assistance Organization
- * records. These records surface in the public directory to help
- * laypeople identify organizations that can assist with their specific
- * situation — jurisdiction, misconduct type, employment sector, and
- * cost constraints.
+ * Tabs: Identity | Scope of Service | Contact | Eligibility & Cost | Credentials
  *
- * FIELD SUMMARY
- * -------------
- * Identity tab:
- *   ws_aorg_internal_id          Internal reference code (text, required)
- *   ws_aorg_type                 Organization type (ws_aorg_type taxonomy, radio, required)
- *   ws_aorg_description          Plain-language organization overview (textarea)
- *   ws_aorg_logo                 Logo image (image)
+ * Key fields:
+ *   ws_aorg_serves_nationwide  — true = surfaces in nationwide directory query
+ *   ws_jurisdiction            — taxonomy field (save_terms: 1)
+ *   ws_languages               — taxonomy field; additional_languages text triggers
+ *                                 'additional' term auto-assign via admin-hooks.php
+ *   ws_aorg_cost_model         — taxonomy radio (save_terms: 1) — Phase 2 filter axis
+ *   ws_employment_sector       — taxonomy (save_terms: 1) — Phase 2 filter axis
+ *   ws_case_stage              — taxonomy (save_terms: 1) — Phase 2 filter axis
  *
- * Scope of Service tab:
- *   ws_aorg_serves_nationwide    Serves all U.S. jurisdictions (true_false)
- *   ws_jurisdiction            Jurisdictions served (ws_jurisdiction taxonomy, checkbox)
- *   ws_aorg_disclosure_type      Misconduct categories handled (taxonomy)
- *   ws_aorg_services             Services offered (taxonomy checkbox, ws_aorg_service)
- *   ws_aorg_additional_services  Additional services not in taxonomy (textarea)
- *   ws_aorg_employment_sectors   Employment sectors served (taxonomy checkbox, ws_employment_sector)
- *
- * Contact & Intake tab:
- *   ws_aorg_website_url              Official website (url, required)
- *   ws_aorg_intake_url               Intake / contact form URL (url)
- *   ws_aorg_phone                    Phone number (text)
- *   ws_aorg_email                    Contact email (email)
- *   ws_aorg_mailing_address          Mailing address (textarea)
- *   ws_languages                   Languages served (taxonomy checkbox)
- *   ws_aorg_additional_languages   Additional languages not in taxonomy list (text)
- *
- * Eligibility & Cost tab:
- *   ws_aorg_cost_model           Cost structure (taxonomy radio, ws_aorg_cost_model)
- *   ws_aorg_income_limit         Income eligibility required (true_false)
- *   ws_aorg_income_limit_notes   Income limit details (textarea, conditional)
- *   ws_aorg_accepts_anonymous    Can assist anonymous clients (true_false)
- *   ws_aorg_eligibility_notes    Additional eligibility requirements (textarea)
- *
- * Credentials tab:
- *   ws_aorg_licensed_attorneys   Licensed attorneys on staff (true_false)
- *   ws_aorg_accreditation        Certifications and accreditations (text)
- *   ws_aorg_bar_states           State bar memberships (text)
- *   ws_aorg_verify_url           URL to verify current status (url)
- *
- * Authorship & Review tab:
- *   ws_aorg_last_edited_author   Last edited by (user, stamp)
- *   ws_aorg_date_created         Date created (text, readonly)
- *   ws_aorg_last_edited          Last edited date (text, readonly)
- *   ws_aorg_last_reviewed        Last verified date (date_picker)
- *
- * STAMP FIELDS
- * ------------
- * Written server-side via ws_acf_write_stamp_fields() in admin-hooks.php.
- * Meta prefix: ws_aorg
- *
- * @package    WhistleblowerShield
- * @since      1.0.0
- * @author     Whistleblower Shield
- * @link       https://whistleblowershield.org
- * @copyright  Copyright (c) Whistleblower Shield
+ * @package WhistleblowerShield
+ * @since   1.0.0
+ * @version 3.10.0
  *
  * VERSION
  * -------
- * 1.0.0  Initial release.
- * 3.0.0  Phase 8: Replaced ws_aorg_languages plain-text field with ws_languages
- *         taxonomy checkbox field + ws_aorg_additional_languages text field.
- *         Auto-assign of "additional" term handled in admin-hooks.php.
- *         Phase 12.1: Replaced ws_aorg_jurisdictions checkbox (dynamic choices via
- *         ws_jx_code meta) with ws_jurisdiction taxonomy field. Dynamic choice
- *         filter removed. Plain Language tab added (Phase 9.2).
- * 3.1.1  Field keys renamed: field_ao_* → field_aorg_* to match meta key prefix (ws_aorg_*).
- * 3.4.0  Stamp field centralization:
- *        - Removed Authorship & Review tab and all stamp fields — now registered
- *          centrally in acf-stamp-fields.php (group_stamp_metadata, menu_order 90).
- *        - Removed Plain Language tab entirely — ws-assist-org content is plain
- *          language by nature; the plain language workflow does not apply.
- *        - ws_aorg_last_reviewed retained as a content-owned field.
- * 3.5.0  Added ws_aorg_description textarea field (Identity tab, after type).
- * 3.7.0  ws_aorg_employment_sectors field converted from checkbox (ACF choices)
- *        to taxonomy type (ws_employment_sector) with save_terms: 1. Enables
- *        tax_query filtering throughout the Phase 2 filter cascade — no
- *        meta_query required at any level.
- * 3.9.0  ws_aorg_cost_model field converted from select (ACF choices) to taxonomy
- *        radio (ws_aorg_cost_model). Enables tax_query filtering in Phase 2.
- *        ws_aorg_services field converted from checkbox (ACF choices) to taxonomy
- *        type (ws_aorg_service) with save_terms: 1. Adds ws_aorg_additional_services
- *        textarea companion field; 'additional' sentinel term auto-assigned via
- *        ws_sync_additional_services_term() in admin-hooks.php.
+ * 1.0.0   Initial release.
+ * 3.0.0   ws_jx_code join retired; ws_jurisdiction taxonomy used throughout.
+ * 3.7.0   ws_employment_sector converted from ACF checkbox to taxonomy field.
+ *         ws_aorg_cost_model converted from select to taxonomy radio.
+ * 3.9.0   ws_case_stage taxonomy field added.
  */
 
 defined( 'ABSPATH' ) || exit;

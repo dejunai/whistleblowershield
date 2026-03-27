@@ -1,46 +1,24 @@
 <?php
 /**
- * cpt-jx-interpretations.php
+ * cpt-jx-interpretations.php — Registers the jx-interpretation CPT.
  *
- * Registers the Jurisdiction Interpretation Custom Post Type.
+ * Stores court interpretations of whistleblower statutes. Each record
+ * captures one case — citation, court, holding, favorable flag.
+ * Linked to parent statute via ws_jx_interp_statute_id (post_object).
+ * Scoped via ws_jurisdiction taxonomy term.
  *
- * PURPOSE
- * -------
- * This CPT stores federal court interpretations of whistleblower statutes.
- * Each record captures a single case — its citation, the court that decided
- * it, the holding, and whether the ruling is favorable to whistleblowers.
+ * Created via "Add New Interpretation" button in admin-interpretation-metabox.php
+ * on the jx-statute edit screen.
  *
- * ARCHITECTURE
- * ------------
- * jx-statute (federal statute, ws_jx_code = US)
- *      └── jx-interpretation (case record, many per statute)
- *
- * Interpretations are linked to their parent statute via ws_statute_id
- * (post_object → jx-statute) and carry ws_jx_code = 'US' to slot into
- * the standard jurisdiction query pattern.
- *
- * WORKFLOW
- * --------
- * New interpretations are created via a "Add New Interpretation" button
- * in a meta box on the jx-statute edit screen (admin-interpretation-metabox.php).
- * The button opens post-new.php?post_type=jx-interpretation&statute_id={ID}
- * in a new tab. Pre-population is handled by the acf/load_value filter in
- * acf-jx-interpretations.php and the ws_jx_code URL filter in admin-hooks.php.
- *
- * MENU POSITION
- * -------------
- * Citations 27 → Agencies 28 → Interpretations 29 → Assist Orgs 30
- *
- * @package    WhistleblowerShield
- * @since      2.4.0
- * @author     Dejunai
+ * @package WhistleblowerShield
+ * @since   2.4.0
+ * @version 3.10.0
  *
  * VERSION
  * -------
- * 2.4.0  Initial release.
- * 2.4.1  Bug #10 fix: menu_position corrected from 28 to 29 to resolve
- *         conflict with cpt-agencies.php which also claimed position 28.
- */
+ * 2.4.0   Initial release.
+ * 2.4.1   menu_position corrected from 28 to 29.
+ *)
 
 defined( 'ABSPATH' ) || exit;
 

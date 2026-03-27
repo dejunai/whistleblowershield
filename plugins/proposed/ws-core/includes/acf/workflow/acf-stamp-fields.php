@@ -1,91 +1,34 @@
 <?php
 /**
- * acf-stamp-fields.php
+ * acf-stamp-fields.php — Centralized Authorship & Review field group.
  *
- * Registers the centralized Authorship & Review ACF field group
- * shared across all content CPTs that carry stamp metadata.
+ * Group key: group_stamp_metadata  (menu_order 90)
  *
- * PURPOSE
+ * Attaches to: jx-summary, jx-statute, jx-citation, jx-interpretation,
+ *              ws-agency, ws-ag-procedure, ws-assist-org, ws-legal-update,
+ *              ws-reference
+ *
+ * Excluded: jurisdiction — seeder-generated; create authorship not meaningful.
+ *           jurisdiction carries its own slim Record Management tab in
+ *           acf-jurisdictions.php.
+ *
+ * Fields (all auto-filled, read-only for non-administrators):
+ *   ws_auto_last_edited_author  — user who last saved; admin-overridable
+ *   ws_auto_date_created        — local Y-m-d; written once
+ *   ws_auto_last_edited         — local Y-m-d; every save
+ *   ws_auto_create_author       — WP user ID; written once
+ *
+ * @package WhistleblowerShield
+ * @since   3.4.0
+ * @version 3.10.0
+ *
+ * VERSION
  * -------
- * Provides a single authoritative registration of the four stamp
- * fields used on every supported CPT. Prior to this file, these
- * fields were duplicated inline inside each CPT's ACF registration
- * file. Centralizing here eliminates that duplication and ensures
- * all CPTs share identical field definitions, keys, and behavior.
- *
- * ATTACHED CPTs
- * -------------
- * jx-summary, jx-statute, jx-citation, jx-interpretation,
- * ws-agency, ws-assist-org, ws-legal-update, ws-reference
- *
- * EXCLUDED CPTs
- * -------------
- * jurisdiction — Records are seeder-generated; create_author does not map
- * to a meaningful WordPress user ID. jurisdiction carries its own slim
- * Record Management tab in acf-jurisdictions.php limited to last_edited
- * and last_edited_author (written by admin-hooks.php on every ACF save).
- * create_author, date_created, and verify fields are intentionally absent.
- *
- * FIELDS
- * ------
- * All four fields share canonical unprefixed meta key names. WordPress
- * post meta is scoped to post_id — no collision risk across CPTs.
- *
- *   last_edited_author  User who last saved this record. Stamped
- *                       automatically on every save. Admins may override
- *                       to preserve attribution for minor corrections.
- *                       return_format => array (display name + ID).
- *
- *   date_created        Local date (Y-m-d) this record was first saved.
- *                       Written once, never overwritten.
- *
- *   last_edited         Local date (Y-m-d) of the most recent save.
- *                       Refreshed on every save.
- *
- *   create_author       WordPress user ID of the user who created this
- *                       record. Written once, never overwritten.
- *                       return_format => id (stamp target).
- *
- * FIELD LOCKING
- * -------------
- * date_created, last_edited, create_author — locked for non-admins via
- * ws_acf_lock_for_non_admins() in admin-hooks.php (registered by field name).
- *
- * last_edited_author — also locked for non-admins. Admins see it
- * pre-filled with their own user ID via ws_acf_autofill_current_editor().
- *
- * STAMP WRITES
- * ------------
- * All four fields are written server-side by ws_acf_write_stamp_fields()
- * in admin-hooks.php at acf/save_post priority 20. The ACF UI fields are
- * display-only for non-admins; ACF's disabled attribute prevents submission
- * and preserves existing stored values.
- *
- * HOOKS
- * -----
- * Registered on acf/init, consistent with all other ACF files in ws-core.
- *
- * @package    WhistleblowerShield
- * @since      3.4.0
- * @author     Whistleblower Shield
- * @link       https://whistleblowershield.org
- * @copyright  Copyright (c) Whistleblower Shield
- *
- * VERSION HISTORY
- * ---------------
- * 3.4.0  Initial release. Centralizes stamp fields previously duplicated
- *        in acf-jx-summaries.php, acf-jx-statutes.php, acf-jx-citations.php,
- *        acf-jx-interpretations.php, acf-agencies.php, acf-assist-orgs.php,
- *        acf-legal-updates.php, and acf-references.php.
- *        ws-reference joins with shared field keys — the previously unique
- *        field_ws_ref_last_edited_author key is retired; $ws_stamp_cpts in
- *        admin-hooks.php updated to field_last_edited_author for ws-reference.
- * 3.5.0  Sanity pass (ws-core v3.1.0): group key renamed
- *        group_ws_stamp_fields → group_stamp_metadata per new ACF key rules.
- * 3.6.0  ws_auto_ pass (ws-core v3.2.0): all four meta key names prefixed:
- *        date_created → ws_auto_date_created, last_edited → ws_auto_last_edited,
- *        last_edited_author → ws_auto_last_edited_author,
- *        create_author → ws_auto_create_author.
+ * 3.4.0   Initial release. Centralizes stamp fields previously duplicated
+ *         across individual CPT ACF files.
+ * 3.5.0   Group key renamed: group_ws_stamp_fields → group_stamp_metadata.
+ * 3.6.0   Stamp meta keys prefixed with ws_auto_.
+ * 3.9.0   ws-ag-procedure added to location rules.
  */
 
 defined( 'ABSPATH' ) || exit;

@@ -1,41 +1,10 @@
 <?php
 /**
- * matrix-assist-orgs.php
+ * matrix-assist-orgs.php — Seeds nationwide and federal-scope whistleblower support organizations.
  *
- * Seeds nationwide and federal-scope whistleblower support organizations.
- *
- * PURPOSE
- * -------
- * Creates ws-assist-org CPT posts for major national organizations that
- * provide legal support, advocacy, and resources to whistleblowers.
- * All records are tagged with the US ws_jurisdiction taxonomy term.
- *
- * NATIONWIDE vs FEDERAL-SCOPE
- * ---------------------------
- * is_nationwide = 1  Org operates across all 57 jurisdictions (e.g. ACLU,
- *                    GAP). Appears in ws_get_nationwide_assist_org_data().
- * is_nationwide = 0  Org serves federal workers / federal law only (e.g.
- *                    OSC, GAO FraudNet). US jurisdiction tag reflects scope
- *                    of law, not geographic reach. Not returned by the
- *                    nationwide query; accessible via jurisdiction pages.
- *
- * State or regional organizations are managed via the admin UI.
- *
- * SEEDER RULES
- * ------------
- * - All seeded records receive ws_matrix_source = 'assist-org-matrix'.
- * - Gate: ws_seeded_assist_org_matrix / 1.0.0 (Unified Option-Gate Method).
- * - The US ws_jurisdiction term must exist before this seeder runs.
- *   Load order in loader.php guarantees jurisdiction-matrix.php fires first.
- * - ws_disclosure_type slugs must align with ws_seed_disclosure_type_taxonomy()
- *   in register-taxonomies.php.
- *
- * @package    WhistleblowerShield
- * @since      3.0.0
- * @author     Whistleblower Shield
- * @link       https://whistleblowershield.org
- * @copyright  Copyright (c) Whistleblower Shield
- *
+ * @package WhistleblowerShield
+ * @since   3.0.0
+ * @version 3.10.0
  */
 
 defined( 'ABSPATH' ) || exit;

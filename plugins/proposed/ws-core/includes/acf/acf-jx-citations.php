@@ -1,93 +1,24 @@
 <?php
 /**
- * acf-jx-citations.php
+ * acf-jx-citations.php — ACF Pro fields for the jx-citation CPT.
  *
- * Registers ACF Pro fields for the `jx-citation` CPT.
+ * Group key: group_jx_citation_metadata
+ * Stamp fields: group_stamp_metadata (acf-stamp-fields.php, menu_order 90)
+ * Plain English: group_plain_english_metadata (acf-plain-english-fields.php, menu_order 85)
+ * Source verify: group_source_verify_metadata (acf-source-verify.php)
+ * Major edit: group_major_edit_metadata (acf-major-edit.php, menu_order 99)
  *
- * PURPOSE
- * -------
- * Provides structured metadata for Jurisdiction Citation records.
- * Citations are rendered on the jurisdiction page via the
- * [ws_jx_case_law] shortcode, which queries attached citations
- * for the current jurisdiction and assembles the ws-case-law
- * section including footnote anchors and Unicode return links.
- *
- * FIELD SUMMARY
- * -------------
- * Content tab:
- *   ws_jx_cite_type          Citation type (select)
- *   ws_disclosure_type       Disclosure Categories taxonomy (checkbox)
- *   ws_jx_citation_official_name  Official name — full citation label (text, required)
- *   ws_jx_citation_common_name    Common/informal name (text, optional)
- *   ws_jx_cite_url           Source URL (url)
- *   ws_jx_cite_is_pdf        PDF link toggle (true_false)
- *   attach_flag              Editorial curation flag (true_false). Marks this record as
- *                            one of the ~3–5 highlighted citations shown on the jurisdiction
- *                            summary page. NOT a visibility gate — unflagged citations are
- *                            accessible via taxonomy queries.
- *   order                    Render order among flagged items (number, conditional on attach_flag)
- *
- * Relationships tab:
- *   ws_jx_citation_statute_ids  Related statutes (post_object, jx-statute, multiple, optional)
- *
- * Jurisdiction scope is provided by the ws_jurisdiction taxonomy — the taxonomy
- * term is assigned via the WordPress taxonomy UI, not via an ACF field.
- *
- * Authorship & Review tab:
- *   ws_jx_cite_last_edited_author  Last edited by (user, readonly non-admins)
- *   ws_jx_cite_date_created        Date created (text, readonly)
- *   ws_jx_cite_last_reviewed       Last reviewed (text)
- *
- * STAMP FIELDS
- * ------------
- * Written server-side via acf/save_post at priority 20.
- *
- * Written once, never overwritten:
- *   ws_jx_cite_date_created      Local date (Y-m-d)
- *   ws_jx_cite_date_created_gmt  UTC date (Y-m-d)
- *   ws_jx_cite_create_author     User ID of creating user
- *
- * Written on every save:
- *   ws_jx_cite_last_edited       Local date (Y-m-d)
- *   ws_jx_cite_last_edited_gmt   UTC date (Y-m-d)
- *   ws_jx_cite_last_edited_author  User ID — visible, admin-editable only
- *
- * ZERO CITATIONS NOTICE
- * ---------------------
- * An admin_notices hook fires on jx-summary edit screens to warn
- * the summary author when no attached citations exist for the
- * parent jurisdiction. See ws_jx_cite_no_citations_notice() below.
- *
- * @package    WhistleblowerShield
- * @since      2.3.0
- * @author     Whistleblower Shield
- * @link       https://whistleblowershield.org
- * @copyright  Copyright (c) Whistleblower Shield
+ * @package WhistleblowerShield
+ * @since   2.3.0
+ * @version 3.10.0
  *
  * VERSION
  * -------
- * 2.3.0  Initial release.
- * 3.0.0  Architecture refactor (Phase 3.3):
- * 3.6.0  Added Relationships tab with ws_jx_citation_statute_ids (post_object,
- *         jx-statute, multiple, optional). Added acf/load_value hook to pre-fill
- *         from ?statute_id= URL param when opened via the statute citation metabox.
- *        - Removed Relationships tab: ws_jx_code text field and ws_jurisdiction
- *          post_object field retired. Scope now provided by ws_jurisdiction taxonomy.
- *        - Renamed ws_jx_cite_attach → attach_flag (field key unchanged).
- *        - Renamed ws_jx_cite_position → order (field key unchanged).
- *        - Admin notice updated to use taxonomy-based citation lookup.
- * 3.1.1  Pass 2 ACF audit fixes:
- *        - Renamed tab key tab_ws_jx_cite_plain_language → field_ws_jx_cite_plain_language
- *          for convention consistency.
- *        - Removed scaffold comment blocks around field_ws_jx_disclosure_cat.
- * 3.1.2  Field keys corrected to match naming convention (field_ + meta name without ws_ prefix).
- * 3.4.0  Stamp field centralization:
- *        - Removed Authorship & Review tab and all stamp fields (last_edited_author,
- *          date_created, last_edited, create_author) — now registered centrally
- *          in acf-stamp-fields.php (group_stamp_metadata, menu_order 90).
- *        - Removed Plain Language tab and all plain English fields — now registered
- *          centrally in acf-plain-english-fields.php (menu_order 85).
- *        - ws_jx_cite_last_reviewed retained as a content-owned field.
+ * 2.3.0   Initial release.
+ * 3.0.0   ws_jx_code join retired; taxonomy scoping only.
+ * 3.4.0   Stamp fields centralized to acf-stamp-fields.php.
+ * 3.8.0   Field keys corrected to match naming convention.
+ *         ws_ref_materials relationship field added (Reference Materials tab).
  */
 
 defined( 'ABSPATH' ) || exit;

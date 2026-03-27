@@ -130,6 +130,10 @@
  * 3.7.0  [ws_jx_interpretation] implemented. "→ External References" button
  *         included — handled inside ws_render_jx_interpretations() in
  *         render-section.php. Shortcode wired into assembler after citations.
+ *
+ * @package WhistleblowerShield
+ * @since   2.1.0
+ * @version 3.10.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit;

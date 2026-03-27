@@ -1,128 +1,31 @@
 <?php
 /**
- * File: render-jurisdiction.php
+ * render-jurisdiction.php — Jurisdiction page assembler.
  *
- * WhistleblowerShield Core Plugin
+ * Intercepts the_content for jurisdiction CPT singles and builds the full
+ * page from available published datasets.
  *
- * PURPOSE
- * -------
- * Automatically assembles the public-facing Jurisdiction page by
- * conditionally rendering available datasets associated with a
- * jurisdiction record.
+ * TWO RENDER PATHS:
+ *   ws_render_jx_curated()   — Standard path. attach_flag gates datasets.
+ *                               Editorial selection, 3-5 records per section.
+ *   ws_render_jx_filtered()  — Phase 2 path. attach_flag IGNORED. All
+ *                               published records are candidates; taxonomy
+ *                               match ($filter_context) gates instead.
+ *                               Currently a stub returning ''. Do not remove.
  *
- * This file intercepts WordPress content rendering for the
- * "jurisdiction" Custom Post Type and dynamically builds the page
- * structure using shortcodes.
+ * The Phase 2 dispatch block in ws_handle_jurisdiction_render() is commented
+ * out pending ws_resolve_filter_context() implementation.
  *
- * The goal is to eliminate the need to manually insert shortcodes
- * into jurisdiction posts. Instead, sections appear automatically
- * when their associated datasets are published.
- *
- *
- * ARCHITECTURE
- * ------------
- *
- * jurisdiction (public CPT)
- *      ├── jx-summary
- *      ├── jx-statute
- *      ├── jx-citation
- *      ├── jx-interpretation
- *      └── ws-assist-org
- *      └── ws-legal-update
- *
- * Each dataset is stored as a separate Custom Post Type and scoped
- * to the jurisdiction via the ws_jurisdiction taxonomy term.
- *
- *
- * RENDERING MODEL
- * ---------------
- *
- * When a visitor loads a jurisdiction page:
- *
- *      WordPress loads post content
- *            ↓
- *      this file intercepts via "the_content" filter
- *            ↓
- *      plugin checks for published datasets via query layer
- *            ↓
- *      plugin renders sections using shortcodes
- *
- *
- * CONDITIONAL RENDERING
- * ---------------------
- *
- * Sections are only displayed when their corresponding dataset
- * exists and is published. Draft or unpublished datasets will
- * never appear on the public site.
- *
- * NOTE: Addendum CPTs (jx-summary, jx-statute, jx-citation,
- * jx-interpretation) store their content in ACF fields, not
- * post_content. The published status of the addendum post is the
- * correct gate — the section shortcode reads and renders field content.
- *
- *
- * WORKFLOW BENEFIT
- * ----------------
- *
- * Editors do NOT need to manually insert shortcodes.
- * Creating and publishing a dataset automatically adds that
- * section to the jurisdiction page.
- *
- *
- * FILE RESPONSIBILITIES
- * ---------------------
- *
- * This file ONLY:
- *      • detects jurisdiction pages
- *      • retrieves dataset relationships via query layer
- *      • verifies published status
- *      • triggers shortcode rendering
- *
- * It does NOT:
- *      • perform database queries (handled by query-jurisdiction.php)
- *      • contain HTML templates (handled by render-section.php)
- *      • register shortcodes (handled by shortcodes-jurisdiction.php)
- *
- *
- * RENDER PATHS
- * ------------
- *
- * Two render paths share the same dispatcher (ws_handle_jurisdiction_render):
- *
- *   Curated  (ws_render_jx_curated)   — default path. attach_flag gates all
- *            datasets. Editors control what appears by flagging records.
- *
- *   Filtered (ws_render_jx_filtered)  — Phase 2 path. attach_flag ignored.
- *            All published records are candidates; $filter_context narrows
- *            results via taxonomy cascade. Wired but dormant until Phase 2.
- *
- * The dispatcher resolves $jx_term_id once and passes it to whichever path
- * is active. Neither render function touches the_content filter directly.
- *
+ * @package WhistleblowerShield
+ * @since   2.1.0
+ * @version 3.10.0
  *
  * VERSION
  * -------
- * 2.1.0  Auto-render architecture introduced
- * 2.1.2  Added is_main_query() and in_the_loop() safeguards
- * 2.1.3  Removed post_content gate — addendum content lives in ACF
- *         fields, not post_content. Published status is the correct gate.
- * 2.3.0  Added [ws_jx_case_law] and [ws_jx_limitations] to assembler.
- *         Case law renders after summary, limitations renders after
- *         case law. Both are conditional on content availability.
- * 2.3.1  ws_is_published() updated to handle query layer array format.
- *         All dataset functions return arrays with a 'status' key.
- *         ws_get_jx_statutes() returns an array-of-arrays (state + federal
- *         merge) — first entry's 'status' key is used for the gate check.
- * 2.4.0  ws_render_jx_filtered() stub added — Phase 2 taxonomy cascade
- *         filter render path. Complements ws_render_directory_taxonomy_guide()
- *         in render-directory.php. See stub comment block for implementation notes.
- * 3.7.0  [ws_jx_interpretation] wired into assembler after [ws_jx_citation]
- *         and before [ws_jx_limitations]. Render order: summary → statutes →
- *         citations → interpretations → limitations → legal updates.
- * 3.8.0  Dispatcher refactor: ws_handle_jurisdiction_render() reduced to a
- *         thin dispatcher. Curated render logic extracted to ws_render_jx_curated().
- *         ws_render_jx_filtered() signature updated to match dispatcher contract.
- *         Phase 2 dispatch hook point added (commented — dormant until Phase 2).
+ * 2.1.0   Initial release.
+ * 3.0.0   Taxonomy-based scoping replaces relationship fields.
+ * 3.8.0   Dispatcher refactor: ws_render_jx_curated() extracted.
+ *         ws_render_jx_filtered() stub + Phase 2 dispatch hook point added.
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit;

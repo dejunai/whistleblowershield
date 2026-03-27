@@ -1,106 +1,46 @@
 <?php
 /**
- * admin-feed-monitor.php
- *
- * Inoreader Feed Monitor — Legislative Ingest Pipeline for jx-statute.
- *
- * PURPOSE
- * -------
- * Polls the Inoreader API daily for new items in the LegalResearch folder.
- * Filters items for enacted/signed legislation using keyword matching.
- * Stages matching items as a human-reviewable JSON file. An admin reviews
- * each item (accept / reject / edit) before ingest creates jx-statute posts.
+ * admin-feed-monitor.php — Inoreader feed monitor and legislative ingest pipeline.
  *
  * PIPELINE
  * --------
- *   1. WP-Cron daily: ws_feed_monitor_poll()
- *        → Fetch LegalResearch folder from Inoreader API
- *        → Keyword-filter for enacted/signed bills
- *        → Deduplicate against already-staged and already-ingested items
- *        → Append new items to staged JSON file
+ * 1. WP-Cron daily → ws_feed_monitor_poll()
+ *    Fetches LegalResearch folder from Inoreader API.
+ *    Keyword-filters for enacted/signed legislation.
+ *    Deduplicates. Appends to staged JSON. Prunes items older than
+ *    ws_feed_staged_max_age_days (default 90, filterable).
  *
- *   2. Admin review UI (Tools → Feed Monitor):
- *        → List staged items with accept / reject / edit controls
- *        → Accepted items trigger ws_feed_ingest_item()
- *        → Rejected items are removed from staged JSON
- *        → Edited items update staged JSON before ingest
- *
- *   3. ws_feed_ingest_item():
- *        → Creates jx-statute post (draft)
- *        → Writes ws_ingest_source, ws_ingest_date, ws_ingest_file meta
- *        → Sets plain_reviewed = 0 (pending legal review)
- *        → Removes item from staged JSON
+ * 2. Admin review UI (Tools → Feed Monitor)
+ *    Accept → ws_feed_ingest_item() → jx-statute draft post
+ *    Reject → removes from staged JSON
+ *    Edit   → updates staged JSON before ingest
  *
  * KEYWORD FILTER
  * --------------
- * Items must contain at least one enacted keyword in title or description:
- *   signed into law, enacted, became law, signed by the president,
- *   chaptered, effective law, public law
- *
- * Items containing exclusion keywords are skipped:
- *   introduced, referred to committee, passed house, passed senate,
- *   failed, vetoed, tabled, withdrawn
+ * Include: signed into law, enacted, became law, signed by the president,
+ *          chaptered, effective law, public law
+ * Exclude: introduced, referred to committee, passed house, passed senate,
+ *          failed, vetoed, tabled, withdrawn
  *
  * INOREADER API
  * -------------
  * Stream:   user/-/label/LegalResearch
  * Endpoint: https://www.inoreader.com/reader/api/0/stream/contents/
- * Auth:     Bearer token (required). App ID + App Key (optional, tier-dependent).
- * Docs:     https://www.inoreader.com/developers/
+ * Auth:     Bearer token required. App ID + App Key optional (tier-dependent).
  *
- * STAGED JSON FILE
- * ----------------
- * Location: {uploads_dir}/ws-feed-data/feed-staged.json
- * Shape per item:
- * {
- *     "guid":        string,   // Unique item identifier from feed
- *     "title":       string,   // Bill title from feed
- *     "url":         string,   // Link to LegiScan or Congress.gov bill page
- *     "description": string,   // Feed item description (plain text)
- *     "published":   string,   // Y-m-d H:i:s (local)
- *     "source":      string,   // Feed source label
- *     "status":      string,   // "pending" | "accepted" | "rejected"
- *     "staged_at":   string,   // Y-m-d H:i:s when staged
- *     // Editable fields — blank by default, filled by reviewer:
- *     "jx_code":     string,   // USPS code e.g. "US"
- *     "notes":       string    // Reviewer notes
- * }
+ * All file_put_contents() calls use LOCK_EX to prevent race conditions.
+ * Default jurisdiction for unscoped items:
+ *   apply_filters( 'ws_feed_monitor_default_jx_code', 'US' )
  *
- * INGEST META KEYS
- * ----------------
- * ws_ingest_source  — 'feed-monitor'
- * ws_ingest_date    — Y-m-d of ingest
- * ws_ingest_guid    — original feed item GUID (deduplication key)
- * ws_ingest_url     — original feed item URL
- *
- * SETTINGS (wp_options)
- * ---------------------
- * ws_feed_monitor_token    — Inoreader OAuth bearer token
- * ws_feed_monitor_app_id   — Inoreader App ID (optional)
- * ws_feed_monitor_app_key  — Inoreader App Key (optional)
- * ws_feed_monitor_last_run — Unix timestamp of last successful poll
- * ws_feed_monitor_ingested — array of {guid, ts} pairs already ingested (30-day rolling dedup log)
- *
- * @package    WhistleblowerShield
- * @since      3.2.0
- * @author     Whistleblower Shield
- * @link       https://whistleblowershield.org
- * @copyright  Copyright (c) Whistleblower Shield
+ * @package WhistleblowerShield
+ * @since   3.2.0
+ * @version 3.10.0
  *
  * VERSION
  * -------
- * 3.2.0  Initial release.
- * 3.2.1  WP_Error case in ws_feed_monitor_poll() now stores error message to
- *        ws_feed_monitor_last_error instead of silently returning -1.
- *        Added admin_notices banner surfacing feed poll failures to all
- *        admin screens, linking to Tools → Feed Monitor.
- * 3.8.1  echo $notice wrapped with wp_kses_post(). LOCK_EX flag added to
- *        file_put_contents() in ws_feed_monitor_write_staged().
- *        Staged JSON prune step added: pending items older than
- *        ws_feed_staged_max_age_days (default 90 days) are dropped on each
- *        poll run to prevent unbounded file growth.
- *        Default jx_code wrapped in apply_filters('ws_feed_monitor_default_jx_code')
- *        for non-US deployments.
+ * 3.2.0   Initial release.
+ * 3.8.1   LOCK_EX added to file writes. Feed staged pruning added.
+ *         ws_feed_monitor_default_jx_code filter added.
  */
 
 defined( 'ABSPATH' ) || exit;

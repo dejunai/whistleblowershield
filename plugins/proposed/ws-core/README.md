@@ -17,13 +17,17 @@ rules a developer needs open while writing code.
 Six layers, loaded in strict dependency order by `includes/loader.php`:
 
 ```
-Data      CPTs + taxonomies + ACF field groups
-Matrix    Idempotent seeders — run once on install
-Query     The only layer that reads from the database
-Admin     ACF hooks, audit trail, monitoring, dashboard
-Assembly  Render functions + shortcodes → HTML
-Assets    Conditionally loaded CSS + JS
+Universal Layer   CPTs, taxonomies, ACF field groups, query functions
+                  Loaded on frontend and admin
+Matrix Layer      Idempotent seeders — run once on install (admin only)
+Admin Layer       ACF hooks, audit trail, monitoring, dashboard (admin only)
+Assembly Layer    Render functions + shortcodes → HTML (frontend only)
+Assets            Conditionally loaded CSS + JS
 ```
+
+**Assembly Layer = render functions + shortcodes only.** The query layer
+is the Universal Layer — a prerequisite of the Assembly Layer, not part
+of it. Never refer to the query layer as part of the "assembly layer."
 
 **The query layer contract** is the most important rule in the codebase:
 shortcodes, render functions, and admin surfaces never call `get_field()`,

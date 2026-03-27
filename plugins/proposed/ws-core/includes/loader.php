@@ -16,29 +16,34 @@
  * ARCHITECTURE
  * ------------
  *
- * The plugin is divided into functional layers:
+ * Six layers, loaded in strict dependency order:
  *
- *      CPT Layer        → registers custom post types
- *      ACF Layer        → defines custom fields
- *      Query Layer      → retrieves structured data
- *      Rendering Layer  → builds jurisdiction pages
- *      Shortcode Layer  → renders individual sections
- *      Admin Layer      → improves editorial workflow
- *		Taxonomies       → allows labeling data objects by category
+ *      Universal Layer   — CPTs, taxonomies, ACF field groups, query functions
+ *                          Loaded on both frontend and admin.
+ *      Matrix Layer      — Idempotent seeders. Admin only.
+ *      Admin Layer       — ACF hooks, audit trail, monitoring, dashboard. Admin only.
+ *      Assembly Layer    — Render functions + shortcodes → HTML. Frontend only.
+ *      Assets            — Conditionally loaded CSS + JS.
+ *
+ * ASSEMBLY LAYER DEFINITION: render functions + shortcode files only.
+ * The query layer is the Universal Layer — a prerequisite of the Assembly
+ * Layer, not part of it. Never refer to the query layer as "assembly."
  *
  *
  * DIRECTORY STRUCTURE
  * -------------------
  *
  * includes/
- *
  *      acf/
+ *          workflow/       shared field groups (stamp, plain English, source verify, major edit)
  *      admin/
+ *          matrix/         seeders and divergence watch
+ *          monitors/       URL health monitor, feed monitor
  *      cpt/
  *      queries/
  *      render/
  *      shortcodes/
- *		taxonomies/
+ *      taxonomies/
  *
  *
  * LOADING STRATEGY
@@ -46,19 +51,20 @@
  *
  * Files are loaded in dependency order:
  *
- *      Universal layer (frontend + admin):
+ *      Universal Layer (frontend + admin):
  *      1) CPT definitions
- *      2) Query layer
+ *      2) Query layer (helpers → shared → jurisdiction → agencies)
  *      3) Taxonomies
  *
- *      Admin layer (is_admin() only):
- *      4) Matrix seeders
- *      5) ACF field definitions
- *      6) Admin tools
+ *      Admin Layer (is_admin() only):
+ *      4) Matrix Layer (helpers first, jurisdictions second, all others after)
+ *      5) ACF Layer (CPT-specific groups, then workflow/ shared groups)
+ *      6) Admin tools (navigation first — defines shared helpers others depend on)
+ *      7) Monitors (admin/monitors/)
  *
- *      Frontend layer (! is_admin() only):
- *      7) Rendering helpers
- *      8) Shortcodes
+ *      Assembly Layer (! is_admin() only):
+ *      8) Render functions
+ *      9) Shortcodes
  *
  *
  * IMPORTANT — TAXONOMY TWO-PHASE BEHAVIOUR
@@ -136,35 +142,22 @@
  *
  * VERSION
  * -------
- * 2.1.0  Modular loader introduced
- * 2.1.3  Optimized for exclusive automatic assembly and advanced admin UX
- * 2.1.4  Added taxonomy layer
- * 2.3.1  Moved taxonomy loading to Universal Layer so ws_disclosure_cat
- *        and ws_process_type are registered on both frontend and admin.
- *        Removed duplicate stale docblock.
- * 2.4.0  Added acf-jx-interpretations to ACF load list (Bug #6 fix).
- * 2.4.1  Added error reporting to loading calls, see /logs/ws-core-error.log
- * 3.0.0  Added acf-source-verify to ACF load list (was registered but never loaded).
- * 3.4.0  Added acf-stamp-fields and acf-plain-english-fields to ACF load list.
- *        These centralize stamp and plain language fields previously duplicated
- *        across individual CPT ACF files.
- * 3.6.0  Query layer split: single query-jurisdiction load replaced with ordered
- *        array load of query-helpers → query-shared → query-jurisdiction.
- *        render-directory.php stub added to ASSEMBLY LAYER render_files.
- * 3.6.1  admin-health-check.php added to ADMIN LAYER.
- * 3.7.0  matrix-state-courts.php added to MATRIX LAYER between
- *        matrix-federal-courts.php and matrix-assist-orgs.php.
- * 3.9.0  cpt-ag-procedures added to CPT LAYER. query-agencies added to QUERY
- *        LAYER. acf-ag-procedures added to ACF LAYER. render-agency added to
- *        ASSEMBLY LAYER. admin-procedure-watch added to ADMIN LAYER.
- *        matrix-ag-procedures added to MATRIX LAYER (between matrix-agencies
- *        and admin-matrix-watch).
- * 3.10.0 LOADING STRATEGY section expanded with TAXONOMY TWO-PHASE BEHAVIOUR
- *        and MATRIX LAYER DEPENDENCY CHAIN documentation. Matrix layer comment
- *        block replaced with full per-file dependency rationale. Taxonomy layer
- *        inline comment clarified: require_once registers functions only —
- *        terms are not available until admin_init fires. admin-navigation
- *        must-load-first comment expanded to name the shared helper it defines.
+ * 2.1.0   Modular loader introduced.
+ * 2.3.1   Taxonomy layer moved to Universal Layer.
+ * 2.4.1   Error reporting added to all load calls.
+ * 3.0.0   acf-source-verify added to ACF load list.
+ * 3.4.0   acf-stamp-fields and acf-plain-english-fields added.
+ * 3.6.0   Query layer load order: helpers → shared → jurisdiction.
+ * 3.6.1   admin-health-check added.
+ * 3.7.0   matrix-state-courts added.
+ * 3.9.0   cpt/query/acf/render/admin files for ws-ag-procedure added.
+ * 3.10.0  TAXONOMY TWO-PHASE BEHAVIOUR and MATRIX LAYER DEPENDENCY CHAIN
+ *         sections added. acf/workflow/ and admin/monitors/ subdirectory
+ *         load blocks added.
+ *
+ * @package WhistleblowerShield
+ * @since   2.1.0
+ * @version 3.10.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit;
@@ -334,15 +327,15 @@ if ( is_admin() ) {
     // available. If either context ever needs ACF field data, move the relevant
     // ACF load outside the is_admin() guard or add an explicit is_rest() / is_cli()
     // check here.
+    // CPT-specific ACF field groups
     $acf_files = [
         'acf-jurisdictions', 'acf-jx-summaries', 'acf-jx-statutes', 'acf-legal-updates',
-        'acf-jx-citations', 'acf-agencies', 'acf-ag-procedures', 'acf-assist-orgs', 'acf-major-edit',
-        'acf-source-verify', 'acf-jx-interpretations', 'acf-references',
-        'acf-stamp-fields', 'acf-plain-english-fields',
+        'acf-jx-citations', 'acf-agencies', 'acf-ag-procedures', 'acf-assist-orgs',
+        'acf-jx-interpretations', 'acf-references',
     ];
-	
-	foreach ( $acf_files as $file ) {
-		$path = WS_CORE_PATH . "includes/acf/{$file}.php";
+
+    foreach ( $acf_files as $file ) {
+        $path = WS_CORE_PATH . "includes/acf/{$file}.php";
 		if ( file_exists( $path ) ) {
 			require_once $path;
 		} else {
@@ -364,14 +357,41 @@ if ( is_admin() ) {
 		}
 	}
 
-    // Admin Tools & Workflow Improvements
-	//
-	// ADMIN Layer: Loaded from /includes/admin/
+    // Shared workflow ACF field groups — includes/acf/workflow/
+    // Load order: stamp-fields first (plain English stamp writes depend on it).
+    $acf_workflow_files = [
+        'acf-stamp-fields', 'acf-plain-english-fields',
+        'acf-source-verify', 'acf-major-edit',
+    ];
+    foreach ( $acf_workflow_files as $file ) {
+        $path = WS_CORE_PATH . "includes/acf/workflow/{$file}.php";
+        if ( file_exists( $path ) ) {
+            require_once $path;
+        } else {
+            error_log( sprintf(
+                '[ws-core] Missing ACF WORKFLOW file: %s (expected at %s, referenced from %s line %d)',
+                $file . '.php',
+                $path,
+                __FILE__,
+                __LINE__
+            ) );
+            add_action( 'admin_notices', function() use ( $file ) {
+                echo '<div class="notice notice-error"><p>';
+                printf(
+                    '<strong>WhistleblowerShield:</strong> Missing ACF workflow file: <code>%s.php</code> — check error log for details.',
+                    esc_html( $file )
+                );
+                echo '</p></div>';
+            } );
+        }
+    }
+
+    // Admin Layer — includes/admin/
 	$admin_files = [
 		'admin-navigation', // MUST load first — defines ws_get_attached_citation_count()
 		                    // which is called by admin-columns.php and jurisdiction-dashboard.php.
-		'admin-audit-trail', 'admin-columns', 'admin-feed-monitor',
-		'admin-hooks', 'admin-interpretation-metabox', 'admin-citation-metabox', 'admin-url-monitor',
+		'admin-audit-trail', 'admin-columns',
+		'admin-hooks', 'admin-interpretation-metabox', 'admin-citation-metabox',
 		'admin-major-edit-hook', 'admin-procedure-watch', 'jurisdiction-dashboard', 'admin-health-check',
 	];
 	foreach ( $admin_files as $file ) {
@@ -396,7 +416,34 @@ if ( is_admin() ) {
 			} );
 		}
 	}
-	
+
+    // Monitors — includes/admin/monitors/
+    $monitor_files = [
+        'admin-url-monitor', 'admin-feed-monitor',
+    ];
+    foreach ( $monitor_files as $file ) {
+        $path = WS_CORE_PATH . "includes/admin/monitors/{$file}.php";
+        if ( file_exists( $path ) ) {
+            require_once $path;
+        } else {
+            error_log( sprintf(
+                '[ws-core] Missing MONITOR file: %s (expected at %s, referenced from %s line %d)',
+                $file . '.php',
+                $path,
+                __FILE__,
+                __LINE__
+            ) );
+            add_action( 'admin_notices', function() use ( $file ) {
+                echo '<div class="notice notice-error"><p>';
+                printf(
+                    '<strong>WhistleblowerShield:</strong> Missing monitor file: <code>%s.php</code> — check error log for details.',
+                    esc_html( $file )
+                );
+                echo '</p></div>';
+            } );
+        }
+    }
+
     // admin-relationships.php removed — Phase 3.6: relationship model replaced by taxonomy scoping.
 
 }

@@ -1,43 +1,10 @@
 <?php
 /**
- * matrix-state-courts.php
+ * matrix-state-courts.php — State and territory court registry for jx-interpretation fields.
  *
- * State and territory court registry for ws-core interpretation fields.
- *
- * STRUCTURE
- * ---------
- * Each entry:
- *   'name'        Full official court name
- *   'short'       Legal citation abbreviation
- *   'type'        state_supreme | state_appellate
- *   'ws_jx_codes' Array containing the single USPS jurisdiction code this
- *                 court serves. Used by ws_interp_auto_populate_affected_jx()
- *                 to resolve the affected ws_jurisdiction term on save.
- *   'circuit'     Always null for state courts
- *   'level'       1=supreme/highest  2=appellate
- *
- * SECTIONS
- * --------
- * 1. State & Territory Supreme Courts
- * 2. State Intermediate Appellate Courts
- *    Omitted (no intermediate tier): DE, ID, ME, MT, NH, ND, RI, SD, VT, WY
- *    PA has two entries: Commonwealth Court and Superior Court.
- *    TX/OK dual high courts each get two state_supreme entries.
- *
- * USAGE
- * -----
- * $ws_state_court_matrix is consumed by ws_interp_load_court_choices() in
- * acf-jx-interpretations.php:
- *   - Federal statute parent: $ws_court_matrix + $ws_state_court_matrix merged
- *     into a single court select. All federal + all state courts are candidates.
- *   - State statute parent: $ws_state_court_matrix only. Federal courts are
- *     excluded — they do not interpret state statutes.
- *
- * Keys must not collide with $ws_court_matrix keys. Naming convention:
- *   state supreme     — {state-abbr}-sup   (e.g. ca-sup, tx-sup)
- *   state appellate   — {state-abbr}-app   (e.g. ca-app, tx-app)
- *   exceptions noted inline (ny-app, ok-cca, tx-cca, dc-app, pa-cw, pa-sup-app, ny-appdiv)
- *
+ * @package WhistleblowerShield
+ * @since   3.8.0
+ * @version 3.10.0
  */
 
 defined( 'ABSPATH' ) || exit;

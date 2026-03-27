@@ -1,28 +1,10 @@
 <?php
 /**
- * fed-statutes-matrix.php
+ * matrix-fed-statutes.php — Seeds major federal whistleblower protection statutes.
  *
- * Seeds major federal whistleblower protection statutes.
- *
- * PURPOSE
- * -------
- * Creates jx-statute CPT posts for major federal whistleblower protection
- * laws. All records are scoped to the US ws_jurisdiction taxonomy term and
- * are attached to the jurisdiction page (attach_flag = 1).
- *
- * SEEDER RULES
- * ------------
- * - All seeded records receive ws_matrix_source = 'fed-statutes-matrix'.
- * - Gate: ws_seeded_fed_statutes_matrix / 1.0.0 (Unified Option-Gate Method).
- * - The US ws_jurisdiction term must exist before this seeder runs.
- *   Load order in loader.php guarantees jurisdiction-matrix.php fires first.
- *
- * @package    WhistleblowerShield
- * @since      3.0.0
- * @author     Whistleblower Shield
- * @link       https://whistleblowershield.org
- * @copyright  Copyright (c) Whistleblower Shield
- *
+ * @package WhistleblowerShield
+ * @since   3.0.0
+ * @version 3.10.0
  */
 
 defined( 'ABSPATH' ) || exit;

@@ -1,50 +1,19 @@
 <?php
 /**
- * File: cpt-jurisdiction.php
+ * cpt-jurisdictions.php — Registers the jurisdiction CPT.
  *
- * Registers the Jurisdiction Core CPT.
+ * Represents one of 57 U.S. jurisdictions: 50 states, DC, 5 territories,
+ * federal. Jurisdiction code is the slug of the assigned ws_jurisdiction
+ * taxonomy term (e.g. 'ca', 'us') — not ws_jx_code post meta.
  *
- * This CPT represents the canonical record for each U.S. jurisdiction
- * supported by the WhistleblowerShield legal archive.
- *
- * Supported jurisdictions:
- * - 50 U.S. states
- * - Federal government (US)
- * - District of Columbia (DC)
- * - U.S. Territories:
- *     Puerto Rico (PR)
- *     Guam (GU)
- *     U.S. Virgin Islands (VI)
- *     American Samoa (AS)
- *     Northern Mariana Islands (MP)
- *
- * Each jurisdiction record acts as the parent reference for:
- *
- *   jx-summary
- *   jx-statute
- *   
- *   
- *   ws-legal-update
- *
- * Internal Identifier:
- *   ws_jx_code (2-letter USPS style code)
- *
- * Examples:
- *   CA = California
- *   TX = Texas
- *   NY = New York
- *   US = Federal
- *
- * @package    WhistleblowerShield
- * @since      1.0.0
- * @author     Whistleblower Shield
- * @link       https://whistleblowershield.org
- * @copyright  Copyright (c) Whistleblower Shield
+ * @package WhistleblowerShield
+ * @since   1.0.0
+ * @version 3.10.0
  *
  * VERSION
  * -------
- * 1.0.0  Initial release.
- * 2.1.0  Refactored for ws-core architecture.
+ * 1.0.0   Initial release.
+ * 2.1.0   ws-core refactor.
  */
 
 defined( 'ABSPATH' ) || exit;

@@ -1,45 +1,10 @@
 <?php
 /**
- * jurisdiction-matrix.php
+ * matrix-jurisdictions.php — Canonical data and seeder for all 57 U.S. jurisdictions.
  *
- * Canonical data for all 57 U.S. jurisdictions. Keyed by USPS code.
- *
- * Each entry defines the immutable identity and label fields for one
- * jurisdiction. All label values are full display strings — there is no
- * ACF select/choices indirection. These values are written once by
- * ws_seed_jurisdiction_matrix() and locked in the admin UI.
- *
- * To change a value, edit this matrix and reset the ws_jurisdictions_seeded
- * option via WP-CLI or the database. No existing post meta is updated
- * automatically — a manual update_field() or WP-CLI command is required
- * for any previously seeded posts.
- *
- * FIELDS PER ENTRY
- * ----------------
- * title                    — post_title (same as ws_jurisdiction_name)
- * slug                     — post_name
- * ws_jurisdiction_class    — constitutional classification: state | federal |
- *                            district | territory
- * ws_jx_code               — 2-letter USPS postal code (canonical identifier)
- * ws_jurisdiction_name     — display name used in headings and labels
- * ws_jx_gov_portal_url     — official state/territory homepage
- * ws_jx_gov_portal_label   — standardized "Official Government Portal" label
- * ws_jx_wb_authority_url   — homepage of office handling whistleblower matters
- * ws_jx_wb_authority_label — official name of the whistleblower authority
- * ws_jx_legislature_url    — official legislative body homepage
- * ws_jx_legislature_label  — official name of the legislative body
- * ws_jx_executive_url      — chief executive office homepage
- * ws_jx_executive_label    — title of the chief executive office; null for
- *                            Federal (suppressed by display template)
- * ws_jx_flag_source_url    — Wikimedia Commons page for the jurisdiction's
- *                            canonical SVG flag file
- *
- * LOADING
- * -------
- * Loaded in the Universal Layer (loader.php) so the matrix is available on
- * both frontend and admin — including query-jurisdiction.php and all ACF files.
- *
- *
+ * @package WhistleblowerShield
+ * @since   1.0.0
+ * @version 3.10.0
  */
 
 defined( 'ABSPATH' ) || exit;

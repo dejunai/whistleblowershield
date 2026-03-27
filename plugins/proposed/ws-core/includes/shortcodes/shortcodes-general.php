@@ -67,6 +67,10 @@
  *         #ws-{section} to the back link. Two disclaimers added to reference
  *         page output. External reference links use target="_blank" with
  *         rel="noopener noreferrer" and window.opener JS for tab management.
+ *
+ * @package WhistleblowerShield
+ * @since   2.1.3
+ * @version 3.10.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit;

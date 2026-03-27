@@ -1,96 +1,27 @@
 <?php
 /**
- * render-agency.php
+ * render-agency.php — Agency page assembler and procedure card renderers.
  *
- * Render Layer — Agency Page
+ * Intercepts the_content for ws-agency CPT singles. Appends structured
+ * procedure sections after the editorial post_content.
  *
- * PURPOSE
- * -------
- * Automatically appends filing procedure sections to the public-facing
- * ws-agency page. Intercepts WordPress content rendering via the_content
- * filter, queries procedures through the query layer, and renders them
- * in grouped sections answering the end-user question: "What do I do next?"
+ * Also handles ws-ag-procedure singles so public permalinks render correctly.
  *
- *
- * ARCHITECTURE
- * ------------
- *
- * ws-agency (public CPT — has_archive: 'agencies')
- *      └── ws-ag-procedure (child CPT, many-to-one via ws_proc_agency_id)
- *
- * The agency page post_content holds an editorial overview of the agency
- * (capabilities, jurisdiction, general description). This file appends
- * the structured procedures section after that content.
- *
- *
- * RENDERING MODEL
- * ---------------
- *
- *      WordPress loads agency post content
- *            ↓
- *      ws_handle_agency_render() intercepts via the_content filter
- *            ↓
- *      ws_get_agency_procedures() queries published procedures from cache
- *            ↓
- *      ws_render_agency_procedures() groups by type and renders sections
- *
- *
- * GROUPING ORDER
- * --------------
- * Procedures are grouped by type and displayed in this order:
- *
+ * PROCEDURE GROUPING ORDER:
  *   1. disclosure  → "How to Report Wrongdoing"
  *   2. retaliation → "How to File a Complaint After Retaliation"
  *   3. both        → "Disclosure & Retaliation Procedure"
  *
- * Disclosure is shown first because it is the primary entry point for
- * most end-users. Retaliation procedures are elevated because deadline
- * urgency is higher — users in retaliation situations need to see the
- * deadline clearly.
+ * Disclosure first — primary entry point. Retaliation elevated because
+ * deadline urgency is higher for users already facing consequences.
  *
+ * @package WhistleblowerShield
+ * @since   3.9.0
+ * @version 3.10.0
  *
- * DATA LAYER
- * ----------
- * All data reads go through the query layer:
- *
- *   ws_get_agency_procedures( $agency_id ) — primary data source
- *
- * This file must not call get_post_meta(), get_field(), or WP_Query directly.
- *
- *
- * LOAD ORDER
- * ----------
- * Loaded in the ASSEMBLY LAYER (frontend only) alongside other render files.
- * Depends on query-agencies.php (Universal Layer) being loaded first.
- *
- *
- * CSS CLASSES
- * -----------
- * .ws-agency-procedures            Outer wrapper for the procedures section.
- * .ws-agency-procedures__heading   "Filing Procedures" h2.
- * .ws-agency-procedures__group     Type group container (--disclosure, --retaliation, --both).
- * .ws-proc-card                    Individual procedure card.
- * .ws-proc-card__intake-only-notice  Prominent intake-only warning callout.
- * .ws-proc-card__meta              dl: identity policy, deadline, entry point.
- * .ws-proc-card__prereqs-notice    Prerequisites required warning callout.
- * .ws-proc-card__walkthrough       Step-by-step walkthrough content (WYSIWYG HTML).
- * .ws-proc-card__exclusivity-notice  Mutual exclusivity warning callout.
- * .ws-proc-card__actions           CTA button row.
- * .ws-proc-card__last-reviewed     "Verified: [date]" attribution line.
- *
- *
- * @package    WhistleblowerShield
- * @since      3.9.0
- * @author     Whistleblower Shield
- * @link       https://whistleblowershield.org
- * @copyright  Copyright (c) Whistleblower Shield
- *
- * VERSION HISTORY
- * ---------------
- * 3.9.0  Initial. ws_handle_agency_render(), ws_render_agency_procedures(),
- *        ws_render_agency_procedure_card(). Phase 2 of ws-ag-procedure feature.
- *        Grouped by type; deadline, identity policy, entry point in meta dl;
- *        intake-only, prerequisites, and exclusivity notice callouts.
+ * VERSION
+ * -------
+ * 3.9.0   Initial release. Phase 2 of ws-ag-procedure feature build.
  */
 
 defined( 'ABSPATH' ) || exit;

@@ -1,30 +1,10 @@
 <?php
 /**
- * matrix-federal-courts.php
+ * matrix-federal-courts.php — Global registry of U.S. federal courts for jx-interpretation fields.
  *
- * Global registry of U.S. courts for ws-core citation fields.
- *
- * STRUCTURE
- * ---------
- * Each entry:
- *   'name'        Full official court name
- *   'short'       Legal citation abbreviation
- *   'type'        scotus | federal_appellate | federal_district
- *   'ws_jx_codes' Array of USPS codes this court serves, or null
- *                 (null = appears on every jurisdiction — SCOTUS only)
- *   'circuit'     Federal circuit number string, or null
- *   'level'       1=supreme/highest  2=appellate  3=district/trial
- *
- * SECTIONS
- * --------
- * 1. Supreme Court of the United States
- * 2. Federal Circuit Courts of Appeals (13)
- * 3. Federal District Courts (94)
- *
- * State and territory courts live in matrix-state-courts.php ($ws_state_court_matrix).
- * ws_interp_load_court_choices() merges both matrices when the parent statute is
- * federal; for state statutes it uses $ws_state_court_matrix only.
- *
+ * @package WhistleblowerShield
+ * @since   3.8.0
+ * @version 3.10.0
  */
 
 defined( 'ABSPATH' ) || exit;

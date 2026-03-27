@@ -77,6 +77,10 @@
  *         to admin-audit-trail.php. Relationship sync logic moved to
  *         admin-relationships.php. Header and inline comments added.
  * 2.3.1  Added jx-citation and ws-agency to audited post types.
+ *
+ * @package WhistleblowerShield
+ * @since   1.0.0
+ * @version 3.10.0
  */
 
 defined( 'ABSPATH' ) || exit;

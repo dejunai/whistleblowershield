@@ -1,35 +1,10 @@
 <?php
 /**
- * cpt-ag-procedures.php
+ * cpt-ag-procedures.php — Registers the ws-ag-procedure CPT.
  *
- * Registers the Agency Filing Procedures Custom Post Type.
- *
- * PURPOSE
- * -------
- * Stores structured filing procedures for whistleblower agencies. Each
- * procedure represents a distinct intake path at a parent agency —
- * differentiated by procedure type (disclosure vs. retaliation), disclosure
- * category, filing deadline, identity policy, and step-by-step guidance.
- *
- * ARCHITECTURE
- * ------------
- * Procedures are child records of ws-agency, linked via the ws_proc_agency_id
- * ACF post_object field (acf-ag-procedures.php). A single agency may have
- * multiple procedures covering different statutes, disclosure categories, or
- * entry points.
- *
- * PHASES
- * ------
- * Phase 1 (3.9.0): CPT + ACF structure, admin columns, agency nav box.
- * Phase 2 (3.9.0): Query layer (query-agencies.php) + front-end render (render-agency.php).
- * Phase 3: Statute cross-reference (ws_proc_statute_ids relationship field).
- * Phase 4: Seeder (matrix-ag-procedures.php).
- *
- * @package    WhistleblowerShield
- * @since      3.9.0
- * @author     Whistleblower Shield
- * @link       https://whistleblowershield.org
- * @copyright  Copyright (c) Whistleblower Shield
+ * @package WhistleblowerShield
+ * @since   3.9.0
+ * @version 3.10.0
  */
 
 defined( 'ABSPATH' ) || exit;

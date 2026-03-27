@@ -36,6 +36,10 @@
  *        - Removed Plain Language tab and all plain English fields — now registered
  *          centrally in acf-plain-english-fields.php (menu_order 85).
  *        - ws_agency_last_reviewed retained as a content-owned field.
+ *
+ * @package WhistleblowerShield
+ * @since   2.3.1
+ * @version 3.10.0
  */
 
 defined( 'ABSPATH' ) || exit;

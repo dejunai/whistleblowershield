@@ -1,96 +1,42 @@
 <?php
 /**
- * admin-procedure-watch.php
+ * admin-procedure-watch.php — Procedure statute link validation + publish gate.
  *
- * Admin Layer — Procedure Statute Link Validation
- *
- * PURPOSE
- * -------
  * Guards against inaccurate statute cross-references on ws-ag-procedure posts.
- * Procedures are public-facing guidance — a statute link that is wrong or
- * carelessly broad undermines the site's core editorial promise.
- *
- * This file owns three admin concerns only:
- *   1. Mismatch detection + publish demotion (acf/save_post hook)
- *   2. Publish gate (wp_insert_post_data filter)
- *   3. Admin notice display on the procedure edit screen
- *
- * Cache invalidation (statute transients) is handled separately by
- * query-agencies.php — the data layer owns its own cache lifecycle.
- *
+ * Owns three concerns: mismatch detection, publish gate, admin notice display.
+ * Cache invalidation is handled by query-agencies.php (data layer owns cache).
  *
  * DETECTION LOGIC
  * ---------------
- * Hard mismatch: a linked jx-statute has zero disclosure-type term
- * intersection with this procedure's ws_proc_disclosure_types.
+ * Hard mismatch: linked jx-statute has zero ws_disclosure_type term intersection
+ * with this procedure's ws_proc_disclosure_types.
+ *   → sets ws_proc_stat_flagged = 1
+ *   → demotes published post to draft
+ *   → publish gate blocks all subsequent publish attempts
  *
- * Broad-scope advisory (soft — no demotion): procedure has no disclosure
- * types set AND has statute links. The picker showed everything when the
- * editor made selections — links cannot be automatically verified.
+ * Broad-scope advisory (soft — no demotion): procedure has no disclosure types
+ * set AND has statute links. Links cannot be automatically verified.
+ *   → sets ws_proc_stat_broad_scope = 1
+ *   → admin notice only
  *
- * Statutes with no ws_disclosure_type terms assigned are skipped by the
- * hard-mismatch check. The data problem is on the statute side; flagging
- * here would point the editor in the wrong direction. Incomplete statute
- * taxonomy data is a separate health-check concern.
+ * Statutes with no ws_disclosure_type terms assigned are skipped — the data
+ * problem is on the statute side, not the procedure side.
  *
+ * ADMIN OVERRIDE FLOW
+ * -------------------
+ * Admin checks field_proc_stat_override (Admin Review tab) and saves:
+ *   wp_insert_post_data fires first — reads $_POST['acf'] directly (before ACF
+ *   saves at priority 10) — allows publish through if admin + override set.
+ *   acf/save_post (priority 20) fires after — writes override audit log to
+ *   ws_proc_stat_override_log, clears mismatch flag, resets override to 0.
  *
- * FLOW: Hard mismatch found
- * -------------------------
- *   acf/save_post (priority 20)
- *     → writes ws_proc_stat_flagged = 1
- *     → writes ws_proc_stat_flag_detail (JSON mismatch list)
- *     → if post_status === 'publish': calls wp_update_post() to demote draft
+ * @package WhistleblowerShield
+ * @since   3.9.0
+ * @version 3.10.0
  *
- *   wp_insert_post_data (all subsequent publish attempts)
- *     → reads ws_proc_stat_flagged
- *     → if set: forces post_status = 'draft'
- *     → exception: admin submits ws_proc_stat_override via ACF edit screen
- *
- *
- * FLOW: Admin override
- * --------------------
- *   Admin checks field_proc_stat_override (Admin Review tab) and saves:
- *
- *   wp_insert_post_data fires first:
- *     → reads $_POST['acf']['field_proc_stat_override'] (set before ACF saves)
- *     → if admin + override submitted: allows publish status through
- *
- *   acf/save_post (priority 20) fires after:
- *     → reads ws_proc_stat_override = 1 from post meta (ACF wrote it at p10)
- *     → writes audit log entry to ws_proc_stat_override_log
- *     → deletes ws_proc_stat_flagged + ws_proc_stat_flag_detail
- *     → resets ws_proc_stat_override to 0 (direct meta write, no ACF cycle)
- *     → returns without mismatch check
- *
- *
- * FLOW: Clean save (no mismatches, no override)
- * ----------------------------------------------
- *   acf/save_post (priority 20):
- *     → runs check, finds no mismatches
- *     → deletes ws_proc_stat_flagged + ws_proc_stat_flag_detail
- *     → deletes ws_proc_stat_broad_scope
- *     → post may publish normally
- *
- *
- * POST META KEYS WRITTEN BY THIS FILE
- * ------------------------------------
- *   ws_proc_stat_flagged       int (0|1)  Hard mismatch flag. Cleared on clean save.
- *   ws_proc_stat_flag_detail   string     JSON array of mismatch entries.
- *   ws_proc_stat_broad_scope   int (0|1)  Soft advisory: no disclosure types + has statute links.
- *   ws_proc_stat_override      int (0|1)  Admin override toggle. Always reset to 0 after save.
- *   ws_proc_stat_override_log  string     JSON append-only audit log of override events.
- *
- *
- * @package    WhistleblowerShield
- * @since      3.9.0
- * @author     Whistleblower Shield
- * @link       https://whistleblowershield.org
- * @copyright  Copyright (c) Whistleblower Shield
- *
- * VERSION HISTORY
- * ---------------
- * 3.9.0  Initial. Phase 3 of ws-ag-procedure feature build.
- *        Detection, demotion, gate, notice, override, audit log.
+ * VERSION
+ * -------
+ * 3.9.0   Initial release. Phase 3 of ws-ag-procedure feature build.
  */
 
 defined( 'ABSPATH' ) || exit;

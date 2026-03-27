@@ -35,6 +35,7 @@
  *
  * @package    WhistleblowerShield
  * @since      3.6.1
+ * @version 3.10.0
  * @author     Dejunai
  *
  * VERSION

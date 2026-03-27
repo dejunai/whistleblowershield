@@ -32,6 +32,10 @@
  * 3.10.0 ws-ag-procedure Type column: get_post_meta( 'ws_proc_type' ) replaced
  *        with wp_get_object_terms( 'ws_procedure_type' ). ws_procedure_type is
  *        now a taxonomy; direct taxonomy read is correct in admin list context.
+ *
+ * @package WhistleblowerShield
+ * @since   2.1.0
+ * @version 3.10.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit;

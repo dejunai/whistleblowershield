@@ -93,140 +93,31 @@
  *
  * @package    WhistleblowerShield
  * @since      1.0.0
+ * @version 3.10.0
  * @author     Whistleblower Shield
  * @link       https://whistleblowershield.org
  * @copyright  Copyright (c) Whistleblower Shield
  *
  * VERSION
  * -------
- * 1.0.0  Initial release.
- * 2.1.0  Refactored for ws-core architecture. Removed ws_get_jurisdiction_by_code
- *        in favor of ws_get_id_by_code. Updated field names to match
- *        acf-jurisdiction.php v2.1.0. Added record management fields to
- *        ws_get_jurisdiction_data. Updated dataset stubs to return consistent
- *        base arrays and accept ws_jx_code as input. Consolidated cache
- *        invalidation on save_post.
- * 2.1.1  ws_get_jx_statutes() now returns with Federal Statutes appended to
- *        Statutes of the specified Jurisdiction when !US is called.
- * 2.3.1  All content keys normalized to raw get_post_field('post_content').
- *        Render layer applies the_content filters. ws_get_jx_statutes()
- *        returns array-of-arrays; shape documented above.
- * 3.0.0  Architecture refactor (Phase 3.1+3.2):
- *        ws_jx_code meta retired as join mechanism. All jurisdiction lookups
- *        now use the ws_jurisdiction taxonomy. ws_get_id_by_code() migrated
- *        to taxonomy query; transient cache rekeyed to ws_id_for_term_{term_id}.
- *        ws_get_jurisdiction_data() and ws_get_jurisdiction_index_data() read
- *        jurisdiction code from taxonomy term slug. save_post_jurisdiction hook
- *        updated to clear per-term transient.
- * 3.1.0  Dropped meta_prefix from all stamp meta keys. All dataset functions
- *        now include a 'record' sub-array with unprefixed stamp fields.
- *        Added ws_resolve_display_name() and ws_build_record_array() private
- *        helpers; all datasets return author_name and last_edited_by as
- *        resolved display names. Added ws_build_plain_english_array() helper;
- *        all plain-English-capable CPTs return a 'plain' sub-array including
- *        plain_reviewed_by and plain_reviewed_name. ws_get_jurisdiction_data()
- *        updated to read stamp fields via get_post_meta() with unprefixed keys.
- *        Removed prefixed summarized key reads from ws_get_jx_summary_data();
- *        summarized_by/summarized_date dropped from summary return (jx-summary
- *        carries no has_plain_english toggle). Removed formatted date fields
- *        (fmt_created, fmt_reviewed, fmt_effective) — dates are stored as
- *        Y-m-d; render layer formats for display. ws_get_legal_updates_data()
- *        returns raw effective_date and post_date; formatting removed.
- *        save_post_jurisdiction hook consolidated: cache invalidation and
- *        ws_jx_term_id write combined in one callback.
- * 3.2.0  Legal update system overhaul and field name audit:
- *        - Fixed 8 get_field() calls missing the jx_ infix (ws_gov_portal_url,
- *          ws_executive_url, etc. → ws_jx_gov_portal_url, ws_jx_executive_url, etc.)
- *          to match acf-jurisdictions.php field names.
- *        - ws_jurisdiction_type → ws_jurisdiction_class throughout, matching the
- *          ACF field name as of acf-jurisdictions.php v3.0+.
- *        - ws_get_legal_updates_data(): new $public_only parameter; restricts
- *          results to types in WS_LEGAL_UPDATE_PUBLIC_TYPES when true.
- *        - Jurisdiction filter replaced: meta_query on ws_update_jurisdiction term ID
- *          → tax_query on ws_jurisdiction taxonomy. Requires save_terms=1 (ACF v3.5.0)
- *          and wp_set_post_terms() in the hook (v1.1.0).
- *        - Return array expanded: added post_id, update_date, update_type,
- *          multi_jurisdiction; source_post_id and source_post_type moved from
- *          get_post_field() to get_post_meta() (correct function for custom meta).
- *        - ws_update_source_url renamed from ws_update_source to comply with
- *          project convention that all URL-valued meta keys end in _url.
- *        - Return key renamed summary_html → summary_wysiwyg to accurately
- *          reflect that the field is a wysiwyg ACF type (content is sanitized
- *          via wp_kses_post before return; safe to echo directly).
- * 3.3.0  Dataset completeness pass:
- * 3.3.1  Query layer refactor — double-duty split:
- *         ws_get_term_id_by_code() extracted from ws_get_id_by_code() as a
- *         standalone helper for callers that need only the term ID.
- *         ws_get_id_by_code() refactored to compose it.
- *         ws_get_legal_updates_data() inline term ID lookup replaced with
- *         ws_get_jx_term_id() for consistency with all other dataset functions.
- *        - Added ws_build_source_verify_array() private helper; all dataset
- *          functions now return a 'verify' sub-array covering source_method,
- *          source_name, verified_by, verified_name, verified_date,
- *          verification_status, and needs_review.
- *        - ws_build_plain_english_array() return keys normalized to ws_ prefix
- *          throughout (plain_english_by → ws_auto_plain_english_by, etc.).
- *        - All dataset functions expanded to return every ACF field defined
- *          for the CPT. ws_statute_burden_of_proof_details phantom key removed
- *          (no corresponding ACF field exists — see inline note).
- *        - ws_jx_code intentionally omitted from ws_get_jurisdiction_data()
- *          return — see inline comment.
- * 3.3.2  Return key simplification pass — all dataset and helper functions
- *         updated. The ws_ / ws_auto_ meta key prefixes are no longer
- *         forwarded as PHP array keys; keys are now plain and context-scoped
- *         to their sub-array. See DATASET RETURN FORMAT above for the
- *         canonical key reference. See ws-core.php for the full policy note.
- * 3.3.3  ws_get_legal_updates_data() caching and default-count improvements:
- *         - $count parameter default changed from 5 to 0; function resolves
- *           0 to 100 for sitewide calls and 5 for per-jurisdiction calls.
- *         - Sitewide calls now cached via WS_CACHE_LEGAL_UPDATES_SITEWIDE transient.
- *           Exact result set is stored; no slicing. Invalidated on every legal update save.
- *         - ≥50 threshold and 100-record slice logic later removed (see 3.3.4).
- * 3.3.4  ws_get_legal_updates_data() caching simplified:
- *         - Removed ≥50-record threshold; all sitewide calls are cached regardless of count.
- *         - Removed 100-record fetch-and-slice pattern; cache stores the exact result set.
- *         - $public_only parameter removed; summary-type filtering is now implicit when
- *           $jx_id is provided (uses WS_LEGAL_UPDATE_SUMMARY_TYPES automatically).
- *         - [ws_legal_updates] shortcode attribute renamed jurisdiction → jx.
- * 3.5.0  ws_get_jx_statute_data() rebuilt to match ACF 3.5.0 ingest alignment:
- *        - Renamed keys: limit_value/unit/trigger → sol_*, burden_of_proof →
- *          bop_standard, exhaustion_required → has_exhaustion.
- *        - tolling_notes retired; replaced by tolling_has_details / tolling_details.
- *        - New fields added across Legal Basis, Enforcement, Burden of Proof,
- *          Reward, and Links sections. See acf-jx-statutes.php v3.5.0 for full
- *          field inventory.
- *        - remedies switched from get_post_meta() to get_field() — fixes pre-existing
- *          bug where matrix-seeded remedy terms were invisible to the query layer.
- * 3.6.0  Query layer split into three files:
- *        - query-helpers.php  — pure utilities (ws_resolve_display_name).
- *        - query-shared.php   — cross-CPT sub-array builders (ws_build_record_array,
- *                               ws_build_plain_english_array, ws_build_source_verify_array).
- *        - query-jurisdiction.php — jurisdiction-specific dataset functions (this file).
- *        Load order is non-negotiable: helpers → shared → jurisdiction.
- * 3.7.0  Added ws_get_nationwide_assist_org_data() — dedicated query function for
- *        the [ws_assist_org_directory] shortcode. Returns all published ws-assist-org
- *        records scoped to the 'us' ws_jurisdiction term, with optional $filters for
- *        type (ws_aorg_type slug), sector (ws_employment_sector slug), stage (ws_case_stage
- *        slug), and cost_model. Sector and cost_model filtering use tax_query.
- *        Return shape is identical to ws_get_assist_org_data().
- * 3.8.0  court key in ws_get_jx_interpretation_data() resolved to short label via
- *        ws_court_lookup(); 'other' court key resolves to ws_jx_interp_court_name
- *        free-text value. Dead ws_ref_approved gate removed from ws_get_ref_materials()
- *        — was silently excluding all references. ws_get_reference_page_url() updated
- *        to accept $section param for anchor targeting.
- * 3.9.0  ws_get_jurisdiction_index_data(): summary gate added — jurisdictions without
- *        a linked jx-summary are excluded from the index. A published jurisdiction
- *        post with no summary is a stub; surfacing it in the index is misleading.
- *        ws_jx_term_by_code() and ws_court_lookup() moved here from matrix-helpers.php
- *        (defined in query-helpers.php — available in Universal Layer).
- *        ws_parse_jx_limitations_meta() added as frontend fallback for the
- *        ws_jx_limitations repeater field. limitations query key updated accordingly.
- *        ws_process_type get_field() calls given get_post_meta() fallback.
- *        ws_aorg_services: both services keys in ws_get_assist_org_data() and
- *        ws_get_jx_assist_org_data() updated from get_post_meta() to
- *        wp_get_object_terms( 'ws_aorg_service' ); additional_services key added.
+ * 1.0.0   Initial release.
+ * 2.1.0   Refactored for ws-core architecture.
+ * 2.3.1   Content keys normalized to raw post_content.
+ * 3.0.0   ws_jx_code join retired; taxonomy-based lookups throughout.
+ * 3.1.0   record sub-array added; stamp fields unprefixed in return keys.
+ * 3.2.0   Legal update system overhaul; tax_query jurisdiction filter.
+ * 3.3.2   ws_/ws_auto_ prefixes stripped from all query layer return keys.
+ * 3.5.0   ws_get_jx_statute_data() rebuilt for ingest alignment.
+ * 3.6.0   Query layer split: helpers → shared → jurisdiction → agencies.
+ * 3.7.0   ws_get_nationwide_assist_org_data() added.
+ * 3.8.0   Court label resolution via ws_court_lookup(). Reference page anchor support.
+ * 3.9.0   Summary gate on index. Frontend repeater fallback. Services via taxonomy.
+ * 3.10.0  ws_procedure_type taxonomy reads added.
+ *
+ * @package WhistleblowerShield
+ * @since   1.0.0
+ * @version 3.10.0
  */
-
 
 defined( 'ABSPATH' ) || exit;
 

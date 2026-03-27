@@ -79,81 +79,18 @@
  *
  * VERSION
  * -------
- * 2.1.0  Initial implementation.
- * 2.1.3  Fixed field name references to match actual ACF field names.
- * 2.3.1  Corrected all four field names to ws_jurisdiction. Collapsed
- *        four separate filters into one.
- * 2.4.0  Replaced ws_jurisdiction (post_object) with ws_jx_code (text)
- *        across all jx-* CPTs. Collapsed ws_jurisdiction and ws_jx_code
- *        filters into a single ws_jx_code filter covering all CPTs.
- * 2.5.0  Consolidated field-lock, auto-fill, and stamp-field hooks from
- *        individual ACF files into this shared file.
- * 2.5.1  Added stamp config entries. Fixed admin stamp behaviour:
- *        last_edited_author now always stamps the current user unless an
- *        admin explicitly selects a different user for attribution. Added
- *        auto-fill-editor filter. Added last_edited date to visible lock list.
- * 3.0.0  Architecture refactor (Phase 3.2):
- *        - Removed ws_jx_code pre-populate filter (ws_jx_code retired).
- *        - Removed deleted CPT entries from stamp config.
- *        - Added save_post_jurisdiction hook writing ws_jx_term_id post meta.
- *        - Added wp_insert_post hook auto-assigning ws_jurisdiction taxonomy
- *          term on new addendum post creation (reads ws_jx_term URL arg).
- * 3.0.1  Phase 8: Added ws_languages "additional" term auto-assign/unassign
- *        hook for ws-agency (ws_agency_additional_languages) and
- *        ws-assist-org (ws_ao_additional_languages).
- * 3.1.0  Dropped meta_prefix from all stamp meta keys — all CPTs now share
- *        identical unprefixed stamp key names (date_created, create_author,
- *        last_edited, last_edited_author, etc.). Removed jx-summary from
- *        ws_acf_stamp_summarized_fields(). Added plain_reviewed_by stamp field.
- *        Added plain English integrity guards (has_plain_english enforcement,
- *        plain_reviewed_by rank check, toggle-off cleanup). Fixed last_reviewed
- *        autofill guard to require plain_reviewed. Fixed date functions to use
- *        current_time() / gmdate(). jurisdiction CPT added to stamp config;
- *        save_post_jurisdiction retained for ws_jx_term_id write. Collapsed
- *        per-CPT field-name arrays into single shared field names; lock filters
- *        now register once per shared field name and apply across all CPTs.
- * 3.1.1  Bug fix: corrected 'ws-jurisdiction' CPT slug references to 'jurisdiction'
- *        in Restrict Manual Creation hooks and Identity Field Enforcement save hook.
- *        Slug mismatch caused Add New removal, manual-creation block, and identity
- *        field re-enforcement to silently not fire.
- * 3.4.0  Stamp field centralization:
- *        - Updated $ws_stamp_cpts entry for ws-reference: author_acf_key changed
- *          from field_ws_ref_last_edited_author to field_last_edited_author.
- *          Unique key retired; ws-reference now uses shared field keys.
- *        - Removed ws_ref_approved from field locking foreach loop.
- *          ws_ref_approved field retired entirely — Approval tab removed from
- *          acf-references.php.
- * 3.5.0  ws_auto_ prefix pass (ws-core v3.2.0):
- *        - All stamp meta keys prefixed with ws_auto_ to signal system-only
- *          writes: date_created → ws_auto_date_created, etc.
- *        - GMT audit keys prefixed _ws_auto_ (leading underscore = WP hidden
- *          meta convention): date_created_gmt → _ws_auto_date_created_gmt.
- *        - Source-verify keys ws_auto_ prefixed: source_method, source_name,
- *          verified_by, verified_date.
- *        - source_name locked readonly/disabled; admin-only visibility added
- *          for source_method and source_name via ws_hide_source_fields_for_non_admins().
- *        - Plain English stamp keys ws_auto_ prefixed: plain_english_by,
- *          plain_english_date, plain_english_reviewed_by.
- * 3.5.1  Bug fix: ws_ao_additional_languages → ws_aorg_additional_languages in
- *        ws_sync_additional_languages_term(). Stale key caused additional-language
- *        term sync for ws-assist-org to silently fail.
- *        Added inline comments to direct meta reads explaining why the query
- *        layer is not used in save/filter hook context.
- * 3.6.0  Added statute reverse indexes (ws_jx_statute_citation_ids,
- *        ws_jx_statute_interp_ids). Stash-and-rebuild pattern via four
- *        acf/save_post hooks (priorities 5 and 25) for citations and
- *        interpretations. Delete hooks maintain integrity on post removal.
- * 3.9.0  Rule 3b added to ws_acf_plain_english_guards(): substantial content
- *        change (similar_text() < 75%) resets plain_english_reviewed and its
- *        stamps. Admin notice queued on trigger. Typos and minor edits do not
- *        fire — only rewrites that materially change the plain English content.
- * 3.10.0 ws-ag-procedure added to $ws_stamp_cpts. acf-stamp-fields.php already
- *        attached stamp fields to this CPT via its location rules — this entry
- *        was the missing counterpart that enables ws_acf_write_stamp_fields()
- *        to actually write created/last-edited meta on procedure saves.
- *        ws-ag-procedure added to ws_source_verify_post_types(). Omission —
- *        matrix-seeded procedures require source verification and ws_needs_review
- *        coverage identical to other seeded CPTs.
+ * 2.1.0   Initial implementation.
+ * 2.5.0   Field-lock, auto-fill, and stamp hooks consolidated here.
+ * 3.0.0   ws_jx_code pre-populate removed. ws_jx_term_id hook added.
+ * 3.1.0   Stamp keys unprefixed. Plain English guards and stamps added.
+ * 3.5.0   ws_auto_ prefix applied to all stamp and source-verify meta keys.
+ * 3.6.0   Statute reverse index hooks added (citation and interpretation).
+ * 3.9.0   Rule 3b: plain_reviewed resets on substantial content change.
+ * 3.10.0  ws-ag-procedure added to $ws_stamp_cpts and ws_source_verify_post_types().
+ *
+ * @package WhistleblowerShield
+ * @since   2.1.0
+ * @version 3.10.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit;

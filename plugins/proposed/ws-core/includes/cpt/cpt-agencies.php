@@ -1,25 +1,10 @@
 <?php
 /**
- * cpt-agencies.php
+ * cpt-agencies.php — Registers the ws-agency CPT.
  *
- * Registers the Whistleblower Shield Agencies Custom Post Type.
- *
- * PURPOSE
- * -------
- * This CPT serves as the central directory for government and non-government
- * agencies responsible for whistleblower intake, oversight, and protection.
- *
- * ARCHITECTURE
- * ------------
- * Unlike citations, agencies are a top-level directory. They are linked to
- * jurisdictions via the ws_jx_code array (USPS codes) and classified by
- * misconduct types via the ws_disclosure_cat taxonomy.
- *
- * @package    WhistleblowerShield
- * @since      1.0.0
- * @author     Whistleblower Shield
- * @link       https://whistleblowershield.org
- * @copyright  Copyright (c) Whistleblower Shield
+ * @package WhistleblowerShield
+ * @since   1.0.0
+ * @version 3.10.0
  */
 
 defined( 'ABSPATH' ) || exit;

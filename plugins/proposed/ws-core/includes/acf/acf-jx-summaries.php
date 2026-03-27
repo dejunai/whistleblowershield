@@ -1,96 +1,26 @@
 <?php
 /**
- * acf-jx-summary.php
+ * acf-jx-summaries.php — ACF Pro fields for the jx-summary CPT.
  *
- * Registers ACF Pro fields for the `jx-summary` CPT.
+ * Group key: group_jx_summary_metadata
+ * Stamp fields: group_stamp_metadata (acf-stamp-fields.php, menu_order 90)
+ * Source verify: group_source_verify_metadata (acf-source-verify.php)
+ * Major edit: group_major_edit_metadata (acf-major-edit.php, menu_order 99)
  *
- * PURPOSE
- * -------
- * Provides structured metadata for Jurisdiction Summary records.
- * The main editorial content is written in the WordPress block
- * editor. These fields supply supporting metadata for content
- * management, plain-language review tracking, and stamp data.
+ * Note: jx-summary IS the plain language document. Plain English fields
+ * (group_plain_english_metadata) do NOT attach here — the summary carries
+ * its own plain_reviewed toggle in this group instead.
  *
- * JURISDICTION SCOPING
- * --------------------
- * jx-summary records are scoped to their parent jurisdiction via the
- * ws_jurisdiction taxonomy term. The ws_jx_code back-reference field
- * and admin-relationships.php sync logic were removed in Phase 3.2/3.6.
- * Auto-assignment of the ws_jurisdiction term on "Create Now" is
- * handled by the wp_insert_post hook in admin-hooks.php.
- *
- * STAMP FIELDS
- * ------------
- * The following fields are written server-side via acf/save_post
- * at priority 20 (after ACF commits its own fields at priority 10).
- *
- * Written once, never overwritten:
- *   date_created      Local date (Y-m-d)
- *   date_created_gmt  UTC date (Y-m-d)
- *   create_author     User ID of creating user
- *
- * Written on every save:
- *   last_edited       Local date (Y-m-d)
- *   last_edited_gmt   UTC date (Y-m-d)
- *   last_edited_author  User ID — stamped automatically,
- *                        visible and editable by admins only.
- *
- * date_created is rendered readonly at the bottom of the
- * Authorship & Review tab for admin reference. last_edited_author
- * also appears in Authorship & Review (readonly for non-admins,
- * editable for administrators). create_author is displayed readonly.
- *
- * @package    WhistleblowerShield
- * @since      2.1.0
- * @author     Whistleblower Shield
- * @link       https://whistleblowershield.org
- * @copyright  Copyright (c) Whistleblower Shield
+ * @package WhistleblowerShield
+ * @since   2.1.0
+ * @version 3.10.0
  *
  * VERSION
  * -------
- * 2.1.0  Initial release in ws-core architecture. CPT slug
- *        corrected to jx-summary (hyphenated). Added ws_jurisdiction
- *        back-reference field to support two-way relationship
- *        sync via admin-relationships.php.
- * 2.3.0  Added ws_jx_limitations wysiwyg field to Content tab.
- *        Rendered via [ws_jx_limitations] shortcode in the assembler
- *        after [ws_jx_case_law]. ws-case-law section removed from
- *        ws_jurisdiction_summary wysiwyg — now managed entirely
- *        via jx-citation CPT records.
- * 3.0.0  Phase 9.0+9.1 refactor:
- *        - Removed ws_jx_sum_legal_review_completed and ws_jx_sum_legal_reviewer
- *          (legal review badge system removed entirely).
- *        - Replaced ws_jx_sum_human_reviewed with canonical plain_reviewed toggle.
- *        - Added summarized_by (user, stamped once) and summarized_date (text, stamped once).
- *        - Removed Relationships tab and ws_jx_code field (retired in Phase 3.2;
- *          jx-summary is now scoped via ws_jurisdiction taxonomy).
- *        - Back-reference note in PURPOSE removed (admin-relationships.php deleted Phase 3.6).
- * 3.1.1  Pass 2 ACF audit fixes:
- *        - Renamed field key field_jx_sum_plain_english_reviewed → field_plain_english_reviewed
- *          for consistency with all other CPTs. Removed inline @todo comments.
- *        - Renamed field key field_ws_jx_sum_plain_english_by_temp → field_plain_english_by.
- *          Corrected meta name from ws_jx_sum_create_author → plain_english_by to match
- *          the canonical name written by ws_acf_stamp_summarized_fields() in admin-hooks.php.
- *          Previously this field always displayed blank (stamp writes plain_english_by;
- *          field read ws_jx_sum_create_author — two different meta keys).
- * 3.1.2  Pass 3 ACF audit — instructions fixes:
- *        - plain_english_reviewed_by instructions: aligned with other CPTs
- *          ('Auto-stamped when Plain Language Reviewed is first enabled.').
- *        - plain_english_by instructions: aligned with other CPTs
- *          ('Auto-stamped on first save after plain language content is created.').
- * 3.9.0  ws_jx_limitations field changed from wysiwyg to two-subfield repeater
- *        (ws_jx_limit_label + ws_jx_limit_text). Meta key renamed from
- *        ws_jx_limitations_wysiwyg to ws_jx_limitations. Query, render, and
- *        shortcode layers updated to match. Any existing wysiwyg content will
- *        need manual migration.
- * 3.4.0  Stamp field centralization:
- *        - Removed stamp fields (last_edited_author, date_created, last_edited,
- *          create_author) from Authorship & Review tab — now registered centrally
- *          in acf-stamp-fields.php (group_stamp_metadata, menu_order 90).
- *        - Renamed field key field_ws_jx_sum_plain_english_reviewed_by to
- *          field_plain_english_reviewed_by for consistency with all other CPTs.
- *          No downstream impact — admin-hooks.php references this field by meta
- *          name not ACF key; query and render layers read post meta directly.
+ * 2.1.0   Initial release.
+ * 3.0.0   ws_jx_code back-reference and admin-relationships sync removed.
+ * 3.4.0   Stamp fields centralized to acf-stamp-fields.php.
+ * 3.10.0  Inline comments updated for consistency with current conventions.
  */
 
 defined( 'ABSPATH' ) || exit;
