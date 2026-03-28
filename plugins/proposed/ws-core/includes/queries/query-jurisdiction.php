@@ -27,7 +27,7 @@
  * ---------------------
  * The canonical two-letter code for each jurisdiction is the slug of its
  * assigned ws_jurisdiction taxonomy term (e.g., 'ca', 'tx', 'us').
- * ws_jx_code meta has been retired. All lookups use taxonomy queries.
+ * All lookups use taxonomy queries.
  *
  * ws_jx_term_id post meta is written on each jurisdiction post (by the seeder
  * and the save_post_jurisdiction hook below) as a convenience for direct
@@ -103,7 +103,7 @@
  * 1.0.0   Initial release.
  * 2.1.0   Refactored for ws-core architecture.
  * 2.3.1   Content keys normalized to raw post_content.
- * 3.0.0   ws_jx_code join retired; taxonomy-based lookups throughout.
+ * 3.0.0   Taxonomy-based lookups throughout; post meta join removed.
  * 3.1.0   record sub-array added; stamp fields unprefixed in return keys.
  * 3.2.0   Legal update system overhaul; tax_query jurisdiction filter.
  * 3.3.2   ws_/ws_auto_ prefixes stripped from all query layer return keys.
@@ -207,7 +207,7 @@ function ws_get_id_by_code( $jx_code ) {
 // ════════════════════════════════════════════════════════════════════════════
 // Input Resolver
 //
-// Resolves a mixed $input (numeric post ID or two-letter ws_jx_code string)
+// Resolves a mixed $input (numeric post ID or two-letter USPS code string)
 // to a jurisdiction post ID integer. Used by all dataset retrieval functions
 // to eliminate the repeated is_numeric ternary.
 //
@@ -226,7 +226,7 @@ function ws_resolve_jx_id( $input ) {
 // ════════════════════════════════════════════════════════════════════════════
 // Master Jurisdiction Data Fetcher
 //
-// Accepts either a numeric post ID or a two-letter ws_jx_code string.
+// Accepts either a numeric post ID or a two-letter USPS code string.
 // Falls back to the global $post if no input is provided.
 //
 // Returns a structured array of all jurisdiction metadata, or false if the
@@ -252,7 +252,7 @@ function ws_get_jurisdiction_data( $input = null ) {
         return false;
     }
 
-    $flag     = get_field( 'ws_jx_flag', $post_id );
+    $flag_id  = (int) get_post_meta( $post_id, 'ws_jx_flag', true );
     $jx_terms = wp_get_post_terms( $post_id, WS_JURISDICTION_TAXONOMY, [ 'fields' => 'slugs' ] );
     $jx_code  = ( ! is_wp_error( $jx_terms ) && ! empty( $jx_terms ) ) ? strtoupper( $jx_terms[0] ) : '';
 
@@ -267,19 +267,15 @@ function ws_get_jurisdiction_data( $input = null ) {
         // the seeder and save_post_jurisdiction hook. Returned here for
         // callers that need the term ID directly without a get_term_by() call.
         'jx_term_id' => (int) get_post_meta( $post_id, 'ws_jx_term_id', true ),
-        // ws_jx_code (the ACF field) is intentionally omitted. It is kept
-        // in the editor as a read-only display convenience; the canonical
-        // USPS code is derived from the ws_jurisdiction taxonomy term slug
-        // and is already present as 'code'. Returning the ACF field here
-        // would introduce a redundant and potentially stale second source.
-        // See the JURISDICTION IDENTITY section in the file header.
 
         // ── Flag ─────────────────────────────────────────────────────────────
+        // ACF returns the raw attachment ID for image fields in some contexts;
+        // bypass get_field() and resolve the URL directly via WP core.
         'flag' => [
-            'url'         => ( is_array( $flag ) && ! empty( $flag['url'] ) ) ? $flag['url'] : '',
-            'attribution' => get_field( 'ws_jx_flag_attribution', $post_id ),
-            'source_url'  => get_field( 'ws_jx_flag_source_url',  $post_id ),
-            'license'     => get_field( 'ws_jx_flag_license',     $post_id ),
+            'url'         => $flag_id ? wp_get_attachment_image_url( $flag_id, 'full' ) : '',
+            'attribution' => get_post_meta( $post_id, 'ws_jx_flag_attribution', true ),
+            'source_url'  => get_post_meta( $post_id, 'ws_jx_flag_source_url',  true ),
+            'license'     => get_post_meta( $post_id, 'ws_jx_flag_license',     true ),
         ],
 
         // ── Government Links ─────────────────────────────────────────────────
@@ -388,7 +384,7 @@ function ws_get_jx_summary_data( $jx_term_id ) {
         // Content fields
         'content'       => get_post_meta( $sid, 'ws_jurisdiction_summary_wysiwyg', true ),
         'sources'       => get_post_meta( $sid, 'ws_jx_summary_sources',   true ),
-        'limitations'   => get_field( 'ws_jx_limitations', $sid ) ?: ws_parse_jx_limitations_meta( $sid ),
+        'limitations'   => ws_parse_jx_limitations_meta( $sid ),
         'notes'         => get_post_meta( $sid, 'ws_jx_summary_notes',        true ),
         // jx-summary is inherently plain English; ws_has_plain_english is
         // implicitly true and no per-record toggle is stored or returned here.

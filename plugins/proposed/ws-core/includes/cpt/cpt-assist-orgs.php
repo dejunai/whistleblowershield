@@ -78,7 +78,7 @@ function ws_register_cpt_assist_org() {
         // Citations 27 → Agencies 28 → Interpretations 29 → Assist Orgs 30
 
         'menu_icon'     => 'dashicons-groups',
-        'menu_position' => 30,
+        'menu_position' => 39,
 
         // ── Rewrite ───────────────────────────────────────────────────────
 

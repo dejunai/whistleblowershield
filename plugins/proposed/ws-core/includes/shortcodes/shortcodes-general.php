@@ -8,7 +8,7 @@
  *
  * Shortcodes registered here:
  *
- *   [ws_nla_disclaimer_notice]
+ *   [ws_not_legal_advice_disclaimer_notice]
  *       Renders the standard "not legal advice" notice box.
  *       Copy is managed centrally in this file — editing $notice_text
  *       propagates to all jurisdiction pages automatically.
@@ -76,13 +76,13 @@
 if ( ! defined( 'ABSPATH' ) ) exit;
 
 
-// ── [ws_nla_disclaimer_notice] ────────────────────────────────────────────────
+// ── [ws_not_legal_advice_disclaimer_notice] ────────────────────────────────────────────────
 //
 // To update the notice text site-wide: edit $notice_text below.
 // The change propagates to all jurisdiction pages automatically.
 // Styling is handled by .ws-nla-disclaimer-notice in ws-core-front-general.css.
 
-add_shortcode( 'ws_nla_disclaimer_notice', function() {
+add_shortcode( 'ws_not_legal_advice_disclaimer_notice', function() {
 
     $notice_text = 'This page is provided for informational purposes only '
         . 'and does not constitute legal advice. The "Whistleblower Shield" '
@@ -294,18 +294,6 @@ function ws_shortcode_reference_page( $atts ) {
 
     </div>
 
-    <script>
-    document.addEventListener( 'DOMContentLoaded', function() {
-        var backLink = document.querySelector( '.ws-reference-page__back-link' );
-        if ( backLink && window.opener && ! window.opener.closed ) {
-            backLink.addEventListener( 'click', function( e ) {
-                e.preventDefault();
-                window.opener.focus();
-                window.close();
-            } );
-        }
-    } );
-    </script>
     <?php
     return ob_get_clean();
 }

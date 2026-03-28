@@ -70,7 +70,7 @@ function ws_register_cpt_jurisdiction() {
         'show_in_menu'  => true,
         'hierarchical'  => false,
         'menu_icon'     => 'dashicons-location-alt',
-        'menu_position' => 25,
+        'menu_position' => 27,
 
         // ── Rewrite ───────────────────────────────────────────────────────
 

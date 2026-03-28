@@ -99,6 +99,23 @@
     } );
 
 
+    // ── Reference Page — Back Link (opener focus) ────────────────────────────
+    //
+    // When a reference page is opened in a new window (window.opener exists),
+    // clicking the back link focuses the opener tab and closes this window
+    // instead of navigating. Falls back to normal href navigation otherwise.
+
+    var backLink = document.querySelector( '.ws-reference-page__back-link' );
+
+    if ( backLink && window.opener && ! window.opener.closed ) {
+        backLink.addEventListener( 'click', function ( e ) {
+            e.preventDefault();
+            window.opener.focus();
+            window.close();
+        } );
+    }
+
+
     // ── External Link Screen Reader Hints ─────────────────────────────────────
     //
     // Screen readers do not announce that a link opens in a new tab unless told.

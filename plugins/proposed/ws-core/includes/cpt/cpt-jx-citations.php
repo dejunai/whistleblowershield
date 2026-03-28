@@ -66,7 +66,7 @@ function ws_register_cpt_jx_citation() {
         // ── Admin Menu ────────────────────────────────────────────────────
 
         'menu_icon'       => 'dashicons-book-alt',
-        'menu_position'   => 27,
+        'menu_position'   => 33,
 
         // ── Capabilities ──────────────────────────────────────────────────
 

@@ -110,34 +110,24 @@ function ws_register_acf_jurisdiction_fields() {
                 'wrapper'      => [ 'class' => 'hidden' ],
             ],
 
+
             [
-                'key'           => 'field_jx_code',
-                'label'         => 'Jurisdiction USPS Code',
-                'name'          => 'ws_jx_code',
-                'type'          => 'text',
-                'instructions'  => 'Read-only display of the canonical USPS code for this jurisdiction. Set by the seeder. Cannot be changed manually.',
-                'required'      => 1,
-				'wrapper'       => [ 'data-maxlength' => 2, 'width' => '20' ],
+                'key'     => 'field_jx_code_display',
+                'label'   => 'USPS Code',
+                'name'    => '',
+                'type'    => 'message',
+                'message' => '',
+                'wrapper' => [ 'width' => '20' ],
             ],
 
             [
-                'key'           => 'field_jurisdiction_class',
-                'label'         => 'Jurisdiction Class',
-                'name'          => 'ws_jurisdiction_class',
-                'type'          => 'select',
-                'instructions'  => 'Determines how this jurisdiction is treated throughout the system. Affects default values for executive office, whistleblower authority, and legislature.',
-                'required'      => 1,
-                'choices'      => [
-                    'federal'   => 'Federal',
-                    'state'     => 'U.S. State',
-                    'territory' => 'U.S. Territory',
-                    'district'  => 'District (D.C.)',
-                ],
-				'default_value' => 'state',
-                'allow_null'    => 0,
-                'ui'            => 1,
-                'return_format' => 'value',
-                'wrapper'       => [ 'width' => '30' ],
+                'key'          => 'field_jurisdiction_class',
+                'label'        => 'Jurisdiction Class',
+                'name'         => 'ws_jurisdiction_class',
+                'type'         => 'text',
+                'instructions' => 'Seeder-set. Values: federal, state, territory, district.',
+                'required'     => 1,
+                'wrapper'      => [ 'width' => '30' ],
             ],
 
             [

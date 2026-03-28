@@ -21,7 +21,7 @@
 
 /* ── Jurisdiction Header ─────────────────────────────────────────────────── */
 
-.ws-jurisdiction-header {
+.ws-jx-header-split {
     display: flex;
     align-items: flex-start;
     gap: 1.25rem;
@@ -31,12 +31,12 @@
 
 /* ── Flag Image ──────────────────────────────────────────────────────────── */
 
-.ws-jurisdiction-flag {
+.ws-jx-flag-column {
     flex-shrink: 0;
 }
 
 .ws-jx-flag-img,
-.ws-jurisdiction-header .ws-jx-flag {
+.ws-jx-flag-column .ws-jx-flag {
     height: 130px;
     width: auto;
     border: 1px solid #D8D2C7;
@@ -72,7 +72,7 @@
 
 /* ── Jurisdiction Title Block ─────────────────────────────────────────────── */
 
-.ws-jurisdiction-title-block {
+.ws-jx-gov-column {
     flex: 1;
 }
 
@@ -93,7 +93,7 @@
     margin-top: 0.25rem;
 }
 
-.ws-jx-gov-offices-label {
+.ws-jx-gov-offices-box h3 {
     font-size: 0.7rem;
     font-weight: 700;
     text-transform: uppercase;

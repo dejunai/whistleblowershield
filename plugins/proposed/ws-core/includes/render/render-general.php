@@ -48,16 +48,16 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Renders the standard "not legal advice" disclaimer notice.
  *
- * Called by the [ws_nla_disclaimer_notice] shortcode in shortcodes-general.php.
+ * Called by the [ws_not_legal_advice_disclaimer_notice] shortcode in shortcodes-general.php.
  * The notice text is managed centrally in that shortcode — editing it there
  * propagates to all jurisdiction pages. Styling is handled by
- * .ws-nla-disclaimer-notice in ws-core-front.css.
+ * .ws-nla-disclaimer-notice in ws-core-front-general.css.
  *
  * @param  string $text  The disclaimer text to display.
  * @return string        HTML notice block.
  */
 function ws_render_not_legal_advice_disclaimer( $text ) {
-    return '<div class="ws-summary-notice"><strong>NOTICE:</strong> ' . wp_kses_post( $text ) . '</div>';
+    return '<div class="ws-nla-disclaimer-notice"><strong>NOTICE:</strong> ' . wp_kses_post( $text ) . '</div>';
 }
 
 

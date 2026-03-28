@@ -52,10 +52,17 @@ function ws_is_published( $data ) {
         return false;
     }
 
-    // Array-of-arrays: ws_get_jx_statutes() returns multiple records
-    // (state + federal merge). Check the first entry's status key.
+    // Array-of-arrays: ws_get_jx_statute_data() returns state + federal merged.
+    // Require at least one local (non-federal) published entry — federal-only
+    // results mean the jurisdiction has no local statutes yet and the section
+    // should not render.
     if ( isset( $data[0] ) && is_array( $data[0] ) ) {
-        return ! empty( $data[0]['status'] ) && $data[0]['status'] === 'publish';
+        foreach ( $data as $entry ) {
+            if ( empty( $entry['is_fed'] ) && ! empty( $entry['status'] ) && $entry['status'] === 'publish' ) {
+                return true;
+            }
+        }
+        return false;
     }
 
     // Standard dataset array returned by query layer functions.
@@ -66,6 +73,7 @@ function ws_is_published( $data ) {
     // Fallback: legacy WP_Post object (not expected in normal flow).
     return isset( $data->post_status ) && $data->post_status === 'publish';
 }
+
 
 
 /*
@@ -141,7 +149,7 @@ Curated Render Path  (default)
 function ws_render_jx_curated( $post, $jx_term_id ) {
 
     $output      = do_shortcode( '[ws_jx_header]' );
-    $output     .= do_shortcode( '[ws_nla_disclaimer_notice]' );
+    $output     .= do_shortcode( '[ws_not_legal_advice_disclaimer_notice]' );
     $has_content = false;
 
     // Summary.

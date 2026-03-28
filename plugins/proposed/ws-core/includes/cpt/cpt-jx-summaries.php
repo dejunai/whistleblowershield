@@ -100,7 +100,7 @@ function ws_register_cpt_jx_summary() {
         // ── Admin Menu ────────────────────────────────────────────────────
 
         'menu_icon'       => 'dashicons-media-text',
-        'menu_position'   => 26,
+        'menu_position'   => 28,
 
         // ── Capabilities ──────────────────────────────────────────────────
 

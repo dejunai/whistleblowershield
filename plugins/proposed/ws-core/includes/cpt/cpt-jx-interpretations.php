@@ -29,7 +29,7 @@ function ws_register_cpt_jx_interpretation() {
     $labels = [
         'name'               => 'Statute Interpretations',
         'singular_name'      => 'Statute Interpretation',
-        'menu_name'          => 'Interpretations',
+        'menu_name'          => 'JX Interpretations',
         'add_new'            => 'Add Interpretation',
         'add_new_item'       => 'Add New Statute Interpretation',
         'edit_item'          => 'Edit Statute Interpretation',
@@ -70,7 +70,7 @@ function ws_register_cpt_jx_interpretation() {
         // Citations 27 → Agencies 28 → Interpretations 29 → Assist Orgs 30
 
         'menu_icon'       => 'dashicons-hammer',
-        'menu_position'   => 29,
+        'menu_position'   => 34,
 
         // ── Capabilities ──────────────────────────────────────────────────
 

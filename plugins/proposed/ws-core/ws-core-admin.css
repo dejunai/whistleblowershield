@@ -1,0 +1,10 @@
+/**
+ * ws-core-admin.css
+ *
+ * Admin-only styles for the WhistleblowerShield plugin.
+ * Enqueued on wp-admin screens only — never loaded on the front end.
+ *
+ * @package WhistleblowerShield
+ * @since   1.0.0
+ */
+

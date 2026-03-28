@@ -113,7 +113,7 @@ function ws_register_cpt_legal_update() {
         // ws-assist-org (cpt-assist-orgs.php).
 
         'menu_icon'       => 'dashicons-media-document',
-        'menu_position'   => 25,
+        'menu_position'   => 51,
 
     ];
 

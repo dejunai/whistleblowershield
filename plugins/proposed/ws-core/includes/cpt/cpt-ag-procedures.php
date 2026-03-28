@@ -16,8 +16,8 @@ function ws_register_cpt_ag_procedures() {
     $labels = [
         'name'               => 'Procedures',
         'singular_name'      => 'Procedure',
-        'menu_name'          => 'Procedures',
-        'name_admin_bar'     => 'Procedure',
+        'menu_name'          => 'AG Procedures',
+        'name_admin_bar'     => 'AG Procedure',
         'add_new'            => 'Add New',
         'add_new_item'       => 'Add New Procedure',
         'edit_item'          => 'Edit Procedure',
@@ -57,7 +57,7 @@ function ws_register_cpt_ag_procedures() {
         // -- Admin Menu ----------------------------------------------------
 
         'menu_icon'           => 'dashicons-clipboard',
-        'menu_position'       => 29, // Placed immediately after ws-agency at 28.
+        'menu_position'       => 41, // Placed immediately after ws-agency at 28.
 
         // -- Taxonomies ----------------------------------------------------
 

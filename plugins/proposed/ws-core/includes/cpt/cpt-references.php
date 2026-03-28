@@ -90,7 +90,7 @@ function ws_register_cpt_ws_reference() {
         // ── Admin Menu ────────────────────────────────────────────────────
 
         'menu_icon'     => 'dashicons-book-alt',
-        'menu_position' => 32,
+        'menu_position' => 52,
 
     ];
 

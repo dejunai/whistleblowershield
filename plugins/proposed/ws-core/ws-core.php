@@ -142,6 +142,16 @@ add_action( 'wp_enqueue_scripts', 'ws_core_enqueue_assets' );
 
 function ws_core_enqueue_assets() {
 
+    if ( is_admin() ) {
+
+        wp_enqueue_style(
+			'ws-core-admin',
+			WS_CORE_URL . 'ws-core-admin.css',
+			[ 'acf-input' ],
+			WS_CORE_VERSION
+		);
+    }
+	
     if ( is_singular() ) {
 
         wp_enqueue_style(

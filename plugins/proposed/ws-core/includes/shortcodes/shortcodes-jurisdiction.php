@@ -170,9 +170,10 @@ add_shortcode( 'ws_jx_header', function( $atts ) {
         'gov_data' => [
             'box_label' => $box_label,
             'links'     => [
-                [ 'url' => $jx_data['gov']['portal_url'],     'label' => $jx_data['gov']['portal_label'] ?: 'Official Government Portal' ],
-                [ 'url' => $jx_data['gov']['executive_url'],  'label' => $head_label ],
+                [ 'url' => $jx_data['gov']['portal_url'],       'label' => $jx_data['gov']['portal_label']       ?: 'Official Government Portal' ],
+                [ 'url' => $jx_data['gov']['executive_url'],    'label' => $head_label ],
                 [ 'url' => $jx_data['gov']['authority_url'],    'label' => $legal_label ],
+                [ 'url' => $jx_data['gov']['legislature_url'],  'label' => $jx_data['gov']['legislature_label']  ?: 'State Legislature' ],
             ],
         ],
     ];

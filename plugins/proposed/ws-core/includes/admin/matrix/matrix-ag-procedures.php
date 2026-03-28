@@ -405,6 +405,8 @@ function ws_procedure_matrix_resolve_statute_ids( array $slugs ) {
 
 function ws_seed_procedure_matrix() {
 
+    global $_ws_procedure_matrix;
+
     // Resolve the US jurisdiction term — all seeded procedures are federal.
     $us_term = ws_jx_term_by_code( 'us' );
     if ( ! $us_term || is_wp_error( $us_term ) ) {

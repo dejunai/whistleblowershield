@@ -773,24 +773,117 @@ add_action( 'load-post-new.php', function() {
     }
 } );
 // ---------------------------------------------------------------
-// Jurisdiction CPT — Identity Field Enforcement
+// jx-summary — View Jurisdiction Page metabox
+//
+// Appears in the right-side panel. Disabled (greyed, no link) until
+// ws_auto_create_author is stamped on first save, confirming the record
+// exists. After save, resolves the jurisdiction permalink via taxonomy
+// and renders an active link.
 // ---------------------------------------------------------------
 
-add_filter( 'acf/prepare_field/key=field_jx_code', function( $field ) {
-    $field['readonly'] = true;
-    $field['disabled'] = true;
+add_action( 'add_meta_boxes', function() {
+    add_meta_box(
+        'ws_jx_summary_live_link',
+        'Jurisdiction Page',
+        'ws_render_jx_summary_live_link_metabox',
+        'jx-summary',
+        'side',
+        'high'
+    );
+} );
+
+// High priority ensures removal runs after WP registers taxonomy metaboxes.
+// Both IDs cover tag-style and hierarchical-style slugs — only one will exist,
+// but removing a nonexistent metabox is harmless.
+add_action( 'add_meta_boxes', function() {
+    remove_meta_box( 'tagsdiv-' . WS_JURISDICTION_TAXONOMY, 'jx-summary', 'side' );
+    remove_meta_box( WS_JURISDICTION_TAXONOMY . 'div',       'jx-summary', 'side' );
+}, 99 );
+
+function ws_render_jx_summary_live_link_metabox( $post ) {
+
+    // Use last_edited_author as the "has been saved" gate — it is reliably
+    // stamped on every save. ws_auto_create_author is a disabled user field
+    // and ACF resets it to '' on each save before the stamp can run.
+    $saved = get_post_meta( $post->ID, 'ws_auto_last_edited_author', true );
+
+    if ( ! $saved ) {
+        echo '<p style="color:#999;font-size:0.85em;">Save this record to activate the live page link.</p>';
+        return;
+    }
+
+    $terms = wp_get_post_terms( $post->ID, WS_JURISDICTION_TAXONOMY, [ 'fields' => 'slugs' ] );
+
+    if ( is_wp_error( $terms ) || empty( $terms ) ) {
+        echo '<p style="color:#999;font-size:0.85em;">No jurisdiction term assigned.</p>';
+        return;
+    }
+
+    $jx_post_id = ws_get_id_by_code( $terms[0] );
+    $url        = $jx_post_id ? get_permalink( $jx_post_id ) : '';
+
+    if ( ! $url ) {
+        echo '<p style="color:#999;font-size:0.85em;">Jurisdiction page not found.</p>';
+        return;
+    }
+
+    echo '<a href="' . esc_url( $url ) . '" target="_blank" rel="noopener noreferrer" style="font-size:0.9em;">View live page &rarr;</a>';
+}
+
+// ---------------------------------------------------------------
+// Jurisdiction CPT — Identity Field Enforcement
+//
+// Fields are visually locked via readonly (text) or wrapper CSS
+// (select). disabled is intentionally omitted — it prevents form
+// submission, which breaks ACF required validation even when the
+// stored value is correct. Server-side acf/update_value hooks
+// below prevent any submitted value from overwriting the stored one.
+// ---------------------------------------------------------------
+
+add_filter( 'acf/prepare_field/key=field_jx_code_display', function( $field ) {
+    $terms = get_the_terms( get_the_ID(), WS_JURISDICTION_TAXONOMY );
+    $code  = ( $terms && ! is_wp_error( $terms ) ) ? strtoupper( $terms[0]->slug ) : '—';
+    $field['message'] = '<strong style="font-size:1.4em;">' . esc_html( $code ) . '</strong>';
     return $field;
 } );
 add_filter( 'acf/prepare_field/key=field_jurisdiction_name', function( $field ) {
     $field['readonly'] = true;
-    $field['disabled'] = true;
+    return $field;
+} );
+add_filter( 'acf/prepare_field/key=field_verified_by', function( $field ) {
+    $stored = get_post_meta( get_the_ID(), 'ws_auto_verified_by', true );
+    $field['value'] = $stored ? ws_resolve_display_name( (int) $stored ) : '';
     return $field;
 } );
 add_filter( 'acf/prepare_field/key=field_jurisdiction_class', function( $field ) {
+    $labels = [
+        'federal'   => 'Federal',
+        'state'     => 'U.S. State',
+        'territory' => 'U.S. Territory',
+        'district'  => 'District (D.C.)',
+    ];
+    $stored = get_post_meta( get_the_ID(), 'ws_jurisdiction_class', true );
+    $field['value']    = $labels[ $stored ] ?? $stored;
     $field['readonly'] = true;
-    $field['disabled'] = true;
     return $field;
 } );
+
+// Lock identity fields: always keep the stored value, ignore anything submitted.
+add_filter( 'acf/update_value/key=field_jurisdiction_name', function( $value, $post_id ) {
+    $stored = get_post_meta( $post_id, 'ws_jurisdiction_name', true );
+    return $stored !== '' ? $stored : $value;
+}, 10, 2 );
+add_filter( 'acf/update_value/key=field_jurisdiction_class', function( $value, $post_id ) {
+    $stored = get_post_meta( $post_id, 'ws_jurisdiction_class', true );
+    return $stored !== '' ? $stored : $value;
+}, 10, 2 );
+
+// Lock create_author: once stamped by ws_acf_write_stamp_fields it must not
+// be overwritten by ACF submitting an empty value on subsequent saves.
+add_filter( 'acf/update_value/key=field_create_author', function( $value, $post_id ) {
+    $stored = get_post_meta( $post_id, 'ws_auto_create_author', true );
+    return $stored !== '' ? $stored : $value;
+}, 10, 2 );
 // ── Jurisdiction CPT — Conditional Button to Wikimedia Flag when URL is present
 // ---------------------------------------------------------------
 // Direct get_post_meta() call is intentional here. ws_matrix_source is an

@@ -46,7 +46,7 @@ function ws_register_cpt_statutes() {
     $labels = [
         'name'               => 'Statutes',
         'singular_name'      => 'Statute',
-        'menu_name'          => 'Statutes',
+        'menu_name'          => 'JX Statutes',
         'add_new'            => 'Add Statute',
         'add_new_item'       => 'Add New Statute',
         'new_item'           => 'New Statute',
@@ -101,7 +101,7 @@ function ws_register_cpt_statutes() {
         // ── Admin Menu ────────────────────────────────────────────────────
 
         'menu_icon'     => 'dashicons-gavel',
-        'menu_position' => 26,
+        'menu_position' => 32,
 
     ];
 
