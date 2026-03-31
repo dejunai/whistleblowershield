@@ -40,14 +40,14 @@ $_ws_dir_cost_labels = [
 
 /** @var array<string,string> Service key → display label. */
 $_ws_dir_service_labels = [
-    'legal_rep'       => 'Legal Representation',
+    'legal-rep'       => 'Legal Representation',
     'consultation'    => 'Consultation',
     'advocacy'        => 'Advocacy',
     'media'           => 'Media Support',
     'referral'        => 'Referrals',
     'training'        => 'Training',
     'hotline'         => 'Hotline',
-    'reporting_tools' => 'Reporting Tools',
+    'reporting-tools' => 'Reporting Tools',
 ];
 
 

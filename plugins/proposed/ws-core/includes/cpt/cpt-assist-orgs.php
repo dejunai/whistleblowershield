@@ -56,7 +56,7 @@ function ws_register_cpt_assist_org() {
         'show_in_menu'        => true,
         'publicly_queryable'  => true,
         'exclude_from_search' => false,
-        'has_archive'         => 'assistance-organizations',
+        'has_archive'         => false, // once live: will be 'assistance-organizations',
         'query_var'           => true,
 
         // ── Editor ────────────────────────────────────────────────────────
