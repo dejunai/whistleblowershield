@@ -75,7 +75,6 @@ function ws_is_published( $data ) {
 }
 
 
-
 /*
 ---------------------------------------------------------
 Dispatcher
@@ -191,6 +190,30 @@ function ws_render_jx_curated( $post, $jx_term_id ) {
         $has_content  = true;
     }
 
+    // Fallback — only triggers when no content sections were assembled.
+    if ( ! $has_content ) {
+        $output .= '<div class="ws-section--placeholder">Content for this jurisdiction is currently being prepared.</div>';
+    }
+
+    // Curated footer — attribution, review badge, and sources from the linked
+    // jx-summary. Rendered last so it follows all content sections (limitations,
+    // legal updates). Only renders when summary data exists.
+    if ( $jx_term_id ) {
+        $summary_data = ws_get_jx_summary_data( $jx_term_id );
+        if ( $summary_data ) {
+            $output .= ws_render_jx_summary_footer( [
+                'created_by_name'  => $summary_data['record']['created_by_name'],
+                'edited_by_name'   => $summary_data['record']['edited_by_name'],
+                'created_date'     => $summary_data['record']['created_date'],
+                'edited_date'      => $summary_data['record']['edited_date'],
+                'is_reviewed'      => $summary_data['plain']['is_reviewed'],
+                'reviewed_by_name' => $summary_data['plain']['reviewed_by_name'],
+                'reviewed_date'    => $summary_data['plain']['reviewed_date'] ?? '',
+                'sources'          => $summary_data['sources'] ?: '',
+            ] );
+        }
+    }
+
     // Legal updates — shortcode returns empty if none exist.
     // Pass the USPS code (e.g. 'ca'), not the WP post slug (e.g. 'california').
     // The [ws_legal_updates] shortcode resolves jx via taxonomy slug, not post slug.
@@ -202,11 +225,6 @@ function ws_render_jx_curated( $post, $jx_term_id ) {
     if ( $legal_updates ) {
         $output      .= $legal_updates;
         $has_content  = true;
-    }
-
-    // Fallback — only triggers when no content sections were assembled.
-    if ( ! $has_content ) {
-        $output .= '<div class="ws-section--placeholder">Content for this jurisdiction is currently being prepared.</div>';
     }
 
     return $output;

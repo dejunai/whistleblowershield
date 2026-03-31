@@ -130,10 +130,17 @@
  * 3.7.0  [ws_jx_interpretation] implemented. "→ External References" button
  *         included — handled inside ws_render_jx_interpretations() in
  *         render-section.php. Shortcode wired into assembler after citations.
+ * 3.10.1 [ws_jx_summary]: glossary scan wired in. Summary content now passes
+ *         through apply_filters('ws_glossary_scan', ...) before render.
+ *         Existing manual tooltip spans are skipped by the scanner's <span>
+ *         skip-tag rule — no duplication of hand-crafted instances.
+ * 3.10.2 [ws_jx_summary]: statute bold scan wired in after glossary scan.
+ *         jx_name resolved from ws_get_jurisdiction_data() and passed as
+ *         second argument to apply_filters('ws_statute_bold_scan', ...).
  *
  * @package WhistleblowerShield
  * @since   2.1.0
- * @version 3.10.0
+ * @version 3.10.2
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit;
@@ -199,17 +206,6 @@ add_shortcode( 'ws_jx_summary', function() {
     $data = ws_get_jx_summary_data( $term_id );
     if ( ! $data || empty( $data['content'] ) ) return '';
 
-    $footer_html = ws_render_jx_summary_footer( [
-        'created_by_name'        => $data['record']['created_by_name'],
-        'edited_by_name'         => $data['record']['edited_by_name'],
-        'created_date'           => $data['record']['created_date'],
-        'edited_date'            => $data['record']['edited_date'],
-        'is_reviewed'            => $data['plain']['is_reviewed'],
-        'reviewed_by_name'       => $data['plain']['reviewed_by_name'],
-        'reviewed_date'          => $data['plain']['reviewed_date'] ?? '',
-        'sources'                => $data['sources'] ?: '',
-    ] );
-
     // wp_kses_post() is correct here — do not replace with apply_filters('the_content', ...).
     // Summary content comes from an ACF WYSIWYG meta field (ws_jurisdiction_summary_wysiwyg),
     // not from post_content. The HTML is already fully formed by the ACF editor. Running
@@ -218,7 +214,14 @@ add_shortcode( 'ws_jx_summary', function() {
     // for a meta-stored WYSIWYG field. wp_kses_post() sanitizes without over-processing.
     // Statute content uses apply_filters('the_content', ...) because it reads post_content
     // directly, which requires block rendering and wpautop.
-    return ws_render_jx_summary_section( wp_kses_post( $data['content'] ), $footer_html );
+    //
+    // Footer (attribution, review badge, sources) is rendered last by the assembler
+    // via ws_render_jx_curated() so it follows limitations and legal updates.
+    $jx_data  = ws_get_jurisdiction_data( $post->ID );
+    $jx_name  = $jx_data ? $jx_data['name'] : '';
+    $html = apply_filters( 'ws_glossary_scan', wp_kses_post( $data['content'] ) );
+    $html = apply_filters( 'ws_statute_bold_scan', $html, $jx_name );
+    return ws_render_jx_summary_section( $html );
 
 } );
 

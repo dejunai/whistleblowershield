@@ -51,7 +51,7 @@
  *
  * @package    WhistleblowerShield
  * @since      2.1.0
- * @version 3.10.0
+ * @version 3.10.1
  * @author     Whistleblower Shield
  * @link       https://whistleblowershield.org
  * @copyright  Copyright (c) Whistleblower Shield
@@ -73,6 +73,9 @@
  *        instead of a sanitized HTML string. Renders label + description
  *        rows as <p><strong>Label:</strong> text</p>. h2 heading moved
  *        into this function (previously lived inside the wysiwyg content).
+ * 3.10.1 ws_render_jx_limitations(): text field switched from sanitize_text_field/
+ *        esc_html to wp_kses_post; glossary scan applied to assembled $items
+ *        before section wrapper. Labels remain esc_html (identifiers, not prose).
  * 3.7.0  ws_render_jx_interpretations() added. Renders court interpretation
  *        cards (case name, court/year/citation, favorable indicator, summary,
  *        External References button). Called by [ws_jx_interpretation].
@@ -174,7 +177,7 @@ function ws_render_section_two_group( $title_local, $content_local, $title_fed, 
 function ws_render_jx_header($data) {
     ob_start(); ?>
     <header class="ws-jx-header-v2">
-        <h1 class="ws-jx-title"><?php echo esc_html($data['jx_name']); ?></h1>
+        <h1 class="ws-jx-title"><?php echo esc_html($data['jx_name']. ": Jurisidiction Summary"); ?></h1>
         <div class="ws-jx-header-split">
             <div class="ws-jx-flag-column">
                 <?php echo ws_render_jx_flag($data['flag_data']); ?>
@@ -365,7 +368,7 @@ function ws_render_jx_summary_footer( $data ) {
 
         <?php if ( $data['sources'] ) : ?>
         <div class="ws-jx-summary-sources">
-            <strong>Sources &amp; Citations:</strong>
+            <strong>Sources:</strong>
             <pre class="ws-jx-sources-text"><?php echo esc_html( $data['sources'] ); ?></pre>
         </div>
         <?php endif; ?>
@@ -518,7 +521,7 @@ function ws_render_jx_limitations( $limitations ) {
     $items = '';
     foreach ( $limitations as $row ) {
         $label = sanitize_text_field( $row['ws_jx_limit_label'] ?? '' );
-        $text  = sanitize_text_field( $row['ws_jx_limit_text']  ?? '' );
+        $text  = wp_kses_post( $row['ws_jx_limit_text'] ?? '' );
         if ( ! $label && ! $text ) {
             continue;
         }
@@ -526,7 +529,7 @@ function ws_render_jx_limitations( $limitations ) {
         if ( $label ) {
             $items .= '<strong>' . esc_html( $label ) . ':</strong> ';
         }
-        $items .= esc_html( $text );
+        $items .= $text;
         $items .= '</p>';
     }
 
@@ -534,7 +537,9 @@ function ws_render_jx_limitations( $limitations ) {
         return '';
     }
 
-    return '<section class="ws-limitations"><h2>Limitations and Ramifications</h2>' . $items . '</section>';
+    $items = apply_filters( 'ws_glossary_scan', $items );
+
+    return '<section class="ws-jx-summary-limitations"><h3>Limitations and Ramifications</h3>' . $items . '</section>';
 }
 
 

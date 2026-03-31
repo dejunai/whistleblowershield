@@ -49,7 +49,7 @@
  *
  * @package    WhistleblowerShield
  * @since      3.2.0
- * @version 3.10.0
+ * @version 3.10.1
  * @author     Whistleblower Shield
  * @link       https://whistleblowershield.org
  * @copyright  Copyright (c) Whistleblower Shield
@@ -70,6 +70,15 @@
  *        legal-test framing toward the whistleblower's perspective:
  *        qui-tam, false-claims-act, original-source, retaliation,
  *        contributing-factor, back-pay, treble-damages.
+ * 3.10.1 h1, h2, h3 added to skip_tags — tooltips in headings look awkward.
+ *        ws_apply_glossary_tooltips(): inner term-match loop refactored to
+ *        match against $plain (the original escaped text node) only — never
+ *        against the accumulating $fragment_html. Previous approach allowed
+ *        terms present in an already-injected data-tooltip attribute value
+ *        (e.g. "retaliation" inside the protected-disclosure definition) to
+ *        be matched by a subsequent regex pass and double-injected into the
+ *        attribute itself, corrupting the output. Fix: collect all matches
+ *        from $plain first via preg_match, then apply spans in a second pass.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -225,7 +234,11 @@ function ws_get_glossary_lookup() {
 
     foreach ( $terms as $term ) {
 
-        $definition = sanitize_text_field( $term->description );
+        // wp_filter_kses (applied by WP on term description save) may encode
+        // HTML as entities rather than stripping it. Decode first so strip_tags
+        // inside sanitize_text_field() catches literal tags, then re-sanitize
+        // to remove any residual whitespace or control characters.
+        $definition = sanitize_text_field( html_entity_decode( $term->description, ENT_QUOTES | ENT_HTML5, 'UTF-8' ) );
         if ( empty( $definition ) ) {
             continue; // Skip terms with no definition — nothing to show.
         }
@@ -304,7 +317,7 @@ function ws_apply_glossary_tooltips( $html ) {
     }
 
     // Tags whose text content must never receive tooltip injection.
-    $skip_tags = [ 'a', 'span', 'abbr', 'button', 'script', 'style', 'code', 'pre' ];
+    $skip_tags = [ 'a', 'span', 'abbr', 'button', 'script', 'style', 'code', 'pre', 'h1', 'h2', 'h3' ];
 
     // Track which terms have already been matched in this scan pass.
     // Keyed by lowercase term string — first match wins.
@@ -344,29 +357,59 @@ function ws_apply_glossary_tooltips( $html ) {
 				continue;
 			}
 
-			// Track whether this text node was modified.
-			$fragment_html = htmlspecialchars( $original, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
-			$modified      = false;
+			// ── Match against original text only ─────────────────────────────
+			//
+			// All pattern matching runs against $plain — the escaped original
+			// text node value. Never against $fragment_html, which accumulates
+			// injected span markup. Matching against the growing fragment would
+			// allow terms found inside data-tooltip attribute values (e.g.
+			// "retaliation" inside the protected-disclosure definition) to be
+			// matched and double-injected into the attribute itself.
+			//
+			// Strategy: collect all (term → matched_text) pairs from $plain,
+			// then build $fragment_html with a single preg_replace_callback
+			// that replaces each matched term exactly once using its pre-built
+			// span, touching only the original text positions.
+
+			$plain   = htmlspecialchars( $original, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+			$pending = []; // term_lower => [ 'span' => string, 'pattern' => string ]
 
 			foreach ( $lookup as $term => $definition ) {
 
 				$term_lower = strtolower( $term );
 
-				// Skip if already matched in this scan pass.
 				if ( isset( $matched[ $term_lower ] ) ) {
 					continue;
 				}
 
-				// Whole-word, case-insensitive pattern.
-				// \b word boundary anchors prevent partial-word matches.
-				$pattern     = '/\b(' . preg_quote( $term, '/' ) . ')\b/iu';
-				$replacement = '<span class="ws-term-highlight" data-tooltip="'
-							 . esc_attr( $definition )
-							 . '">$1</span>';
+				$pattern = '/\b(' . preg_quote( $term, '/' ) . ')\b/iu';
 
-				// Replace first occurrence only (limit = 1).
-				$new_html = preg_replace( $pattern, $replacement, $fragment_html, 1, $count );
+				// Test against $plain — the unmodified original text only.
+				preg_match( $pattern, $plain, $m );
+				if ( empty( $m ) ) {
+					continue;
+				}
 
+				$pending[ $term_lower ] = [
+					'pattern' => $pattern,
+					'span'    => '<span class="ws-term-highlight" data-tooltip="'
+							   . esc_attr( $definition )
+							   . '">$1</span>',
+				];
+			}
+
+			if ( empty( $pending ) ) {
+				continue;
+			}
+
+			// Apply all pending replacements to $plain in a single pass.
+			// Each term replaces exactly once (limit = 1) and is then marked
+			// matched so it cannot fire again in this or any later text node.
+			$fragment_html = $plain;
+			$modified      = false;
+
+			foreach ( $pending as $term_lower => $entry ) {
+				$new_html = preg_replace( $entry['pattern'], $entry['span'], $fragment_html, 1, $count );
 				if ( $count > 0 && null !== $new_html ) {
 					$fragment_html          = $new_html;
 					$matched[ $term_lower ] = true;

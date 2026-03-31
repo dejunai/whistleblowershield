@@ -74,22 +74,6 @@ function ws_register_acf_jx_summary() {
                 'delay'        => 0,
             ],
             [
-                'key'          => 'field_jx_summary_sources',
-                'label'        => 'Sources & Citations',
-                'name'         => 'ws_jx_summary_sources',
-                'type'         => 'textarea',
-                'instructions' => 'List source citations, statute references, and attribution. One per line recommended.',
-                'rows'         => 6,
-            ],
-            [
-                'key'          => 'field_jx_summary_notes',
-                'label'        => 'Internal Notes',
-                'name'         => 'ws_jx_summary_notes',
-                'type'         => 'textarea',
-                'instructions' => 'Internal editorial notes only. Not displayed publicly.',
-                'rows'         => 4,
-            ],
-            [
                 'key'          => 'field_jx_limitations',
                 'label'        => 'Limitations & Ramifications',
                 'name'         => 'ws_jx_limitations',
@@ -120,6 +104,22 @@ function ws_register_acf_jx_summary() {
                         'wrapper'      => [ 'width' => '75' ],
                     ],
                 ],
+            ],
+            [
+                'key'          => 'field_jx_summary_sources',
+                'label'        => 'Sources & Citations',
+                'name'         => 'ws_jx_summary_sources',
+                'type'         => 'textarea',
+                'instructions' => 'List source citations, statute references, and attribution. One per line recommended.',
+                'rows'         => 6,
+            ],
+            [
+                'key'          => 'field_jx_summary_notes',
+                'label'        => 'Internal Notes',
+                'name'         => 'ws_jx_summary_notes',
+                'type'         => 'textarea',
+                'instructions' => 'Internal editorial notes only. Not displayed publicly.',
+                'rows'         => 4,
             ],
 
             // ── Tab: Authorship & Review ──────────────────────────────────

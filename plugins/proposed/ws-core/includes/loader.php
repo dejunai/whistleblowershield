@@ -154,6 +154,7 @@
  * 3.10.0  TAXONOMY TWO-PHASE BEHAVIOUR and MATRIX LAYER DEPENDENCY CHAIN
  *         sections added. acf/workflow/ and admin/monitors/ subdirectory
  *         load blocks added.
+ * 3.10.2  ws-statute-bold added to render files.
  *
  * @package WhistleblowerShield
  * @since   2.1.0
@@ -478,6 +479,7 @@ if ( ! is_admin() ) {
 	// would never fire here. Check the server error log if assembly layer output is silently broken.
 	$render_files = [
 		'render-general', 'render-section', 'render-jurisdiction', 'render-directory', 'render-agency',
+		'ws-statute-bold',
 	];
 	foreach ( $render_files as $file ) {
 		$path = WS_CORE_PATH . "includes/render/{$file}.php";
