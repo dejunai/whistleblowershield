@@ -4,7 +4,7 @@
  *
  * @package WhistleblowerShield
  * @since   2.1.0
- * @version 3.10.0
+ * @version 3.11.0
  *
  * VERSION
  * -------
@@ -21,6 +21,10 @@
  * 3.8.1   ws_seed_disclosure_taxonomy() refactored to ws_bulk_insert_hierarchical().
  * 3.9.0   ws-ag-procedure added to ws_jurisdiction and ws_disclosure_type object_types.
  * 3.10.0  ws_procedure_type added (ws-ag-procedure). Replaces ws_proc_type ACF select.
+ * 3.11.0  has-details sentinel term added to ws_adverse_action_types, ws_remedies,
+ *         ws_disclosure_targets, ws_protected_class, ws_employer_defense. Signals
+ *         that a companion ACF freetext field holds detail beyond available slugs.
+ *         Gate versions bumped to 1.1.0 for affected seeders.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -639,17 +643,17 @@ add_action( 'admin_init', function() {
         ws_seed_process_taxonomy();
         update_option( 'ws_seeded_process_type', '1.0.0' );
     }
-    if ( get_option( 'ws_seeded_remedies' ) !== '1.0.0' ) {
+    if ( get_option( 'ws_seeded_remedies' ) !== '1.1.0' ) {
         ws_seed_remedies_taxonomy();
-        update_option( 'ws_seeded_remedies', '1.0.0' );
+        update_option( 'ws_seeded_remedies', '1.1.0' );
     }
-    if ( get_option( 'ws_seeded_protected_class' ) !== '1.0.0' ) {
+    if ( get_option( 'ws_seeded_protected_class' ) !== '1.1.0' ) {
         ws_seed_protected_class_taxonomy();
-        update_option( 'ws_seeded_protected_class', '1.0.0' );
+        update_option( 'ws_seeded_protected_class', '1.1.0' );
     }
-    if ( get_option( 'ws_seeded_adverse_action_types' ) !== '1.0.0' ) {
+    if ( get_option( 'ws_seeded_adverse_action_types' ) !== '1.1.0' ) {
         ws_seed_adverse_action_types_taxonomy();
-        update_option( 'ws_seeded_adverse_action_types', '1.0.0' );
+        update_option( 'ws_seeded_adverse_action_types', '1.1.0' );
     }
     if ( get_option( 'ws_seeded_languages_taxonomy' ) !== '1.0.0' ) {
         ws_seed_languages_taxonomy();
@@ -663,17 +667,17 @@ add_action( 'admin_init', function() {
         ws_seed_jurisdiction_taxonomy();
         update_option( 'ws_seeded_jurisdiction', '1.0.0' );
     }
-    if ( get_option( 'ws_seeded_disclosure_targets' ) !== '1.0.0' ) {
+    if ( get_option( 'ws_seeded_disclosure_targets' ) !== '1.1.0' ) {
         ws_seed_disclosure_targets_taxonomy();
-        update_option( 'ws_seeded_disclosure_targets', '1.0.0' );
+        update_option( 'ws_seeded_disclosure_targets', '1.1.0' );
     }
     if ( get_option( 'ws_seeded_fee_shifting' ) !== '1.0.0' ) {
         ws_seed_fee_shifting_taxonomy();
         update_option( 'ws_seeded_fee_shifting', '1.0.0' );
     }
-    if ( get_option( 'ws_seeded_employer_defense' ) !== '1.0.0' ) {
+    if ( get_option( 'ws_seeded_employer_defense' ) !== '1.1.0' ) {
         ws_seed_employer_defense_taxonomy();
-        update_option( 'ws_seeded_employer_defense', '1.0.0' );
+        update_option( 'ws_seeded_employer_defense', '1.1.0' );
     }
     if ( get_option( 'ws_seeded_aorg_type' ) !== '1.0.0' ) {
         ws_seed_aorg_type_taxonomy();
@@ -794,6 +798,7 @@ function ws_seed_process_taxonomy() {
 /**
  * Seeds ws_remedies with its flat term list.
  * Replaces ws_seed_remedy_taxonomy() for ws_remedy_type (deprecated).
+ * 3.11.0: has-details sentinel added.
  */
 function ws_seed_remedies_taxonomy() {
     $taxonomy = 'ws_remedies';
@@ -818,6 +823,7 @@ function ws_seed_remedies_taxonomy() {
         'bounty-qui-tam-award'            => 'Bounty / Qui Tam Award',
         'wage-differential'               => 'Wage Differential',
         'liquidated-damages'              => 'Liquidated Damages',
+        'has-details'                     => 'Has Details',
     ];
     foreach ( $terms as $slug => $name ) {
         if ( ! term_exists( $slug, $taxonomy ) ) {
@@ -829,6 +835,7 @@ function ws_seed_remedies_taxonomy() {
 /**
  * Seeds ws_protected_class with its hierarchical employee type structure.
  * Replaces ws_seed_coverage_scope_taxonomy() for ws_coverage_scope (deprecated).
+ * 3.11.0: has-details sentinel added as flat top-level term.
  */
 function ws_seed_protected_class_taxonomy() {
     $hierarchy = [
@@ -868,11 +875,18 @@ function ws_seed_protected_class_taxonomy() {
         ],
     ];
     ws_bulk_insert_hierarchical( $hierarchy, 'ws_protected_class' );
+
+    // Sentinel term — flat, top-level. Signals a companion freetext field
+    // holds protected class detail beyond available slugs.
+    if ( ! term_exists( 'has-details', 'ws_protected_class' ) ) {
+        wp_insert_term( 'Has Details', 'ws_protected_class', [ 'slug' => 'has-details' ] );
+    }
 }
 
 /**
  * Seeds ws_adverse_action_types with its flat term list.
  * Replaces ws_seed_retaliation_forms_taxonomy() for ws_retaliation_forms (deprecated).
+ * 3.11.0: has-details sentinel added.
  */
 function ws_seed_adverse_action_types_taxonomy() {
     $taxonomy = 'ws_adverse_action_types';
@@ -891,6 +905,7 @@ function ws_seed_adverse_action_types_taxonomy() {
         'contract-non-renewal'      => 'Contract Non-Renewal',
         'privilege-revocation'      => 'Privilege / Access Revocation',
         'immigration-threat'        => 'Immigration-Related Threat',
+        'has-details'               => 'Has Details',
     ];
     foreach ( $terms as $slug => $name ) {
         if ( ! term_exists( $slug, $taxonomy ) ) {
@@ -1037,6 +1052,7 @@ function ws_seed_jurisdiction_taxonomy() {
 /**
  * Seeds ws_disclosure_targets with its hierarchical recipient structure.
  * New in 3.1.0. Describes who received the disclosure for protection to apply.
+ * 3.11.0: has-details sentinel added as flat top-level term.
  */
 function ws_seed_disclosure_targets_taxonomy() {
     $hierarchy = [
@@ -1081,6 +1097,12 @@ function ws_seed_disclosure_targets_taxonomy() {
         ],
     ];
     ws_bulk_insert_hierarchical( $hierarchy, 'ws_disclosure_targets' );
+
+    // Sentinel term — flat, top-level. Signals a companion freetext field
+    // holds disclosure target detail beyond available slugs.
+    if ( ! term_exists( 'has-details', 'ws_disclosure_targets' ) ) {
+        wp_insert_term( 'Has Details', 'ws_disclosure_targets', [ 'slug' => 'has-details' ] );
+    }
 }
 
 /**
@@ -1202,8 +1224,8 @@ function ws_seed_aorg_service_taxonomy() {
 
 /**
  * Seeds ws_employer_defense with its flat term structure.
- *
  * New in 3.2.0.
+ * 3.11.0: has-details sentinel added.
  */
 function ws_seed_employer_defense_taxonomy() {
     $taxonomy = 'ws_employer_defense';
@@ -1214,6 +1236,7 @@ function ws_seed_employer_defense_taxonomy() {
         'statutory-exception-claim'         => 'Statutory Exception Claim',
         'mixed-motive-defense'              => 'Mixed Motive Defense',
         'no-protected-activity'             => 'Disclosure was not Protected',
+        'has-details'                       => 'Has Details',
     ];
     foreach ( $terms as $slug => $name ) {
         if ( ! term_exists( $slug, $taxonomy ) ) {

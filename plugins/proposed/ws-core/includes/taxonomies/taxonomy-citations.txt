@@ -1,0 +1,273 @@
+================================================================================
+FILE: taxonomy-citations.txt
+Scope: jx-citation
+Source: register-taxonomies.php v3.10.0
+Notes: Full statute-mirror palette for citation records. Citations inherit
+       the complete doctrinal taxonomy set from jx-statute. Many axes will
+       often be unused or sparsely tagged on any single citation record;
+       this file defines the allowed palette, not a required checklist.
+       Tag only what is genuinely illustrated or narrowed by the cited case,
+       ruling, or source — do not mirror parent statute tags by default.
+================================================================================
+
+
+────────────────────────────────────────────────────────────────────────────
+TAXONOMY: ws_disclosure_type
+Applies to: jx-citation
+Hierarchical: YES — use child slugs only
+Description: Subject matter of the protected disclosure as discussed or
+             narrowed by this citation. Tag only what the cited source
+             genuinely addresses; do not inherit from parent statute.
+────────────────────────────────────────────────────────────────────────────
+
+--- fraud-and-financial ---
+fraud-and-financial          Fraud & Financial Misconduct (parent)
+tax-fraud                    Tax Fraud
+securities-fraud             Securities Fraud
+government-contract-fraud    Government Contract Fraud
+financial-misconduct         General Financial Misconduct
+
+--- safety-and-health ---
+safety-and-health            Safety & Health Violations (parent)
+workplace-safety             Workplace Safety
+environmental-hazard         Environmental Hazard
+public-health                Public Health Risk
+food-and-drug                Food & Drug Safety
+
+--- legal-and-regulatory ---
+legal-and-regulatory         Legal & Regulatory Violations (parent)
+civil-rights                 Civil Rights Violations
+labor-law                    Labor Law Violations
+discrimination               Discrimination
+consumer-protection          Consumer Protection
+
+--- government-and-public ---
+government-and-public        Government & Public Interest (parent)
+government-misconduct        Government Misconduct
+corruption                   Corruption / Bribery
+abuse-of-authority           Abuse of Authority
+waste-of-funds               Waste of Public Funds
+
+--- other ---
+other                        Other / General (parent)
+general-wrongdoing           General Wrongdoing
+policy-violation             Policy / Ethics Violation
+
+
+────────────────────────────────────────────────────────────────────────────
+TAXONOMY: ws_protected_class
+Applies to: jx-citation
+Hierarchical: NO — flat list
+Description: Worker classification at issue in this citation. Tag only
+             where the cited source explicitly addresses or turns on
+             protected class status.
+────────────────────────────────────────────────────────────────────────────
+
+all-employees          All Employees
+private-employees      Private Sector Employees
+public-employees       Public / Government Employees
+federal-employees      Federal Employees
+state-employees        State Employees
+local-employees        Local Government Employees
+contractors            Independent Contractors
+subcontractors         Subcontractors
+gig-workers            Gig / Platform Workers
+volunteers             Volunteers
+applicants             Job Applicants
+former-employees       Former Employees
+union-members          Union Members
+non-union              Non-Union Employees
+
+
+────────────────────────────────────────────────────────────────────────────
+TAXONOMY: ws_disclosure_targets
+Applies to: jx-citation
+Hierarchical: NO — flat list
+Description: Reporting target at issue in this citation. Tag only where
+             the cited source explicitly discusses or turns on the reporting
+             channel used.
+────────────────────────────────────────────────────────────────────────────
+
+internal-management      Internal Management
+internal-compliance      Internal Compliance / Ethics Hotline
+internal-hr              Human Resources
+external-federal         Federal Agency / Regulator
+external-state           State Agency / Regulator
+external-local           Local Authority
+law-enforcement          Law Enforcement
+legislature              Legislature / Congressional Committee
+judiciary                Court / Judicial Body
+media                    Media / Press
+public                   General Public
+nonprofit-advocate       Nonprofit / Advocacy Organization
+
+
+────────────────────────────────────────────────────────────────────────────
+TAXONOMY: ws_adverse_action_types
+Applies to: jx-citation
+Hierarchical: NO — flat list
+Description: Retaliatory action at issue in this citation. Tag only where
+             the cited source explicitly addresses the type of adverse action
+             taken or alleged.
+────────────────────────────────────────────────────────────────────────────
+
+termination              Termination / Discharge
+demotion                 Demotion
+suspension               Suspension
+harassment               Harassment / Hostile Work Environment
+pay-reduction            Pay Reduction
+hours-reduction          Hours Reduction
+reassignment             Reassignment / Transfer
+blacklisting             Blacklisting
+discipline               Disciplinary Action
+negative-reference       Negative Employment Reference
+benefit-reduction        Benefit Reduction
+constructive-discharge   Constructive Discharge
+failure-to-hire          Failure to Hire / Refusal to Hire
+denial-of-promotion      Denial of Promotion
+denial-of-training       Denial of Training
+forced-psychiatric       Forced Psychiatric / Fitness Exam
+unfavorable-evaluation   Unfavorable Performance Evaluation
+
+
+────────────────────────────────────────────────────────────────────────────
+TAXONOMY: ws_process_type
+Applies to: jx-citation
+Hierarchical: NO — flat list
+Description: Procedural route at issue or discussed in this citation.
+             Tag only where the cited source explicitly addresses procedure.
+────────────────────────────────────────────────────────────────────────────
+
+administrative           Administrative Complaint
+civil-lawsuit            Civil Lawsuit
+criminal-referral        Criminal Referral
+internal-grievance       Internal Grievance / Union Procedure
+arbitration              Arbitration
+administrative-appeal    Administrative Appeal / Review
+inspector-general        Inspector General Complaint
+
+
+────────────────────────────────────────────────────────────────────────────
+TAXONOMY: ws_remedies
+Applies to: jx-citation
+Hierarchical: NO — flat list
+Description: Remedies discussed, awarded, or denied in this citation.
+             Tag only where the cited source explicitly addresses remedy.
+────────────────────────────────────────────────────────────────────────────
+
+reinstatement            Reinstatement
+back-pay                 Back Pay
+front-pay                Front Pay
+compensatory-damages     Compensatory Damages
+punitive-damages         Punitive Damages
+exemplary-damages        Exemplary Damages
+emotional-distress       Emotional Distress Damages
+consequential-damages    Special / Consequential Damages
+declaratory-relief       Declaratory Relief
+injunctive-relief        Injunctive Relief
+attorney-fees            Attorney Fees
+costs                    Court Costs / Filing Fees
+whistleblower-award      Whistleblower Award / Bounty
+
+
+────────────────────────────────────────────────────────────────────────────
+TAXONOMY: ws_fee_shifting
+Applies to: jx-citation
+Hierarchical: NO — flat list
+Description: Fee-shifting outcome or discussion in this citation.
+             Tag only where the cited source explicitly addresses fees.
+             Single-value taxonomy; use the most accurate single term.
+────────────────────────────────────────────────────────────────────────────
+
+prevailing-party         Prevailing Party (bidirectional)
+plaintiff-only           Plaintiff Only (one-way)
+discretionary            Discretionary / Court Discretion
+none                     No Fee Shifting
+ambiguous                Ambiguous / Unclear
+
+
+────────────────────────────────────────────────────────────────────────────
+TAXONOMY: ws_employer_defense
+Applies to: jx-citation
+Hierarchical: NO — flat list
+Description: Employer defense raised, accepted, or rejected in this
+             citation. Tag only where the cited source explicitly addresses
+             a defense posture.
+────────────────────────────────────────────────────────────────────────────
+
+same-decision             Same-Decision / Mixed-Motive Defense
+legitimate-reason         Legitimate Non-Retaliatory Reason
+no-knowledge              Employer Lacked Knowledge of Disclosure
+good-faith-investigation  Good Faith Investigation
+procedural-default        Exhaustion / Procedural Default
+arbitration-clause        Mandatory Arbitration Clause
+at-will-employment        At-Will Employment Basis
+sovereign-immunity        Sovereign / Governmental Immunity
+
+
+────────────────────────────────────────────────────────────────────────────
+TAXONOMY: ws_jurisdiction
+Applies to: jx-citation (and all content CPTs)
+Hierarchical: YES — use jurisdiction term slugs
+Description: Jurisdiction the citation originates from or applies to.
+             Always tag exactly one jurisdiction unless the cited source
+             explicitly spans multiple.
+────────────────────────────────────────────────────────────────────────────
+
+us        Federal (United States)
+al        Alabama
+ak        Alaska
+az        Arizona
+ar        Arkansas
+ca        California
+co        Colorado
+ct        Connecticut
+de        Delaware
+fl        Florida
+ga        Georgia
+hi        Hawaii
+id        Idaho
+il        Illinois
+in        Indiana
+ia        Iowa
+ks        Kansas
+ky        Kentucky
+la        Louisiana
+me        Maine
+md        Maryland
+ma        Massachusetts
+mi        Michigan
+mn        Minnesota
+ms        Mississippi
+mo        Missouri
+mt        Montana
+ne        Nebraska
+nv        Nevada
+nh        New Hampshire
+nj        New Jersey
+nm        New Mexico
+ny        New York
+nc        North Carolina
+nd        North Dakota
+oh        Ohio
+ok        Oklahoma
+or        Oregon
+pa        Pennsylvania
+ri        Rhode Island
+sc        South Carolina
+sd        South Dakota
+tn        Tennessee
+tx        Texas
+ut        Utah
+vt        Vermont
+va        Virginia
+wa        Washington
+wv        West Virginia
+wi        Wisconsin
+wy        Wyoming
+dc        District of Columbia
+pr        Puerto Rico
+gu        Guam
+vi        U.S. Virgin Islands
+as        American Samoa
+mp        Northern Mariana Islands

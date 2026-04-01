@@ -1,6 +1,6 @@
 WHISTLEBLOWERSHIELD TAXONOMY TABLES
 ====================================
-Source: register-taxonomies.php v3.7.0
+Source: register-taxonomies.php v3.10.0
 Use these slug values in all JSON record arrays.
 Hierarchical taxonomies show PARENT > child relationships.
 Use child slugs in JSON records — not parent slugs.
@@ -303,3 +303,54 @@ private-sector        Private Sector Employee
 military-defense      Military & Defense Contractors
 nonprofit-ngo         Nonprofit & NGO Employee
 all-sectors           All Employment Sectors
+
+
+────────────────────────────────────────────────────────────────────────────
+TAXONOMY: ws_aorg_cost_model
+Applies to: ws-assist-org
+Hierarchical: NO — flat list
+Description: Cost structure used by an assistance organization.
+             Replaces ws_aorg_cost_model ACF select field (3.9.0).
+             Single-value taxonomy used for Phase 2 directory filtering.
+────────────────────────────────────────────────────────────────────────────
+
+free              Free of Charge
+pro-bono          Pro Bono
+sliding-scale     Sliding Scale Fee
+contingency       Contingency Fee
+fee-for-service   Fee for Service
+mixed             Mixed / Varies
+
+
+────────────────────────────────────────────────────────────────────────────
+TAXONOMY: ws_aorg_service
+Applies to: ws-assist-org
+Hierarchical: NO — flat list
+Description: Service offerings provided by an assistance organization.
+             Replaces ws_aorg_services ACF checkbox field (3.9.0).
+             'additional' is a system flag — do not use in JSON records.
+────────────────────────────────────────────────────────────────────────────
+
+legal-rep      Full Legal Representation
+consultation   Legal Consultation / Advice
+referral       Intake & Referral
+doc-review     Document Review
+hotline        Whistleblower Hotline
+retaliation    Retaliation Defense
+financial      Financial Assistance
+advocacy       Policy Advocacy
+media          Media & Communications Support
+
+
+────────────────────────────────────────────────────────────────────────────
+TAXONOMY: ws_procedure_type
+Applies to: ws-ag-procedure
+Hierarchical: NO — flat list
+Description: Purpose classification for agency procedure records.
+             Replaces ws_proc_type ACF select field (3.10.0).
+             Single-value taxonomy; stable three-term set.
+────────────────────────────────────────────────────────────────────────────
+
+disclosure    Disclosure
+retaliation   Retaliation
+both          Both

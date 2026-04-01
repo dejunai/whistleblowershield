@@ -1,0 +1,183 @@
+================================================================================
+FILE: taxonomy-agencies.txt
+Scope: ws-agency
+Source: register-taxonomies.php v3.10.0
+Notes: Operational palette for agency records. Intentionally slimmer than
+       statutes; agencies describe subject area, reporting targets, process
+       routes, languages, and jurisdiction only. Full doctrinal detail
+       belongs on jx-statute, not ws-agency.
+================================================================================
+
+
+────────────────────────────────────────────────────────────────────────────
+TAXONOMY: ws_disclosure_type
+Applies to: ws-agency
+Hierarchical: YES — use child slugs only
+Description: Subject matter areas the agency accepts or oversees. Tags what
+             kind of wrongdoing or concern the agency is relevant to.
+             Use all that apply.
+────────────────────────────────────────────────────────────────────────────
+
+--- fraud-and-financial ---
+fraud-and-financial          Fraud & Financial Misconduct (parent)
+tax-fraud                    Tax Fraud
+securities-fraud             Securities Fraud
+government-contract-fraud    Government Contract Fraud
+financial-misconduct         General Financial Misconduct
+
+--- safety-and-health ---
+safety-and-health            Safety & Health Violations (parent)
+workplace-safety             Workplace Safety
+environmental-hazard         Environmental Hazard
+public-health                Public Health Risk
+food-and-drug                Food & Drug Safety
+
+--- legal-and-regulatory ---
+legal-and-regulatory         Legal & Regulatory Violations (parent)
+civil-rights                 Civil Rights Violations
+labor-law                    Labor Law Violations
+discrimination               Discrimination
+consumer-protection          Consumer Protection
+
+--- government-and-public ---
+government-and-public        Government & Public Interest (parent)
+government-misconduct        Government Misconduct
+corruption                   Corruption / Bribery
+abuse-of-authority           Abuse of Authority
+waste-of-funds               Waste of Public Funds
+
+--- other ---
+other                        Other / General (parent)
+general-wrongdoing           General Wrongdoing
+policy-violation             Policy / Ethics Violation
+
+
+────────────────────────────────────────────────────────────────────────────
+TAXONOMY: ws_disclosure_targets
+Applies to: ws-agency
+Hierarchical: NO — flat list
+Description: Reporting target classification for this agency. Tags what kind
+             of reporting body this agency represents. Use the most accurate
+             single term in most cases; multi-tag only where genuinely dual.
+────────────────────────────────────────────────────────────────────────────
+
+external-federal         Federal Agency / Regulator
+external-state           State Agency / Regulator
+external-local           Local Authority
+law-enforcement          Law Enforcement
+legislature              Legislature / Congressional Committee
+inspector-general        Inspector General Office
+
+
+────────────────────────────────────────────────────────────────────────────
+TAXONOMY: ws_process_type
+Applies to: ws-agency
+Hierarchical: NO — flat list
+Description: Procedural route this agency administers or accepts.
+             Tag all that genuinely apply to this agency's intake process.
+────────────────────────────────────────────────────────────────────────────
+
+administrative           Administrative Complaint
+criminal-referral        Criminal Referral
+administrative-appeal    Administrative Appeal / Review
+inspector-general        Inspector General Complaint
+civil-lawsuit            Civil Lawsuit (agency-referred or agency-filed)
+
+
+────────────────────────────────────────────────────────────────────────────
+TAXONOMY: ws_languages
+Applies to: ws-agency
+Hierarchical: NO — flat list
+Description: Languages in which the agency offers services or intake support.
+             Tag all languages the agency explicitly supports. English is
+             assumed and should still be tagged.
+────────────────────────────────────────────────────────────────────────────
+
+en        English
+es        Spanish
+zh        Chinese (Simplified)
+zh-tw     Chinese (Traditional)
+vi        Vietnamese
+ko        Korean
+tl        Tagalog / Filipino
+ar        Arabic
+fr        French
+de        German
+pt        Portuguese
+ru        Russian
+ja        Japanese
+hi        Hindi
+fa        Farsi / Persian
+pl        Polish
+it        Italian
+ht        Haitian Creole
+ur        Urdu
+bn        Bengali
+
+
+────────────────────────────────────────────────────────────────────────────
+TAXONOMY: ws_jurisdiction
+Applies to: ws-agency (and all content CPTs)
+Hierarchical: YES — use jurisdiction term slugs
+Description: Jurisdiction the agency operates in or has authority over.
+             Always tag exactly one jurisdiction unless the agency explicitly
+             spans multiple (e.g. a federal agency with state-level offices).
+────────────────────────────────────────────────────────────────────────────
+
+us        Federal (United States)
+al        Alabama
+ak        Alaska
+az        Arizona
+ar        Arkansas
+ca        California
+co        Colorado
+ct        Connecticut
+de        Delaware
+fl        Florida
+ga        Georgia
+hi        Hawaii
+id        Idaho
+il        Illinois
+in        Indiana
+ia        Iowa
+ks        Kansas
+ky        Kentucky
+la        Louisiana
+me        Maine
+md        Maryland
+ma        Massachusetts
+mi        Michigan
+mn        Minnesota
+ms        Mississippi
+mo        Missouri
+mt        Montana
+ne        Nebraska
+nv        Nevada
+nh        New Hampshire
+nj        New Jersey
+nm        New Mexico
+ny        New York
+nc        North Carolina
+nd        North Dakota
+oh        Ohio
+ok        Oklahoma
+or        Oregon
+pa        Pennsylvania
+ri        Rhode Island
+sc        South Carolina
+sd        South Dakota
+tn        Tennessee
+tx        Texas
+ut        Utah
+vt        Vermont
+va        Virginia
+wa        Washington
+wv        West Virginia
+wi        Wisconsin
+wy        Wyoming
+dc        District of Columbia
+pr        Puerto Rico
+gu        Guam
+vi        U.S. Virgin Islands
+as        American Samoa
+mp        Northern Mariana Islands

@@ -1,0 +1,281 @@
+================================================================================
+FILE: taxonomy-interpretations.txt
+Scope: jx-interpretation
+Source: register-taxonomies.php v3.10.0
+Notes: Full statute-mirror palette for interpretation records.
+       Interpretations inherit the complete doctrinal taxonomy set from
+       jx-statute. An interpretation is an applied reading of a statute —
+       agency guidance, regulatory opinion, administrative ruling, or
+       editorial doctrine note. Tag only what the interpretation genuinely
+       addresses or clarifies; do not mirror parent statute tags by default.
+       Many axes will often be unused or sparsely tagged on any single
+       interpretation record; this file defines the allowed palette,
+       not a required checklist.
+================================================================================
+
+
+────────────────────────────────────────────────────────────────────────────
+TAXONOMY: ws_disclosure_type
+Applies to: jx-interpretation
+Hierarchical: YES — use child slugs only
+Description: Subject matter of the protected disclosure as addressed or
+             clarified by this interpretation. Tag only what the
+             interpretation genuinely explains or narrows; do not inherit
+             from parent statute.
+────────────────────────────────────────────────────────────────────────────
+
+--- fraud-and-financial ---
+fraud-and-financial          Fraud & Financial Misconduct (parent)
+tax-fraud                    Tax Fraud
+securities-fraud             Securities Fraud
+government-contract-fraud    Government Contract Fraud
+financial-misconduct         General Financial Misconduct
+
+--- safety-and-health ---
+safety-and-health            Safety & Health Violations (parent)
+workplace-safety             Workplace Safety
+environmental-hazard         Environmental Hazard
+public-health                Public Health Risk
+food-and-drug                Food & Drug Safety
+
+--- legal-and-regulatory ---
+legal-and-regulatory         Legal & Regulatory Violations (parent)
+civil-rights                 Civil Rights Violations
+labor-law                    Labor Law Violations
+discrimination               Discrimination
+consumer-protection          Consumer Protection
+
+--- government-and-public ---
+government-and-public        Government & Public Interest (parent)
+government-misconduct        Government Misconduct
+corruption                   Corruption / Bribery
+abuse-of-authority           Abuse of Authority
+waste-of-funds               Waste of Public Funds
+
+--- other ---
+other                        Other / General (parent)
+general-wrongdoing           General Wrongdoing
+policy-violation             Policy / Ethics Violation
+
+
+────────────────────────────────────────────────────────────────────────────
+TAXONOMY: ws_protected_class
+Applies to: jx-interpretation
+Hierarchical: NO — flat list
+Description: Worker classification addressed or clarified by this
+             interpretation. Tag only where the interpretation explicitly
+             turns on or explains protected class applicability.
+────────────────────────────────────────────────────────────────────────────
+
+all-employees          All Employees
+private-employees      Private Sector Employees
+public-employees       Public / Government Employees
+federal-employees      Federal Employees
+state-employees        State Employees
+local-employees        Local Government Employees
+contractors            Independent Contractors
+subcontractors         Subcontractors
+gig-workers            Gig / Platform Workers
+volunteers             Volunteers
+applicants             Job Applicants
+former-employees       Former Employees
+union-members          Union Members
+non-union              Non-Union Employees
+
+
+────────────────────────────────────────────────────────────────────────────
+TAXONOMY: ws_disclosure_targets
+Applies to: jx-interpretation
+Hierarchical: NO — flat list
+Description: Reporting target addressed or clarified by this interpretation.
+             Tag only where the interpretation explicitly discusses or
+             turns on the reporting channel used or permitted.
+────────────────────────────────────────────────────────────────────────────
+
+internal-management      Internal Management
+internal-compliance      Internal Compliance / Ethics Hotline
+internal-hr              Human Resources
+external-federal         Federal Agency / Regulator
+external-state           State Agency / Regulator
+external-local           Local Authority
+law-enforcement          Law Enforcement
+legislature              Legislature / Congressional Committee
+judiciary                Court / Judicial Body
+media                    Media / Press
+public                   General Public
+nonprofit-advocate       Nonprofit / Advocacy Organization
+
+
+────────────────────────────────────────────────────────────────────────────
+TAXONOMY: ws_adverse_action_types
+Applies to: jx-interpretation
+Hierarchical: NO — flat list
+Description: Retaliatory action addressed or clarified by this
+             interpretation. Tag only where the interpretation explicitly
+             explains or narrows the type of adverse action covered.
+────────────────────────────────────────────────────────────────────────────
+
+termination              Termination / Discharge
+demotion                 Demotion
+suspension               Suspension
+harassment               Harassment / Hostile Work Environment
+pay-reduction            Pay Reduction
+hours-reduction          Hours Reduction
+reassignment             Reassignment / Transfer
+blacklisting             Blacklisting
+discipline               Disciplinary Action
+negative-reference       Negative Employment Reference
+benefit-reduction        Benefit Reduction
+constructive-discharge   Constructive Discharge
+failure-to-hire          Failure to Hire / Refusal to Hire
+denial-of-promotion      Denial of Promotion
+denial-of-training       Denial of Training
+forced-psychiatric       Forced Psychiatric / Fitness Exam
+unfavorable-evaluation   Unfavorable Performance Evaluation
+
+
+────────────────────────────────────────────────────────────────────────────
+TAXONOMY: ws_process_type
+Applies to: jx-interpretation
+Hierarchical: NO — flat list
+Description: Procedural route addressed or clarified by this interpretation.
+             Tag only where the interpretation explicitly explains or
+             narrows procedural requirements or options.
+────────────────────────────────────────────────────────────────────────────
+
+administrative           Administrative Complaint
+civil-lawsuit            Civil Lawsuit
+criminal-referral        Criminal Referral
+internal-grievance       Internal Grievance / Union Procedure
+arbitration              Arbitration
+administrative-appeal    Administrative Appeal / Review
+inspector-general        Inspector General Complaint
+
+
+────────────────────────────────────────────────────────────────────────────
+TAXONOMY: ws_remedies
+Applies to: jx-interpretation
+Hierarchical: NO — flat list
+Description: Remedies addressed, clarified, or limited by this
+             interpretation. Tag only where the interpretation explicitly
+             explains remedy availability or scope.
+────────────────────────────────────────────────────────────────────────────
+
+reinstatement            Reinstatement
+back-pay                 Back Pay
+front-pay                Front Pay
+compensatory-damages     Compensatory Damages
+punitive-damages         Punitive Damages
+exemplary-damages        Exemplary Damages
+emotional-distress       Emotional Distress Damages
+consequential-damages    Special / Consequential Damages
+declaratory-relief       Declaratory Relief
+injunctive-relief        Injunctive Relief
+attorney-fees            Attorney Fees
+costs                    Court Costs / Filing Fees
+whistleblower-award      Whistleblower Award / Bounty
+
+
+────────────────────────────────────────────────────────────────────────────
+TAXONOMY: ws_fee_shifting
+Applies to: jx-interpretation
+Hierarchical: NO — flat list
+Description: Fee-shifting rule addressed or clarified by this
+             interpretation. Tag only where the interpretation explicitly
+             explains fee-shifting applicability or limits.
+             Single-value taxonomy; use the most accurate single term.
+────────────────────────────────────────────────────────────────────────────
+
+prevailing-party         Prevailing Party (bidirectional)
+plaintiff-only           Plaintiff Only (one-way)
+discretionary            Discretionary / Court Discretion
+none                     No Fee Shifting
+ambiguous                Ambiguous / Unclear
+
+
+────────────────────────────────────────────────────────────────────────────
+TAXONOMY: ws_employer_defense
+Applies to: jx-interpretation
+Hierarchical: NO — flat list
+Description: Employer defense addressed, validated, or rejected by this
+             interpretation. Tag only where the interpretation explicitly
+             explains or limits a defense posture.
+────────────────────────────────────────────────────────────────────────────
+
+same-decision             Same-Decision / Mixed-Motive Defense
+legitimate-reason         Legitimate Non-Retaliatory Reason
+no-knowledge              Employer Lacked Knowledge of Disclosure
+good-faith-investigation  Good Faith Investigation
+procedural-default        Exhaustion / Procedural Default
+arbitration-clause        Mandatory Arbitration Clause
+at-will-employment        At-Will Employment Basis
+sovereign-immunity        Sovereign / Governmental Immunity
+
+
+────────────────────────────────────────────────────────────────────────────
+TAXONOMY: ws_jurisdiction
+Applies to: jx-interpretation (and all content CPTs)
+Hierarchical: YES — use jurisdiction term slugs
+Description: Jurisdiction the interpretation originates from or applies to.
+             Always tag exactly one jurisdiction unless the interpretation
+             explicitly spans multiple or addresses a federal-preemption
+             question across jurisdictions.
+────────────────────────────────────────────────────────────────────────────
+
+us        Federal (United States)
+al        Alabama
+ak        Alaska
+az        Arizona
+ar        Arkansas
+ca        California
+co        Colorado
+ct        Connecticut
+de        Delaware
+fl        Florida
+ga        Georgia
+hi        Hawaii
+id        Idaho
+il        Illinois
+in        Indiana
+ia        Iowa
+ks        Kansas
+ky        Kentucky
+la        Louisiana
+me        Maine
+md        Maryland
+ma        Massachusetts
+mi        Michigan
+mn        Minnesota
+ms        Mississippi
+mo        Missouri
+mt        Montana
+ne        Nebraska
+nv        Nevada
+nh        New Hampshire
+nj        New Jersey
+nm        New Mexico
+ny        New York
+nc        North Carolina
+nd        North Dakota
+oh        Ohio
+ok        Oklahoma
+or        Oregon
+pa        Pennsylvania
+ri        Rhode Island
+sc        South Carolina
+sd        South Dakota
+tn        Tennessee
+tx        Texas
+ut        Utah
+vt        Vermont
+va        Virginia
+wa        Washington
+wv        West Virginia
+wi        Wisconsin
+wy        Wyoming
+dc        District of Columbia
+pr        Puerto Rico
+gu        Guam
+vi        U.S. Virgin Islands
+as        American Samoa
+mp        Northern Mariana Islands

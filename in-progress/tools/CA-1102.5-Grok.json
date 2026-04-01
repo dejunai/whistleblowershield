@@ -1,0 +1,114 @@
+{
+  "meta": {
+    "json_format_version": "2.0",
+    "source_method": "ai_assisted",
+    "source_name": "Grok",
+    "jurisdiction_id": "CA",
+    "generated_date": "2026-04-01",
+    "generated_by": "Grok by xAI (tool-assisted research, April 2026)",
+    "record_count": 1,
+    "proposed_count": 0,
+    "new_terms_proposed": [],
+    "json_run_notes": "Processed single requested record CA-1102.5 using official legislature source. Statute of limitations is derived from general civil procedure code (CCP § 338(a) for liability created by statute), not stated in 1102.5 itself — limit_ambiguous set to true. No new taxonomy terms proposed. No parent slugs used in taxonomy arrays.",
+    "batch_completed": "2026-04-01 15:27 UTC"
+  },
+  "records": [
+    {
+      "jurisdiction_id": "CA",
+      "statute_id": "CA-1102.5",
+      "official_name": "Labor Code § 1102.5",
+      "common_name": "",
+
+      "legal_basis": {
+        "statute_citation": "Cal. Lab. Code § 1102.5",
+        "disclosure_types": [
+          "general-wrongdoing"
+        ],
+        "protected_class": [
+          "all-employees"
+        ],
+        "disclosure_targets": [
+          "internal-management",
+          "external-federal",
+          "external-state",
+          "law-enforcement",
+          "public-body"
+        ],
+        "adverse_action_scope": "Prohibits retaliation including any adverse employment actions against employees for protected disclosures or refusal to participate in illegal activity; also protects family members of those who engaged in protected activity and extends to former employment."
+      },
+
+      "statute_of_limitations": {
+        "limit_ambiguous": true,
+        "limit_value": 3,
+        "limit_unit": "years",
+        "limit_details": "Derived from Code of Civil Procedure § 338(a) for actions upon a liability created by statute (general civil claim); civil penalty under (f) may be subject to shorter one-year period under CCP § 340. No SOL specified within § 1102.5 itself.",
+        "trigger": "Date of the retaliatory act",
+        "exhaustion_required": false
+      },
+
+      "enforcement": {
+        "primary_agency": "California Labor Commissioner (for civil penalties under subdivision (f))",
+        "process_type": [
+          "civil-lawsuit",
+          "administrative"
+        ],
+        "adverse_action": [
+          "termination",
+          "demotion",
+          "suspension",
+          "harassment",
+          "pay-reduction",
+          "reassignment",
+          "discipline",
+          "constructive-discharge"
+        ],
+        "remedies": [
+          "reinstatement",
+          "back-pay",
+          "compensatory-damages",
+          "attorney-fees",
+          "costs",
+          "injunctive-relief"
+        ],
+        "fee_shifting": "plaintiff-only"
+      },
+
+      "burden_of_proof": {
+        "employee_standard": "contributing-factor (per Labor Code § 1102.6 framework)",
+        "employer_defense": [
+          "same-decision",
+          "legitimate-reason"
+        ],
+        "burden_of_proof_details": "Once employee shows protected activity was a contributing factor, burden shifts to employer to prove same decision would have been made absent the protected activity (Lab. Code § 1102.6).",
+        "burden_of_proof_flag": "burden shift to employer"
+      },
+
+      "reward": {
+        "available": false
+      },
+
+      "links": {
+        "statute_url": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=LAB&sectionNum=1102.5.",
+        "is_official": true,
+        "is_pdf": false
+      },
+
+      "citations": {
+        "attached_citations": [
+          "Lawson v. PPG Architectural Finishes, Inc. || establishes contributing-factor burden-shifting framework || https://law.justia.com/cases/california/supreme-court/2022/s266001.html || law.justia.com || high",
+          "People ex rel. Garcia-Brower v. Kolla's, Inc. || confirms internal report to employer who already knew of violation qualifies as protected disclosure || https://law.justia.com/cases/california/supreme-court/2023/s269456.html || law.justia.com || high"
+        ],
+        "citation_count": 2
+      },
+
+      "_review_notes": "This is California's primary general whistleblower protection statute covering both private and public sector employees. It broadly protects disclosures (internal or external) of suspected violations of any state/federal statute or regulation (or noncompliance), even if not part of job duties and even if the violation was already known to the recipient. Also protects refusal to participate in illegal activity and family members. No administrative exhaustion required for civil suit. Attorney fees available to successful plaintiff. Reviewer should confirm current application of SOL distinctions between damages and penalties, and verify any recent amendments post-2024."
+    }
+  ],
+  "integrity": {
+    "with_errors": true,
+    "error_details": [
+      "CA-1102.5: limit_ambiguous set to true — SOL derived from general CCP § 338(a), not stated in the whistleblower statute itself"
+    ],
+    "error_count": 1
+  }
+}

@@ -72,9 +72,9 @@ the array empty — do not invent a slug and insert it into the record.
 
 PARENT SLUGS — CRITICAL RULE
 
-Every taxonomy table has parent slugs used for organization only. Parent
-slugs are structural labels. They are not valid record values and must
-never appear in any record array.
+Every hierarchical taxonomy table has parent slugs used for organization
+only. Parent slugs are structural labels. They are not valid record values
+and must never appear in any record array.
 
 Always use child slugs — the specific terms listed under each parent.
 If no child slug fits, leave the array empty and note the gap in
@@ -111,32 +111,203 @@ Example of correct behavior when no child fits:
 
 ---
 
+================================================================================
 TAXONOMY TABLES
+Notes: Full doctrinal palette for statute records. Use child slugs only for
+       hierarchical taxonomies. Many axes will often be sparsely used on any
+       single statute; tag what is genuinely supported by the source material.
+================================================================================
 
-### ws_disclosure_type
-{{TAXONOMY:ws_disclosure_type}}
 
-### ws_protected_class
-{{TAXONOMY:ws_protected_class}}
+────────────────────────────────────────────────────────────────────────────
+TAXONOMY: ws_disclosure_type
+Applies to: jx-statute
+Hierarchical: YES — use child slugs only
+Description: Subject matter of the protected disclosure. Tags what kind of
+             wrongdoing or concern the statute covers. Use all that apply.
+────────────────────────────────────────────────────────────────────────────
 
-### ws_disclosure_targets
-{{TAXONOMY:ws_disclosure_targets}}
+--- fraud-and-financial ---
+fraud-and-financial          Fraud & Financial Misconduct (parent)
+tax-fraud                    Tax Fraud
+securities-fraud             Securities Fraud
+government-contract-fraud    Government Contract Fraud
+financial-misconduct         General Financial Misconduct
 
-### ws_process_type
-{{TAXONOMY:ws_process_type}}
+--- safety-and-health ---
+safety-and-health            Safety & Health Violations (parent)
+workplace-safety             Workplace Safety
+environmental-hazard         Environmental Hazard
+public-health                Public Health Risk
+food-and-drug                Food & Drug Safety
 
-### ws_adverse_action_types
-{{TAXONOMY:ws_adverse_action_types}}
+--- legal-and-regulatory ---
+legal-and-regulatory         Legal & Regulatory Violations (parent)
+civil-rights                 Civil Rights Violations
+labor-law                    Labor Law Violations
+discrimination               Discrimination
+consumer-protection          Consumer Protection
 
-### ws_remedies
-{{TAXONOMY:ws_remedies}}
+--- government-and-public ---
+government-and-public        Government & Public Interest (parent)
+government-misconduct        Government Misconduct
+corruption                   Corruption / Bribery
+abuse-of-authority           Abuse of Authority
+waste-of-funds               Waste of Public Funds
 
-### ws_fee_shifting
-{{TAXONOMY:ws_fee_shifting}}
+--- other ---
+other                        Other / General (parent)
+general-wrongdoing           General Wrongdoing
+policy-violation             Policy / Ethics Violation
 
-### ws_employer_defense
-{{TAXONOMY:ws_employer_defense}}
 
+────────────────────────────────────────────────────────────────────────────
+TAXONOMY: ws_protected_class
+Applies to: jx-statute
+Hierarchical: NO — flat list
+Description: Employment or worker classification protected under the statute.
+             Tag all classes explicitly covered. Do not infer coverage.
+────────────────────────────────────────────────────────────────────────────
+
+all-employees          All Employees
+private-employees      Private Sector Employees
+public-employees       Public / Government Employees
+federal-employees      Federal Employees
+state-employees        State Employees
+local-employees        Local Government Employees
+contractors            Independent Contractors
+subcontractors         Subcontractors
+gig-workers            Gig / Platform Workers
+volunteers             Volunteers
+applicants             Job Applicants
+former-employees       Former Employees
+union-members          Union Members
+non-union              Non-Union Employees
+
+
+────────────────────────────────────────────────────────────────────────────
+TAXONOMY: ws_disclosure_targets
+Applies to: jx-statute
+Hierarchical: NO — flat list
+Description: Who the protected disclosure may be made to under the statute.
+             Tag all valid reporting targets explicitly named or clearly implied.
+────────────────────────────────────────────────────────────────────────────
+
+internal-management      Internal Management
+internal-compliance      Internal Compliance / Ethics Hotline
+internal-hr              Human Resources
+external-federal         Federal Agency / Regulator
+external-state           State Agency / Regulator
+external-local           Local Authority
+law-enforcement          Law Enforcement
+legislature              Legislature / Congressional Committee
+judiciary                Court / Judicial Body
+media                    Media / Press
+public                   General Public
+nonprofit-advocate       Nonprofit / Advocacy Organization
+
+
+────────────────────────────────────────────────────────────────────────────
+TAXONOMY: ws_adverse_action_types
+Applies to: jx-statute
+Hierarchical: NO — flat list
+Description: Retaliatory actions the statute explicitly or broadly prohibits.
+             Tag all that are covered; do not tag actions merely implied.
+────────────────────────────────────────────────────────────────────────────
+
+termination              Termination / Discharge
+demotion                 Demotion
+suspension               Suspension
+harassment               Harassment / Hostile Work Environment
+pay-reduction            Pay Reduction
+hours-reduction          Hours Reduction
+reassignment             Reassignment / Transfer
+blacklisting             Blacklisting
+discipline               Disciplinary Action
+negative-reference       Negative Employment Reference
+benefit-reduction        Benefit Reduction
+constructive-discharge   Constructive Discharge
+failure-to-hire          Failure to Hire / Refusal to Hire
+denial-of-promotion      Denial of Promotion
+denial-of-training       Denial of Training
+forced-psychiatric       Forced Psychiatric / Fitness Exam
+unfavorable-evaluation   Unfavorable Performance Evaluation
+
+
+────────────────────────────────────────────────────────────────────────────
+TAXONOMY: ws_process_type
+Applies to: jx-statute
+Hierarchical: NO — flat list
+Description: Procedural route available under the statute. Tag all that apply.
+             Single-value intent where routes are mutually exclusive per record.
+────────────────────────────────────────────────────────────────────────────
+
+administrative           Administrative Complaint
+civil-lawsuit            Civil Lawsuit
+criminal-referral        Criminal Referral
+internal-grievance       Internal Grievance / Union Procedure
+arbitration              Arbitration
+administrative-appeal    Administrative Appeal / Review
+inspector-general        Inspector General Complaint
+
+
+────────────────────────────────────────────────────────────────────────────
+TAXONOMY: ws_remedies
+Applies to: jx-statute
+Hierarchical: NO — flat list
+Description: Remedies available to a prevailing claimant under the statute.
+             Tag all explicitly available; do not infer from general principles.
+────────────────────────────────────────────────────────────────────────────
+
+reinstatement            Reinstatement
+back-pay                 Back Pay
+front-pay                Front Pay
+compensatory-damages     Compensatory Damages
+punitive-damages         Punitive Damages
+exemplary-damages        Exemplary Damages
+emotional-distress       Emotional Distress Damages
+consequential-damages    Special / Consequential Damages
+declaratory-relief       Declaratory Relief
+injunctive-relief        Injunctive Relief
+attorney-fees            Attorney Fees
+costs                    Court Costs / Filing Fees
+whistleblower-award      Whistleblower Award / Bounty
+
+
+────────────────────────────────────────────────────────────────────────────
+TAXONOMY: ws_fee_shifting
+Applies to: jx-statute
+Hierarchical: NO — flat list
+Description: Fee-shifting posture of the statute.
+             Single-value taxonomy; use the most accurate single term.
+────────────────────────────────────────────────────────────────────────────
+
+prevailing-party         Prevailing Party (bidirectional)
+plaintiff-only           Plaintiff Only (one-way)
+discretionary            Discretionary / Court Discretion
+none                     No Fee Shifting
+ambiguous                Ambiguous / Unclear
+
+
+────────────────────────────────────────────────────────────────────────────
+TAXONOMY: ws_employer_defense
+Applies to: jx-statute
+Hierarchical: NO — flat list
+Description: Affirmative defenses or rebuttal standards available to employers.
+             Tag all defenses explicitly recognized under the statute.
+────────────────────────────────────────────────────────────────────────────
+
+same-decision            Same-Decision / Mixed-Motive Defense
+legitimate-reason        Legitimate Non-Retaliatory Reason
+no-knowledge             Employer Lacked Knowledge of Disclosure
+good-faith-investigation Good Faith Investigation
+procedural-default       Exhaustion / Procedural Default
+arbitration-clause       Mandatory Arbitration Clause
+at-will-employment       At-Will Employment Basis
+sovereign-immunity       Sovereign / Governmental Immunity
+
+
+────────────────────────────────────────────────────────────────────────────
 ---
 
 PROPOSING NEW TAXONOMY TERMS
@@ -329,6 +500,10 @@ meta BLOCK SCHEMA
   }
 }
 
+batch_completed:
+Always use UTC. Do not use local time. Format: YYYY-MM-DD HH:MM UTC.
+Written last, after all records, proposals, and calculated fields are final.
+
 ---
 
 RECORD SCHEMA
@@ -485,6 +660,8 @@ with_errors must be true if ANY of the following occurred:
   - A parent slug was detected and removed during self-check
   - Anything else you believe a human reviewer should know about the
     integrity of this batch
+  - A burden_of_proof.employee_standard value was inferred or assumed rather
+    than explicitly stated in the statute text.
 
 OMISSION RULE:
   If with_errors is false, omit error_details and error_count entirely.

@@ -100,7 +100,7 @@ function ws_register_cpt_statutes() {
 
         // ── Admin Menu ────────────────────────────────────────────────────
 
-        'menu_icon'     => 'dashicons-gavel',
+        'menu_icon'     => 'dashicons-media-document',
         'menu_position' => 32,
 
     ];

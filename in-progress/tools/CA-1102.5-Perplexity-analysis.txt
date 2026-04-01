@@ -1,0 +1,95 @@
+These are the best three outputs you have gotten from this pipeline so far. The single-record focused run clearly helped discipline across all three. Here is the full compare+contrast.
+
+***
+
+## Meta observations first
+
+**ChatGPT (GPT-5.4 Thinking)** — the "thinking" layer before execution is significant. That is not just a UI change; it is a different reasoning architecture where the model is explicitly planning before committing to output. The looping through related statutes before executing explains why the `jsonrunnotes` and `reviewnotes` are the most contextually aware of the three. The long startup time is the cost of that planning pass, and the output quality suggests it was worth it here.
+
+**Grok** — first clean code-block-only output is a direct win for the v2.0.4 prompt language. The "no commentary outside the block" instruction finally landed. That alone makes this version worth keeping.
+
+**Gemini (3 Flash)** — notably the fastest (`1522 UTC` vs `1527 UTC` for both others), which tracks with Flash being a speed-optimized model. That speed comes with tradeoffs visible in the output.
+
+***
+
+## Side-by-side scorecard
+
+### Schema fidelity
+- **ChatGPT**: Clean. No invented keys, correct field order, omissions handled properly. Best of three.
+- **Grok**: Clean. Slightly richer field population than ChatGPT but still schema-faithful.
+- **Gemini**: One critical violation — used `scholar.google.com` URL for *Lawson*, which the prompt explicitly forbids by name. Then flagged it in integrity, which shows self-awareness, but the violation still occurred.
+
+### Taxonomy discipline
+- **ChatGPT**: Most conservative — `disclosuretypes: [general-wrongdoing]` only, `adverseaction: []` empty, `remedies: [injunctive-relief, attorney-fees]` only. Honest but thin.
+- **Grok**: Best balance — full `adverseaction` array with eight legitimate slugs, full `remedies` array, no parent slugs, all child slugs valid.
+- **Gemini**: `disclosuretypes` includes `labor-law` and `government-misconduct` which are arguably defensible but pushing toward over-tagging for a general statute. `adverseaction` only four slugs where Grok found eight from the same source. Inconsistent depth.
+
+### SOL handling
+- **ChatGPT**: `limitambiguous: true`, `limitvalue: 3`, correctly notes civil vs. penalty distinction. Integrity event raised. Correct behavior.
+- **Grok**: Same — and notably adds the civil penalty one-year period under CCP 340 as a second SOL concern. Most complete SOL analysis of the three.
+- **Gemini**: `limitambiguous: false` with `limitvalue: 3`. This is the most significant factual error in the entire batch. The three-year period is derived from CCP 338, not stated in 1102.5 itself. Gemini's overconfidence failure mode from prior runs is still present.
+
+### Citation quality
+- **ChatGPT**: Two citations — *Lawson v. PPG* via `supreme.courts.ca.gov` (official, correct), *Garcia-Brower v. Kollas* via `law.justia.com`. Both verified-source pattern. Best citation block.
+- **Grok**: Same two cases, both via `law.justia.com`. Slightly lower source tier than ChatGPT for *Lawson* but still approved. SPECIFICIMPACT on *Garcia-Brower* is more precise than ChatGPT's.
+- **Gemini**: One citation — *Lawson* only, via `scholar.google.com` which is explicitly forbidden. Self-reported in integrity, which is correct behavior, but the violation should not have occurred.
+
+### `reviewnotes` quality
+- **ChatGPT**: Strong — covers scope, SOL uncertainty, conservative remedies tagging rationale. Reviewer-useful.
+- **Grok**: Best of three — covers scope, SOL dual-period concern, no exhaustion, attorney fees, post-2024 amendment note. That amendment flag is a valuable human-review prompt.
+- **Gemini**: Weakest — thin, references 2024 amendments vaguely without the specificity Grok provides.
+
+### `jsonrunnotes` quality
+- **ChatGPT**: Best — explains every major decision including conservative tagging rationale and SOL derivation. Feels like the thinking layer fed directly into this field.
+- **Grok**: Good — clean and honest, covers SOL derivation and no-proposal explanation.
+- **Gemini**: "Clinical execution" is not a useful note. Tells the reviewer nothing actionable.
+
+### Integrity block honesty
+- **ChatGPT**: Correct — one error, specific, named.
+- **Grok**: Correct — one error, specific, named.
+- **Gemini**: Correct in form — one error flagged, but the bigger error (`limitambiguous: false`) was not caught and not reported.
+
+### `public-body` slug (Grok only)
+Grok used `public-body` in `disclosuretargets` which does not appear in your registered taxonomy. This is exactly the invented-slug failure mode — not a parent slug, but a non-existent child slug inserted directly into a record array. Worth a specific note in your prompt: "Do not insert any slug that does not appear verbatim in the taxonomy tables. If no slug fits, leave the array empty."
+
+***
+
+## Rankings this run
+
+| Dimension | Winner |
+|---|---|
+| Schema fidelity | ChatGPT |
+| Taxonomy depth | Grok |
+| Taxonomy discipline | ChatGPT |
+| SOL honesty | Grok |
+| Citation source quality | ChatGPT |
+| Citation completeness | Tie (ChatGPT/Grok) |
+| `reviewnotes` usefulness | Grok |
+| `jsonrunnotes` usefulness | ChatGPT |
+| Integrity honesty | Tie (ChatGPT/Grok) |
+| Speed | Gemini |
+| Overall trust | ChatGPT |
+| Overall richness | Grok |
+
+***
+
+## Strategic read
+
+**ChatGPT with the Thinking layer** is now your most trustworthy single-model output. The planning pass before execution is visibly improving `jsonrunnotes` quality and SOL discipline simultaneously. The tradeoff is conservative taxonomy depth — it under-tags where Grok correctly tags.
+
+**Grok** is your richest output but has one new failure mode to address: the `public-body` invented slug. One prompt addition fixes that. If you close that gap, Grok becomes the strongest single-model producer.
+
+**Gemini Flash** is the weakest of the three for this use case. Speed is its only advantage here, and for legal data accuracy you do not want the speed-optimized model. The `limitambiguous: false` error on a derivied SOL, combined with the forbidden Google Scholar URL, means Gemini Flash outputs need heavier human review than the other two. Worth testing Gemini Pro or Gemini Advanced if you want to keep Gemini in the rotation.
+
+## One prompt addition to make now
+
+Add this line to the TAXONOMY FIELDS section:
+
+```
+Do not insert any slug that does not appear verbatim in the
+taxonomy tables provided. If no listed slug fits, leave the
+array empty and note the gap in jsonrunnotes. Do not invent
+or approximate a slug.
+```
+
+That closes the `public-body` failure mode for Grok without adding significant prompt length.

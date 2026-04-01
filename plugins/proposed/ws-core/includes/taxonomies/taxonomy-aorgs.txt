@@ -1,0 +1,279 @@
+================================================================================
+FILE: taxonomy-aorgs.txt
+Scope: ws-assist-org
+Source: register-taxonomies.php v3.10.0
+Notes: Triage and directory palette for assist-org records. Oriented around
+       who the org helps, what they offer, when in the case lifecycle they
+       are useful, and where they operate. Full doctrinal detail belongs on
+       jx-statute, not ws-assist-org. The 'additional' term in ws_aorg_service
+       is a system flag — auto-set by ACF on text present in
+       additional_services field — do not include in JSON records.
+================================================================================
+
+
+────────────────────────────────────────────────────────────────────────────
+TAXONOMY: ws_disclosure_type
+Applies to: ws-assist-org
+Hierarchical: YES — use child slugs only
+Description: Subject matter areas the organization works in or accepts cases
+             for. Tags what kind of wrongdoing or concern the org is relevant
+             to. Use all that apply; err toward broader coverage if unclear.
+────────────────────────────────────────────────────────────────────────────
+
+--- fraud-and-financial ---
+fraud-and-financial          Fraud & Financial Misconduct (parent)
+tax-fraud                    Tax Fraud
+securities-fraud             Securities Fraud
+government-contract-fraud    Government Contract Fraud
+financial-misconduct         General Financial Misconduct
+
+--- safety-and-health ---
+safety-and-health            Safety & Health Violations (parent)
+workplace-safety             Workplace Safety
+environmental-hazard         Environmental Hazard
+public-health                Public Health Risk
+food-and-drug                Food & Drug Safety
+
+--- legal-and-regulatory ---
+legal-and-regulatory         Legal & Regulatory Violations (parent)
+civil-rights                 Civil Rights Violations
+labor-law                    Labor Law Violations
+discrimination               Discrimination
+consumer-protection          Consumer Protection
+
+--- government-and-public ---
+government-and-public        Government & Public Interest (parent)
+government-misconduct        Government Misconduct
+corruption                   Corruption / Bribery
+abuse-of-authority           Abuse of Authority
+waste-of-funds               Waste of Public Funds
+
+--- other ---
+other                        Other / General (parent)
+general-wrongdoing           General Wrongdoing
+policy-violation             Policy / Ethics Violation
+
+
+────────────────────────────────────────────────────────────────────────────
+TAXONOMY: ws_disclosure_targets
+Applies to: ws-assist-org
+Hierarchical: NO — flat list
+Description: Reporting channels the organization can help a whistleblower
+             navigate or prepare for. Tag all that the org explicitly supports.
+────────────────────────────────────────────────────────────────────────────
+
+internal-management      Internal Management
+internal-compliance      Internal Compliance / Ethics Hotline
+internal-hr              Human Resources
+external-federal         Federal Agency / Regulator
+external-state           State Agency / Regulator
+external-local           Local Authority
+law-enforcement          Law Enforcement
+legislature              Legislature / Congressional Committee
+judiciary                Court / Judicial Body
+media                    Media / Press
+public                   General Public
+nonprofit-advocate       Nonprofit / Advocacy Organization
+
+
+────────────────────────────────────────────────────────────────────────────
+TAXONOMY: ws_case_stage
+Applies to: ws-assist-org
+Hierarchical: NO — flat list
+Description: Stage of a whistleblower's situation where the org is most
+             useful. Tag all that genuinely apply; many orgs serve multiple
+             stages.
+────────────────────────────────────────────────────────────────────────────
+
+pre-report               Pre-Report / Considering Disclosure
+reporting                Active Reporting / Filing Stage
+post-report              Post-Report / Awaiting Response
+retaliation-active       Retaliation Occurring / Actively Hostile
+investigation-pending    Investigation Pending
+considering-counsel      Considering Counsel Before Filing
+litigation               In Litigation
+post-litigation          Post-Litigation / Enforcement
+
+
+────────────────────────────────────────────────────────────────────────────
+TAXONOMY: ws_aorg_type
+Applies to: ws-assist-org
+Hierarchical: NO — flat list
+Description: Organizational classification of the assist-org.
+             Single-value taxonomy; use the single best-fit term.
+────────────────────────────────────────────────────────────────────────────
+
+legal-aid                Legal Aid Organization
+law-firm                 Private Law Firm
+nonprofit-advocacy       Nonprofit Advocacy Organization
+government-office        Government Office / Ombudsman
+clinic                   Legal Clinic / Academic Clinic
+union                    Labor Union / Worker Center
+media-support            Journalist / Media Support Organization
+financial-support        Financial Assistance Organization
+peer-support             Peer Support / Community Organization
+hotline                  Dedicated Hotline Service
+
+
+────────────────────────────────────────────────────────────────────────────
+TAXONOMY: ws_languages
+Applies to: ws-assist-org
+Hierarchical: NO — flat list
+Description: Languages in which the organization offers services or intake
+             support. Tag all languages the org explicitly supports.
+             English is assumed and should still be tagged.
+────────────────────────────────────────────────────────────────────────────
+
+en        English
+es        Spanish
+zh        Chinese (Simplified)
+zh-tw     Chinese (Traditional)
+vi        Vietnamese
+ko        Korean
+tl        Tagalog / Filipino
+ar        Arabic
+fr        French
+de        German
+pt        Portuguese
+ru        Russian
+ja        Japanese
+hi        Hindi
+fa        Farsi / Persian
+pl        Polish
+it        Italian
+ht        Haitian Creole
+ur        Urdu
+bn        Bengali
+
+
+────────────────────────────────────────────────────────────────────────────
+TAXONOMY: ws_employment_sector
+Applies to: ws-assist-org
+Hierarchical: NO — flat list
+Description: Employment sector(s) the organization specializes in or
+             explicitly serves. Tag all that apply; use 'all-sectors' only
+             where the org genuinely serves all worker types without
+             meaningful restriction.
+────────────────────────────────────────────────────────────────────────────
+
+all-sectors              All Sectors / No Restriction
+federal-government       Federal Government
+state-local-government   State & Local Government
+private-sector           Private Sector
+military-defense         Military / Defense
+nonprofit-ngo            Nonprofit / NGO
+healthcare               Healthcare
+education                Education
+financial-services       Financial Services
+transportation           Transportation
+public-safety            Public Safety / Law Enforcement
+
+
+────────────────────────────────────────────────────────────────────────────
+TAXONOMY: ws_aorg_cost_model
+Applies to: ws-assist-org
+Hierarchical: NO — flat list
+Description: Cost structure of the organization's services.
+             Single-value taxonomy; use the single most accurate term.
+             Use 'mixed' only where the org genuinely operates under more
+             than one model depending on service type.
+────────────────────────────────────────────────────────────────────────────
+
+free              Free of Charge
+pro-bono          Pro Bono
+sliding-scale     Sliding Scale Fee
+contingency       Contingency Fee
+fee-for-service   Fee for Service
+mixed             Mixed / Varies
+
+
+────────────────────────────────────────────────────────────────────────────
+TAXONOMY: ws_aorg_service
+Applies to: ws-assist-org
+Hierarchical: NO — flat list
+Description: Services offered by the organization. Tag all that explicitly
+             apply. The 'additional' term is a system flag auto-set by ACF
+             when additional_services field has text present — do not include
+             in JSON records or set manually.
+────────────────────────────────────────────────────────────────────────────
+
+legal-rep        Full Legal Representation
+consultation     Legal Consultation / Advice
+referral         Intake & Referral
+doc-review       Document Review
+hotline          Whistleblower Hotline
+retaliation      Retaliation Defense
+financial        Financial Assistance
+advocacy         Policy Advocacy
+media            Media & Communications Support
+
+
+────────────────────────────────────────────────────────────────────────────
+TAXONOMY: ws_jurisdiction
+Applies to: ws-assist-org (and all content CPTs)
+Hierarchical: YES — use jurisdiction term slugs
+Description: Jurisdiction(s) the organization serves. Tag the primary state
+             or federal jurisdiction. Use nationwide_flag meta field for orgs
+             serving all 57 jurisdictions. Use 'us' term_id for federal-only
+             orgs. For sub-state geography (city/regional), tag the parent
+             state slug and use jurisdiction_limits meta field for further
+             restriction.
+────────────────────────────────────────────────────────────────────────────
+
+us        Federal (United States)
+al        Alabama
+ak        Alaska
+az        Arizona
+ar        Arkansas
+ca        California
+co        Colorado
+ct        Connecticut
+de        Delaware
+fl        Florida
+ga        Georgia
+hi        Hawaii
+id        Idaho
+il        Illinois
+in        Indiana
+ia        Iowa
+ks        Kansas
+ky        Kentucky
+la        Louisiana
+me        Maine
+md        Maryland
+ma        Massachusetts
+mi        Michigan
+mn        Minnesota
+ms        Mississippi
+mo        Missouri
+mt        Montana
+ne        Nebraska
+nv        Nevada
+nh        New Hampshire
+nj        New Jersey
+nm        New Mexico
+ny        New York
+nc        North Carolina
+nd        North Dakota
+oh        Ohio
+ok        Oklahoma
+or        Oregon
+pa        Pennsylvania
+ri        Rhode Island
+sc        South Carolina
+sd        South Dakota
+tn        Tennessee
+tx        Texas
+ut        Utah
+vt        Vermont
+va        Virginia
+wa        Washington
+wv        West Virginia
+wi        Wisconsin
+wy        Wyoming
+dc        District of Columbia
+pr        Puerto Rico
+gu        Guam
+vi        U.S. Virgin Islands
+as        American Samoa
+mp        Northern Mariana Islands

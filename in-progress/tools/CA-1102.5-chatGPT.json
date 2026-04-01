@@ -1,0 +1,93 @@
+{
+  "meta": {
+    "json_format_version": "2.0",
+    "source_method": "ai_assisted",
+    "source_name": "OpenAI",
+    "jurisdiction_id": "CA",
+    "generated_date": "2026-04-01",
+    "generated_by": "GPT-5.4 Thinking",
+    "record_count": 1,
+    "proposed_count": 0,
+    "new_terms_proposed": [],
+    "json_run_notes": "No parent slugs were inserted or removed during self-check. The official California Legislature text confirms the core coverage, disclosure targets, civil-penalty language, attorney-fee authorization, and the burden framework referenced through Labor Code section 1102.6. The statute text does not state a civil filing deadline, so the statute-of-limitations field is flagged ambiguous; reviewer should confirm whether to encode a derived three-year limitations period for the retaliation claim and whether the civil-penalty component should be treated separately. Adverse-action and remedies taxonomy tagging was kept conservative because section 1102.5 uses broad anti-retaliation language and some practical remedies are clarified through related sections and case law rather than a single enumerated remedial list in section 1102.5 itself.",
+    "batch_completed": "2026-04-01 15:27 UTC"
+  },
+  "records": [
+    {
+      "jurisdiction_id": "CA",
+      "statute_id": "CA-1102.5",
+      "official_name": "Labor Code section 1102.5",
+      "legal_basis": {
+        "statute_citation": "Cal. Lab. Code § 1102.5",
+        "disclosure_types": [
+          "general-wrongdoing"
+        ],
+        "protected_class": [
+          "all-employees"
+        ],
+        "disclosure_targets": [
+          "internal-management",
+          "external-federal",
+          "external-state",
+          "external-local",
+          "law-enforcement"
+        ],
+        "adverse_action_scope": "Broad anti-retaliation language that covers retaliation for actual, perceived, or anticipated disclosure; refusal to participate in unlawful conduct; protected activity in former employment; and retaliation tied to a family member's protected conduct."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": true,
+        "limit_value": 3,
+        "limit_unit": "years",
+        "limit_details": "The statute text does not state a civil filing deadline. Secondary authorities commonly derive a three-year period for the retaliation claim from Code Civ. Proc. § 338(a), while the civil-penalty component may be subject to a different limitations period.",
+        "trigger": "date of the retaliatory act",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "primary_agency": "California Labor Commissioner / Division of Labor Standards Enforcement",
+        "process_type": [
+          "civil-lawsuit",
+          "administrative"
+        ],
+        "adverse_action": [],
+        "remedies": [
+          "injunctive-relief",
+          "attorney-fees"
+        ],
+        "fee_shifting": [
+          "plaintiff-only"
+        ]
+      },
+      "burden_of_proof": {
+        "employee_standard": "contributing-factor",
+        "employer_defense": [
+          "same-decision"
+        ],
+        "employer_defense_details": "Employer may avoid liability by proving by clear and convincing evidence that it would have taken the same action for legitimate, independent reasons.",
+        "burden_of_proof_details": "Section 1102.6 places the initial burden on the employee to show protected activity was a contributing factor by a preponderance of the evidence, then shifts the burden to the employer."
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=LAB&sectionNum=1102.5",
+        "is_official": true,
+        "is_pdf": false
+      },
+      "citations": {
+        "attached_citations": [
+          "Lawson v. PPG Architectural Finishes, Inc. || establishes burden framework || https://supreme.courts.ca.gov/sites/default/files/supremecourt/default/2022-08/S266001.pdf || supreme.courts.ca.gov || high",
+          "People ex rel. Garcia-Brower v. Kolla's, Inc. || confirms internal reports qualify || https://law.justia.com/cases/california/supreme-court/2023/s269456.html || law.justia.com || high"
+        ],
+        "citation_count": 2
+      },
+      "_review_notes": "Section 1102.5 is California's general whistleblower anti-retaliation statute for employees who disclose reasonably suspected violations of statutes, rules, or regulations, or who refuse to participate in unlawful conduct. The text expressly protects disclosures to government or law enforcement agencies, persons with authority over the employee, and other employees with authority to investigate or correct the violation, and it extends to former-employment activity and retaliation based on family-member whistleblowing. Review the statute-of-limitations entry carefully: the statute text does not state a civil filing deadline, and secondary authorities commonly derive a three-year period from Code of Civil Procedure section 338(a), while the civil-penalty component may have a different limitations period. Remedies were tagged conservatively because section 1102.5 expressly provides a civil penalty and attorney-fee authorization, while other litigation remedies are clarified through related sections and case law."
+    }
+  ],
+  "integrity": {
+    "with_errors": true,
+    "error_details": [
+      "CA-1102.5: statute_of_limitations.limit_ambiguous set true — Labor Code § 1102.5 does not state a civil filing deadline in its text, and the encoded three-year period appears to be derived from general limitations law; the penalty component may have a different limitations period."
+    ],
+    "error_count": 1
+  }
+}
