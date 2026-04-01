@@ -177,7 +177,7 @@ function ws_render_section_two_group( $title_local, $content_local, $title_fed, 
 function ws_render_jx_header($data) {
     ob_start(); ?>
     <header class="ws-jx-header-v2">
-        <h1 class="ws-jx-title"><?php echo esc_html($data['jx_name']. ": Jurisidiction Summary"); ?></h1>
+        <h1 class="ws-jx-title"><?php echo esc_html($data['jx_name']. ": Jurisdiction Summary"); ?></h1>
         <div class="ws-jx-header-split">
             <div class="ws-jx-flag-column">
                 <?php echo ws_render_jx_flag($data['flag_data']); ?>
