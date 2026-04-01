@@ -79,7 +79,9 @@ PARENT: special-status | Special Status
   former-employee              Former Employee
   perceived-whistleblower      Perceived Whistleblower
 
-
+CHILD (NO PARENT)
+  has-details                  Has Details
+  
 ────────────────────────────────────────────────────────────────────────────
 TAXONOMY: ws_disclosure_targets
 Applies to: jx-statute, ws-assist-org
@@ -111,7 +113,9 @@ PARENT: public | Public Disclosure
   public-media                 Media / Press
   public-nonprofit             Non-Profit / Advocacy Organization
 
-
+CHILD (NO PARENT)
+  has-details                  Has Details
+  
 ────────────────────────────────────────────────────────────────────────────
 TAXONOMY: ws_adverse_action_types
 Applies to: jx-statute
@@ -133,8 +137,8 @@ security-clearance-action    Security Clearance Action
 contract-non-renewal         Contract Non-Renewal
 privilege-revocation         Privilege / Access Revocation
 immigration-threat           Immigration-Related Threat
-
-
+has-details                  Has Details
+  
 ────────────────────────────────────────────────────────────────────────────
 TAXONOMY: ws_process_type
 Applies to: jx-statute, ws-agency, jx-interpretation
@@ -180,6 +184,7 @@ expungement-of-personnel-record  Expungement of Personnel Record
 bounty-qui-tam-award         Bounty / Qui Tam Award
 wage-differential            Wage Differential
 liquidated-damages           Liquidated Damages
+has-details                  Has Details
 
 
 ────────────────────────────────────────────────────────────────────────────
@@ -238,7 +243,7 @@ good-faith-compliance                Good-Faith Compliance
 statutory-exception-claim            Statutory Exception Claim
 mixed-motive-defense                 Mixed Motive Defense
 no-protected-activity                Disclosure was not Protected
-
+has-details                          Has Details
 
 ────────────────────────────────────────────────────────────────────────────
 TAXONOMY: ws_case_stage

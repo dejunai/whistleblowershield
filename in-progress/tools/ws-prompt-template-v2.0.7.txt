@@ -65,11 +65,12 @@ the array empty — do not invent a slug and insert it into the record.
   enforcement.adverse_action       → ws_adverse_action_types → can use has-details
   enforcement.remedies             → ws_remedies             → can use has-details
   enforcement.fee_shifting         → ws_fee_shifting
-  burden_of_proof.employer_defense → ws_employer_defense     → can use has-details
-  
-Any taxonomy field set "has-details" requires the details in an associated
-freetext field *_details following the taxonomy field. Omit *_details key
-entirely when taxonomy field has a proper slug.
+  burden_of_proof.employee_standard → ws_employee_standard   → can use has-details
+  burden_of_proof.employer_defense  → ws_employer_defense    → can use has-details
+
+Any taxonomy field set to has-details requires the details in an associated
+freetext field *_details following the taxonomy field. Omit the *_details key
+entirely when the taxonomy field has a proper slug.
 
 ---
 
@@ -313,6 +314,25 @@ has-details                          Has Details
 
 
 ────────────────────────────────────────────────────────────────────────────
+TAXONOMY: ws_employee_standard
+Applies to: jx-statute
+Hierarchical: NO — flat list
+Description: Burden-of-proof standard the employee must meet under the
+             statute. Tag all that explicitly apply. Multiple values
+             permitted. Omit entirely if no standard is named in the
+             statute text — do not infer.
+────────────────────────────────────────────────────────────────────────────
+
+contributing-factor      Contributing Factor
+motivating-factor        Motivating Factor
+but-for                  But-For Causation
+preponderance            Preponderance of the Evidence
+clear-and-convincing     Clear and Convincing Evidence
+reasonable-belief        Reasonable Belief Standard
+has-details              Has Details
+
+
+────────────────────────────────────────────────────────────────────────────
 ---
 
 PROPOSING NEW TAXONOMY TERMS
@@ -357,6 +377,27 @@ Each proposal must follow this shape:
     "notes":      "[WHY THIS TERM IS NEEDED AND WHY EXISTING TERMS DO NOT COVER IT]",
     "seen_in":    ["[STATUTE_ID]", "[SECOND_STATUTE_ID]"],
     "count":      [INTEGER — must equal length of seen_in]
+  }
+
+Example of a correct proposal:
+
+  Several California statutes protect employees from retaliation based on
+  a family member's protected whistleblowing activity. No slug in
+  ws_protected_class covers this class of protection. The concept is likely
+  to appear in statutes across multiple jurisdictions. A correct proposal:
+
+  {
+    "taxonomy":   "ws_protected_class",
+    "term_id":    "family-member-of-whistleblower",
+    "term_label": "Family Member of Whistleblower",
+    "notes":      "Covers employees retaliated against because a family
+                  member engaged in protected activity. Distinct from
+                  direct whistleblower protection — the protected person
+                  did not themselves disclose. No existing slug covers
+                  this. Appears in Cal. Lab. Code §§ 1102.5 and 6310;
+                  likely present in other jurisdictions.",
+    "seen_in":    ["CA-1102.5", "CA-6310"],
+    "count":      2
   }
 
 If the same gap appears in multiple records, consolidate into one entry with
@@ -420,7 +461,9 @@ CASE LAW SOURCES:
 
 If none of the above yields a verifiable URL for a case, omit the citation
 entirely. Do not use scholar.google.com — URLs are unstable and canonical
-identity cannot be confirmed.
+identity cannot be confirmed. Do not use law firm websites, legal blog
+aggregators, or any non-institutional source not listed above — these are
+not citeable sources regardless of content quality.
 
 When using a secondary source, populate links.url_source with the domain
 name of the source used (e.g., "legiscan.com"). Do not note the source
@@ -561,12 +604,13 @@ RECORD SCHEMA
   },
 
   "burden_of_proof": {
-    "employee_standard":        "[omit if unknown]",
-    "employer_defense":         [],
-    "employer_defense_details": "[FREE TEXT — omit unless employer_defense is set to 'has-details']",
-    "rebuttable_presumption":   "[omit if none identified]",
-    "burden_of_proof_details":  "[omit if none]",
-    "burden_of_proof_flag":     "[omit unless a meaningful burden shift is identified]"
+    "employee_standard":         [],
+    "employee_standard_details": "[FREE TEXT — omit unless employee_standard is set to 'has-details']",
+    "employer_defense":          [],
+    "employer_defense_details":  "[FREE TEXT — omit unless employer_defense is set to 'has-details']",
+    "rebuttable_presumption":    "[omit if none identified]",
+    "burden_of_proof_details":   "[omit if none]",
+    "burden_of_proof_flag":      "[omit unless a meaningful burden shift is identified]"
   },
 
   "reward": {
@@ -593,65 +637,66 @@ RECORD SCHEMA
 
 SCHEMA NOTES
 
+has-details companion fields:
+The following taxonomy fields support has-details as a sentinel slug. When
+has-details appears in a taxonomy array, its companion freetext field is
+required and must contain statute-specific detail beyond what the slugs
+capture. Omit the companion field entirely when has-details is not used.
 
-protected_class_details, disclosure_targets_details, adverse_action_details,
-remedies_details, and employer_defense_details are required when their
-corresponding taxonomy field contains has-details. They must be omitted in
-all other cases.
+  protected_class      → protected_class_details
+  disclosure_targets   → disclosure_targets_details
+  adverse_action       → adverse_action_details
+  remedies             → remedies_details
+  employer_defense     → employer_defense_details
+  employee_standard    → employee_standard_details
 
 adverse_action_scope vs adverse_action:
 Use enforcement.adverse_action slugs for structured taxonomy filtering.
-Use adverse_action_scope for a free-text description of how adverse actions
-are defined or scoped in this specific statute — e.g., whether the statute
-uses broader language than the taxonomy slugs capture, or explicitly
-names categories not in the slug list. Do not duplicate slug content
-verbatim into adverse_action_scope.
+Use legal_basis.adverse_action_scope for a free-text description of how
+adverse actions are defined or scoped in this specific statute — for example,
+whether the statute uses broader language than the slugs capture or explicitly
+names categories not in the slug list. Do not duplicate slug content verbatim
+into adverse_action_scope.
 
 employee_standard:
-Free text. Use plain legal standard language. Common values start with:
-contributing-factor, motivating-factor, but-for, preponderance-of-evidence,
-clear-and-convincing. Use the exact standard named in the statute where
-possible. If the statute does not name a standard explicitly, omit this
-field rather than inferring one.
+Taxonomy field — use slugs from ws_employee_standard only. Multiple slugs
+are permitted when the statute names more than one standard. Use has-details
+and employee_standard_details if the statute names a standard not in the
+taxonomy. Omit entirely if no standard is explicitly named in the statute
+text — do not infer.
 
-statute_id: Use the format [JURISDICTION_ID-SECTION] only. Use the chapter
-or article entry-point section — not mid-chapter provisions. Examples:
-DE-1701 (not DE-1703), CA-1102.5 (not CA-1102.6). The section number
-alone is the identifier — do not include code prefixes such as LAB, GOV,
-or similar. Do not invent cluster IDs (e.g., "DE-HEALTHCARE"). If
-protections are scattered across sections and cannot be summarized under
-a single real section number, describe them in json_run_notes instead of
+statute_id:
+Use the format [JURISDICTION_ID-SECTION] only. Use the chapter or article
+entry-point section, not mid-chapter provisions. Examples: DE-1701 (not
+DE-1703), CA-1102.5 (not CA-1102.6). Do not include code prefixes such as
+LAB, GOV, or similar. Do not invent cluster IDs (e.g., "DE-HEALTHCARE"). If
+protections are scattered across sections and cannot be summarized under a
+single real section number, describe them in json_run_notes instead of
 creating a pseudo-record.
 
-common_name: The plain language name most commonly used to refer to this
-statute (e.g., "California Whistleblower Protection Act"). Omit if no
-widely recognized common name exists. Do not invent one.
+common_name:
+The plain language name most commonly used to refer to this statute. Omit
+if no widely recognized common name exists. Do not invent one.
 
-limit_ambiguous: If limit_value is 0 and the actual deadline is genuinely
-unknown or not stated in the statute text, set limit_ambiguous to true.
-A zero limit_value with limit_ambiguous false implies the deadline is
-verifiably zero — use this only when that is literally correct. Any record
-with limit_ambiguous: true requires a corresponding entry in error_details.
+limit_ambiguous:
+Set to true whenever the SOL value is derived from a general civil procedure
+statute, secondary source, or case law rather than stated explicitly in the
+whistleblower statute's own text — regardless of confidence in the derived
+value. A zero limit_value with limit_ambiguous false implies the deadline is
+verifiably zero; use this only when that is literally correct. Any record
+with limit_ambiguous true requires a corresponding entry in error_details.
 
-employer_defense: Use slugs from ws_employer_defense only. Multiple slugs
-are permitted when more than one defense applies. If no slug fits, use
-"has-details" and explain in employer_defense_details.
+burden_of_proof_flag:
+Omit entirely unless a meaningful or non-standard burden shift is identified.
+Do not include as false by default.
 
-employer_defense_details: Use only when the jurisdiction states the defense
-in a materially specific way that the taxonomy slug alone does not capture.
-Provide specfics if employer_defense is set to "has-details". Omit in all
-other cases.
+url_source:
+Populate with the domain name only (e.g., "law.justia.com"). Omit when
+is_official is true or when no URL is present.
 
-burden_of_proof_flag: Omit this field entirely unless a meaningful or
-non-standard burden shift is identified for this statute. Do not include
-it as false by default.
-
-url_source: Populate with the domain name only (e.g., "legiscan.com",
-"law.justia.com"). Omit when is_official is true or when no URL is present.
-
-remedies: If a statute refers to "actual damages" map this to
-"compensatory-damages" and note the exact statutory term in _review_notes.
-Use "has-details" and remedies_details as freetext if no slug fits.
+remedies:
+If a statute refers to "actual damages" map this to compensatory-damages and
+note the exact statutory term in _review_notes.
 
 ---
 
@@ -704,12 +749,12 @@ WHAT MAKES A GOOD ERROR ENTRY:
 
 RUN SCOPE
 
-Jurisdiction:       California
-Jurisdiction ID:    CA
-Legislature URL:    https://legislature.ca.gov/
+Jurisdiction:       Federal
+Jurisdiction ID:    US
+Legislature URL:    https://www.congress.gov/
 Record type:        statute
-Records Requested:  CA-6310
-Scope:              state-level whistleblower laws and protections
+Records Requested:  18 U.S.C. § 1514A
+Scope:              federal-level whistleblower laws and protections
 
 This template covers `statute` records only.
 Other record types use separate templates.

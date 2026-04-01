@@ -1,0 +1,96 @@
+{
+  "meta": {
+    "json_format_version": "2.0",
+    "source_method": "ai_assisted",
+    "source_name": "ChatGPT",
+    "jurisdiction_id": "CA",
+    "generated_date": "2026-04-01",
+    "generated_by": "GPT-5.4 Thinking",
+    "record_count": 1,
+    "proposed_count": 0,
+    "new_terms_proposed": [],
+    "json_run_notes": "Researched CA-6310 as California Labor Code section 6310. The statute text was confirmed at the official California Legislative Information site. Section 6310 itself does not state a filing deadline; the six-month administrative deadline appears in related retaliation procedures under Labor Code section 98.7 / section 6312 references rather than in section 6310's own text, so statute_of_limitations.limit_ambiguous was set to true. I did not use any parent taxonomy slugs. Disclosure-target and adverse-action coverage are broader than the current slug lists fully capture, so has-details was used to preserve statute-specific breadth rather than forcing inaccurate taxonomy tags. Civil-suit versus administrative-exhaustion interplay should be reviewer-checked against the current state of California law before approval, because the statute text and case history reflect procedural complexity.",
+    "batch_completed": "2026-04-01 19:59 UTC"
+  },
+  "records": [
+    {
+      "jurisdiction_id": "CA",
+      "statute_id": "CA-6310",
+      "official_name": "Discrimination Against Employees for Complaints Regarding Employee Safety or Health",
+      "legal_basis": {
+        "statute_citation": "Cal. Lab. Code § 6310",
+        "disclosure_types": [
+          "workplace-safety"
+        ],
+        "protected_class": [
+          "all-employees"
+        ],
+        "disclosure_targets": [
+          "internal-management",
+          "external-state",
+          "has-details"
+        ],
+        "disclosure_targets_details": "Protected activity includes complaints to the Division of Occupational Safety and Health, other governmental agencies assisting with employee safety or health enforcement, the employer, or the employee's representative. The statute also protects instituting or testifying in proceedings, participating in a qualifying occupational health and safety committee, reporting a work-related fatality, injury, or illness, requesting access to occupational injury or illness reports/records, and exercising rights protected by federal OSHA.",
+        "adverse_action_scope": "The statute bars discharge and discrimination in any manner, including threats of discharge and broader discrimination in the terms and conditions of employment. It also separately protects an employee from retaliation based on being a family member of someone who engaged in protected activity."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": true,
+        "limit_value": 6,
+        "limit_unit": "months",
+        "limit_details": "A six-month filing period appears in related Labor Code retaliation procedures rather than in section 6310's own text. Reviewer should confirm the current operative route and deadline for both administrative and civil enforcement.",
+        "trigger": "occurrence of the violation",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "primary_agency": "California Labor Commissioner's Office / Division of Labor Standards Enforcement",
+        "process_type": [
+          "administrative",
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "demotion",
+          "suspension",
+          "has-details"
+        ],
+        "adverse_action_details": "The statute expressly covers discharge, threatened discharge, demotion, suspension, and any other discrimination in the terms and conditions of employment. State guidance also lists examples such as transfer, layoff, loss of overtime or promotion opportunities, exclusion from normal overtime work, undesirable shifts, denial of benefits, blacklisting, reduced pay, and reduced hours.",
+        "remedies": [
+          "reinstatement",
+          "back-pay",
+          "has-details"
+        ],
+        "remedies_details": "Section 6310(b) expressly provides reinstatement and reimbursement for lost wages and work benefits. Related Labor Commissioner and court procedures may also permit cease-and-desist relief, interest, posting notices, attorney's fees associated with certain proceedings, court costs in some circumstances, and other appropriate equitable or compensatory relief.",
+        "fee_shifting": [
+          "ambiguous"
+        ]
+      },
+      "burden_of_proof": {
+        "employer_defense": []
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=LAB&sectionNum=6310",
+        "is_official": true,
+        "is_pdf": false
+      },
+      "citations": {
+        "attached_citations": [
+          "McDonald v. State of Cal. || addresses exhaustion pathway || https://law.justia.com/cases/california/court-of-appeal/2013/c069646.html || law.justia.com || high",
+          "Wendy Cenis v. WinCo Holdings, Inc. || limits workplace-safety scope || https://law.justia.com/cases/federal/appellate-courts/ca9/18-16089/18-16089-2019-12-16.html || law.justia.com || moderate"
+        ],
+        "citation_count": 2
+      },
+      "_review_notes": "This is California's core workplace-safety anti-retaliation statute under Cal-OSHA. It protects employees who complain about unsafe conditions or work practices, participate in safety-related proceedings or committees, report work-related injuries or illnesses, or exercise OSHA-related rights. The section itself expressly grants reinstatement and lost wages/work benefits, but the filing deadline and procedural route come from related statutes rather than from section 6310's own text and should be verified carefully before approval. Reviewer should also confirm current California law on whether prior administrative filing is optional or required before a direct civil action."
+    }
+  ],
+  "integrity": {
+    "with_errors": true,
+    "error_details": [
+      "CA-6310: Statute of limitations marked ambiguous — six-month deadline appears to derive from related Labor Code retaliation procedures rather than section 6310's own text.",
+      "CA-6310: Current exhaustion / direct-civil-action pathway should be reviewer-verified before approval due procedural complexity in the statute and case history."
+    ],
+    "error_count": 2
+  }
+}

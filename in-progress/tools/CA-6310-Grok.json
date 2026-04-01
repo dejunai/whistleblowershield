@@ -1,0 +1,107 @@
+{
+  "meta": {
+    "json_format_version": "2.0",
+    "source_method": "ai_assisted",
+    "source_name": "Grok",
+    "jurisdiction_id": "CA",
+    "generated_date": "2026-04-01",
+    "generated_by": "Grok by xAI (tool-assisted research, April 2026)",
+    "record_count": 1,
+    "proposed_count": 0,
+    "new_terms_proposed": [],
+    "json_run_notes": "Single statute record produced for CA-6310 as requested. Official text obtained from leginfo.legislature.ca.gov. No new taxonomy terms proposed; all tags map to existing child slugs. SOL derived from secondary sources and general practice for Labor Code retaliation claims (not explicitly stated in §6310 text itself).",
+    "batch_completed": "2026-04-01 19:58 UTC"
+  },
+  "records": [
+    {
+      "jurisdiction_id": "CA",
+      "statute_id": "CA-6310",
+      "official_name": "Labor Code § 6310",
+      "common_name": "",
+      "legal_basis": {
+        "statute_citation": "Cal. Lab. Code § 6310",
+        "disclosure_types": [
+          "workplace-safety",
+          "public-health"
+        ],
+        "protected_class": [
+          "all-employees"
+        ],
+        "disclosure_targets": [
+          "internal-management",
+          "external-federal",
+          "external-state",
+          "law-enforcement"
+        ],
+        "adverse_action_scope": "Prohibits discharge, discrimination in any manner, demotion, suspension, threats of discharge, or discrimination in terms and conditions of employment. Also protects family members of those who engage in protected activity. Includes refusal to rehire or restore after determination of eligibility."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": true,
+        "limit_value": 3,
+        "limit_unit": "years",
+        "limit_details": "Civil action generally three years from the retaliatory act; administrative complaint with DLSE/Labor Commissioner often cited as six months to one year depending on source and coordination with other claims. Not explicitly stated in §6310; derived from general practice and secondary analyses.",
+        "trigger": "Date of the retaliatory adverse action",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "primary_agency": "Division of Labor Standards Enforcement (DLSE) / Cal/OSHA",
+        "process_type": [
+          "administrative",
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "demotion",
+          "suspension",
+          "harassment",
+          "pay-reduction",
+          "reassignment",
+          "discipline",
+          "constructive-discharge"
+        ],
+        "remedies": [
+          "reinstatement",
+          "back-pay",
+          "front-pay",
+          "compensatory-damages",
+          "punitive-damages",
+          "emotional-distress",
+          "attorney-fees",
+          "costs"
+        ],
+        "fee_shifting": [
+          "plaintiff-only"
+        ]
+      },
+      "burden_of_proof": {
+        "employee_standard": "Protected activity and adverse action with causal connection (retaliation because of the protected activity); rebuttable presumption if adverse action within 90 days in some interpretations",
+        "employer_defense": [
+          "legitimate-non-retaliatory-reason"
+        ]
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=LAB&sectionNum=6310",
+        "is_official": true,
+        "is_pdf": false
+      },
+      "citations": {
+        "attached_citations": [
+          "Sheridan v. Touchstone Television Productions, LLC || clarifies protected activity includes complaints of unsafe conditions || https://www.gmsr.com/case/sheridan-v-touchstone-television-productions-inc-2015-241-cal-app-4th-508/ || caselaw source || moderate"
+        ],
+        "citation_count": 1
+      },
+      "_review_notes": "Labor Code § 6310 is the primary California Occupational Safety and Health Act provision protecting employees (and their family members) from retaliation for complaining about unsafe working conditions or work practices to the employer, Cal/OSHA/Division, other agencies, or representatives; instituting proceedings; testifying; participating in safety committees; or exercising OSHA rights (with workers' comp carve-out). It creates a private right of action for reinstatement and lost wages/benefits, with courts recognizing broader damages including emotional distress and punitives in practice. Applies broadly to employees including domestic workers (with limited exception). No explicit SOL in the section itself; reviewers should confirm current filing deadlines with DLSE/courts as secondary sources vary slightly on admin vs. civil timelines. Case law (e.g., Sheridan) addresses application to contract non-renewal and exhaustion issues. Protected disclosures center on workplace safety and health risks."
+    }
+  ],
+  "integrity": {
+    "with_errors": true,
+    "error_details": [
+      "CA-6310: limit_ambiguous set to true because SOL not explicitly stated in statute text itself (derived from secondary sources and general civil practice for Labor Code retaliation claims)",
+      "CA-6310: No explicit employee_standard or detailed burden shift named in statute text; contributing/motivating factor framework applied via general retaliation principles and CACI 4605 but not verbatim in §6310"
+    ],
+    "error_count": 2
+  }
+}

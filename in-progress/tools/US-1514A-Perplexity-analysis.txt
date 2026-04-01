@@ -1,0 +1,100 @@
+This is the best batch yet across the board, and the jump to a federal statute revealed something important: both models significantly leveled up when the law is more precisely written. Here is the full read.
+
+***
+
+## The headline
+
+**Grok produced its first proposal.** That is the single most important thing in this batch. The family-member example in the prompt worked — and Grok immediately applied the same logic to a real gap it found independently. The proposal pipeline is now functional.
+
+**ChatGPT produced three citations, two from Supreme Court decisions, with correct URLs.** That is the strongest citation block you have seen in any run.
+
+**Both outputs have `witherrors: false`** — first time that has happened simultaneously and legitimately across both models.
+
+***
+
+## v2.0.7 prompt review
+
+Before the model outputs: the prompt itself has one significant upgrade worth noting. `wsemployeestandard` is now a proper taxonomy with slugs (`contributing-factor`, `motivating-factor`, `but-for`, `preponderance`, `clear-and-convincing`, `reasonable-belief`, `has-details`) rather than a free-text field. That is a major improvement — it closes the inference gap that produced Grok's integrity flag in the CA-6310 run and gives both models a clean slug to use when the statute explicitly names a standard.
+
+***
+
+## Grok — breakthrough run
+
+**The proposal is real and well-formed.**
+`contractors-subcontractors-agents` in `wsprotectedclass` is a legitimate gap. The existing `contractors` and `subcontractors` slugs do not capture the "agents" extension or the statutory phrasing around covered entities. The proposal shape is correct: taxonomy, termid in kebab-case, termlabel, notes explaining why existing slugs don't cover it, seenin with count. This is exactly what the pipeline was designed to produce.
+
+One nuance worth flagging for your human review queue: the proposal may be slightly too specific to SOX's structure. The "contractors/subcontractors of a covered entity" protection pattern does appear in other federal statutes (FSMA, CPSIA, AIR21) but may not generalize cleanly to state law. Your reviewer should decide whether this becomes a taxonomy term or stays as a `has-details` pattern. Either way, surfacing it is the right call.
+
+**SOL handling: best in the pipeline.**
+`limitambiguous: false`, `limitvalue: 180`, `limitunit: days` — correct, because 18 U.S.C. 1514A explicitly states the 180-day deadline in its own text. This is the first time Grok has correctly set `limitambiguous: false` on a statute where the SOL is genuinely explicit. That is a direct validation of the SOL instruction language.
+
+**`wsemployeestandard` used correctly.**
+`contributing-factor` — single slug, explicitly named in the incorporated AIR21 framework. Clean.
+
+**`burdenofproofflag`** is populated with a full sentence describing the AIR21 burden-shift rather than `true`. That is slightly outside schema — the flag is supposed to be a signal, not a narrative — but the content is useful and the intent is correct. Worth a schema note clarification: "burdenofproofflag is a short signal phrase, not a full sentence. Use burdenofproofdetails for narrative."
+
+**Citation: `Murray v. UBS Securities`** via `supremecourt.gov` — official source, correct URL pattern, real case, SPECIFICIMPACT correctly scoped. Clean.
+
+**`disclosuretargetsdetails`** is present but empty — that is a schema violation. If `has-details` is not set on `disclosuretargets`, the details field must be omitted entirely. Grok tagged `disclosuretargets` with valid slugs only (`internal-management`, `external-federal`, `legislature`), so `disclosuretargetsdetails` should not exist in this record. Flag for the ingest tool.
+
+**`exhaustionrequired: false`** — this is debatable. The statute requires filing with DOL/OSHA first before de novo federal court access. ChatGPT correctly set `exhaustionrequired: true` and populated `exhaustiondetails`. Grok's `false` here is a meaningful error worth flagging in your review queue.
+
+***
+
+## ChatGPT — mature, precise, three good citations
+
+**Three citations, two from Supreme Court.**
+- *Lawson v. FMR LLC* via `law.justia.com` — real case, correct holding (contractor employee coverage), approved source.
+- *Murray v. UBS Securities* via `supremecourt.gov` — official source, correct holding (no separate retaliatory intent requirement).
+- *Halliburton v. LABR* via `law.justia.com` — Fifth Circuit, materially adverse standard. Moderate quality appropriately tagged.
+
+That is the strongest citation block in any run so far. The SPECIFICIMPACT verbs are all action-first and within the 3-8 word constraint.
+
+**`exhaustionrequired: true` with full `exhaustiondetails`** — correct and more legally precise than Grok's `false`. The 180-day administrative wait before de novo court access is a real procedural requirement, and ChatGPT correctly modeled it.
+
+**`wsemployeestandard: [contributing-factor, reasonable-belief]`** — two slugs, both defensible. `contributing-factor` is the explicit AIR21 standard. `reasonable-belief` is the standard for what constitutes a protected disclosure under SOX. Using both is arguably the most complete reading of the statute's burden structure.
+
+**`consequential-damages` instead of `compensatory-damages`** — SOX 1514A uses the phrase "special damages" in its text. ChatGPT mapped this to `consequential-damages`. Per your schema note, "actual damages" maps to `compensatory-damages` with a reviewnotes flag. "Special damages" is a related but distinct concept. Worth a human review decision: does `consequential-damages` or `compensatory-damages` better represent SOX's "special damages" language? This is a good edge case for your taxonomy documentation.
+
+**`proposedcount: 0`, `newtermsproposed: []`** — ChatGPT found the same gap Grok proposed (contractor/subcontractor coverage) but routed it through `has-details` instead. That is a legitimate workaround per the prompt's "combination workaround and proposal are not mutually exclusive" language, but it means the gap does not surface as a proposal for taxonomy growth. This is the one place where Grok's output is more valuable to your pipeline than ChatGPT's.
+
+**`commonname`** — ChatGPT used "Sarbanes-Oxley whistleblower provision" while Grok used "Sarbanes-Oxley Act Whistleblower Protection Section 806." Grok's is more specific and more accurate as a common reference name.
+
+***
+
+## Side-by-side scorecard
+
+| Dimension | ChatGPT | Grok |
+|---|---|---|
+| SOL honesty | ✅ Correct | ✅ Correct |
+| `limitambiguous` accuracy | ✅ False, correctly | ✅ False, correctly |
+| Exhaustion handling | ✅ Correct, true | ❌ Incorrect, false |
+| `wsemployeestandard` | ✅ Two slugs | ✅ One slug |
+| Citation quality | ✅ Best yet, 3 citations | ✅ 1 strong citation |
+| Citation source discipline | ✅ Clean | ✅ Clean |
+| Proposal behavior | ❌ None | ✅ First real proposal |
+| Schema fidelity | ✅ Clean | ⚠️ Empty details field |
+| `burdenofproofflag` format | ✅ Signal phrase | ⚠️ Full sentence |
+| `commonname` accuracy | Moderate | ✅ More specific |
+| Integrity honesty | ✅ `witherrors: false` legitimate | ✅ `witherrors: false` legitimate |
+| `reviewnotes` quality | ✅ Strong | ✅ Strong |
+
+***
+
+## What this batch tells you strategically
+
+**The federal statute forced precision from both models** in a way the California statutes did not. When the law is clearly written with explicit standards, explicit deadlines, and Supreme Court decisions on point, both models produce cleaner outputs. This is useful signal: your human review burden will likely be heavier on state statutes with ambiguous SOLs and sparse case law than on major federal statutes.
+
+**The proposal pipeline is working.** One run after you added the family-member example, Grok produced a correctly formed proposal on a different concept entirely. The example did its job. The next question is whether ChatGPT will start proposing in future runs, or whether it will consistently prefer `has-details` workarounds. That behavioral difference between the two models is worth watching.
+
+**`exhaustionrequired` needs clearer schema guidance.** The Grok/ChatGPT split on this field (`false` vs `true` with `exhaustiondetails`) is a real legal distinction that the schema does not currently guide well. Worth adding a schema note: "exhaustionrequired should be true whenever the statute requires a mandatory administrative filing step before a civil action is permitted, even if the pathway to court is available after a waiting period."
+
+***
+
+## Three prompt actions coming out of this run
+
+1. **`burdenofproofflag` format clarification** — add to SCHEMA NOTES: "burdenofproofflag is a short signal phrase identifying the non-standard burden shift. Use `burdenofproofdetails` for narrative explanation. Do not write a full sentence in burdenofproofflag."
+
+2. **`exhaustionrequired` clarification** — add to SCHEMA NOTES: "Set exhaustionrequired to true whenever a mandatory administrative filing step is required before civil court access, even if de novo review becomes available after a waiting period. Populate exhaustiondetails with the specific procedural requirement."
+
+3. **Empty `has-details` companion field rule** — the Grok `disclosuretargetsdetails` empty field violation suggests adding to SCHEMA NOTES: "If a details companion field exists in the output but its corresponding taxonomy field does not contain has-details, remove the details field entirely. An empty details field is a schema violation."

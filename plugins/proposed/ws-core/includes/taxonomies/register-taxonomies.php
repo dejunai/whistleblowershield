@@ -4,7 +4,7 @@
  *
  * @package WhistleblowerShield
  * @since   2.1.0
- * @version 3.11.0
+ * @version 3.12.0
  *
  * VERSION
  * -------
@@ -25,6 +25,8 @@
  *         ws_disclosure_targets, ws_protected_class, ws_employer_defense. Signals
  *         that a companion ACF freetext field holds detail beyond available slugs.
  *         Gate versions bumped to 1.1.0 for affected seeders.
+ * 3.12.0  ws_employee_standard added (jx-statute). Flat taxonomy replacing freetext
+ *         employee_standard field. Seven terms including has-details sentinel.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -529,6 +531,40 @@ function ws_register_taxonomies() {
         );
     }
 
+    // ── 17. Employee Standard ─────────────────────────────────────────────
+    //
+    // New in 3.12.0. Flat taxonomy for the burden-of-proof standard an employee
+    // must meet under a statute. Replaces the freetext employee_standard field.
+    // Applied to jx-statute only. Multiple values permitted per record.
+    // Terms seeded via ws_seed_employee_standard_taxonomy().
+
+    if ( ! taxonomy_exists( 'ws_employee_standard' ) ) {
+        register_taxonomy(
+            'ws_employee_standard',
+            [ 'jx-statute' ],
+            [
+                'label'             => 'Employee Burden Standards',
+                'labels'            => [
+                    'name'              => 'Employee Burden Standards',
+                    'singular_name'     => 'Employee Burden Standard',
+                    'search_items'      => 'Search Employee Burden Standards',
+                    'all_items'         => 'All Employee Burden Standards',
+                    'edit_item'         => 'Edit Employee Burden Standard',
+                    'update_item'       => 'Update Employee Burden Standard',
+                    'add_new_item'      => 'Add New Employee Burden Standard',
+                    'new_item_name'     => 'New Employee Burden Standard Name',
+                    'menu_name'         => 'Employee Burden Standards',
+                ],
+                'public'            => false,
+                'hierarchical'      => false,
+                'show_ui'           => true,
+                'show_in_rest'      => true,
+                'show_admin_column' => true,
+                'capabilities'      => ws_get_taxonomy_caps(),
+            ]
+        );
+    }
+
     // ── 16. Procedure Type ────────────────────────────────────────────────
     //
     // New in 3.10.0. Flat taxonomy classifying the purpose of a
@@ -698,6 +734,10 @@ add_action( 'admin_init', function() {
     if ( get_option( 'ws_seeded_procedure_type' ) !== '1.0.0' ) {
         ws_seed_proc_type_taxonomy();
         update_option( 'ws_seeded_procedure_type', '1.0.0' );
+    }
+    if ( get_option( 'ws_seeded_employee_standard' ) !== '1.0.0' ) {
+        ws_seed_employee_standard_taxonomy();
+        update_option( 'ws_seeded_employee_standard', '1.0.0' );
     }
 
 } );
@@ -1261,6 +1301,31 @@ function ws_seed_proc_type_taxonomy() {
         'disclosure'  => 'Disclosure',
         'retaliation' => 'Retaliation',
         'both'        => 'Both',
+    ];
+    foreach ( $terms as $slug => $name ) {
+        if ( ! term_exists( $slug, $taxonomy ) ) {
+            wp_insert_term( $name, $taxonomy, [ 'slug' => $slug ] );
+        }
+    }
+}
+
+/**
+ * Seeds ws_employee_standard with its flat term list.
+ *
+ * New in 3.12.0. Replaces the freetext employee_standard field on jx-statute.
+ * has-details sentinel signals a companion ACF freetext field holds a standard
+ * not covered by the registered slugs.
+ */
+function ws_seed_employee_standard_taxonomy() {
+    $taxonomy = 'ws_employee_standard';
+    $terms    = [
+        'contributing-factor'    => 'Contributing Factor',
+        'motivating-factor'      => 'Motivating Factor',
+        'but-for'                => 'But-For Causation',
+        'preponderance'          => 'Preponderance of the Evidence',
+        'clear-and-convincing'   => 'Clear and Convincing Evidence',
+        'reasonable-belief'      => 'Reasonable Belief Standard',
+        'has-details'            => 'Has Details',
     ];
     foreach ( $terms as $slug => $name ) {
         if ( ! term_exists( $slug, $taxonomy ) ) {

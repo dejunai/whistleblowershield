@@ -1,0 +1,388 @@
+{
+  "meta": {
+    "json_format_version": "2.0",
+    "source_method": "ai_assisted",
+    "source_name": "Gemini",
+    "jurisdiction_id": "CA",
+    "generated_date": "2026-04-01",
+    "generated_by": "Gemini 3 Flash",
+    "record_count": 5,
+    "proposed_count": 0,
+    "new_terms_proposed": [],
+    "json_run_notes": "Clinical execution of 5 CA statutes per v2.0.7.1 rules. Excluded CA-6310 and CA-1102.5. Utilized 'has-details' for CA-1278.5 (protected class), CA-12653 (remedies - double back pay), and CA-98.6 (remedies - specific civil penalties). Flagged ambiguous SOLs for several statutes deriving limitations from CCP.",
+    "batch_completed": "2026-04-01 15:45 UTC"
+  },
+  "records": [
+    {
+      "jurisdiction_id": "CA",
+      "statute_id": "CA-8547",
+      "official_name": "California Government Code Section 8547",
+      "common_name": "California Whistleblower Protection Act",
+      "legal_basis": {
+        "statute_citation": "Cal. Gov. Code § 8547",
+        "disclosure_types": [
+          "government-misconduct",
+          "waste-of-funds",
+          "abuse-of-authority",
+          "public-health"
+        ],
+        "protected_class": [
+          "state-employees",
+          "applicants"
+        ],
+        "disclosure_targets": [
+          "external-state"
+        ],
+        "adverse_action_scope": "Any action that intentionally engages in acts of reprisal, retaliation, threats, coercion, or similar acts against a state employee or applicant for disclosing improper governmental activities."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": false,
+        "limit_value": 12,
+        "limit_unit": "months",
+        "trigger": "Date of the retaliatory act",
+        "exhaustion_required": true,
+        "exhaustion_details": "Must file a written complaint with the State Personnel Board before filing a civil action."
+      },
+      "enforcement": {
+        "primary_agency": "State Personnel Board / California State Auditor",
+        "process_type": [
+          "administrative",
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "demotion",
+          "suspension",
+          "discipline",
+          "harassment"
+        ],
+        "remedies": [
+          "reinstatement",
+          "back-pay",
+          "compensatory-damages",
+          "punitive-damages",
+          "attorney-fees"
+        ],
+        "fee_shifting": [
+          "plaintiff-only"
+        ]
+      },
+      "burden_of_proof": {
+        "employee_standard": [
+          "contributing-factor"
+        ],
+        "employer_defense": [
+          "same-decision-defense"
+        ],
+        "employer_defense_details": "Employer must demonstrate by clear and convincing evidence that the action would have occurred for independent, legitimate reasons.",
+        "burden_of_proof_flag": true
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://leginfo.legislature.ca.gov/faces/codes_displayText.xhtml?lawCode=GOV&division=1.&title=2.&part=&chapter=6.5.&article=3.",
+        "is_official": true,
+        "is_pdf": false
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      "_review_notes": "A primary statute for state-employed whistleblowers. Citations omitted pending verification of stable approved-source URLs for key exhaustion precedent (e.g., Miklosy)."
+    },
+    {
+      "jurisdiction_id": "CA",
+      "statute_id": "CA-12653",
+      "official_name": "California Government Code Section 12653",
+      "common_name": "California False Claims Act Retaliation Provision",
+      "legal_basis": {
+        "statute_citation": "Cal. Gov. Code § 12653",
+        "disclosure_types": [
+          "government-contract-fraud",
+          "financial-misconduct"
+        ],
+        "protected_class": [
+          "all-employees",
+          "contractors"
+        ],
+        "disclosure_targets": [
+          "internal-management",
+          "law-enforcement",
+          "external-state"
+        ],
+        "adverse_action_scope": "Discharge, demotion, suspension, threats, harassment, or in any other manner discriminating in the terms and conditions of employment."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": false,
+        "limit_value": 3,
+        "limit_unit": "years",
+        "trigger": "Date the retaliation occurred",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "primary_agency": "Office of the Attorney General",
+        "process_type": [
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "demotion",
+          "suspension",
+          "harassment"
+        ],
+        "remedies": [
+          "has-details",
+          "reinstatement",
+          "attorney-fees",
+          "consequential-damages"
+        ],
+        "remedies_details": "Two times the amount of back pay (double back pay), plus interest, reinstatement, and compensation for special damages including litigation costs.",
+        "fee_shifting": [
+          "plaintiff-only"
+        ]
+      },
+      "burden_of_proof": {
+        "employee_standard": [
+          "preponderance"
+        ],
+        "employer_defense": [
+          "legitimate-non-retaliatory-reason"
+        ]
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=12653.&lawCode=GOV",
+        "is_official": true,
+        "is_pdf": false
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      "_review_notes": "Modeled closely on the Federal FCA retaliation provisions. Citations omitted pending verified URLs."
+    },
+    {
+      "jurisdiction_id": "CA",
+      "statute_id": "CA-1278.5",
+      "official_name": "California Health and Safety Code Section 1278.5",
+      "common_name": "Health Care Facilities Whistleblower Protection",
+      "legal_basis": {
+        "statute_citation": "Cal. Health & Safety Code § 1278.5",
+        "disclosure_types": [
+          "public-health"
+        ],
+        "protected_class": [
+          "has-details"
+        ],
+        "protected_class_details": "Patients, employees, medical staff, and other health care workers at health care facilities.",
+        "disclosure_targets": [
+          "internal-management",
+          "external-state"
+        ],
+        "adverse_action_scope": "Discrimination or retaliation against a patient, employee, or medical staff member, including discharge, demotion, suspension, or unfavorable changes to privileges."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": true,
+        "trigger": "Date of discriminatory act",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "primary_agency": "California Department of Public Health",
+        "process_type": [
+          "civil-lawsuit",
+          "administrative"
+        ],
+        "adverse_action": [
+          "termination",
+          "demotion",
+          "suspension",
+          "discipline",
+          "has-details"
+        ],
+        "adverse_action_details": "Restriction, revocation, or unfavorable changes in medical staff privileges.",
+        "remedies": [
+          "reinstatement",
+          "back-pay",
+          "attorney-fees",
+          "costs"
+        ],
+        "fee_shifting": [
+          "plaintiff-only"
+        ]
+      },
+      "burden_of_proof": {
+        "employee_standard": [
+          "preponderance"
+        ],
+        "employer_defense": [
+          "legitimate-non-retaliatory-reason"
+        ],
+        "rebuttable_presumption": "Rebuttable presumption of retaliation if discriminatory action occurs within 120 days of the protected grievance or complaint.",
+        "burden_of_proof_flag": true
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=1278.5.&lawCode=HSC",
+        "is_official": true,
+        "is_pdf": false
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      "_review_notes": "Statute relies heavily on the 120-day rebuttable presumption. The SOL is not explicitly defined in this section and defaults to civil procedure codes."
+    },
+    {
+      "jurisdiction_id": "CA",
+      "statute_id": "CA-98.6",
+      "official_name": "California Labor Code Section 98.6",
+      "legal_basis": {
+        "statute_citation": "Cal. Lab. Code § 98.6",
+        "disclosure_types": [
+          "labor-law"
+        ],
+        "protected_class": [
+          "all-employees",
+          "applicants"
+        ],
+        "disclosure_targets": [
+          "external-state",
+          "internal-management"
+        ],
+        "adverse_action_scope": "Discharge or any manner of discrimination, retaliation, or adverse action for exercising rights under the Labor Code, including filing complaints with the Labor Commissioner."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": true,
+        "trigger": "Occurrence of the violation",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "primary_agency": "Labor Commissioner's Office (DLSE)",
+        "process_type": [
+          "administrative",
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "demotion",
+          "suspension",
+          "discipline",
+          "failure-to-hire"
+        ],
+        "remedies": [
+          "reinstatement",
+          "back-pay",
+          "has-details"
+        ],
+        "remedies_details": "Civil penalty of up to $10,000 per employee per violation, awarded to the employee.",
+        "fee_shifting": [
+          "plaintiff-only"
+        ]
+      },
+      "burden_of_proof": {
+        "employee_standard": [
+          "preponderance"
+        ],
+        "employer_defense": [
+          "legitimate-non-retaliatory-reason"
+        ],
+        "rebuttable_presumption": "Recent amendments provide a rebuttable presumption of retaliation if action occurs within 90 days of protected activity.",
+        "burden_of_proof_flag": true
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=98.6.&lawCode=LAB",
+        "is_official": true,
+        "is_pdf": false
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      "_review_notes": "Core labor code retaliation statute. Limit is ambiguous as it can depend on the forum (DLSE complaint vs. direct civil action under associated torts)."
+    },
+    {
+      "jurisdiction_id": "CA",
+      "statute_id": "CA-232.5",
+      "official_name": "California Labor Code Section 232.5",
+      "legal_basis": {
+        "statute_citation": "Cal. Lab. Code § 232.5",
+        "disclosure_types": [
+          "labor-law",
+          "general-wrongdoing"
+        ],
+        "protected_class": [
+          "all-employees"
+        ],
+        "disclosure_targets": [
+          "internal-management",
+          "public",
+          "media"
+        ],
+        "adverse_action_scope": "Requires that an employer not discharge, formally discipline, or otherwise discriminate against an employee who discloses information about the employer's working conditions."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": true,
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "primary_agency": "Labor Commissioner's Office",
+        "process_type": [
+          "civil-lawsuit",
+          "administrative"
+        ],
+        "adverse_action": [
+          "termination",
+          "discipline",
+          "demotion"
+        ],
+        "remedies": [
+          "reinstatement",
+          "back-pay"
+        ],
+        "fee_shifting": [
+          "ambiguous"
+        ]
+      },
+      "burden_of_proof": {
+        "employee_standard": [
+          "preponderance"
+        ],
+        "employer_defense": [
+          "legitimate-non-retaliatory-reason"
+        ]
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=232.5.&lawCode=LAB",
+        "is_official": true,
+        "is_pdf": false
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      "_review_notes": "Protects employees discussing working conditions. SOL is derived from general civil procedure. Citations omitted pending verified URLs."
+    }
+  ],
+  "integrity": {
+    "with_errors": true,
+    "error_details": [
+      "CA-1278.5: limit_ambiguous is true; SOL value derived from general civil procedure.",
+      "CA-98.6: limit_ambiguous is true; SOL value derived from general civil procedure.",
+      "CA-232.5: limit_ambiguous is true; SOL value derived from general civil procedure.",
+      "CA-8547: Citations omitted; reliable official court or verified Justia/CourtListener URLs could not be confidently attached in this pass.",
+      "CA-12653: Citations omitted; reliable official court or verified Justia/CourtListener URLs could not be confidently attached in this pass."
+    ],
+    "error_count": 5
+  }
+}

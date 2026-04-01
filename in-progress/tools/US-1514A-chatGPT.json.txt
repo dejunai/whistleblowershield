@@ -1,0 +1,101 @@
+{
+  "meta": {
+    "json_format_version": "2.0",
+    "source_method": "ai_assisted",
+    "source_name": "ChatGPT",
+    "jurisdiction_id": "US",
+    "generated_date": "2026-04-01",
+    "generated_by": "GPT-5.4 Thinking",
+    "record_count": 1,
+    "proposed_count": 0,
+    "new_terms_proposed": [],
+    "json_run_notes": "Researched the requested federal statute as 18 U.S.C. § 1514A and mapped statute_id as US-1514A. The statute itself expressly states the 180-day filing deadline, the 180-day administrative-wait pathway for de novo federal court review, the incorporated AIR21 burden framework, and the core remedies. I used has-details for protected_class because the coverage question is broader than the current slug set cleanly captures: the statute covers employees of covered public companies and, after Lawson, employees of contractors and subcontractors serving those companies. No parent slugs were used or removed during self-check.",
+    "batch_completed": "2026-04-01 20:08 UTC"
+  },
+  "records": [
+    {
+      "jurisdiction_id": "US",
+      "statute_id": "US-1514A",
+      "official_name": "Civil action to protect against retaliation in fraud cases",
+      "common_name": "Sarbanes-Oxley whistleblower provision",
+      "legal_basis": {
+        "statute_citation": "18 U.S.C. § 1514A",
+        "disclosure_types": [
+          "securities-fraud",
+          "financial-misconduct"
+        ],
+        "protected_class": [
+          "has-details"
+        ],
+        "protected_class_details": "Covers employees of companies with securities registered under Exchange Act section 12, companies required to file reports under section 15(d), subsidiaries or affiliates included in consolidated financial statements, and nationally recognized statistical rating organizations. The statute also applies to retaliation by officers, employees, contractors, subcontractors, or agents of those covered entities; Supreme Court case law confirms coverage extends to employees of private contractors and subcontractors serving public companies.",
+        "disclosure_targets": [
+          "external-federal",
+          "legislature",
+          "internal-management"
+        ],
+        "adverse_action_scope": "The statute prohibits discharge, demotion, suspension, threats, harassment, and any other discrimination in the terms and conditions of employment because of protected whistleblowing activity relating to shareholder fraud, specified federal fraud crimes, or SEC-rule violations."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": false,
+        "limit_value": 180,
+        "limit_unit": "days",
+        "trigger": "after the date on which the violation occurs, or after the date on which the employee became aware of the violation",
+        "exhaustion_required": true,
+        "exhaustion_details": "The employee must first file a complaint with the Secretary of Labor. A de novo action in federal district court is permitted only if the Secretary has not issued a final decision within 180 days after filing and the delay is not due to the claimant's bad faith."
+      },
+      "enforcement": {
+        "primary_agency": "U.S. Department of Labor / Occupational Safety and Health Administration",
+        "process_type": [
+          "administrative",
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "demotion",
+          "suspension",
+          "harassment"
+        ],
+        "remedies": [
+          "reinstatement",
+          "back-pay",
+          "consequential-damages",
+          "attorney-fees",
+          "costs"
+        ],
+        "fee_shifting": [
+          "plaintiff-only"
+        ]
+      },
+      "burden_of_proof": {
+        "employee_standard": [
+          "contributing-factor",
+          "reasonable-belief"
+        ],
+        "employer_defense": [
+          "same-decision-defense"
+        ],
+        "burden_of_proof_flag": "AIR21 burden-shifting framework expressly incorporated"
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://uscode.house.gov/view.xhtml?req=%28title%3A18+section%3A1514a+edition%3Aprelim%29",
+        "is_official": true,
+        "is_pdf": false
+      },
+      "citations": {
+        "attached_citations": [
+          "Lawson v. FMR LLC || expands contractor-employee coverage || https://supreme.justia.com/cases/federal/us/571/429/ || law.justia.com || high",
+          "Murray v. UBS Securities, LLC || rejects retaliatory-intent requirement || https://www.supremecourt.gov/opinions/23pdf/601us1r02_c07d.pdf || supremecourt.gov || high",
+          "Halliburton, Incorporated v. LABR || clarifies materially adverse standard || https://law.justia.com/cases/federal/appellate-courts/ca5/13-60323/13-60323-2014-12-29.html || law.justia.com || moderate"
+        ],
+        "citation_count": 3
+      },
+      "_review_notes": "This is the core federal Sarbanes-Oxley anti-retaliation statute for employees who report shareholder-fraud, securities-law, SEC-rule, and related fraud concerns. The statute expressly protects internal reporting to supervisors or other employer personnel with authority to investigate or terminate misconduct, as well as reporting to federal regulators and Congress. The 180-day filing deadline and the administrative-first enforcement path are stated directly in the statute text, so the SOL is not marked ambiguous. Reviewer should keep in mind that contractor/subcontractor employee coverage comes from binding Supreme Court interpretation rather than from worker-classification labels stated expressly in the text."
+    }
+  ],
+  "integrity": {
+    "with_errors": false
+  }
+}

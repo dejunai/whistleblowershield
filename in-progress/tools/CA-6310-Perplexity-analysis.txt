@@ -1,0 +1,102 @@
+This is the most revealing compare+contrast yet, because CA-6310 is genuinely harder than 1102.5 — the SOL is ambiguous in a different way, the procedural pathway is layered, and the `has-details` gateway was available for the first time. Here is the full read.
+
+***
+
+## The headline
+
+**ChatGPT is now clearly your production model.** Grok is your best enrichment pass. Gemini Flash should be retired from this pipeline.
+
+***
+
+## Gemini — retire from this pipeline
+
+This output is the worst of the three and reveals a pattern that is now consistent enough to act on.
+
+**`limitambiguous: false` with a derived SOL — again.** The six-month figure does not appear in 6310's own text; it comes from related retaliation procedures. Gemini confidently set `limitambiguous: false` on 1102.5 with a derived SOL, and it did exactly the same thing here. This is not a one-time failure — it is a structural overconfidence problem with Flash that the prompt cannot fix.
+
+**`jsonrunnotes: "Clinical execution"** — again. This is the second consecutive run where Gemini described its own output as "clinical execution" and provided nothing actionable for the reviewer. That phrase is a tell: the model is performing confidence rather than demonstrating it.
+
+**`witherrors: false`** despite using a Google Scholar URL (again, forbidden by name in the prompt), a derived SOL marked as confirmed, and thin taxonomy coverage. The integrity block is functionally useless on this output.
+
+**`feeshifting: none`** is likely wrong — 6310 has attorney fee provisions that ChatGPT and Grok both caught.
+
+**`has-details` not used once** despite the `jsonrunnotes` boast that it "successfully matched all taxonomy fields without requiring has-details overrides." That is not discipline — that is the model congratulating itself for not using a tool it clearly needed.
+
+The only thing Gemini got right that the others missed: `commonname: "CalOSHA Whistleblower Protection"` is a reasonable common name. Everything else is outclassed.
+
+***
+
+## Grok — strong enrichment pass, two issues
+
+**What Grok got right:**
+- `public-health` added to `disclosuretypes` alongside `workplace-safety` — defensible and probably correct given 6310's scope around illness reporting.
+- Fullest `adverseaction` array of the three — eight slugs, all valid, no invented terms.
+- Fullest `remedies` array — seven slugs including `punitive-damages` and `emotional-distress` which courts have recognized even if not enumerated in the statute text.
+- Best `reviewnotes` again — covers scope, family member protection, domestic worker applicability, the workers comp carve-out, and flags the case law on contract non-renewal.
+- `employeestandard` honestly flagged in integrity: "contributing/motivating factor framework applied via general retaliation principles and CACI 4605 but not verbatim in 6310." That is exactly the right behavior under the new integrity bullet you added.
+- No commentary outside the code block — second consecutive clean run on that front.
+
+**Two issues:**
+- `limitvalue: 3, limitunit: years` — Grok derived a three-year civil SOL from general practice, while ChatGPT derived a six-month administrative deadline from related sections. Both flagged `limitambiguous: true`, which is correct, but the values differ significantly. This divergence is itself useful signal for your human reviewer: the SOL situation on 6310 is genuinely contested and both numbers may be simultaneously correct for different pathways.
+- The citation URL for *Sheridan v. Touchstone* points to `gmsr.com` which is a law firm website — not on your approved source list. Grok did not self-report this in the integrity block, which is a miss. Worth adding "law firm websites" explicitly to the forbidden source list since this is the second time a non-approved domain has slipped through without flagging.
+
+***
+
+## ChatGPT — production-ready, best output
+
+**What ChatGPT got right:**
+- `has-details` used correctly and meaningfully on three fields: `disclosuretargets`, `adverseaction`, and `remedies`. The details text for each is substantive, statute-specific, and genuinely useful to a reviewer — not padding.
+- `limitambiguous: true` with `limitvalue: 6, limitunit: months` — correctly attributes the six-month figure to related Labor Code retaliation procedures rather than 6310's own text, and explicitly flags it for reviewer verification.
+- `feeshifting: ambiguous` — the most honest answer given the statutory complexity. Grok said `plaintiff-only`, Gemini said `none`. ChatGPT is the only one that acknowledged genuine uncertainty here.
+- Second integrity error flagged: the exhaustion/direct-civil-action pathway complexity. That is exactly the kind of procedural nuance that should surface in the integrity block.
+- `jsonrunnotes` is again the most useful of the three — covers every major decision including why `has-details` was chosen over empty arrays, and flags the civil-suit vs. administrative-exhaustion interplay for reviewer attention.
+- Citation for *Wendy Cenis v. WinCo Holdings* via `law.justia.com` — approved source, real case, `SPECIFICIMPACT` correctly scoped as "limits workplace-safety scope." That is useful precedent context.
+
+**One minor issue:**
+- `burdenofproof.employerdefense` is empty with no `has-details` and no `jsonrunnotes` explanation. Given that Grok found `legitimate-non-retaliatory-reason` and Gemini agreed, ChatGPT's silence here is probably over-caution rather than a real gap — but it should have been surfaced in `jsonrunnotes` either way.
+
+***
+
+## `has-details` report card
+
+This was the first live test of the gateway feature.
+
+- **ChatGPT**: Used it three times, correctly, with substantive detail text each time. Exactly what it was designed for.
+- **Grok**: Did not use it, but compensated with fuller slug arrays. Acceptable — Grok found valid slugs where ChatGPT found gaps.
+- **Gemini**: Did not use it and boasted about not needing it. The feature might as well not exist for Gemini Flash.
+
+The feature is working as designed for ChatGPT. The next question is whether Grok will use it when genuinely needed, or whether it will always find a slug-based workaround.
+
+***
+
+## Proposals — still zero across all three
+
+CA-6310 had at least one genuine proposal opportunity: the family-member protection extension, which all three models described in `adverseactionscope` or `reviewnotes` but none proposed as a taxonomy term. That concept — retaliation against an employee *because of* a family member's protected activity — appears in multiple California statutes and almost certainly appears in other jurisdictions. It is a textbook proposal candidate.
+
+The revised proposal language got closer — ChatGPT and Grok both surfaced the concept in notes — but neither crossed the threshold into `newtermsproposed`. This suggests the proposal pathway needs one more nudge: a concrete example of what a good proposal looks like, not just the shape of the proposal object.
+
+***
+
+## Scorecard
+
+| Dimension | ChatGPT | Grok | Gemini |
+|---|---|---|---|
+| SOL honesty | ✅ Best | ✅ Correct | ❌ Wrong |
+| `has-details` usage | ✅ Correct | — not needed | ❌ Avoided |
+| Taxonomy depth | Moderate | Best | Thin |
+| Citation source discipline | ✅ | ❌ gmsr.com | ❌ Scholar again |
+| Integrity honesty | ✅ Best | ✅ Good | ❌ Useless |
+| `jsonrunnotes` quality | ✅ Best | ✅ Good | ❌ Performative |
+| `reviewnotes` quality | ✅ Strong | ✅ Best | Thin |
+| Schema fidelity | ✅ Best | ✅ Good | Moderate |
+| Proposal behavior | ❌ None | ❌ None | ❌ None |
+
+***
+
+## Three prompt actions coming out of this run
+
+1. **Add law firm websites to the forbidden citation sources list** — explicitly name them alongside `scholar.google.com`. Grok's `gmsr.com` slip shows the approved-source list needs a negative example for non-institutional non-aggregator sites.
+
+2. **Add a concrete proposal example** — one fully worked example in the PROPOSING NEW TAXONOMY TERMS section showing a real concept (family-member retaliation protection would be perfect) going through the full proposal shape. Models learn faster from examples than from instructions.
+
+3. **Consider dropping Gemini Flash from the rotation entirely** — two consecutive runs with `limitambiguous: false` on derived SOLs, two consecutive forbidden citation sources, and two consecutive useless integrity blocks is a pattern. If you want to keep Gemini in rotation, test Gemini Pro or Advanced on the next statute before committing.

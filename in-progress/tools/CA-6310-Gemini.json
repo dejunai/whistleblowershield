@@ -1,0 +1,90 @@
+{
+  "meta": {
+    "json_format_version": "2.0",
+    "source_method": "ai_assisted",
+    "source_name": "Gemini",
+    "jurisdiction_id": "CA",
+    "generated_date": "2026-04-01",
+    "generated_by": "Gemini 3 Flash",
+    "record_count": 1,
+    "proposed_count": 0,
+    "new_terms_proposed": [],
+    "json_run_notes": "Clinical execution of CA-6310 (Cal/OSHA Whistleblower Protection). Successfully matched all taxonomy fields to existing child slugs without requiring 'has-details' overrides or parent slug intervention.",
+    "batch_completed": "2026-04-01 12:56 UTC"
+  },
+  "records": [
+    {
+      "jurisdiction_id": "CA",
+      "statute_id": "CA-6310",
+      "official_name": "California Labor Code Section 6310",
+      "common_name": "Cal/OSHA Whistleblower Protection",
+      "legal_basis": {
+        "statute_citation": "Cal. Lab. Code § 6310",
+        "disclosure_types": [
+          "workplace-safety"
+        ],
+        "protected_class": [
+          "all-employees"
+        ],
+        "disclosure_targets": [
+          "internal-management",
+          "external-state"
+        ],
+        "adverse_action_scope": "Prohibits discharge or any manner of discrimination against an employee who makes an oral or written complaint to the division, other governmental agencies, or the employer regarding unsafe working conditions or work practices."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": false,
+        "limit_value": 6,
+        "limit_unit": "months",
+        "trigger": "Date of the retaliatory act",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "primary_agency": "Labor Commissioner's Office (Division of Labor Standards Enforcement)",
+        "process_type": [
+          "administrative",
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "demotion",
+          "suspension",
+          "discipline"
+        ],
+        "remedies": [
+          "reinstatement",
+          "back-pay"
+        ],
+        "fee_shifting": [
+          "none"
+        ]
+      },
+      "burden_of_proof": {
+        "employee_standard": "preponderance-of-evidence",
+        "employer_defense": [
+          "legitimate-non-retaliatory-reason"
+        ],
+        "burden_of_proof_details": "Employee must show they engaged in protected activity (safety complaint), the employer knew of it, and an adverse action followed with a causal link. Burden then shifts to employer to provide a non-discriminatory reason.",
+        "burden_of_proof_flag": true
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=6310.&lawCode=LAB",
+        "is_official": true,
+        "is_pdf": false
+      },
+      "citations": {
+        "attached_citations": [
+          "Cabesuela v. Browning-Ferris Industries of California, Inc. || interprets protected activity scope || https://scholar.google.com/scholar_case?case=3862214300585675660 || Google Scholar || moderate"
+        ],
+        "citation_count": 1
+      },
+      "_review_notes": "The 6-month SOL is specific to the administrative complaint process with the Labor Commissioner. Note that common law 'Tameny' claims for wrongful termination in violation of public policy based on this statute may carry a longer SOL."
+    }
+  ],
+  "integrity": {
+    "with_errors": false
+  }
+}

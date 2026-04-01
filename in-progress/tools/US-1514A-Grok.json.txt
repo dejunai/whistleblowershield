@@ -1,0 +1,110 @@
+{
+  "meta": {
+    "json_format_version": "2.0",
+    "source_method": "ai_assisted",
+    "source_name": "Grok",
+    "jurisdiction_id": "US",
+    "generated_date": "2026-04-01",
+    "generated_by": "Grok by xAI (tool-assisted research, April 2026)",
+    "record_count": 1,
+    "proposed_count": 1,
+    "new_terms_proposed": [
+      {
+        "taxonomy": "ws_protected_class",
+        "term_id": "contractors-subcontractors-agents",
+        "term_label": "Contractors, Subcontractors, and Agents",
+        "notes": "Explicitly covers employees of contractors, subcontractors, or agents of covered publicly traded companies or nationally recognized statistical rating organizations. The statute extends protection beyond direct employees of the issuer to those working for its contractors/agents. Existing 'contractors' and 'subcontractors' slugs are close but do not fully capture the statutory phrasing or the inclusion of 'agents'; this combined protection is a core feature of SOX §1514A and appears in related federal whistleblower contexts.",
+        "seen_in": ["US-1514A"],
+        "count": 1
+      }
+    ],
+    "json_run_notes": "Single federal statute record for 18 U.S.C. § 1514A (SOX whistleblower provision) as requested. Official text sourced from uscode.house.gov. Protected disclosures center on reasonable belief of specified fraud violations. No parent slugs used in any taxonomy arrays. One new taxonomy proposal for protected_class due to explicit statutory extension to contractors/subcontractors/agents of covered entities. SOL is explicitly stated in the statute text itself. Employee_standard uses 'contributing-factor' based on the incorporated burden framework from 49 U.S.C. § 42121(b).",
+    "batch_completed": "2026-04-01 20:45 UTC"
+  },
+  "records": [
+    {
+      "jurisdiction_id": "US",
+      "statute_id": "US-1514A",
+      "official_name": "18 U.S.C. § 1514A",
+      "common_name": "Sarbanes-Oxley Act Whistleblower Protection (Section 806)",
+      "legal_basis": {
+        "statute_citation": "18 U.S.C. § 1514A",
+        "disclosure_types": [
+          "securities-fraud",
+          "financial-misconduct"
+        ],
+        "protected_class": [
+          "all-employees",
+          "contractors",
+          "subcontractors"
+        ],
+        "protected_class_details": "Covers employees of publicly traded companies (and subsidiaries/affiliates whose financials are consolidated), nationally recognized statistical rating organizations, and any officer, employee, contractor, subcontractor, or agent of such entities.",
+        "disclosure_targets": [
+          "internal-management",
+          "external-federal",
+          "legislature"
+        ],
+        "disclosure_targets_details": "",
+        "adverse_action_scope": "Prohibits discharge, demotion, suspension, threats, harassment, or any other manner of discrimination against an employee in the terms and conditions of employment because of protected activity."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": false,
+        "limit_value": 180,
+        "limit_unit": "days",
+        "trigger": "Date on which the violation occurs or the date on which the employee became aware of the violation",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "primary_agency": "U.S. Department of Labor (OSHA)",
+        "process_type": [
+          "administrative",
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "demotion",
+          "suspension",
+          "harassment",
+          "constructive-discharge"
+        ],
+        "remedies": [
+          "reinstatement",
+          "back-pay",
+          "compensatory-damages",
+          "attorney-fees",
+          "costs"
+        ],
+        "fee_shifting": [
+          "plaintiff-only"
+        ]
+      },
+      "burden_of_proof": {
+        "employee_standard": [
+          "contributing-factor"
+        ],
+        "employer_defense": [
+          "same-decision-defense"
+        ],
+        "burden_of_proof_flag": "Employee proves protected activity was a contributing factor by preponderance; burden then shifts to employer to prove by clear and convincing evidence that the same action would have been taken absent the protected activity."
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://uscode.house.gov/view.xhtml?req=granuleid:USC-prelim-title18-section1514A&num=0&edition=prelim",
+        "is_official": true,
+        "is_pdf": false
+      },
+      "citations": {
+        "attached_citations": [
+          "Murray v. UBS Securities, LLC || clarifies no separate retaliatory intent requirement beyond contributing-factor framework || https://www.supremecourt.gov/opinions/23pdf/22-660_7648.pdf || supremecourt.gov || high"
+        ],
+        "citation_count": 1
+      },
+      "_review_notes": "18 U.S.C. § 1514A (SOX § 806) protects employees (including those of contractors, subcontractors, and agents) of publicly traded companies and nationally recognized statistical rating organizations from retaliation for providing information or assisting in investigations regarding conduct reasonably believed to violate specified federal fraud statutes (mail, wire, bank, securities fraud), SEC rules, or federal shareholder fraud laws. Protected disclosures may be made internally to supervisors or those with investigative authority, to federal regulatory/law enforcement agencies, or to Congress. Enforcement begins with OSHA administrative complaint; de novo federal court action available if no final DOL decision within 180 days. Remedies make the employee whole, including reinstatement, back pay with interest, and special damages (including attorney fees). Burden follows AIR21 framework: contributing factor by preponderance, then clear-and-convincing same-decision defense for employer. No explicit punitive damages; emotional distress/special damages available per case law. Reviewer should confirm any updates post-Dodd-Frank amendments and verify coverage of contractors/agents in practice."
+    }
+  ],
+  "integrity": {
+    "with_errors": false
+  }
+}
