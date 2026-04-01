@@ -116,7 +116,7 @@
  *
  * @package WhistleblowerShield
  * @since   1.0.0
- * @version 3.10.0
+ * @version 3.10.2
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -877,9 +877,9 @@ function ws_get_assist_org_data( $jx_term_id ) {
             'logo'                 => get_field( 'ws_aorg_logo', $oid ),
             'serves_nationwide'    => (bool) get_post_meta( $oid, 'ws_aorg_serves_nationwide',   true ),
             'disclosure_type'      => get_field( 'ws_aorg_disclosure_type', $oid ),
-            'services'             => wp_get_object_terms( $oid, 'ws_aorg_service', [ 'fields' => 'slugs' ] ),
+            'services'             => wp_get_object_terms( $oid, 'ws_aorg_service', [ 'fields' => 'names' ] ),
             'additional_services'  => get_post_meta( $oid, 'ws_aorg_additional_services',        true ),
-            'employment_sectors'   => wp_get_object_terms( $oid, 'ws_employment_sector', [ 'fields' => 'slugs' ] ),
+            'employment_sectors'   => wp_get_object_terms( $oid, 'ws_employment_sector', [ 'fields' => 'names' ] ),
             'website_url'          => get_post_meta( $oid, 'ws_aorg_website_url',                true ),
             'intake_url'           => get_post_meta( $oid, 'ws_aorg_intake_url',                 true ),
             'phone'                => get_post_meta( $oid, 'ws_aorg_phone',                      true ),
@@ -887,7 +887,7 @@ function ws_get_assist_org_data( $jx_term_id ) {
             'mailing_address'      => get_post_meta( $oid, 'ws_aorg_mailing_address',            true ),
             'languages'            => get_field( 'ws_languages', $oid ),
             'additional_languages' => get_post_meta( $oid, 'ws_aorg_additional_languages',       true ),
-            'cost_model'           => wp_get_object_terms( $oid, 'ws_aorg_cost_model', [ 'fields' => 'slugs' ] ),
+            'cost_model'           => wp_get_object_terms( $oid, 'ws_aorg_cost_model', [ 'fields' => 'names' ] ),
             'income_limit'         => get_post_meta( $oid, 'ws_aorg_income_limit',               true ),
             'income_limit_notes'   => get_post_meta( $oid, 'ws_aorg_income_limit_notes',         true ),
             'anonymous'            => (bool) get_post_meta( $oid, 'ws_aorg_accepts_anonymous',   true ),
@@ -1014,9 +1014,9 @@ function ws_get_nationwide_assist_org_data( $filters = [] ) {
             'logo'                 => get_field( 'ws_aorg_logo', $oid ),
             'serves_nationwide'    => (bool) get_post_meta( $oid, 'ws_aorg_serves_nationwide',   true ),
             'disclosure_type'      => get_field( 'ws_aorg_disclosure_type', $oid ),
-            'services'             => wp_get_object_terms( $oid, 'ws_aorg_service', [ 'fields' => 'slugs' ] ),
+            'services'             => wp_get_object_terms( $oid, 'ws_aorg_service', [ 'fields' => 'names' ] ),
             'additional_services'  => get_post_meta( $oid, 'ws_aorg_additional_services',        true ),
-            'employment_sectors'   => wp_get_object_terms( $oid, 'ws_employment_sector', [ 'fields' => 'slugs' ] ),
+            'employment_sectors'   => wp_get_object_terms( $oid, 'ws_employment_sector', [ 'fields' => 'names' ] ),
             'website_url'          => get_post_meta( $oid, 'ws_aorg_website_url',                true ),
             'intake_url'           => get_post_meta( $oid, 'ws_aorg_intake_url',                 true ),
             'phone'                => get_post_meta( $oid, 'ws_aorg_phone',                      true ),
@@ -1024,7 +1024,7 @@ function ws_get_nationwide_assist_org_data( $filters = [] ) {
             'mailing_address'      => get_post_meta( $oid, 'ws_aorg_mailing_address',            true ),
             'languages'            => get_field( 'ws_languages', $oid ),
             'additional_languages' => get_post_meta( $oid, 'ws_aorg_additional_languages',       true ),
-            'cost_model'           => wp_get_object_terms( $oid, 'ws_aorg_cost_model', [ 'fields' => 'slugs' ] ),
+            'cost_model'           => wp_get_object_terms( $oid, 'ws_aorg_cost_model', [ 'fields' => 'names' ] ),
             'income_limit'         => get_post_meta( $oid, 'ws_aorg_income_limit',               true ),
             'income_limit_notes'   => get_post_meta( $oid, 'ws_aorg_income_limit_notes',         true ),
             'anonymous'            => (bool) get_post_meta( $oid, 'ws_aorg_accepts_anonymous',   true ),

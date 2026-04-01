@@ -10,7 +10,7 @@
  *
  * @package WhistleblowerShield
  * @since   3.6.0
- * @version 3.10.0
+ * @version 3.10.2
  *
  * VERSION
  * -------
@@ -20,35 +20,6 @@
  */
 
 defined( 'ABSPATH' ) || exit;
-
-
-// ── Label maps ───────────────────────────────────────────────────────────────
-//
-// Used by ws_render_directory_card() to convert stored slugs/keys to
-// human-readable strings. Defined at module scope so both card and any
-// future filter-guide function share the same canonical set.
-
-/** @var array<string,string> Cost model slug → display label. */
-$_ws_dir_cost_labels = [
-    'free'            => 'Free',
-    'pro-bono'        => 'Pro Bono',
-    'sliding-scale'   => 'Sliding Scale',
-    'contingency'     => 'Contingency Fee',
-    'fee-for-service' => 'Fee for Service',
-    'mixed'           => 'Mixed',
-];
-
-/** @var array<string,string> Service key → display label. */
-$_ws_dir_service_labels = [
-    'legal-rep'       => 'Legal Representation',
-    'consultation'    => 'Consultation',
-    'advocacy'        => 'Advocacy',
-    'media'           => 'Media Support',
-    'referral'        => 'Referrals',
-    'training'        => 'Training',
-    'hotline'         => 'Hotline',
-    'reporting-tools' => 'Reporting Tools',
-];
 
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -125,22 +96,50 @@ function ws_render_directory_listing( $items ) {
 
 function ws_render_directory_card( $org ) {
 
-    global $_ws_dir_cost_labels, $_ws_dir_service_labels;
+    // Cost map inlined — avoids global variable scope issues.
+    $cost_labels = [
+        'free'            => 'Free',
+        'pro-bono'        => 'Pro Bono',
+        'sliding-scale'   => 'Sliding Scale',
+        'contingency'     => 'Contingency Fee',
+        'fee-for-service' => 'Fee for Service',
+        'mixed'           => 'Mixed',
+    ];
 
     // ── Resolve display values ─────────────────────────────────────────────
 
     $type_name = ( $org['type'] instanceof WP_Term ) ? $org['type']->name : '';
     $type_slug = ( $org['type'] instanceof WP_Term ) ? $org['type']->slug : '';
 
-    $cost_slug  = $org['cost_model'][0] ?? '';
-    $cost_label = $_ws_dir_cost_labels[ $cost_slug ] ?? '';
+    $cost_slug  = is_array( $org['cost_model'] ) ? ( $org['cost_model'][0] ?? '' ) : '';
+    $cost_label = $cost_labels[ $cost_slug ] ?? '';
 
-    $services = is_array( $org['services'] ) ? $org['services'] : [];
+    $services = ( is_array( $org['services'] ) && ! is_wp_error( $org['services'] ) )
+        ? array_values( array_filter( $org['services'] ) )
+        : [];
 
     $anchor_id = ! empty( $org['internal_id'] )
         ? 'aorg-' . sanitize_html_class( $org['internal_id'] )
         : 'aorg-' . absint( $org['id'] );
 
+    // ── Build services string ──────────────────────────────────────────────
+    //
+    // "Services Provided: Foo, Bar & Baz"
+    // Oxford-style: comma-separated, last item joined with &.
+
+    $services_html = '';
+    if ( ! empty( $services ) ) {
+        $count = count( $services );
+        if ( $count === 1 ) {
+            $services_html = esc_html( $services[0] );
+        } elseif ( $count === 2 ) {
+            $services_html = esc_html( $services[0] ) . ' &amp; ' . esc_html( $services[1] );
+        } else {
+            $parts = array_map( 'esc_html', array_slice( $services, 0, -1 ) );
+            $last  = esc_html( end( $services ) );
+            $services_html = implode( ', ', $parts ) . ' &amp; ' . $last;
+        }
+    }
 
     ob_start();
     ?>
@@ -152,22 +151,12 @@ function ws_render_directory_card( $org ) {
         <?php // ── Header: name + badge row ────────────────────────────────────── ?>
         <div class="ws-aorg-card__header">
 
-            <h3 class="ws-aorg-card__name">
-                <?php if ( ! empty( $org['url'] ) ) : ?>
-                    <a href="<?php echo esc_url( $org['url'] ); ?>">
-                        <?php echo esc_html( $org['title'] ); ?>
-                    </a>
-                <?php else : ?>
-                    <?php echo esc_html( $org['title'] ); ?>
-                <?php endif; ?>
-            </h3>
+            <h2 class="ws-aorg-card__name">
 
-            <?php
-            // Badges are visually useful but the substantive information (type,
-            // cost, attorney status) is already captured in the card's readable
-            // content. Grouping them under a labeled container lets screen readers
-            // announce the group once rather than reading six unlabeled spans.
-            ?>
+                <?php echo esc_html( $org['title'] ); ?>
+
+            </h2>
+
             <div class="ws-aorg-card__badges"
                  aria-label="<?php echo esc_attr( $org['title'] ); ?> details">
 
@@ -208,14 +197,9 @@ function ws_render_directory_card( $org ) {
         <?php endif; ?>
 
         <?php // ── Services ────────────────────────────────────────────────────── ?>
-        <?php if ( ! empty( $services ) ) : ?>
-            <div class="ws-aorg-card__services" aria-label="Services offered">
-                <?php foreach ( $services as $svc ) : ?>
-                    <?php $svc_label = $_ws_dir_service_labels[ $svc ] ?? ucwords( str_replace( '_', ' ', $svc ) ); ?>
-                    <span class="ws-aorg-card__service-tag">
-                        <?php echo esc_html( $svc_label ); ?>
-                    </span>
-                <?php endforeach; ?>
+        <?php if ( $services_html ) : ?>
+            <div class="ws-aorg-card__services">
+                <strong>Services Provided:</strong> <?php echo $services_html; ?>
             </div>
         <?php endif; ?>
 
@@ -243,34 +227,29 @@ function ws_render_directory_card( $org ) {
 
         <?php
         // ── CTA buttons ──────────────────────────────────────────────────────
-        //
-        // aria-label includes the org name so that each link is unique in the
-        // accessibility tree. Without this, a screen reader reading the page
-        // would announce "Get Help Now, link" up to 14 times with no way to
-        // distinguish which organisation the link targets.
-        //
-        // "(opens in new tab)" appended both to aria-label and as visually
-        // hidden text (.screen-reader-text is the standard WP SR utility class).
-        // This satisfies WCAG 2.1 SC 3.2.2 and SC 3.2.5 for _blank links.
+        // Visit Website first, Get Started second.
+        // aria-label includes org name so each link is unique in the
+        // accessibility tree. "(opens in new tab)" satisfies WCAG 2.1
+        // SC 3.2.2 and SC 3.2.5 for _blank links.
         ?>
         <div class="ws-aorg-card__actions">
-            <?php if ( ! empty( $org['intake_url'] ) ) : ?>
-                <a href="<?php echo esc_url( $org['intake_url'] ); ?>"
-                   class="ws-btn ws-btn--primary"
-                   target="_blank"
-                   rel="noopener noreferrer"
-                   aria-label="Get Help Now from <?php echo esc_attr( $org['title'] ); ?> (opens in new tab)">
-                    Get Help Now
-                    <span class="screen-reader-text">(opens in new tab)</span>
-                </a>
-            <?php endif; ?>
             <?php if ( ! empty( $org['website_url'] ) ) : ?>
                 <a href="<?php echo esc_url( $org['website_url'] ); ?>"
-                   class="ws-btn ws-btn--secondary"
+                   class="ws-btn ws-btn--secondary ws-btn--sm"
                    target="_blank"
                    rel="noopener noreferrer"
                    aria-label="Visit the <?php echo esc_attr( $org['title'] ); ?> website (opens in new tab)">
                     Visit Website
+                    <span class="screen-reader-text">(opens in new tab)</span>
+                </a>
+            <?php endif; ?>
+            <?php if ( ! empty( $org['intake_url'] ) ) : ?>
+                <a href="<?php echo esc_url( $org['intake_url'] ); ?>"
+                   class="ws-btn ws-btn--primary ws-btn--sm"
+                   target="_blank"
+                   rel="noopener noreferrer"
+                   aria-label="Get started with <?php echo esc_attr( $org['title'] ); ?> (opens in new tab)">
+                    Get Started
                     <span class="screen-reader-text">(opens in new tab)</span>
                 </a>
             <?php endif; ?>

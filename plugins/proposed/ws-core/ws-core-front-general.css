@@ -17,6 +17,7 @@
  *
  * Version history:
  *   3.8.0 — Split from ws-core-front.css. General shortcode styles extracted.
+ *   3.10.2 — directory-cards styles added
  */
 
 
@@ -555,4 +556,94 @@
     font-size: 0.88rem;
     color: #444;
     line-height: 1.5;
+}
+
+/* ── Assist Org Directory Cards ─────────────────────────────────────────── */
+
+.ws-directory__grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.ws-aorg-card {
+    padding: 1.5rem 0;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.ws-aorg-card:first-child {
+    border-top: 1px solid #e5e7eb;
+}
+
+.ws-aorg-card__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.6rem;
+}
+
+.ws-aorg-card__name {
+    margin: 0;
+    font-size: 1.50rem;
+    font-weight: 700;
+}
+
+.ws-aorg-card__badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    align-items: center;
+}
+
+.ws-aorg-card__badge {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 0.2rem 0.5rem;
+    border-radius: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+}
+
+.ws-aorg-card__badge--type    { background: #e8f0fe; color: #1a56b0; }
+.ws-aorg-card__badge--cost    { background: #e6f4ea; color: #1a6b3c; }
+.ws-aorg-card__badge--attorneys { background: #fff3e0; color: #b45309; }
+.ws-aorg-card__badge--anon    { background: #f3e8ff; color: #6b21a8; }
+
+.ws-aorg-card__description {
+    margin-bottom: 0.6rem;
+    font-size: 0.92rem;
+}
+
+.ws-aorg-card__description p {
+    margin: 0 0 0.4rem;
+}
+
+.ws-aorg-card__services {
+    font-size: 0.88rem;
+    margin-bottom: 0.6rem;
+    color: #444;
+}
+
+.ws-aorg-card__contact {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    font-size: 0.88rem;
+    margin-bottom: 0.75rem;
+}
+
+.ws-aorg-card__actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+/* Small button modifier for directory cards */
+.ws-btn--sm {
+    padding: 0.3rem 0.65rem;
+    font-size: 0.78rem;
 }
