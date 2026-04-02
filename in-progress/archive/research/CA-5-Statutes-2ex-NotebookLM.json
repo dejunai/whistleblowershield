@@ -1,0 +1,387 @@
+{
+  "meta": {
+    "json_format_version": "2.0",
+    "source_method": "ai_assisted",
+    "source_name": "NotebookLM Artifact Agent",
+    "jurisdiction_id": "CA",
+    "generated_date": "2026-04-01",
+    "generated_by": "NotebookLM Legal Researcher",
+    "record_count": 5,
+    "proposed_count": 0,
+    "new_terms_proposed": [],
+    "json_run_notes": "Per the run scope requesting 5 state-level California records excluding CA-6310 and CA-1102.5, I have generated records for CA-8547, CA-1278.5, CA-98.6, CA-12653, and CA-44112. Please note that the specific statutory details for these laws are drawn from outside information, as the provided sources only contain the prompt template guidelines. You may want to independently verify this information. I have verified all taxonomy child slugs and strictly omitted parent slugs. The statute of limitations ambiguity rule was applied for records relying on general civil procedure limits, correctly triggering integrity errors.",
+    "batch_completed": "2026-04-01 18:25 UTC"
+  },
+  "records": [
+    {
+      "jurisdiction_id": "CA",
+      "statute_id": "CA-8547",
+      "official_name": "California Whistleblower Protection Act",
+      "common_name": "CWPA",
+      "legal_basis": {
+        "statute_citation": "Cal. Gov. Code § 8547",
+        "disclosure_types": [
+          "government-misconduct",
+          "waste-of-funds",
+          "abuse-of-authority",
+          "public-health",
+          "workplace-safety"
+        ],
+        "protected_class": [
+          "state-employees",
+          "applicants"
+        ],
+        "disclosure_targets": [
+          "internal-management",
+          "external-state",
+          "law-enforcement",
+          "legislature"
+        ],
+        "adverse_action_scope": "Any act of reprisal, retaliation, threats, coercion, or similar acts."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": false,
+        "limit_value": 12,
+        "limit_unit": "months",
+        "trigger": "from the date of the retaliation",
+        "exhaustion_required": true,
+        "exhaustion_details": "Must file a complaint with the State Personnel Board before filing a civil action."
+      },
+      "enforcement": {
+        "primary_agency": "California State Personnel Board",
+        "process_type": [
+          "administrative",
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "demotion",
+          "suspension",
+          "harassment",
+          "reassignment",
+          "discipline",
+          "denial-of-promotion"
+        ],
+        "remedies": [
+          "reinstatement",
+          "back-pay",
+          "compensatory-damages",
+          "punitive-damages",
+          "attorney-fees",
+          "costs"
+        ],
+        "fee_shifting": [
+          "prevailing-party"
+        ]
+      },
+      "burden_of_proof": {
+        "employee_standard": [
+          "contributing-factor"
+        ],
+        "employer_defense": [
+          "same-decision-defense"
+        ]
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=GOV&sectionNum=8547",
+        "is_official": true,
+        "is_pdf": false
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      "_review_notes": "This statute protects state employees reporting improper governmental activities. Reviewers should verify that the 12-month limit and administrative exhaustion requirement with the State Personnel Board is current."
+    },
+    {
+      "jurisdiction_id": "CA",
+      "statute_id": "CA-1278.5",
+      "official_name": "Health and Safety Code Section 1278.5",
+      "legal_basis": {
+        "statute_citation": "Cal. Health & Safety Code § 1278.5",
+        "disclosure_types": [
+          "public-health",
+          "workplace-safety"
+        ],
+        "protected_class": [
+          "private-employees",
+          "public-employees",
+          "contractors"
+        ],
+        "disclosure_targets": [
+          "internal-management",
+          "external-state"
+        ],
+        "adverse_action_scope": "Discrimination or retaliation against a patient, employee, or medical staff."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": true,
+        "limit_value": 0,
+        "limit_unit": "days",
+        "limit_details": "Not explicitly stated in the specific provision, derived from general tort and wrongful termination statute of limitations.",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "process_type": [
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "demotion",
+          "suspension"
+        ],
+        "remedies": [
+          "reinstatement",
+          "back-pay",
+          "attorney-fees",
+          "costs"
+        ],
+        "fee_shifting": [
+          "prevailing-party"
+        ]
+      },
+      "burden_of_proof": {
+        "employee_standard": [],
+        "employer_defense": [],
+        "rebuttable_presumption": "There is a rebuttable presumption of retaliation if the adverse action occurs within 120 days of the protected activity.",
+        "burden_of_proof_flag": "120-day rebuttable presumption"
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=HSC&sectionNum=1278.5",
+        "is_official": true,
+        "is_pdf": false
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      "_review_notes": "Covers whistleblower protections for healthcare workers and patients regarding quality of care. Note the 120-day rebuttable presumption and verify the missing limit value."
+    },
+    {
+      "jurisdiction_id": "CA",
+      "statute_id": "CA-98.6",
+      "official_name": "Labor Code Section 98.6",
+      "legal_basis": {
+        "statute_citation": "Cal. Lab. Code § 98.6",
+        "disclosure_types": [
+          "labor-law"
+        ],
+        "protected_class": [
+          "all-employees",
+          "applicants"
+        ],
+        "disclosure_targets": [
+          "external-state",
+          "internal-management"
+        ],
+        "adverse_action_scope": "Discharge or any other manner of discrimination, retaliation, or adverse action."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": true,
+        "limit_value": 6,
+        "limit_unit": "months",
+        "limit_details": "Generally 6 months to file with the Labor Commissioner, but civil action SOL may vary.",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "primary_agency": "Labor Commissioner",
+        "process_type": [
+          "administrative",
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "demotion",
+          "suspension",
+          "harassment",
+          "pay-reduction"
+        ],
+        "remedies": [
+          "reinstatement",
+          "back-pay",
+          "compensatory-damages",
+          "attorney-fees",
+          "costs"
+        ],
+        "fee_shifting": [
+          "prevailing-party"
+        ]
+      },
+      "burden_of_proof": {
+        "employee_standard": [],
+        "employer_defense": []
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=LAB&sectionNum=98.6",
+        "is_official": true,
+        "is_pdf": false
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      "_review_notes": "Protects employees exercising rights under the Labor Code, including filing wage claims. Excluded 1102.5 and 6310 per RUN SCOPE so this stands as a key labor provision."
+    },
+    {
+      "jurisdiction_id": "CA",
+      "statute_id": "CA-12653",
+      "official_name": "California False Claims Act",
+      "common_name": "CFCA",
+      "legal_basis": {
+        "statute_citation": "Cal. Gov. Code § 12653",
+        "disclosure_types": [
+          "government-contract-fraud",
+          "financial-misconduct"
+        ],
+        "protected_class": [
+          "all-employees",
+          "contractors",
+          "has-details"
+        ],
+        "protected_class_details": "Includes employees, contractors, and agents.",
+        "disclosure_targets": [
+          "internal-management",
+          "law-enforcement",
+          "external-state"
+        ],
+        "adverse_action_scope": "Discharged, demoted, suspended, threatened, harassed, or in any other manner discriminated against in the terms and conditions of employment."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": false,
+        "limit_value": 3,
+        "limit_unit": "years",
+        "trigger": "from the date when the retaliation occurred",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "process_type": [
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "demotion",
+          "suspension",
+          "harassment",
+          "discipline"
+        ],
+        "remedies": [
+          "reinstatement",
+          "back-pay",
+          "consequential-damages",
+          "attorney-fees",
+          "costs",
+          "has-details"
+        ],
+        "remedies_details": "Double back pay.",
+        "fee_shifting": [
+          "prevailing-party"
+        ]
+      },
+      "burden_of_proof": {
+        "employee_standard": [],
+        "employer_defense": []
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=GOV&sectionNum=12653",
+        "is_official": true,
+        "is_pdf": false
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      "_review_notes": "CFCA anti-retaliation provision protecting those reporting false claims. Specifically note that double back pay is available as a remedy, utilizing the has-details pattern."
+    },
+    {
+      "jurisdiction_id": "CA",
+      "statute_id": "CA-44112",
+      "official_name": "Reporting by School Employees of Improper Governmental Activities Act",
+      "legal_basis": {
+        "statute_citation": "Cal. Ed. Code § 44112",
+        "disclosure_types": [
+          "government-misconduct",
+          "waste-of-funds",
+          "abuse-of-authority",
+          "public-health",
+          "workplace-safety",
+          "policy-violation"
+        ],
+        "protected_class": [
+          "public-employees"
+        ],
+        "disclosure_targets": [
+          "internal-management",
+          "external-local",
+          "external-state",
+          "law-enforcement"
+        ],
+        "adverse_action_scope": "Use of official authority or influence to intimidate, threaten, coerce, or command."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": true,
+        "limit_value": 0,
+        "limit_unit": "days",
+        "limit_details": "Timeframe varies depending on general tort claims act deadlines; typically 6 months for public entities.",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "process_type": [
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "demotion",
+          "suspension",
+          "reassignment",
+          "discipline"
+        ],
+        "remedies": [
+          "compensatory-damages",
+          "punitive-damages",
+          "attorney-fees"
+        ],
+        "fee_shifting": [
+          "prevailing-party"
+        ]
+      },
+      "burden_of_proof": {
+        "employee_standard": [],
+        "employer_defense": []
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=EDC&sectionNum=44112",
+        "is_official": true,
+        "is_pdf": false
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      "_review_notes": "Protects public school employees reporting improper activities. The statute of limitations is inherently ambiguous as it relies on the Tort Claims Act."
+    }
+  ],
+  "integrity": {
+    "with_errors": true,
+    "error_details": [
+      "CA-1278.5: limit_ambiguous is true because the SOL is derived from general civil procedure rather than explicitly stated in the specific provision.",
+      "CA-98.6: limit_ambiguous is true because the SOL is derived from general civil procedure rather than explicitly stated in the specific provision.",
+      "CA-44112: limit_ambiguous is true because the SOL is derived from general civil procedure rather than explicitly stated in the specific provision."
+    ],
+    "error_count": 3
+  }
+}

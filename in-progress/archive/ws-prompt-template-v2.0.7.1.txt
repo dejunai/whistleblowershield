@@ -753,9 +753,9 @@ Jurisdiction:       California
 Jurisdiction ID:    CA
 Legislature URL:    https://legislature.ca.gov/
 Record type:        statute
-Records Requested:  5
+Records Requested:  CA-8547, CA-1278.5, CA-98.6, CA-12653, CA-44112, CA-6310, CA-1102.5
 Scope:              state-level whistleblower laws and protections
-Exclude:            CA-6310, CA-1102.5
+        
 
 This template covers `statute` records only.
 Other record types use separate templates.

@@ -1,0 +1,91 @@
+This is a significant improvement over Gemini Flash, and in several ways it is competitive with ChatGPT and Grok. The "read the full prompt before executing" instruction clearly made a difference. Here is the full read.
+
+***
+
+## Headline
+
+**Gemini Pro is a viable third model.** The overconfidence failures that made Flash unreliable are mostly gone. The output is disciplined, the integrity block is honest, and the `has-details` gateway is being used correctly. It is not yet at ChatGPT's citation quality or Grok's enrichment depth, but it is no longer producing actively harmful outputs.
+
+***
+
+## What Gemini Pro got right
+
+**`limitambiguous` discipline is fixed.** Three statutes correctly flagged as ambiguous (`CA-1278.5`, `CA-98.6`, `CA-232.5`), all with corresponding integrity events. Two statutes correctly set to `false` (`CA-8547` with an explicit 12-month deadline, `CA-12653` with an explicit 3-year period). This is the exact failure mode that made Flash unusable, and Pro handled it correctly across all five records.
+
+**`has-details` used correctly in three places.**
+- `CA-1278.5 protectedclass` — patients, employees, medical staff, and health care workers is genuinely broader than any single slug, and the detail text is statute-specific and useful.
+- `CA-12653 remedies` — double back pay is a real statutory remedy that has no clean slug, and the detail text correctly names the statutory mechanism.
+- `CA-98.6 remedies` — the $10,000 civil penalty per employee is a real remedy not captured by any slug. Correctly routed through `has-details`.
+
+**Rebuttable presumption fields populated on two statutes.** Both `CA-1278.5` (120-day presumption) and `CA-98.6` (90-day presumption) have rebuttable presumption language in the statute text, and Pro correctly populated `rebuttablepresumption` on both. That field has been empty in every prior run — this is the first time it has been used correctly.
+
+**`exhaustionrequired: true` on `CA-8547` with `exhaustiondetails`.** Correctly identifies the State Personnel Board filing requirement before civil action. This is exactly the pattern ChatGPT modeled on SOX and the schema note you added about exhaustion.
+
+**Integrity block is honest and specific.** Five error entries, each named by statute and field. The citation omission entries are honest — "could not confidently attach verified URLs" is correct behavior and correct reporting. The SOL ambiguity entries are correctly keyed to the specific statutes.
+
+**Statute selection is good.** `CA-8547` (California Whistleblower Protection Act for state employees), `CA-12653` (False Claims Act retaliation), `CA-1278.5` (healthcare facilities), `CA-98.6` (Labor Commissioner retaliation), and `CA-232.5` (working conditions disclosure) are all real, relevant, non-overlapping California whistleblower statutes. No invented records, no cluster IDs, no mid-chapter drift.
+
+***
+
+## What needs attention
+
+### Citations — zero across all five records
+This is the most significant gap. Five California statutes, zero citations, all omitted with integrity flags citing inability to verify stable URLs. That is honest behavior, but for statutes like `CA-8547` and `CA-12653` with real appellate history, it is a quality gap. The integrity entries reference *Miklosy* for `CA-8547` — that is a real California Supreme Court case on exhaustion — but Pro chose omission over risk rather than attempting an approved-source lookup. ChatGPT and Grok have both produced verified citations from `law.justia.com` and `courtlistener.com` in prior runs. Pro may need explicit encouragement to attempt approved secondary sources before giving up on citations entirely.
+
+### `CA-8547 limitambiguous: false` with 12 months — verify
+The 12-month deadline for `CA-8547` does appear in Government Code 8547.12, but it is worth confirming whether that deadline is in the section itself or a related section, since the `statuteid` is `CA-8547` (the parent section) not `CA-8547.12`. If the deadline is in a subsection rather than the entry-point section, `limitambiguous` should arguably be `true`. Flag for human review.
+
+### `CA-12653 limitambiguous: false` with 3 years — verify
+The False Claims Act retaliation SOL under Government Code 12653 is worth confirming. The federal FCA has a 3-year/6-year dual SOL; California's version may differ. Pro's confidence here deserves a reviewer check before approval.
+
+### `burdenofproofflag: true` on two records
+Same issue as Grok in the prior run — `burdenofproofflag` is populated with `true` rather than a short signal phrase. The schema says to omit it unless a meaningful burden shift is identified, and to use a signal phrase not a boolean. Worth checking whether your schema note addition from the prior run made it into v2.0.7.1 — it does not appear to be in the attached prompt.
+
+### `CA-8547 disclosuretargets: [external-state]` only
+This is thin. Government Code 8547 protects disclosures to the State Auditor, the State Personnel Board, the Joint Legislative Audit Committee, and supervisors. `internal-management` and `legislature` should both be present. This is under-tagging rather than over-tagging, which is the safer error, but worth enrichment.
+
+### `CA-232.5 disclosuretargets` includes `public` and `media`
+This is the most aggressive disclosure target tagging in the batch. Lab Code 232.5 protects employees who disclose information about working conditions — but whether `media` and `public` are explicitly named as targets in the statute text, or inferred from the nature of the disclosure, is worth a reviewer check. The prompt instructs "tag all valid reporting targets explicitly named or clearly implied" — `media` and `public` feel like inferences here rather than explicit statutory language.
+
+### `jsonrunnotes: "Clinical execution"` — again
+Pro used the same self-congratulatory phrase as Flash. It is less egregious here because the rest of the output is genuinely better, but it is still not a useful note. The only actionable content in `jsonrunnotes` is the list of `has-details` usages. The rest is performative. Worth adding a prompt note: "`jsonrunnotes` should describe decisions, gaps, and uncertainties — not evaluate the quality of your own output."
+
+### Zero proposals — still
+Five records, at least two real proposal candidates:
+- **`family-member-of-whistleblower`** — the family-member example is literally in the prompt, and `CA-1102.5` is in the exclude list, so Pro knows it was seen before. A model reading carefully should have proposed it consolidated across the two statutes it was seen in.
+- **`medical-staff-privileges`** as an adverse action type — the `CA-1278.5` `adverseactiondetails` describes "restriction, revocation, or unfavorable changes in medical staff privileges" which is a real and recurring concept in healthcare whistleblower law that has no slug. Pro used `has-details` correctly but did not propose the term.
+
+***
+
+## Scorecard vs. prior runs
+
+| Dimension | Gemini Pro | ChatGPT | Grok |
+|---|---|---|---|
+| `limitambiguous` discipline | ✅ Fixed | ✅ Strong | ✅ Strong |
+| `has-details` usage | ✅ Correct | ✅ Correct | — rarely needed |
+| Rebuttable presumption | ✅ Best yet | ❌ Not seen | ❌ Not seen |
+| Exhaustion handling | ✅ Correct | ✅ Correct | ❌ Prior error |
+| Citations | ❌ Zero | ✅ Best | ✅ Good |
+| Integrity honesty | ✅ Honest | ✅ Honest | ✅ Honest |
+| Proposals | ❌ None | ❌ None | ✅ One |
+| `jsonrunnotes` quality | ⚠️ Performative | ✅ Best | ✅ Good |
+| Statute selection | ✅ Good | N/A single record | N/A single record |
+| Schema fidelity | ✅ Clean | ✅ Clean | ⚠️ One violation |
+
+***
+
+## Strategic read
+
+**Gemini Pro is now your batch model.** When you need 5-record runs across a jurisdiction, Pro's statute selection instincts are solid and its schema discipline has caught up. Flash is still retired.
+
+**The citation gap is Pro's biggest remaining weakness.** It is choosing omission too aggressively on citations. A targeted note — "before omitting a citation, attempt at least one approved secondary source lookup; omit only after a genuine attempt fails" — may be enough to unlock citations in the next run without pushing it toward fabrication.
+
+**The proposal gap is now your most persistent cross-model problem.** Three models, multiple runs, only one proposal ever produced (Grok on SOX). The family-member example is in the prompt and still not being generalized. Consider adding a second worked example on a different concept — `medical-staff-privileges` from this run would be a perfect candidate, since it appeared in this batch and is unambiguously a real gap.
+
+**Three prompt actions from this run:**
+
+1. **Citation attempt instruction** — add to CITATIONS section: "Before omitting a citation, make at least one genuine attempt at an approved secondary source. Omit only after that attempt fails. Omitting without attempting is a quality gap worth flagging in integrity."
+
+2. **`jsonrunnotes` self-evaluation prohibition** — add to jsonrunnotes section: "Do not evaluate the quality of your own output in this field. Describe decisions, gaps, and uncertainties only."
+
+3. **Second proposal example** — add `medical-staff-privileges` or a similar concept as a second worked example in the PROPOSING section to show that single-jurisdiction concepts with no existing slug are also worth proposing, not just cross-jurisdiction patterns.
