@@ -1,7 +1,7 @@
 ================================================================================
 FILE: taxonomy-interpretations.txt
 Scope: jx-interpretation
-Source: register-taxonomies.php v3.10.0
+Source: register-taxonomies.php v3.12.0
 Notes: Full statute-mirror palette for interpretation records.
        Interpretations inherit the complete doctrinal taxonomy set from
        jx-statute. An interpretation is an applied reading of a statute —
@@ -24,86 +24,124 @@ Description: Subject matter of the protected disclosure as addressed or
              from parent statute.
 ────────────────────────────────────────────────────────────────────────────
 
---- fraud-and-financial ---
-fraud-and-financial          Fraud & Financial Misconduct (parent)
-tax-fraud                    Tax Fraud
-securities-fraud             Securities Fraud
-government-contract-fraud    Government Contract Fraud
-financial-misconduct         General Financial Misconduct
+--- workplace-employment ---
+workplace-employment         Workplace & Employment (parent)
+retaliation-protection       Retaliation Protection
+wrongful-termination         Wrongful Termination
+wage-hour-violations         Wage & Hour Violations
+occupational-health-safety   Occupational Health & Safety
+collective-bargaining        Collective Bargaining Rights
 
---- safety-and-health ---
-safety-and-health            Safety & Health Violations (parent)
-workplace-safety             Workplace Safety
-environmental-hazard         Environmental Hazard
-public-health                Public Health Risk
-food-and-drug                Food & Drug Safety
+--- financial-corporate ---
+financial-corporate          Financial & Corporate (parent)
+securities-commodities-fraud Securities & Commodities Fraud
+consumer-financial-protection Consumer Financial Protection
+banking-aml-compliance       Banking & AML Compliance
+shareholder-rights           Shareholder Rights
+tax-evasion-fraud            Tax Evasion & Fraud
 
---- legal-and-regulatory ---
-legal-and-regulatory         Legal & Regulatory Violations (parent)
-civil-rights                 Civil Rights Violations
-labor-law                    Labor Law Violations
-discrimination               Discrimination
-consumer-protection          Consumer Protection
+--- government-accountability ---
+government-accountability    Government Accountability (parent)
+procurement-spending-fraud   Procurement & Spending Fraud
+public-corruption-ethics     Public Corruption & Ethics
+election-integrity           Election Integrity
+military-defense-reporting   Military & Defense Reporting
 
---- government-and-public ---
-government-and-public        Government & Public Interest (parent)
-government-misconduct        Government Misconduct
-corruption                   Corruption / Bribery
-abuse-of-authority           Abuse of Authority
-waste-of-funds               Waste of Public Funds
+--- public-health-safety ---
+public-health-safety         Public Health & Safety (parent)
+healthcare-medicare-fraud    Healthcare & Medicare Fraud
+environmental-protection     Environmental Protection
+food-drug-safety             Food & Drug Safety
+nuclear-energy-safety        Nuclear & Energy Safety
+transportation-safety        Transportation & Aviation Safety
 
---- other ---
-other                        Other / General (parent)
-general-wrongdoing           General Wrongdoing
-policy-violation             Policy / Ethics Violation
+--- privacy-data-integrity ---
+privacy-data-integrity       Privacy & Data Integrity (parent)
+cybersecurity-disclosure     Cybersecurity Disclosure
+hipaa-patient-privacy        HIPAA & Patient Privacy
+consumer-data-protection     Consumer Data Protection
+education-privacy-ferpa      Education Privacy (FERPA)
+
+--- national-security ---
+national-security            National Security (parent)
+intelligence-community       Intelligence Community Reporting
+classified-information       Classified Information Disclosures
+export-sanctions-compliance  Export Controls & Sanctions Compliance
 
 
 ────────────────────────────────────────────────────────────────────────────
 TAXONOMY: ws_protected_class
 Applies to: jx-interpretation
-Hierarchical: NO — flat list
+Hierarchical: YES — use child slugs only
 Description: Worker classification addressed or clarified by this
              interpretation. Tag only where the interpretation explicitly
              turns on or explains protected class applicability.
 ────────────────────────────────────────────────────────────────────────────
 
-all-employees          All Employees
-private-employees      Private Sector Employees
-public-employees       Public / Government Employees
-federal-employees      Federal Employees
-state-employees        State Employees
-local-employees        Local Government Employees
-contractors            Independent Contractors
-subcontractors         Subcontractors
-gig-workers            Gig / Platform Workers
-volunteers             Volunteers
-applicants             Job Applicants
-former-employees       Former Employees
-union-members          Union Members
-non-union              Non-Union Employees
+--- public-sector ---
+public-sector                Public Sector (parent)
+federal-employee             Federal Employee
+state-employee               State Agency Employee
+local-gov-staff              Local / Municipal Employee
+k12-education-staff          K-12 / Higher Ed Staff
+military-personnel           Military Personnel
+
+--- private-sector ---
+private-sector               Private Sector (parent)
+corporate-staff              Corporate / Private Employee
+contractor-gig               Independent Contractor / Gig
+non-profit-staff             Non-Profit Employee
+agricultural-worker          Agricultural Worker
+
+--- healthcare-staff ---
+healthcare-staff             Healthcare & Medical (parent)
+clinical-staff               Clinical (Nurse / Physician)
+medical-student              Medical Student / Intern / Resident
+
+--- special-status ---
+special-status               Special Status (parent)
+job-applicant                Job Applicant
+former-employee              Former Employee
+perceived-whistleblower      Perceived Whistleblower
 
 
 ────────────────────────────────────────────────────────────────────────────
 TAXONOMY: ws_disclosure_targets
 Applies to: jx-interpretation
-Hierarchical: NO — flat list
+Hierarchical: YES — use child slugs only
 Description: Reporting target addressed or clarified by this interpretation.
              Tag only where the interpretation explicitly discusses or
              turns on the reporting channel used or permitted.
 ────────────────────────────────────────────────────────────────────────────
 
-internal-management      Internal Management
-internal-compliance      Internal Compliance / Ethics Hotline
-internal-hr              Human Resources
-external-federal         Federal Agency / Regulator
-external-state           State Agency / Regulator
-external-local           Local Authority
-law-enforcement          Law Enforcement
-legislature              Legislature / Congressional Committee
-judiciary                Court / Judicial Body
-media                    Media / Press
-public                   General Public
-nonprofit-advocate       Nonprofit / Advocacy Organization
+--- internal ---
+internal                     Internal (parent)
+internal-supervisor          Supervisor / Manager
+internal-hr                  Human Resources
+internal-compliance          Compliance / Ethics Hotline
+internal-legal               In-House Legal Counsel
+
+--- external-agency ---
+external-agency              External: Government Agency (parent)
+agency-federal               Federal Agency
+agency-state                 State Agency
+agency-local                 Local / Municipal Agency
+law-enforcement              Law Enforcement
+
+--- legislative ---
+legislative                  Legislative Body (parent)
+legislative-federal          U.S. Congress
+legislative-state            State Legislature
+
+--- judicial ---
+judicial                     Judicial / Legal (parent)
+court-filing                 Court Filing
+attorney-counsel             Personal Attorney / Counsel
+
+--- public ---
+public                       Public Disclosure (parent)
+public-media                 Media / Press
+public-nonprofit             Non-Profit / Advocacy Organization
 
 
 ────────────────────────────────────────────────────────────────────────────
@@ -115,23 +153,20 @@ Description: Retaliatory action addressed or clarified by this
              explains or narrows the type of adverse action covered.
 ────────────────────────────────────────────────────────────────────────────
 
-termination              Termination / Discharge
-demotion                 Demotion
-suspension               Suspension
-harassment               Harassment / Hostile Work Environment
-pay-reduction            Pay Reduction
-hours-reduction          Hours Reduction
-reassignment             Reassignment / Transfer
-blacklisting             Blacklisting
-discipline               Disciplinary Action
-negative-reference       Negative Employment Reference
-benefit-reduction        Benefit Reduction
-constructive-discharge   Constructive Discharge
-failure-to-hire          Failure to Hire / Refusal to Hire
-denial-of-promotion      Denial of Promotion
-denial-of-training       Denial of Training
-forced-psychiatric       Forced Psychiatric / Fitness Exam
-unfavorable-evaluation   Unfavorable Performance Evaluation
+termination               Termination
+constructive-discharge    Constructive Discharge
+demotion                  Demotion
+suspension                Suspension
+disciplinary-action       Disciplinary Action
+transfer                  Transfer
+schedule-change           Schedule Change
+pay-reduction             Pay / Benefits Reduction
+harassment                Harassment
+blacklisting              Blacklisting
+security-clearance-action Security Clearance Action
+contract-non-renewal      Contract Non-Renewal
+privilege-revocation      Privilege / Access Revocation
+immigration-threat        Immigration-Related Threat
 
 
 ────────────────────────────────────────────────────────────────────────────
@@ -143,13 +178,15 @@ Description: Procedural route addressed or clarified by this interpretation.
              narrows procedural requirements or options.
 ────────────────────────────────────────────────────────────────────────────
 
-administrative           Administrative Complaint
-civil-lawsuit            Civil Lawsuit
-criminal-referral        Criminal Referral
-internal-grievance       Internal Grievance / Union Procedure
-arbitration              Arbitration
-administrative-appeal    Administrative Appeal / Review
-inspector-general        Inspector General Complaint
+administrative-complaint  Administrative Complaint
+civil-lawsuit             Civil Lawsuit
+qui-tam                   Qui Tam (False Claims)
+internal-disclosure       Internal Disclosure
+regulatory-tip            Regulatory Tip
+criminal-referral         Criminal Referral
+state-agency-complaint    State Agency Complaint
+congressional-disclosure  Congressional Disclosure
+representative-action     Representative Action
 
 
 ────────────────────────────────────────────────────────────────────────────
@@ -161,19 +198,26 @@ Description: Remedies addressed, clarified, or limited by this
              explains remedy availability or scope.
 ────────────────────────────────────────────────────────────────────────────
 
-reinstatement            Reinstatement
-back-pay                 Back Pay
-front-pay                Front Pay
-compensatory-damages     Compensatory Damages
-punitive-damages         Punitive Damages
-exemplary-damages        Exemplary Damages
-emotional-distress       Emotional Distress Damages
-consequential-damages    Special / Consequential Damages
-declaratory-relief       Declaratory Relief
-injunctive-relief        Injunctive Relief
-attorney-fees            Attorney Fees
-costs                    Court Costs / Filing Fees
-whistleblower-award      Whistleblower Award / Bounty
+reinstatement                   Reinstatement
+back-pay                        Back Pay
+front-pay                       Front Pay
+double-back-pay                 Double Back Pay
+lost-wages                      Lost Wages
+benefits-restoration            Benefits Restoration
+compensatory-damages            Compensatory Damages
+punitive-damages                Punitive Damages
+treble-damages                  Treble Damages
+civil-penalty                   Civil Penalty
+civil-penalties                 Civil Penalties (Aggregate)
+attorney-fees                   Attorney Fees
+litigation-costs                Litigation Costs
+injunctive-relief               Injunctive Relief
+cease-and-desist                Cease and Desist Order
+license-suspension              License Suspension
+expungement-of-personnel-record Expungement of Personnel Record
+bounty-qui-tam-award            Bounty / Qui Tam Award
+wage-differential               Wage Differential
+liquidated-damages              Liquidated Damages
 
 
 ────────────────────────────────────────────────────────────────────────────
@@ -186,11 +230,10 @@ Description: Fee-shifting rule addressed or clarified by this
              Single-value taxonomy; use the most accurate single term.
 ────────────────────────────────────────────────────────────────────────────
 
-prevailing-party         Prevailing Party (bidirectional)
-plaintiff-only           Plaintiff Only (one-way)
-discretionary            Discretionary / Court Discretion
-none                     No Fee Shifting
-ambiguous                Ambiguous / Unclear
+unilateral-pro-plaintiff  Unilateral (Pro-Plaintiff)
+bilateral-loser-pays      Bilateral (Loser Pays)
+discretionary             Discretionary
+none-american-rule        None (American Rule)
 
 
 ────────────────────────────────────────────────────────────────────────────
@@ -202,80 +245,95 @@ Description: Employer defense addressed, validated, or rejected by this
              explains or limits a defense posture.
 ────────────────────────────────────────────────────────────────────────────
 
-same-decision             Same-Decision / Mixed-Motive Defense
-legitimate-reason         Legitimate Non-Retaliatory Reason
-no-knowledge              Employer Lacked Knowledge of Disclosure
-good-faith-investigation  Good Faith Investigation
-procedural-default        Exhaustion / Procedural Default
-arbitration-clause        Mandatory Arbitration Clause
-at-will-employment        At-Will Employment Basis
-sovereign-immunity        Sovereign / Governmental Immunity
+same-decision-defense              Same-Decision Defense
+legitimate-non-retaliatory-reason  Legitimate Non-Retaliatory Reason
+good-faith-compliance              Good-Faith Compliance
+statutory-exception-claim          Statutory Exception Claim
+mixed-motive-defense               Mixed Motive Defense
+no-protected-activity              Disclosure was not Protected
+
+
+────────────────────────────────────────────────────────────────────────────
+TAXONOMY: ws_employee_standard
+Applies to: jx-interpretation
+Hierarchical: NO — flat list
+Description: Burden-of-proof standard addressed or clarified by this
+             interpretation. Tag only where the interpretation explicitly
+             explains or narrows the employee burden standard.
+────────────────────────────────────────────────────────────────────────────
+
+contributing-factor    Contributing Factor
+motivating-factor      Motivating Factor
+but-for                But-For Causation
+preponderance          Preponderance of the Evidence
+clear-and-convincing   Clear and Convincing Evidence
+reasonable-belief      Reasonable Belief Standard
 
 
 ────────────────────────────────────────────────────────────────────────────
 TAXONOMY: ws_jurisdiction
 Applies to: jx-interpretation (and all content CPTs)
-Hierarchical: YES — use jurisdiction term slugs
+Hierarchical: NO — flat list
 Description: Jurisdiction the interpretation originates from or applies to.
              Always tag exactly one jurisdiction unless the interpretation
              explicitly spans multiple or addresses a federal-preemption
              question across jurisdictions.
 ────────────────────────────────────────────────────────────────────────────
 
-us        Federal (United States)
-al        Alabama
-ak        Alaska
-az        Arizona
-ar        Arkansas
-ca        California
-co        Colorado
-ct        Connecticut
-de        Delaware
-fl        Florida
-ga        Georgia
-hi        Hawaii
-id        Idaho
-il        Illinois
-in        Indiana
-ia        Iowa
-ks        Kansas
-ky        Kentucky
-la        Louisiana
-me        Maine
-md        Maryland
-ma        Massachusetts
-mi        Michigan
-mn        Minnesota
-ms        Mississippi
-mo        Missouri
-mt        Montana
-ne        Nebraska
-nv        Nevada
-nh        New Hampshire
-nj        New Jersey
-nm        New Mexico
-ny        New York
-nc        North Carolina
-nd        North Dakota
-oh        Ohio
-ok        Oklahoma
-or        Oregon
-pa        Pennsylvania
-ri        Rhode Island
-sc        South Carolina
-sd        South Dakota
-tn        Tennessee
-tx        Texas
-ut        Utah
-vt        Vermont
-va        Virginia
-wa        Washington
-wv        West Virginia
-wi        Wisconsin
-wy        Wyoming
-dc        District of Columbia
-pr        Puerto Rico
-gu        Guam
-vi        U.S. Virgin Islands
-as        American Samoa
-mp        Northern Mariana Islands
+us   Federal
+dc   District of Columbia
+al   Alabama
+ak   Alaska
+az   Arizona
+ar   Arkansas
+ca   California
+co   Colorado
+ct   Connecticut
+de   Delaware
+fl   Florida
+ga   Georgia
+hi   Hawaii
+id   Idaho
+il   Illinois
+in   Indiana
+ia   Iowa
+ks   Kansas
+ky   Kentucky
+la   Louisiana
+me   Maine
+md   Maryland
+ma   Massachusetts
+mi   Michigan
+mn   Minnesota
+ms   Mississippi
+mo   Missouri
+mt   Montana
+ne   Nebraska
+nv   Nevada
+nh   New Hampshire
+nj   New Jersey
+nm   New Mexico
+ny   New York
+nc   North Carolina
+nd   North Dakota
+oh   Ohio
+ok   Oklahoma
+or   Oregon
+pa   Pennsylvania
+ri   Rhode Island
+sc   South Carolina
+sd   South Dakota
+tn   Tennessee
+tx   Texas
+ut   Utah
+vt   Vermont
+va   Virginia
+wa   Washington
+wv   West Virginia
+wi   Wisconsin
+wy   Wyoming
+as   American Samoa
+gu   Guam
+mp   Northern Mariana Islands
+pr   Puerto Rico
+vi   U.S. Virgin Islands

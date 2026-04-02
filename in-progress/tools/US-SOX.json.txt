@@ -1,0 +1,101 @@
+{
+  "meta": {
+    "json_format_version": "2.0",
+    "source_method": "ai_assisted",
+    "source_name": "NotebookLM Reconciliation",
+    "jurisdiction_id": "US",
+    "generated_date": "2026-04-02",
+    "generated_by": "NotebookLM Legal Fact-Checker",
+    "record_count": 1,
+    "proposed_count": 0,
+    "new_terms_proposed": [],
+    "json_run_notes": "Split Federal (US) records into a standalone document from the previously merged master batch. Record maintains prior conflict resolution in favor of 180-day DOL exhaustion requirement. Updated to comply with v2.0.9 omission rules.",
+    "batch_completed": "2026-04-02 22:30 UTC"
+  },
+  "records": [
+    {
+      "jurisdiction_id": "US",
+      "statute_id": "US-1514A",
+      "official_name": "18 U.S.C. § 1514A",
+      "common_name": "Sarbanes-Oxley Act Whistleblower Protection (Section 806)",
+      "legal_basis": {
+        "statute_citation": "18 U.S.C. § 1514A",
+        "disclosure_types": [
+          "securities-fraud",
+          "financial-misconduct"
+        ],
+        "protected_class": [
+          "has-details"
+        ],
+        "protected_class_details": "Covers employees of companies with securities registered under Exchange Act section 12, companies required to file reports under section 15(d), subsidiaries or affiliates included in consolidated financial statements, and nationally recognized statistical rating organizations. Also applies to officers, employees, contractors, subcontractors, or agents.",
+        "disclosure_targets": [
+          "internal-management",
+          "external-federal",
+          "legislature"
+        ],
+        "adverse_action_scope": "Prohibits discharge, demotion, suspension, threats, harassment, or any other manner of discrimination against an employee in the terms and conditions of employment."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": false,
+        "limit_value": 180,
+        "limit_unit": "days",
+        "trigger": "After the date on which the violation occurs, or after the date on which the employee became aware of the violation",
+        "exhaustion_required": true,
+        "exhaustion_details": "The employee must first file a complaint with the Secretary of Labor. A de novo action in federal district court is permitted only if the Secretary has not issued a final decision within 180 days after filing."
+      },
+      "enforcement": {
+        "primary_agency": "U.S. Department of Labor (OSHA)",
+        "process_type": [
+          "administrative",
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "demotion",
+          "suspension",
+          "harassment",
+          "constructive-discharge"
+        ],
+        "remedies": [
+          "reinstatement",
+          "back-pay",
+          "consequential-damages",
+          "attorney-fees",
+          "costs"
+        ],
+        "fee_shifting": [
+          "plaintiff-only"
+        ]
+      },
+      "burden_of_proof": {
+        "employee_standard": [
+          "contributing-factor",
+          "reasonable-belief"
+        ],
+        "employer_defense": [
+          "same-decision-defense"
+        ],
+        "burden_of_proof_flag": "AIR21 burden-shifting framework expressly incorporated."
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://uscode.house.gov/view.xhtml?req=granuleid:USC-prelim-title18-section1514A&num=0&edition=prelim",
+        "is_official": true
+      },
+      "citations": {
+        "attached_citations": [
+          "Lawson v. FMR LLC || expands contractor-employee coverage || https://supreme.justia.com/cases/federal/us/571/429/ || law.justia.com || high",
+          "Murray v. UBS Securities, LLC || rejects retaliatory-intent requirement || https://www.supremecourt.gov/opinions/23pdf/601us1r02_c07d.pdf || supremecourt.gov || high",
+          "Halliburton, Incorporated v. LABR || clarifies materially adverse standard || https://law.justia.com/cases/federal/appellate-courts/ca5/13-60323/13-60323-2014-12-29.html || law.justia.com || moderate"
+        ],
+        "citation_count": 3
+      },
+      "_review_notes": "Compiled from ChatGPT and Grok runs. Resolved exhaustion requirement discrepancy in favor of ChatGPT's accurate 180-day DOL gateway logic. Maintained robust citation block."
+    }
+  ],
+  "integrity": {
+    "with_errors": false
+  }
+}

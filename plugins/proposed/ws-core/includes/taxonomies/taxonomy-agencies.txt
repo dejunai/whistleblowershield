@@ -1,7 +1,7 @@
 ================================================================================
 FILE: taxonomy-agencies.txt
 Scope: ws-agency
-Source: register-taxonomies.php v3.10.0
+Source: register-taxonomies.php v3.12.0
 Notes: Operational palette for agency records. Intentionally slimmer than
        statutes; agencies describe subject area, reporting targets, process
        routes, languages, and jurisdiction only. Full doctrinal detail
@@ -18,38 +18,49 @@ Description: Subject matter areas the agency accepts or oversees. Tags what
              Use all that apply.
 ────────────────────────────────────────────────────────────────────────────
 
---- fraud-and-financial ---
-fraud-and-financial          Fraud & Financial Misconduct (parent)
-tax-fraud                    Tax Fraud
-securities-fraud             Securities Fraud
-government-contract-fraud    Government Contract Fraud
-financial-misconduct         General Financial Misconduct
+--- workplace-employment ---
+workplace-employment         Workplace & Employment (parent)
+retaliation-protection       Retaliation Protection
+wrongful-termination         Wrongful Termination
+wage-hour-violations         Wage & Hour Violations
+occupational-health-safety   Occupational Health & Safety
+collective-bargaining        Collective Bargaining Rights
 
---- safety-and-health ---
-safety-and-health            Safety & Health Violations (parent)
-workplace-safety             Workplace Safety
-environmental-hazard         Environmental Hazard
-public-health                Public Health Risk
-food-and-drug                Food & Drug Safety
+--- financial-corporate ---
+financial-corporate          Financial & Corporate (parent)
+securities-commodities-fraud Securities & Commodities Fraud
+consumer-financial-protection Consumer Financial Protection
+banking-aml-compliance       Banking & AML Compliance
+shareholder-rights           Shareholder Rights
+tax-evasion-fraud            Tax Evasion & Fraud
 
---- legal-and-regulatory ---
-legal-and-regulatory         Legal & Regulatory Violations (parent)
-civil-rights                 Civil Rights Violations
-labor-law                    Labor Law Violations
-discrimination               Discrimination
-consumer-protection          Consumer Protection
+--- government-accountability ---
+government-accountability    Government Accountability (parent)
+procurement-spending-fraud   Procurement & Spending Fraud
+public-corruption-ethics     Public Corruption & Ethics
+election-integrity           Election Integrity
+military-defense-reporting   Military & Defense Reporting
 
---- government-and-public ---
-government-and-public        Government & Public Interest (parent)
-government-misconduct        Government Misconduct
-corruption                   Corruption / Bribery
-abuse-of-authority           Abuse of Authority
-waste-of-funds               Waste of Public Funds
+--- public-health-safety ---
+public-health-safety         Public Health & Safety (parent)
+healthcare-medicare-fraud    Healthcare & Medicare Fraud
+environmental-protection     Environmental Protection
+food-drug-safety             Food & Drug Safety
+nuclear-energy-safety        Nuclear & Energy Safety
+transportation-safety        Transportation & Aviation Safety
 
---- other ---
-other                        Other / General (parent)
-general-wrongdoing           General Wrongdoing
-policy-violation             Policy / Ethics Violation
+--- privacy-data-integrity ---
+privacy-data-integrity       Privacy & Data Integrity (parent)
+cybersecurity-disclosure     Cybersecurity Disclosure
+hipaa-patient-privacy        HIPAA & Patient Privacy
+consumer-data-protection     Consumer Data Protection
+education-privacy-ferpa      Education Privacy (FERPA)
+
+--- national-security ---
+national-security            National Security (parent)
+intelligence-community       Intelligence Community Reporting
+classified-information       Classified Information Disclosures
+export-sanctions-compliance  Export Controls & Sanctions Compliance
 
 
 ────────────────────────────────────────────────────────────────────────────
@@ -61,12 +72,13 @@ Description: Reporting target classification for this agency. Tags what kind
              single term in most cases; multi-tag only where genuinely dual.
 ────────────────────────────────────────────────────────────────────────────
 
-external-federal         Federal Agency / Regulator
-external-state           State Agency / Regulator
-external-local           Local Authority
+agency-federal           Federal Agency
+agency-state             State Agency
+agency-local             Local / Municipal Agency
 law-enforcement          Law Enforcement
-legislature              Legislature / Congressional Committee
-inspector-general        Inspector General Office
+legislative-federal      U.S. Congress
+legislative-state        State Legislature
+court-filing             Court Filing
 
 
 ────────────────────────────────────────────────────────────────────────────
@@ -77,11 +89,12 @@ Description: Procedural route this agency administers or accepts.
              Tag all that genuinely apply to this agency's intake process.
 ────────────────────────────────────────────────────────────────────────────
 
-administrative           Administrative Complaint
-criminal-referral        Criminal Referral
-administrative-appeal    Administrative Appeal / Review
-inspector-general        Inspector General Complaint
-civil-lawsuit            Civil Lawsuit (agency-referred or agency-filed)
+administrative-complaint  Administrative Complaint
+civil-lawsuit             Civil Lawsuit (agency-referred or agency-filed)
+qui-tam                   Qui Tam (False Claims)
+regulatory-tip            Regulatory Tip
+criminal-referral         Criminal Referral
+congressional-disclosure  Congressional Disclosure
 
 
 ────────────────────────────────────────────────────────────────────────────
@@ -90,94 +103,92 @@ Applies to: ws-agency
 Hierarchical: NO — flat list
 Description: Languages in which the agency offers services or intake support.
              Tag all languages the agency explicitly supports. English is
-             assumed and should still be tagged.
+             assumed and should still be tagged. 'additional' is a system
+             flag auto-assigned when ws_agency_additional_languages field
+             contains a value — do not set manually.
 ────────────────────────────────────────────────────────────────────────────
 
-en        English
-es        Spanish
-zh        Chinese (Simplified)
-zh-tw     Chinese (Traditional)
-vi        Vietnamese
-ko        Korean
-tl        Tagalog / Filipino
-ar        Arabic
-fr        French
-de        German
-pt        Portuguese
-ru        Russian
-ja        Japanese
-hi        Hindi
-fa        Farsi / Persian
-pl        Polish
-it        Italian
-ht        Haitian Creole
-ur        Urdu
-bn        Bengali
+english          English
+spanish          Spanish
+mandarin         Mandarin
+cantonese        Cantonese
+french           French
+portuguese       Portuguese
+vietnamese       Vietnamese
+tagalog          Tagalog
+korean           Korean
+arabic           Arabic
+hindi            Hindi
+russian          Russian
+haitian-creole   Haitian Creole
+polish           Polish
+japanese         Japanese
+additional       Additional (system flag — do not set manually)
 
 
 ────────────────────────────────────────────────────────────────────────────
 TAXONOMY: ws_jurisdiction
 Applies to: ws-agency (and all content CPTs)
-Hierarchical: YES — use jurisdiction term slugs
+Hierarchical: NO — flat list
 Description: Jurisdiction the agency operates in or has authority over.
              Always tag exactly one jurisdiction unless the agency explicitly
              spans multiple (e.g. a federal agency with state-level offices).
 ────────────────────────────────────────────────────────────────────────────
 
-us        Federal (United States)
-al        Alabama
-ak        Alaska
-az        Arizona
-ar        Arkansas
-ca        California
-co        Colorado
-ct        Connecticut
-de        Delaware
-fl        Florida
-ga        Georgia
-hi        Hawaii
-id        Idaho
-il        Illinois
-in        Indiana
-ia        Iowa
-ks        Kansas
-ky        Kentucky
-la        Louisiana
-me        Maine
-md        Maryland
-ma        Massachusetts
-mi        Michigan
-mn        Minnesota
-ms        Mississippi
-mo        Missouri
-mt        Montana
-ne        Nebraska
-nv        Nevada
-nh        New Hampshire
-nj        New Jersey
-nm        New Mexico
-ny        New York
-nc        North Carolina
-nd        North Dakota
-oh        Ohio
-ok        Oklahoma
-or        Oregon
-pa        Pennsylvania
-ri        Rhode Island
-sc        South Carolina
-sd        South Dakota
-tn        Tennessee
-tx        Texas
-ut        Utah
-vt        Vermont
-va        Virginia
-wa        Washington
-wv        West Virginia
-wi        Wisconsin
-wy        Wyoming
-dc        District of Columbia
-pr        Puerto Rico
-gu        Guam
-vi        U.S. Virgin Islands
-as        American Samoa
-mp        Northern Mariana Islands
+us   Federal
+dc   District of Columbia
+al   Alabama
+ak   Alaska
+az   Arizona
+ar   Arkansas
+ca   California
+co   Colorado
+ct   Connecticut
+de   Delaware
+fl   Florida
+ga   Georgia
+hi   Hawaii
+id   Idaho
+il   Illinois
+in   Indiana
+ia   Iowa
+ks   Kansas
+ky   Kentucky
+la   Louisiana
+me   Maine
+md   Maryland
+ma   Massachusetts
+mi   Michigan
+mn   Minnesota
+ms   Mississippi
+mo   Missouri
+mt   Montana
+ne   Nebraska
+nv   Nevada
+nh   New Hampshire
+nj   New Jersey
+nm   New Mexico
+ny   New York
+nc   North Carolina
+nd   North Dakota
+oh   Ohio
+ok   Oklahoma
+or   Oregon
+pa   Pennsylvania
+ri   Rhode Island
+sc   South Carolina
+sd   South Dakota
+tn   Tennessee
+tx   Texas
+ut   Utah
+vt   Vermont
+va   Virginia
+wa   Washington
+wv   West Virginia
+wi   Wisconsin
+wy   Wyoming
+as   American Samoa
+gu   Guam
+mp   Northern Mariana Islands
+pr   Puerto Rico
+vi   U.S. Virgin Islands

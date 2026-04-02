@@ -1,0 +1,25 @@
+{
+  "proposed_terms": [
+    {
+      "taxonomy": "ws_protected_class",
+      "term_id": "family-member-of-whistleblower",
+      "term_label": "Family Member of Whistleblower",
+      "notes": "California Labor Code Section 6310 expressly protects an employee who is retaliated against because the employee is a family member of a person who engaged, or was perceived to have engaged, in protected safety-reporting activity. No existing protected_class slug cleanly captures derivative family-member protection.",
+      "seen_in": [
+        "CA-6310"
+      ],
+      "count": 1
+    },
+    {
+      "taxonomy": "ws_protected_class",
+      "term_id": "domestic-work-employees",
+      "term_label": "Domestic Work Employees",
+      "notes": "California Labor Code Sections 6310 and 6311 expressly extend coverage to domestic work employees, with a stated exclusion for publicly funded household domestic service. The current taxonomy does not contain a specific domestic worker slug, and this class is likely to recur in labor-protection statutes.",
+      "seen_in": [
+        "CA-6310",
+        "CA-6311"
+      ],
+      "count": 2
+    }
+  ]
+}
