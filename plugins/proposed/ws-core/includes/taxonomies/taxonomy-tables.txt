@@ -165,7 +165,7 @@ STATUTE TAXONOMIES (jx-statute only unless noted)
 TAXONOMY: ws_protected_class
 Applies to: jx-statute, jx-citation, jx-interpretation
 Hierarchical: YES — use child slugs only
-Note: has-details sentinel applies to jx-statute only.
+Note: has-details sentinel applies to jx-statute, jx-citation, jx-interpretation.
       Use with protected_class_details companion field.
 ────────────────────────────────────────────────────────────────────────────
 
@@ -202,8 +202,8 @@ has-details                  Has Details (sentinel — jx-statute only)
 TAXONOMY: ws_disclosure_targets
 Applies to: jx-statute, jx-citation, jx-interpretation, ws-assist-org
 Hierarchical: YES — use child slugs only
-Note: has-details sentinel applies to jx-statute only.
-      Use with disclosure_targets_details companion field.
+Note: has-details sentinel applies to jx-statute, jx-citation, jx-interpretation,
+      ws-assist-org. Use with disclosure_targets_details companion field.
 ────────────────────────────────────────────────────────────────────────────
 
 --- internal ---
@@ -242,7 +242,7 @@ has-details                  Has Details (sentinel — jx-statute only)
 TAXONOMY: ws_adverse_action_types
 Applies to: jx-statute, jx-citation, jx-interpretation
 Hierarchical: NO — flat list
-Note: has-details sentinel applies to jx-statute only.
+Note: has-details sentinel applies to jx-statute, jx-citation, jx-interpretation.
       Use with adverse_action_details companion field.
 ────────────────────────────────────────────────────────────────────────────
 
@@ -284,7 +284,7 @@ representative-action     Representative Action
 TAXONOMY: ws_remedies
 Applies to: jx-statute, jx-citation, jx-interpretation
 Hierarchical: NO — flat list
-Note: has-details sentinel applies to jx-statute only.
+Note: has-details sentinel applies to jx-statute, jx-citation, jx-interpretation.
       Use with remedies_details companion field.
 ────────────────────────────────────────────────────────────────────────────
 
@@ -328,7 +328,7 @@ none-american-rule        None (American Rule)
 TAXONOMY: ws_employer_defense
 Applies to: jx-statute, jx-citation, jx-interpretation
 Hierarchical: NO — flat list
-Note: has-details sentinel applies to jx-statute only.
+Note: has-details sentinel applies to jx-statute, jx-citation, jx-interpretation.
       Use with employer_defense_details companion field.
 ────────────────────────────────────────────────────────────────────────────
 
@@ -346,7 +346,7 @@ TAXONOMY: ws_employee_standard
 Applies to: jx-statute, jx-citation, jx-interpretation
 Hierarchical: NO — flat list
 Multiple values permitted per record.
-Note: has-details sentinel applies to jx-statute only.
+Note: has-details sentinel applies to jx-statute, jx-citation, jx-interpretation.
       Use with employee_standard_details companion field.
       Omit entirely if no standard is explicitly named in the source —
       do not infer.

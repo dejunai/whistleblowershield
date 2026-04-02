@@ -758,6 +758,11 @@ url_source:
 Populate with the domain name only (e.g., "law.justia.com"). Omit when
 is_official is true or when no URL is present.
 
+is_pdf:
+Omit when false. Include only when the link URL resolves to a PDF
+document, in which case set to true. Used to append a (PDF) indicator
+to the rendered link.
+
 remedies:
 If a statute refers to "actual damages" map this to compensatory-damages and
 note the exact statutory term in _review_notes.

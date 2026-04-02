@@ -19,7 +19,7 @@
  *
  * @package WhistleblowerShield
  * @since   1.0.0
- * @version 3.10.0
+ * @version 3.12.0
  *
  * VERSION
  * -------
@@ -28,6 +28,11 @@
  * 3.7.0   ws_employment_sector converted from ACF checkbox to taxonomy field.
  *         ws_aorg_cost_model converted from select to taxonomy radio.
  * 3.9.0   ws_case_stage taxonomy field added.
+ * 3.12.0  ws_aorg_disclosure_targets field added to Scope of Service tab.
+ *         has-details sentinel pattern: ws_aorg_disclosure_targets_details
+ *         textarea appears when 'has-details' term is selected.
+ *         ws_ao_case_stage field added to Scope of Service tab (was in text
+ *         table but missing from ACF).
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -174,6 +179,44 @@ function ws_register_acf_assist_org() {
                 'instructions'  => 'Select all types of misconduct this organization has experience assisting with.',
                 'required'      => 1,
                 'field_type'    => 'multi_select',
+                'add_term'      => 0,
+                'save_terms'    => 1,
+                'load_terms'    => 1,
+                'return_format' => 'id',
+            ],
+
+            [
+                'key'           => 'field_aorg_disclosure_targets',
+                'label'         => 'Disclosure Targets Supported',
+                'name'          => 'ws_aorg_disclosure_targets',
+                'type'          => 'taxonomy',
+                'taxonomy'      => 'ws_disclosure_targets',
+                'field_type'    => 'checkbox',
+                'instructions'  => 'Reporting channels this organization can help a whistleblower navigate or prepare for. Tag all that the org explicitly supports.',
+                'add_term'      => 0,
+                'save_terms'    => 1,
+                'load_terms'    => 1,
+                'return_format' => 'id',
+            ],
+
+            [
+                'key'          => 'field_aorg_disclosure_targets_details',
+                'label'        => 'Disclosure Targets Details',
+                'name'         => 'ws_aorg_disclosure_targets_details',
+                'type'         => 'textarea',
+                'rows'         => 3,
+                'instructions' => 'Describe any conditions, channel-specific expertise, or nuance in the reporting targets this organization supports.',
+                // conditional_logic set dynamically — see ws_aorg_details_conditional()
+            ],
+
+            [
+                'key'           => 'field_aorg_case_stage',
+                'label'         => 'Case Stage',
+                'name'          => 'ws_ao_case_stage',
+                'type'          => 'taxonomy',
+                'taxonomy'      => 'ws_case_stage',
+                'field_type'    => 'checkbox',
+                'instructions'  => 'Stage of a whistleblower\'s situation where this organization is most useful. Tag all that genuinely apply.',
                 'add_term'      => 0,
                 'save_terms'    => 1,
                 'load_terms'    => 1,
@@ -462,3 +505,37 @@ function ws_register_acf_assist_org() {
 
 // Dynamic choice filter removed (Phase 3.2 / 12.1).
 // ws_jurisdiction is now a taxonomy field — ACF loads terms natively.
+
+
+// ── Conditional logic: has-details sentinel ───────────────────────────────────
+//
+// When the 'has-details' term is selected in ws_aorg_disclosure_targets,
+// the companion _details textarea becomes visible.
+
+add_filter( 'acf/load_field', 'ws_aorg_details_conditional' );
+
+function ws_aorg_details_conditional( $field ) {
+
+    static $map = [
+        'field_aorg_disclosure_targets_details' => [ 'ws_disclosure_targets', 'field_aorg_disclosure_targets' ],
+    ];
+
+    if ( ! isset( $map[ $field['key'] ] ) ) {
+        return $field;
+    }
+
+    [ $taxonomy, $trigger_key ] = $map[ $field['key'] ];
+
+    $term = get_term_by( 'slug', 'has-details', $taxonomy );
+    if ( ! $term || is_wp_error( $term ) ) {
+        return $field;
+    }
+
+    $field['conditional_logic'] = [ [ [
+        'field'    => $trigger_key,
+        'operator' => '==',
+        'value'    => (string) $term->term_id,
+    ] ] ];
+
+    return $field;
+}

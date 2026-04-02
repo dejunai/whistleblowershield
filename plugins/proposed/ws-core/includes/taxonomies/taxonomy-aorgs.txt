@@ -103,6 +103,8 @@ public                       Public Disclosure (parent)
 public-media                 Media / Press
 public-nonprofit             Non-Profit / Advocacy Organization
 
+has-details                  Has Details (sentinel — use with disclosure_targets_details)
+
 
 ────────────────────────────────────────────────────────────────────────────
 TAXONOMY: ws_case_stage

@@ -36,10 +36,12 @@
  *        - Removed Plain Language tab and all plain English fields — now registered
  *          centrally in acf-plain-english-fields.php (menu_order 85).
  *        - ws_agency_last_reviewed retained as a content-owned field.
+ * 3.12.0 ws_agency_disclosure_targets field added to Agency Identity tab.
+ *        Mirrors taxonomy-agencies.txt flat disclosure_targets palette.
  *
  * @package WhistleblowerShield
  * @since   2.3.1
- * @version 3.10.0
+ * @version 3.12.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -134,15 +136,30 @@ function ws_register_acf_agencies() {
                 'allow_null'    => 1,
             ],
             [
-                'key'        => 'field_agency_disclosure_type',
-                'label'      => 'Disclosure Categories',
-                'name'       => 'ws_agency_disclosure_type',
-                'type'       => 'taxonomy',
-                'taxonomy'   => 'ws_disclosure_type',
-                'field_type' => 'multi_select',
-                'add_term'   => 0,
-                'save_terms' => 1,
-                'load_terms' => 1,
+                'key'           => 'field_agency_disclosure_type',
+                'label'         => 'Disclosure Categories',
+                'name'          => 'ws_agency_disclosure_type',
+                'type'          => 'taxonomy',
+                'taxonomy'      => 'ws_disclosure_type',
+                'field_type'    => 'multi_select',
+                'instructions'  => 'Subject matter areas this agency accepts or oversees. Use all that apply.',
+                'add_term'      => 0,
+                'save_terms'    => 1,
+                'load_terms'    => 1,
+                'return_format' => 'id',
+            ],
+
+            [
+                'key'           => 'field_agency_disclosure_targets',
+                'label'         => 'Reporting Target Classification',
+                'name'          => 'ws_agency_disclosure_targets',
+                'type'          => 'taxonomy',
+                'taxonomy'      => 'ws_disclosure_targets',
+                'field_type'    => 'multi_select',
+                'instructions'  => 'What kind of reporting body is this agency? Use the most accurate single term in most cases; multi-tag only where genuinely dual.',
+                'add_term'      => 0,
+                'save_terms'    => 1,
+                'load_terms'    => 1,
                 'return_format' => 'id',
             ],
 

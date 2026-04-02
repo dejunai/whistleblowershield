@@ -1,0 +1,222 @@
+{
+  "meta": {
+    "json_format_version": "2.0",
+    "source_method": "ai_assisted",
+    "source_name": "Gemini",
+    "jurisdiction_id": "WY",
+    "generated_date": "2026-04-02",
+    "generated_by": "Gemini 1.5 Pro",
+    "record_count": 3,
+    "proposed_count": 0,
+    "new_terms_proposed": [],
+    "json_run_notes": "Wyoming has very limited statutory whistleblower protections compared to other jurisdictions. Most private-sector protections are derived from common law 'public policy' exceptions to at-will employment, which are excluded per the requirement to only produce statute records. Only three distinct statutory protections were identified. All identified SOL values are derived from general civil statutes (Wyo. Stat. § 1-3-105 and the Wyoming Tort Claims Act), resulting in limit_ambiguous: true for all records.",
+    "batch_completed": "2026-04-02 11:45 UTC"
+  },
+  "records": [
+    {
+      "jurisdiction_id": "WY",
+      "statute_id": "WY-22-2-101",
+      "official_name": "State Employee Whistleblower Act",
+      "common_name": "State Employee Whistleblower Act",
+      "legal_basis": {
+        "statute_citation": "Wyo. Stat. § 22-2-101",
+        "disclosure_types": [
+          "public-corruption-ethics",
+          "procurement-spending-fraud"
+        ],
+        "protected_class": [
+          "state-employee"
+        ],
+        "disclosure_targets": [
+          "internal-supervisor",
+          "agency-state"
+        ],
+        "adverse_action_scope": "Any action that results in a negative employment impact as a result of a protected disclosure."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": true,
+        "limit_value": 0,
+        "limit_unit": "years",
+        "limit_details": "The statute does not specify a deadline; claims against the state are generally subject to the Wyoming Tort Claims Act notice requirements and general statutes of limitation.",
+        "exhaustion_required": true,
+        "exhaustion_details": "Complaints are typically routed through the State Auditor's office for investigation before further legal action."
+      },
+      "enforcement": {
+        "primary_agency": "Wyoming State Auditor",
+        "process_type": [
+          "administrative-complaint",
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "demotion",
+          "suspension",
+          "disciplinary-action"
+        ],
+        "remedies": [
+          "reinstatement",
+          "back-pay",
+          "attorney-fees"
+        ],
+        "fee_shifting": [
+          "unilateral-pro-plaintiff"
+        ]
+      },
+      "burden_of_proof": {
+        "employee_standard": [],
+        "employer_defense": [
+          "legitimate-non-retaliatory-reason"
+        ]
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://wyoleg.gov/statutes/22-2-101",
+        "is_official": true
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      "_review_notes": "Protects state employees who report waste, fraud, abuse of authority, or violations of law. Reviewer should verify the specific notice period required by the Wyoming Tort Claims Act for claims arising under this statute."
+    },
+    {
+      "jurisdiction_id": "WY",
+      "statute_id": "WY-35-15-101",
+      "official_name": "Workers' Compensation Retaliation Protection",
+      "common_name": "Workers' Comp Anti-Retaliation",
+      "legal_basis": {
+        "statute_citation": "Wyo. Stat. § 35-15-101",
+        "disclosure_types": [
+          "retaliation-protection"
+        ],
+        "protected_class": [
+          "corporate-staff",
+          "contractor-gig"
+        ],
+        "disclosure_targets": [
+          "internal-supervisor",
+          "agency-state"
+        ],
+        "adverse_action_scope": "Retaliatory discharge or adverse action following the filing of a workers' compensation claim."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": true,
+        "limit_value": 4,
+        "limit_unit": "years",
+        "limit_details": "Derived from the general statute of limitations for torts/personal injury in Wyoming under Wyo. Stat. § 1-3-105."
+      },
+      "enforcement": {
+        "process_type": [
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "constructive-discharge"
+        ],
+        "remedies": [
+          "compensatory-damages",
+          "punitive-damages"
+        ],
+        "fee_shifting": [
+          "none-american-rule"
+        ]
+      },
+      "burden_of_proof": {
+        "employee_standard": [
+          "preponderance"
+        ],
+        "employer_defense": [
+          "legitimate-non-retaliatory-reason"
+        ]
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://wyoleg.gov/statutes/35-15-101",
+        "is_official": true
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      "_review_notes": "Protects employees from retaliation for filing workers' compensation claims. This is a narrower protection than general whistleblowing but is a statutory right in Wyoming."
+    },
+    {
+      "jurisdiction_id": "WY",
+      "statute_id": "WY-23-4-101",
+      "official_name": "Wage Payment Act",
+      "common_name": "Wage Payment Protection",
+      "legal_basis": {
+        "statute_citation": "Wyo. Stat. § 23-4-101",
+        "disclosure_types": [
+          "wage-hour-violations"
+        ],
+        "protected_class": [
+          "corporate-staff"
+        ],
+        "disclosure_targets": [
+          "internal-supervisor",
+          "agency-state"
+        ],
+        "adverse_action_scope": "Retaliation against employees for asserting their rights to payment of wages."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": true,
+        "limit_value": 0,
+        "limit_unit": "years",
+        "limit_details": "The statute does not provide a specific limitation period for retaliation claims; likely governed by Wyo. Stat. § 1-3-105."
+      },
+      "enforcement": {
+        "process_type": [
+          "civil-lawsuit",
+          "state-agency-complaint"
+        ],
+        "adverse_action": [
+          "termination",
+          "pay-reduction"
+        ],
+        "remedies": [
+          "lost-wages",
+          "liquidated-damages",
+          "attorney-fees"
+        ],
+        "fee_shifting": [
+          "unilateral-pro-plaintiff"
+        ]
+      },
+      "burden_of_proof": {
+        "employee_standard": [
+          "preponderance"
+        ],
+        "employer_defense": [
+          "legitimate-non-retaliatory-reason"
+        ]
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://wyoleg.gov/statutes/23-4-101",
+        "is_official": true
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      "_review_notes": "Protects employees who report or seek recovery of unpaid wages. Reviewer should confirm if the liquidated damages provision applies specifically to the retaliation claim or only to the recovery of wages."
+    }
+  ],
+  "integrity": {
+    "with_errors": true,
+    "error_details": [
+      "Batch truncated — only 3 statutory protections found; Wyoming lacks a broad private-sector whistleblower statute.",
+      "WY-22-2-101: SOL derived from general state law/Tort Claims Act",
+      "WY-35-15-101: SOL derived from general civil procedure statute Wyo. Stat. § 1-3-105",
+      "WY-23-4-101: SOL derived from general civil procedure statute Wyo. Stat. § 1-3-105"
+    ],
+    "error_count": 4
+  }
+}

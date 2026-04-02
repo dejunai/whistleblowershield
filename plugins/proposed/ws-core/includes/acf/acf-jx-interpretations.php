@@ -26,10 +26,20 @@
  *
  * Summary tab:
  *   ws_jx_interp_summary       Textarea — plain-language summary of the holding.
- *   ws_process_type            Taxonomy — ws_process_type terms (save_terms: 1).
  *   ws_attach_flag             True/false — surface on jurisdiction summary page.
  *   ws_display_order           Number — render order among flagged items (conditional).
  *   ws_jx_interp_last_reviewed Text — last verified date (Y-m-d).
+ *
+ * Classification tab:
+ *   ws_jx_interp_disclosure_type   Taxonomy — ws_disclosure_type terms.
+ *   ws_jx_interp_protected_class   Taxonomy — ws_protected_class terms.
+ *   ws_jx_interp_disclosure_targets Taxonomy — ws_disclosure_targets terms.
+ *   ws_jx_interp_adverse_action    Taxonomy — ws_adverse_action_types terms.
+ *   ws_jx_interp_process_type      Taxonomy — ws_process_type terms (moved from Summary).
+ *   ws_jx_interp_remedies          Taxonomy — ws_remedies terms.
+ *   ws_jx_interp_fee_shifting      Taxonomy — ws_fee_shifting terms.
+ *   ws_jx_interp_employer_defense  Taxonomy — ws_employer_defense terms.
+ *   ws_jx_interp_employee_standard Taxonomy — ws_employee_standard terms.
  *
  * Relationships tab:
  *   ws_jx_interp_statute_id    Post object — parent jx-statute (single, required).
@@ -43,7 +53,7 @@
  *
  * @package    WhistleblowerShield
  * @since      2.4.0
- * @version 3.10.0
+ * @version 3.12.0
  *
  * VERSION
  * -------
@@ -54,6 +64,11 @@
  * 3.8.0  Court matrix split (federal + state). ws_jx_interp_court_name
  *        conditional field added for 'other' court sentinel.
  *        Field summary corrected to match current meta key names.
+ * 3.12.0 Classification tab added: ws_disclosure_type, ws_protected_class,
+ *        ws_disclosure_targets, ws_adverse_action_types, ws_process_type
+ *        (moved from Summary tab), ws_remedies, ws_fee_shifting,
+ *        ws_employer_defense, ws_employee_standard — mirrors jx-statute palette
+ *        (no has-details sentinels on interpretations).
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -214,20 +229,6 @@ function ws_register_acf_jx_interpretations() {
             ],
 
             [
-                'key'           => 'field_jx_interp_process_type',
-                'label'         => 'Process Type',
-                'name'          => 'ws_process_type',
-                'type'          => 'taxonomy',
-                'taxonomy'      => 'ws_process_type',
-                'field_type'    => 'multi_select',
-                'instructions'  => 'Which whistleblower process areas does this ruling address?',
-                'add_term'      => 0,
-                'save_terms'    => 1,
-                'load_terms'    => 1,
-                'return_format' => 'id',
-            ],
-
-            [
                 'key'           => 'field_jx_interp_attach_flag',
                 'label'         => 'Attach to Jurisdiction Page',
                 'name'          => 'ws_attach_flag',
@@ -252,6 +253,206 @@ function ws_register_acf_jx_interpretations() {
                     'operator' => '==',
                     'value'    => '1',
                 ] ] ],
+            ],
+
+            // ────────────────────────────────────────────────────────────────
+            // Tab: Classification
+            //
+            // Doctrinal taxonomy fields mirroring jx-statute. Tag only what
+            // the interpretation genuinely addresses or clarifies — do not
+            // inherit from the parent statute. No has-details sentinels.
+            // ────────────────────────────────────────────────────────────────
+
+            [
+                'key'   => 'field_jx_interp_classification_tab',
+                'label' => 'Classification',
+                'type'  => 'tab',
+            ],
+
+            [
+                'key'           => 'field_jx_interp_disclosure_type',
+                'label'         => 'Disclosure Category',
+                'name'          => 'ws_jx_interp_disclosure_type',
+                'type'          => 'taxonomy',
+                'taxonomy'      => 'ws_disclosure_type',
+                'field_type'    => 'checkbox',
+                'instructions'  => 'Subject matter addressed or clarified by this interpretation. Tag only what the interpretation genuinely explains or narrows.',
+                'add_term'      => 0,
+                'save_terms'    => 1,
+                'load_terms'    => 1,
+                'return_format' => 'id',
+            ],
+
+            [
+                'key'           => 'field_jx_interp_protected_class',
+                'label'         => 'Protected Class',
+                'name'          => 'ws_jx_interp_protected_class',
+                'type'          => 'taxonomy',
+                'taxonomy'      => 'ws_protected_class',
+                'field_type'    => 'checkbox',
+                'instructions'  => 'Worker classification addressed or clarified by this interpretation. Tag only where the interpretation explicitly turns on or explains protected class applicability.',
+                'add_term'      => 0,
+                'save_terms'    => 1,
+                'load_terms'    => 1,
+                'return_format' => 'id',
+            ],
+
+            [
+                'key'          => 'field_jx_interp_protected_class_details',
+                'label'        => 'Protected Class Details',
+                'name'         => 'ws_jx_interp_protected_class_details',
+                'type'         => 'textarea',
+                'rows'         => 3,
+                'instructions' => 'Describe nuance in protected class coverage as addressed by this interpretation.',
+                // conditional_logic set dynamically — see ws_jx_interp_details_conditional()
+            ],
+
+            [
+                'key'           => 'field_jx_interp_disclosure_targets',
+                'label'         => 'Disclosure Targets',
+                'name'          => 'ws_jx_interp_disclosure_targets',
+                'type'          => 'taxonomy',
+                'taxonomy'      => 'ws_disclosure_targets',
+                'field_type'    => 'checkbox',
+                'instructions'  => 'Reporting target addressed or clarified by this interpretation. Tag only where the interpretation explicitly discusses or turns on the reporting channel.',
+                'add_term'      => 0,
+                'save_terms'    => 1,
+                'load_terms'    => 1,
+                'return_format' => 'id',
+            ],
+
+            [
+                'key'          => 'field_jx_interp_disclosure_targets_details',
+                'label'        => 'Disclosure Targets Details',
+                'name'         => 'ws_jx_interp_disclosure_targets_details',
+                'type'         => 'textarea',
+                'rows'         => 3,
+                'instructions' => 'Describe nuance in the reporting channel as addressed by this interpretation.',
+                // conditional_logic set dynamically — see ws_jx_interp_details_conditional()
+            ],
+
+            [
+                'key'           => 'field_jx_interp_adverse_action',
+                'label'         => 'Adverse Action Types',
+                'name'          => 'ws_jx_interp_adverse_action',
+                'type'          => 'taxonomy',
+                'taxonomy'      => 'ws_adverse_action_types',
+                'field_type'    => 'checkbox',
+                'instructions'  => 'Retaliatory action addressed or clarified by this interpretation. Tag only where the interpretation explicitly explains or narrows the type of adverse action covered.',
+                'add_term'      => 0,
+                'save_terms'    => 1,
+                'load_terms'    => 1,
+                'return_format' => 'id',
+            ],
+
+            [
+                'key'          => 'field_jx_interp_adverse_action_details',
+                'label'        => 'Adverse Action Details',
+                'name'         => 'ws_jx_interp_adverse_action_details',
+                'type'         => 'textarea',
+                'rows'         => 3,
+                'instructions' => 'Describe nuance in adverse action coverage as addressed by this interpretation.',
+                // conditional_logic set dynamically — see ws_jx_interp_details_conditional()
+            ],
+
+            [
+                'key'           => 'field_jx_interp_process_type',
+                'label'         => 'Process Type',
+                'name'          => 'ws_jx_interp_process_type',
+                'type'          => 'taxonomy',
+                'taxonomy'      => 'ws_process_type',
+                'field_type'    => 'checkbox',
+                'instructions'  => 'Procedural route addressed or clarified by this interpretation. Tag only where the interpretation explicitly explains or narrows procedural requirements or options.',
+                'add_term'      => 0,
+                'save_terms'    => 1,
+                'load_terms'    => 1,
+                'return_format' => 'id',
+            ],
+
+            [
+                'key'           => 'field_jx_interp_remedies',
+                'label'         => 'Remedies',
+                'name'          => 'ws_jx_interp_remedies',
+                'type'          => 'taxonomy',
+                'taxonomy'      => 'ws_remedies',
+                'field_type'    => 'checkbox',
+                'instructions'  => 'Remedies addressed, clarified, or limited by this interpretation. Tag only where the interpretation explicitly explains remedy availability or scope.',
+                'add_term'      => 0,
+                'save_terms'    => 1,
+                'load_terms'    => 1,
+                'return_format' => 'id',
+            ],
+
+            [
+                'key'          => 'field_jx_interp_remedies_details',
+                'label'        => 'Remedies Details',
+                'name'         => 'ws_jx_interp_remedies_details',
+                'type'         => 'textarea',
+                'rows'         => 3,
+                'instructions' => 'Describe nuance in remedy availability or scope as addressed by this interpretation.',
+                // conditional_logic set dynamically — see ws_jx_interp_details_conditional()
+            ],
+
+            [
+                'key'           => 'field_jx_interp_fee_shifting',
+                'label'         => 'Fee Shifting',
+                'name'          => 'ws_jx_interp_fee_shifting',
+                'type'          => 'taxonomy',
+                'taxonomy'      => 'ws_fee_shifting',
+                'field_type'    => 'checkbox',
+                'instructions'  => 'Fee-shifting rule addressed or clarified by this interpretation. Tag only where the interpretation explicitly explains fee-shifting applicability or limits. Single value.',
+                'add_term'      => 0,
+                'save_terms'    => 1,
+                'load_terms'    => 1,
+                'return_format' => 'id',
+            ],
+
+            [
+                'key'           => 'field_jx_interp_employer_defense',
+                'label'         => 'Employer Defense',
+                'name'          => 'ws_jx_interp_employer_defense',
+                'type'          => 'taxonomy',
+                'taxonomy'      => 'ws_employer_defense',
+                'field_type'    => 'checkbox',
+                'instructions'  => 'Employer defense addressed, validated, or rejected by this interpretation. Tag only where the interpretation explicitly explains or limits a defense posture.',
+                'add_term'      => 0,
+                'save_terms'    => 1,
+                'load_terms'    => 1,
+                'return_format' => 'id',
+            ],
+
+            [
+                'key'          => 'field_jx_interp_employer_defense_details',
+                'label'        => 'Employer Defense Details',
+                'name'         => 'ws_jx_interp_employer_defense_details',
+                'type'         => 'textarea',
+                'rows'         => 3,
+                'instructions' => 'Describe nuance in the employer defense posture as addressed by this interpretation.',
+                // conditional_logic set dynamically — see ws_jx_interp_details_conditional()
+            ],
+
+            [
+                'key'           => 'field_jx_interp_employee_standard',
+                'label'         => 'Employee Standard',
+                'name'          => 'ws_jx_interp_employee_standard',
+                'type'          => 'taxonomy',
+                'taxonomy'      => 'ws_employee_standard',
+                'field_type'    => 'checkbox',
+                'instructions'  => 'Burden-of-proof standard addressed or clarified by this interpretation. Tag only where the interpretation explicitly explains or narrows the employee burden standard.',
+                'add_term'      => 0,
+                'save_terms'    => 1,
+                'load_terms'    => 1,
+                'return_format' => 'id',
+            ],
+
+            [
+                'key'          => 'field_jx_interp_employee_standard_details',
+                'label'        => 'Employee Standard Details',
+                'name'         => 'ws_jx_interp_employee_standard_details',
+                'type'         => 'textarea',
+                'rows'         => 3,
+                'instructions' => 'Describe nuance in the burden-of-proof standard as addressed by this interpretation.',
+                // conditional_logic set dynamically — see ws_jx_interp_details_conditional()
             ],
 
             // ────────────────────────────────────────────────────────────────
@@ -346,6 +547,45 @@ function ws_register_acf_jx_interpretations() {
     ] );
 
 } // end ws_register_acf_jx_interpretations
+
+
+// ── Conditional logic: has-details sentinel ───────────────────────────────────
+//
+// Mirrors the pattern in acf-jx-statutes.php. When the 'has-details' term is
+// selected in a taxonomy field, the companion _details textarea becomes visible.
+
+add_filter( 'acf/load_field', 'ws_jx_interp_details_conditional' );
+
+function ws_jx_interp_details_conditional( $field ) {
+
+    static $map = [
+        'field_jx_interp_protected_class_details'    => [ 'ws_protected_class',     'field_jx_interp_protected_class' ],
+        'field_jx_interp_disclosure_targets_details' => [ 'ws_disclosure_targets',   'field_jx_interp_disclosure_targets' ],
+        'field_jx_interp_adverse_action_details'     => [ 'ws_adverse_action_types', 'field_jx_interp_adverse_action' ],
+        'field_jx_interp_remedies_details'           => [ 'ws_remedies',             'field_jx_interp_remedies' ],
+        'field_jx_interp_employee_standard_details'  => [ 'ws_employee_standard',    'field_jx_interp_employee_standard' ],
+        'field_jx_interp_employer_defense_details'   => [ 'ws_employer_defense',     'field_jx_interp_employer_defense' ],
+    ];
+
+    if ( ! isset( $map[ $field['key'] ] ) ) {
+        return $field;
+    }
+
+    [ $taxonomy, $trigger_key ] = $map[ $field['key'] ];
+
+    $term = get_term_by( 'slug', 'has-details', $taxonomy );
+    if ( ! $term || is_wp_error( $term ) ) {
+        return $field;
+    }
+
+    $field['conditional_logic'] = [ [ [
+        'field'    => $trigger_key,
+        'operator' => '==',
+        'value'    => (string) $term->term_id,
+    ] ] ];
+
+    return $field;
+}
 
 
 // ── Court choices: context-aware select population ────────────────────────────

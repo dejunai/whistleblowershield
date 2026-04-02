@@ -10,7 +10,7 @@
  *
  * @package WhistleblowerShield
  * @since   2.3.0
- * @version 3.10.0
+ * @version 3.12.0
  *
  * VERSION
  * -------
@@ -19,6 +19,10 @@
  * 3.4.0   Stamp fields centralized to acf-stamp-fields.php.
  * 3.8.0   Field keys corrected to match naming convention.
  *         ws_ref_materials relationship field added (Reference Materials tab).
+ * 3.12.0  Classification tab added: ws_protected_class, ws_disclosure_targets,
+ *         ws_adverse_action_types, ws_process_type, ws_remedies, ws_fee_shifting,
+ *         ws_employer_defense, ws_employee_standard — mirrors jx-statute palette
+ *         (no has-details sentinels on citations).
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -150,6 +154,190 @@ function ws_register_acf_jx_citations() {
                 ] ] ],
             ],
 
+            // ── Tab: Classification ───────────────────────────────────────
+            //
+            // Doctrinal taxonomy fields mirroring jx-statute. Tag only what
+            // the cited source genuinely addresses — do not inherit from the
+            // parent statute. No has-details sentinels on citations.
+
+            [
+                'key'   => 'field_jx_cite_classification_tab',
+                'label' => 'Classification',
+                'type'  => 'tab',
+            ],
+
+            [
+                'key'           => 'field_jx_citation_protected_class',
+                'label'         => 'Protected Class',
+                'name'          => 'ws_jx_citation_protected_class',
+                'type'          => 'taxonomy',
+                'taxonomy'      => 'ws_protected_class',
+                'field_type'    => 'checkbox',
+                'instructions'  => 'Worker classification at issue in this citation. Tag only where the cited source explicitly addresses or turns on protected class status.',
+                'add_term'      => 0,
+                'save_terms'    => 1,
+                'load_terms'    => 1,
+                'return_format' => 'id',
+            ],
+
+            [
+                'key'          => 'field_jx_citation_protected_class_details',
+                'label'        => 'Protected Class Details',
+                'name'         => 'ws_jx_citation_protected_class_details',
+                'type'         => 'textarea',
+                'rows'         => 3,
+                'instructions' => 'Describe nuance in protected class coverage as addressed by this citation.',
+                // conditional_logic set dynamically — see ws_jx_citation_details_conditional()
+            ],
+
+            [
+                'key'           => 'field_jx_citation_disclosure_targets',
+                'label'         => 'Disclosure Targets',
+                'name'          => 'ws_jx_citation_disclosure_targets',
+                'type'          => 'taxonomy',
+                'taxonomy'      => 'ws_disclosure_targets',
+                'field_type'    => 'checkbox',
+                'instructions'  => 'Reporting target at issue in this citation. Tag only where the cited source explicitly discusses or turns on the reporting channel.',
+                'add_term'      => 0,
+                'save_terms'    => 1,
+                'load_terms'    => 1,
+                'return_format' => 'id',
+            ],
+
+            [
+                'key'          => 'field_jx_citation_disclosure_targets_details',
+                'label'        => 'Disclosure Targets Details',
+                'name'         => 'ws_jx_citation_disclosure_targets_details',
+                'type'         => 'textarea',
+                'rows'         => 3,
+                'instructions' => 'Describe nuance in the reporting channel as addressed by this citation.',
+                // conditional_logic set dynamically — see ws_jx_citation_details_conditional()
+            ],
+
+            [
+                'key'           => 'field_jx_citation_adverse_action',
+                'label'         => 'Adverse Action Types',
+                'name'          => 'ws_jx_citation_adverse_action',
+                'type'          => 'taxonomy',
+                'taxonomy'      => 'ws_adverse_action_types',
+                'field_type'    => 'checkbox',
+                'instructions'  => 'Retaliatory action at issue in this citation. Tag only where the cited source explicitly addresses the type of adverse action taken or alleged.',
+                'add_term'      => 0,
+                'save_terms'    => 1,
+                'load_terms'    => 1,
+                'return_format' => 'id',
+            ],
+
+            [
+                'key'          => 'field_jx_citation_adverse_action_details',
+                'label'        => 'Adverse Action Details',
+                'name'         => 'ws_jx_citation_adverse_action_details',
+                'type'         => 'textarea',
+                'rows'         => 3,
+                'instructions' => 'Describe nuance in the adverse action coverage as addressed by this citation.',
+                // conditional_logic set dynamically — see ws_jx_citation_details_conditional()
+            ],
+
+            [
+                'key'           => 'field_jx_citation_process_type',
+                'label'         => 'Process Type',
+                'name'          => 'ws_jx_citation_process_type',
+                'type'          => 'taxonomy',
+                'taxonomy'      => 'ws_process_type',
+                'field_type'    => 'checkbox',
+                'instructions'  => 'Procedural route at issue or discussed in this citation. Tag only where the cited source explicitly addresses procedure.',
+                'add_term'      => 0,
+                'save_terms'    => 1,
+                'load_terms'    => 1,
+                'return_format' => 'id',
+            ],
+
+            [
+                'key'           => 'field_jx_citation_remedies',
+                'label'         => 'Remedies',
+                'name'          => 'ws_jx_citation_remedies',
+                'type'          => 'taxonomy',
+                'taxonomy'      => 'ws_remedies',
+                'field_type'    => 'checkbox',
+                'instructions'  => 'Remedies discussed, awarded, or denied in this citation. Tag only where the cited source explicitly addresses remedy.',
+                'add_term'      => 0,
+                'save_terms'    => 1,
+                'load_terms'    => 1,
+                'return_format' => 'id',
+            ],
+
+            [
+                'key'          => 'field_jx_citation_remedies_details',
+                'label'        => 'Remedies Details',
+                'name'         => 'ws_jx_citation_remedies_details',
+                'type'         => 'textarea',
+                'rows'         => 3,
+                'instructions' => 'Describe nuance in remedy availability or scope as addressed by this citation.',
+                // conditional_logic set dynamically — see ws_jx_citation_details_conditional()
+            ],
+
+            [
+                'key'           => 'field_jx_citation_fee_shifting',
+                'label'         => 'Fee Shifting',
+                'name'          => 'ws_jx_citation_fee_shifting',
+                'type'          => 'taxonomy',
+                'taxonomy'      => 'ws_fee_shifting',
+                'field_type'    => 'checkbox',
+                'instructions'  => 'Fee-shifting outcome or discussion in this citation. Tag only where the cited source explicitly addresses fees. Single value.',
+                'add_term'      => 0,
+                'save_terms'    => 1,
+                'load_terms'    => 1,
+                'return_format' => 'id',
+            ],
+
+            [
+                'key'           => 'field_jx_citation_employer_defense',
+                'label'         => 'Employer Defense',
+                'name'          => 'ws_jx_citation_employer_defense',
+                'type'          => 'taxonomy',
+                'taxonomy'      => 'ws_employer_defense',
+                'field_type'    => 'checkbox',
+                'instructions'  => 'Employer defense raised, accepted, or rejected in this citation. Tag only where the cited source explicitly addresses a defense posture.',
+                'add_term'      => 0,
+                'save_terms'    => 1,
+                'load_terms'    => 1,
+                'return_format' => 'id',
+            ],
+
+            [
+                'key'          => 'field_jx_citation_employer_defense_details',
+                'label'        => 'Employer Defense Details',
+                'name'         => 'ws_jx_citation_employer_defense_details',
+                'type'         => 'textarea',
+                'rows'         => 3,
+                'instructions' => 'Describe nuance in the employer defense posture as addressed by this citation.',
+                // conditional_logic set dynamically — see ws_jx_citation_details_conditional()
+            ],
+
+            [
+                'key'           => 'field_jx_citation_employee_standard',
+                'label'         => 'Employee Standard',
+                'name'          => 'ws_jx_citation_employee_standard',
+                'type'          => 'taxonomy',
+                'taxonomy'      => 'ws_employee_standard',
+                'field_type'    => 'checkbox',
+                'instructions'  => 'Burden-of-proof standard at issue or clarified by this citation. Tag only where the cited source explicitly addresses or turns on the employee burden standard.',
+                'add_term'      => 0,
+                'save_terms'    => 1,
+                'load_terms'    => 1,
+                'return_format' => 'id',
+            ],
+
+            [
+                'key'          => 'field_jx_citation_employee_standard_details',
+                'label'        => 'Employee Standard Details',
+                'name'         => 'ws_jx_citation_employee_standard_details',
+                'type'         => 'textarea',
+                'rows'         => 3,
+                'instructions' => 'Describe nuance in the burden-of-proof standard as addressed by this citation.',
+                // conditional_logic set dynamically — see ws_jx_citation_details_conditional()
+            ],
+
             // ── Tab: Authorship & Review ──────────────────────────────────
             // Removed — registered centrally in acf-stamp-fields.php
             // (group_stamp_metadata, menu_order 90).
@@ -233,6 +421,45 @@ function ws_register_acf_jx_citations() {
 // Field locking, auto-fill today, and stamp fields are handled centrally
 // in admin-hooks.php via ws_acf_lock_for_non_admins(), ws_acf_autofill_today(),
 // and ws_acf_write_stamp_fields().
+
+
+// ── Conditional logic: has-details sentinel ───────────────────────────────────
+//
+// Mirrors the pattern in acf-jx-statutes.php. When the 'has-details' term is
+// selected in a taxonomy field, the companion _details textarea becomes visible.
+
+add_filter( 'acf/load_field', 'ws_jx_citation_details_conditional' );
+
+function ws_jx_citation_details_conditional( $field ) {
+
+    static $map = [
+        'field_jx_citation_protected_class_details'    => [ 'ws_protected_class',     'field_jx_citation_protected_class' ],
+        'field_jx_citation_disclosure_targets_details' => [ 'ws_disclosure_targets',   'field_jx_citation_disclosure_targets' ],
+        'field_jx_citation_adverse_action_details'     => [ 'ws_adverse_action_types', 'field_jx_citation_adverse_action' ],
+        'field_jx_citation_remedies_details'           => [ 'ws_remedies',             'field_jx_citation_remedies' ],
+        'field_jx_citation_employee_standard_details'  => [ 'ws_employee_standard',    'field_jx_citation_employee_standard' ],
+        'field_jx_citation_employer_defense_details'   => [ 'ws_employer_defense',     'field_jx_citation_employer_defense' ],
+    ];
+
+    if ( ! isset( $map[ $field['key'] ] ) ) {
+        return $field;
+    }
+
+    [ $taxonomy, $trigger_key ] = $map[ $field['key'] ];
+
+    $term = get_term_by( 'slug', 'has-details', $taxonomy );
+    if ( ! $term || is_wp_error( $term ) ) {
+        return $field;
+    }
+
+    $field['conditional_logic'] = [ [ [
+        'field'    => $trigger_key,
+        'operator' => '==',
+        'value'    => (string) $term->term_id,
+    ] ] ];
+
+    return $field;
+}
 
 
 // ── Pre-populate ws_jx_citation_statute_ids from ?statute_id= URL param ──────

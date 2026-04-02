@@ -20,7 +20,9 @@ defined( 'ABSPATH' ) || exit;
  *   ws_jx_statute_common_name        Common/informal name (text, optional)
  *   ws_jx_statute_disclosure_type    Disclosure Categories taxonomy (multi_select)
  *   ws_jx_statute_protected_class    Protected Class taxonomy (multi_select)
+ *   ws_jx_statute_protected_class_details Protected Class Detail (textarea, conditional on has-details term)
  *   ws_jx_statute_disclosure_targets Disclosure Targets taxonomy (multi_select)
+ *   ws_jx_statute_disclosure_targets_details Disclosure Targets Detail (textarea, conditional on has-details term)
  *   ws_jx_statute_adverse_action_scope Free-text scope of covered adverse actions
  *   ws_attach_flag                   Editorial curation flag (true_false). Marks this
  *                                    record as one of the ~3–5 highlighted statutes shown
@@ -45,13 +47,17 @@ defined( 'ABSPATH' ) || exit;
  * Enforcement tab:
  *   ws_jx_statute_process_type       Process Types taxonomy (checkbox)
  *   ws_jx_statute_adverse_action     Adverse Action Types taxonomy (checkbox)
+ *   ws_jx_statute_adverse_action_details Adverse Action Detail (textarea, conditional on has-details term)
  *   ws_jx_statute_fee_shifting       Fee Shifting taxonomy (checkbox)
  *   ws_jx_statute_remedies           Available Remedies taxonomy (checkbox)
+ *   ws_jx_statute_remedies_details   Remedies Detail (textarea, conditional on has-details term)
  *   ws_jx_statute_related_agencies   Primary Oversight Agencies (post_object)
  *
  * Burden of Proof tab:
- *   ws_jx_statute_bop_standard       Employee burden standard (select)
+ *   ws_jx_statute_employee_standard  Employee Standard taxonomy (checkbox)
+ *   ws_jx_statute_employee_standard_details Employee Standard Detail (textarea, conditional on has-details term)
  *   ws_jx_statute_employer_defense   Employer Defense taxonomy (checkbox)
+ *   ws_jx_statute_employer_defense_details Employer Defense Details (textarea, conditional on has-details term)
  *   ws_jx_statute_rebuttable_has_details Rebuttable presumption exists (true_false)
  *   ws_jx_statute_rebuttable_details Rebuttable Presumption Details (textarea, conditional)
  *   ws_jx_statute_bop_has_details    BOP has supplementary detail (true_false)
@@ -67,7 +73,7 @@ defined( 'ABSPATH' ) || exit;
  *
  * @package    WhistleblowerShield
  * @since      2.0.0
- * @version 3.10.0
+ * @version 3.12.0
  * @author     Whistleblower Shield
  * @link       https://whistleblowershield.org
  * @copyright  Copyright (c) Whistleblower Shield
@@ -110,6 +116,11 @@ defined( 'ABSPATH' ) || exit;
  *        - ws_employer_defense taxonomy stub registered in register-taxonomies.php.
  *        - Downstream consumers (query layer, matrix seeder, admin hooks) are
  *          deferred to a follow-up pass.
+ * 3.12.0 ws_employee_standard taxonomy replaces ws_jx_statute_bop_standard select.
+ *        has-details sentinel pattern added to six taxonomies: protected_class,
+ *        disclosure_targets, adverse_action_types, remedies, employer_defense,
+ *        employee_standard — each gains a _has_details toggle and conditional
+ *        _details textarea. employer_defense_details made conditional.
  */
 
 add_action( 'acf/init', 'ws_register_acf_jx_statutes' );
@@ -204,6 +215,16 @@ function ws_register_acf_jx_statutes() {
             ],
 
             [
+                'key'          => 'field_jx_statute_protected_class_details',
+                'label'        => 'Protected Class Details',
+                'name'         => 'ws_jx_statute_protected_class_details',
+                'type'         => 'textarea',
+                'rows'         => 3,
+                'instructions' => 'Describe nuance in the covered worker classifications — e.g., eligibility thresholds, exclusions, or statutory language distinguishing coverage.',
+                // conditional_logic set dynamically — see ws_jx_statute_details_conditional()
+            ],
+
+            [
                 'key'           => 'field_jx_statute_disclosure_targets',
                 'label'         => 'Disclosure Targets',
                 'name'          => 'ws_jx_statute_disclosure_targets',
@@ -215,6 +236,16 @@ function ws_register_acf_jx_statutes() {
                 'save_terms'    => 1,
                 'load_terms'    => 1,
                 'return_format' => 'id',
+            ],
+
+            [
+                'key'          => 'field_jx_statute_disclosure_targets_details',
+                'label'        => 'Disclosure Targets Details',
+                'name'         => 'ws_jx_statute_disclosure_targets_details',
+                'type'         => 'textarea',
+                'rows'         => 3,
+                'instructions' => 'Describe any conditions, ordering requirements, or statutory language that affects which reporting channels qualify for protection.',
+                // conditional_logic set dynamically — see ws_jx_statute_details_conditional()
             ],
 
             [
@@ -429,6 +460,16 @@ function ws_register_acf_jx_statutes() {
             ],
 
             [
+                'key'          => 'field_jx_statute_adverse_action_details',
+                'label'        => 'Adverse Action Details',
+                'name'         => 'ws_jx_statute_adverse_action_details',
+                'type'         => 'textarea',
+                'rows'         => 3,
+                'instructions' => 'Describe any statutory language, broad catch-all provisions, or nuance that the taxonomy terms do not fully capture.',
+                // conditional_logic set dynamically — see ws_jx_statute_details_conditional()
+            ],
+
+            [
                 'key'           => 'field_jx_statute_fee_shifting',
                 'label'         => 'Fee Shifting',
                 'name'          => 'ws_jx_statute_fee_shifting',
@@ -457,6 +498,16 @@ function ws_register_acf_jx_statutes() {
             ],
 
             [
+                'key'          => 'field_jx_statute_remedies_details',
+                'label'        => 'Remedies Details',
+                'name'         => 'ws_jx_statute_remedies_details',
+                'type'         => 'textarea',
+                'rows'         => 3,
+                'instructions' => 'Describe caps, eligibility conditions, aggregation rules, or other nuance affecting available remedies.',
+                // conditional_logic set dynamically — see ws_jx_statute_details_conditional()
+            ],
+
+            [
                 'key'           => 'field_jx_statute_related_agencies',
                 'label'         => 'Primary Oversight Agencies',
                 'name'          => 'ws_jx_statute_related_agencies',
@@ -480,21 +531,27 @@ function ws_register_acf_jx_statutes() {
             ],
 
             [
-                'key'           => 'field_jx_statute_bop_standard',
+                'key'           => 'field_jx_statute_employee_standard',
                 'label'         => 'Employee Standard',
-                'name'          => 'ws_jx_statute_bop_standard',
-                'type'          => 'select',
-                'instructions'  => 'What standard must the whistleblower meet to succeed? "Contributing Factor" is the most employee-friendly; "But-For" is employer-friendly.',
-                'choices'       => [
-                    'contributing_factor' => 'Contributing Factor (employee-friendly)',
-                    'motivating_factor'   => 'Motivating Factor',
-                    'but_for'             => 'But-For Causation (employer-friendly)',
-                    'preponderance'       => 'Preponderance of Evidence',
-                    'varies'              => 'Varies by Claim Type',
-                ],
-                'allow_null'    => 1,
-                'ui'            => 1,
-                'return_format' => 'value',
+                'name'          => 'ws_jx_statute_employee_standard',
+                'type'          => 'taxonomy',
+                'taxonomy'      => 'ws_employee_standard',
+                'field_type'    => 'checkbox',
+                'instructions'  => 'What standard must the whistleblower meet to succeed? Tag all that explicitly apply. Omit if no standard is named in the statute — do not infer.',
+                'add_term'      => 0,
+                'save_terms'    => 1,
+                'load_terms'    => 1,
+                'return_format' => 'id',
+            ],
+
+            [
+                'key'          => 'field_jx_statute_employee_standard_details',
+                'label'        => 'Employee Standard Details',
+                'name'         => 'ws_jx_statute_employee_standard_details',
+                'type'         => 'textarea',
+                'rows'         => 3,
+                'instructions' => 'Describe the split standard, burden shift, or other nuance — e.g., different standards applying to different claim types under this statute.',
+                // conditional_logic set dynamically — see ws_jx_statute_details_conditional()
             ],
 
             [
@@ -518,7 +575,7 @@ function ws_register_acf_jx_statutes() {
                 'type'         => 'textarea',
                 'rows'         => 3,
                 'instructions' => 'Describe the specific defense standard — e.g., the evidentiary burden required, statutory language, or any procedural conditions attached to the defense.',
-                'required'     => 0,
+                // conditional_logic set dynamically — see ws_jx_statute_details_conditional()
             ],
 
             [
@@ -693,3 +750,50 @@ function ws_register_acf_jx_statutes() {
 // Field locking, auto-fill today, and stamp fields are handled centrally
 // in admin-hooks.php via ws_acf_lock_for_non_admins(), ws_acf_autofill_today(),
 // and ws_acf_write_stamp_fields().
+
+
+// ── Conditional logic: has-details sentinel ───────────────────────────────────
+//
+// ACF conditional logic cannot reference taxonomy term IDs at registration time
+// because term IDs are assigned at seed runtime, not at code registration time.
+//
+// This filter runs on each field load and dynamically injects conditional_logic
+// into each _details textarea when the 'has-details' term is selected in its
+// companion taxonomy multi-select field.
+//
+// Pattern: when the editor selects the 'has-details' term in a taxonomy field,
+// the companion _details textarea becomes visible. No separate toggle needed.
+
+add_filter( 'acf/load_field', 'ws_jx_statute_details_conditional' );
+
+function ws_jx_statute_details_conditional( $field ) {
+
+    // Map: details field key => [ taxonomy slug, trigger field key ]
+    static $map = [
+        'field_jx_statute_protected_class_details'    => [ 'ws_protected_class',     'field_jx_statute_protected_class' ],
+        'field_jx_statute_disclosure_targets_details' => [ 'ws_disclosure_targets',   'field_jx_statute_disclosure_targets' ],
+        'field_jx_statute_adverse_action_details'     => [ 'ws_adverse_action_types', 'field_jx_statute_adverse_action' ],
+        'field_jx_statute_remedies_details'           => [ 'ws_remedies',             'field_jx_statute_remedies' ],
+        'field_jx_statute_employee_standard_details'  => [ 'ws_employee_standard',    'field_jx_statute_employee_standard' ],
+        'field_jx_statute_employer_defense_details'   => [ 'ws_employer_defense',     'field_jx_statute_employer_defense' ],
+    ];
+
+    if ( ! isset( $map[ $field['key'] ] ) ) {
+        return $field;
+    }
+
+    [ $taxonomy, $trigger_key ] = $map[ $field['key'] ];
+
+    $term = get_term_by( 'slug', 'has-details', $taxonomy );
+    if ( ! $term || is_wp_error( $term ) ) {
+        return $field;
+    }
+
+    $field['conditional_logic'] = [ [ [
+        'field'    => $trigger_key,
+        'operator' => '==',
+        'value'    => (string) $term->term_id,
+    ] ] ];
+
+    return $field;
+}

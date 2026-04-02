@@ -104,6 +104,8 @@ job-applicant                Job Applicant
 former-employee              Former Employee
 perceived-whistleblower      Perceived Whistleblower
 
+has-details                  Has Details (sentinel — use with protected_class_details)
+
 
 ────────────────────────────────────────────────────────────────────────────
 TAXONOMY: ws_disclosure_targets
@@ -143,6 +145,8 @@ public                       Public Disclosure (parent)
 public-media                 Media / Press
 public-nonprofit             Non-Profit / Advocacy Organization
 
+has-details                  Has Details (sentinel — use with disclosure_targets_details)
+
 
 ────────────────────────────────────────────────────────────────────────────
 TAXONOMY: ws_adverse_action_types
@@ -167,6 +171,7 @@ security-clearance-action Security Clearance Action
 contract-non-renewal      Contract Non-Renewal
 privilege-revocation      Privilege / Access Revocation
 immigration-threat        Immigration-Related Threat
+has-details               Has Details (sentinel — use with adverse_action_details)
 
 
 ────────────────────────────────────────────────────────────────────────────
@@ -218,6 +223,7 @@ expungement-of-personnel-record Expungement of Personnel Record
 bounty-qui-tam-award            Bounty / Qui Tam Award
 wage-differential               Wage Differential
 liquidated-damages              Liquidated Damages
+has-details                     Has Details (sentinel — use with remedies_details)
 
 
 ────────────────────────────────────────────────────────────────────────────
@@ -251,6 +257,7 @@ good-faith-compliance              Good-Faith Compliance
 statutory-exception-claim          Statutory Exception Claim
 mixed-motive-defense               Mixed Motive Defense
 no-protected-activity              Disclosure was not Protected
+has-details                        Has Details (sentinel — use with employer_defense_details)
 
 
 ────────────────────────────────────────────────────────────────────────────
@@ -268,6 +275,7 @@ but-for                But-For Causation
 preponderance          Preponderance of the Evidence
 clear-and-convincing   Clear and Convincing Evidence
 reasonable-belief      Reasonable Belief Standard
+has-details            Has Details (sentinel — use with employee_standard_details)
 
 
 ────────────────────────────────────────────────────────────────────────────

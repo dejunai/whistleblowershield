@@ -1,0 +1,100 @@
+{
+  "meta": {
+    "json_format_version": "2.0",
+    "source_method": "ai_assisted",
+    "source_name": "NotebookLM Reconciliation",
+    "jurisdiction_id": "WY",
+    "generated_date": "2026-04-02",
+    "generated_by": "NotebookLM Legal Fact-Checker",
+    "record_count": 1,
+    "proposed_count": 0,
+    "new_terms_proposed": [],
+    "json_run_notes": "Wyoming has very limited statutory whistleblower protections. Gemma researcher model hallucinated citations for Title 22 (Elections instead of Gov Administration) and fabricated statutory protections for workers compensation and wage payment which are either common law or non-existent in WY statute. Batch truncated to include only the verified State Employee Whistleblower Act.",
+    "batch_completed": "2026-04-02 12:47 UTC"
+  },
+  "records": [
+    {
+      "jurisdiction_id": "WY",
+      "statute_id": "WY-9-11-103",
+      "official_name": "State Employees and Officials Whistle Blower Act",
+      "common_name": "State Employee Whistleblower Act",
+      "legal_basis": {
+        "statute_citation": "Wyo. Stat. § 9-11-103",
+        "disclosure_types": [
+          "public-corruption-ethics",
+          "procurement-spending-fraud"
+        ],
+        "protected_class": [
+          "state-employee"
+        ],
+        "disclosure_targets": [
+          "internal-supervisor",
+          "agency-state"
+        ],
+        "adverse_action_scope": "Discharge, discipline, or retaliation against a state employee for reporting in good faith."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": true,
+        "limit_value": 0,
+        "limit_unit": "years",
+        "limit_details": "The statute does not explicitly state a deadline. Claims are generally subject to general state law and Wyoming Tort Claims Act notice requirements.",
+        "exhaustion_required": true,
+        "exhaustion_details": "Employee must exhaust all available administrative remedies before bringing a civil action under the statute."
+      },
+      "enforcement": {
+        "primary_agency": "Wyoming Department of Administration and Information",
+        "process_type": [
+          "administrative-complaint",
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "demotion",
+          "suspension",
+          "disciplinary-action"
+        ],
+        "remedies": [
+          "reinstatement",
+          "back-pay",
+          "attorney-fees",
+          "has-details"
+        ],
+        "remedies_details": "Statute explicitly provides for reinstatement, back pay, and reasonable attorney fees.",
+        "fee_shifting": [
+          "unilateral-pro-plaintiff"
+        ]
+      },
+      "burden_of_proof": {
+        "employee_standard": [],
+        "employer_defense": []
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://wyoleg.gov/statutes/9-11-103",
+        "is_official": true,
+        "is_pdf": false
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      "_review_notes": "Protects state employees who report waste, fraud, abuse of authority, or violations of law. The Gemma model originally hallucinated this under Wyo. Stat. § 22-2-101 (Elections code); it has been corrected to the accurate statute, Wyo. Stat. § 9-11-103."
+    }
+  ],
+  "integrity": {
+    "with_errors": true,
+    "error_details": [
+      "Batch truncated — WY-35-15-101 (Workers' Compensation Retaliation Protection) could not be located or verified as a valid statute at the approved legislature URL.",
+      "Batch truncated — WY-23-4-101 (Wage Payment Act) could not be located or verified as a valid retaliation statute at the approved legislature URL.",
+      "WY-9-11-103: Corrected statute_id, URL, and citation from hallucinated WY-22-2-101 based on verification against official legislature text.",
+      "WY-9-11-103: SOL field limit_ambiguous is true; limit_value was derived from general civil procedure and Tort Claims Act, not explicitly verified in the specific whistleblower statute text.",
+      "WY-9-11-103: exhaustion_details populated from verifiable statute text to indicate that administrative remedies must be exhausted before a civil action.",
+      "WY-9-11-103: Added 'has-details' sentinel to enforcement.remedies and populated remedies_details based on verified statute text.",
+      "WY-9-11-103: Removed 'legitimate-non-retaliatory-reason' from burden_of_proof.employer_defense because it is inferred and not explicitly named in the statute text.",
+      "Rule conflict identified: Researcher model produced common law and hallucinated statutes despite instructions to only produce statute records. Resolved by truncating the hallucinated records to enforce strict statutory compliance per Fact-Checker instructions."
+    ],
+    "error_count": 8
+  }
+}
