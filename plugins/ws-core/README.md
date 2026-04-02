@@ -1,156 +1,165 @@
-# ws-core — WhistleblowerShield Core Plugin
+# ws-core
 
-**Version:** 1.9.2
-**Site:** https://whistleblowershield.org
-**Requires:** WordPress 6.0+, Advanced Custom Fields Pro
+The core plugin for WhistleblowerShield.org. Implements the complete data
+model, editorial workflow, and public-facing output for the platform.
+
+**Stack:** WordPress + ACF Pro
+**Requires:** PHP 8.0+, WordPress 6.0+, ACF Pro
+**Version:** 3.10.0
+
+Full project documentation is in `/documentation/`. This file covers the
+rules a developer needs open while writing code.
 
 ---
 
-## What This Plugin Does
+## Architecture
 
-`ws-core` is the foundation of WhistleblowerShield.org. It registers all Custom Post Types, ACF Pro field groups, shortcodes, and the hidden audit trail system. No other ws- plugin works without this one active.
-
----
-
-## File Structure
+Six layers, loaded in strict dependency order by `includes/loader.php`:
 
 ```
-ws-core/
-├── ws-core.php              ← Main plugin file — loads all includes, enqueues stylesheet
-├── ws-core-front.css        ← Frontend stylesheet for all ws-core output
-├── README.md                ← This file
-└── includes/
-    ├── cpt-jurisdiction.php   ← `jurisdiction` CPT + one-time taxonomy cleanup routine
-    ├── cpt-summaries.php      ← Addendum CPTs: jx-summary, jx-resources, jx-procedures, jx-statutes
-    ├── cpt-legal-updates.php  ← `ws-legal-update` CPT
-    ├── acf-jurisdiction.php   ← ACF field group: Jurisdiction Core
-    ├── acf-summary.php        ← ACF field group: Jurisdiction Summary + deprecated field cleanup
-    ├── acf-legal-updates.php  ← ACF field group: Legal Update
-    ├── audit-trail.php        ← Hidden post meta audit trail (save_post, priority 99)
-    └── shortcodes.php         ← All shortcode handlers
+Universal Layer   CPTs, taxonomies, ACF field groups, query functions
+                  Loaded on frontend and admin
+Matrix Layer      Idempotent seeders — run once on install (admin only)
+Admin Layer       ACF hooks, audit trail, monitoring, dashboard (admin only)
+Assembly Layer    Render functions + shortcodes → HTML (frontend only)
+Assets            Conditionally loaded CSS + JS
 ```
 
----
+**Assembly Layer = render functions + shortcodes only.** The query layer
+is the Universal Layer — a prerequisite of the Assembly Layer, not part
+of it. Never refer to the query layer as part of the "assembly layer."
 
-## Installation
-
-1. Upload the `ws-core` folder to `/wp-content/plugins/ws-core/`
-2. In WordPress admin: **Plugins → Installed Plugins → Activate WhistleblowerShield Core**
-3. Confirm ACF Pro is also active — ws-core displays an admin notice if it is not
-4. Go to **Settings → Permalinks → Save Changes** to register the `/ws-legal-update/` archive slug
-
----
-
-## Custom Post Types
-
-| CPT slug | Public | Archive URL | Purpose |
-|---|---|---|---|
-| `jurisdiction` | Yes | `/jurisdiction/` | Primary page for each of the 57 jurisdictions |
-| `jx-summary` | No | — | Legal protections overview (rendered via shortcode) |
-| `jx-resources` | No | — | Resources overview — future |
-| `jx-procedures` | No | — | Coming forward procedures — future |
-| `jx-statutes` | No | — | Statutes of limitations — future |
-| `ws-legal-update` | Yes | `/ws-legal-update/` | Site-wide legal updates change log |
-
-**Prefix notes:** `jx-` = "jurisdiction" addendum CPTs (non-public). `ws-` = site-wide content CPTs (public). The `jx-` prefix keeps all addendum slugs within WordPress's 20-character post type name limit.
+**The query layer contract** is the most important rule in the codebase:
+shortcodes, render functions, and admin surfaces never call `get_field()`,
+`get_post_meta()`, or `WP_Query` directly. All data retrieval goes through
+`includes/queries/`. Admin files that must bypass this (columns, hooks,
+metaboxes) carry inline comments explaining why.
 
 ---
 
-## Shortcodes
+## Naming Conventions
 
-All shortcodes accepting a `jurisdiction` parameter take either a post slug (e.g., `california`) or a post ID.
+### ACF Field Keys
 
-### `[ws_jurisdiction_header jurisdiction="california"]`
-Renders the full jurisdiction page header: flag image with Wikimedia attribution, jurisdiction name (H1), and a government offices panel containing the portal link (all jurisdictions), governor link (states and territories), mayor link (D.C. only), and legal authority link (all except federal). Empty fields are suppressed automatically.
+These rules govern ACF `key` values only — not `name` (meta key), `label`,
+or any other property.
 
-### `[ws_flag jurisdiction="california"]`
-Renders only the flag image with attribution. Use when the flag needs to appear separately from the full header.
+1. No `ws_` prefix on field keys. `field_` is sufficient namespacing.
+2. Group keys end with `_metadata`. Example: `group_jx_statute_metadata`.
+3. Tab field keys end with `_tab`. Example: `field_legal_basis_tab`.
+4. Field key = `field_` + meta name with `ws_` prefix stripped.
+   Example: `ws_jx_statute_official_name` → `field_jx_statute_official_name`.
+5. Fields whose meta name appears in multiple groups (e.g. `ws_attach_flag`,
+   `ws_display_order`, `ws_ref_materials`) prepend CPT context to disambiguate.
+   Example: `field_statute_attach_flag`, `field_citation_attach_flag`.
 
-### `[ws_summary jurisdiction="california"]`
-Renders the full jurisdiction summary block: summary HTML content, author, date created, last reviewed date, review status badges, and sources/citations.
+### Post Meta Keys
 
-### `[ws_review_status jurisdiction="california"]`
-Renders review status badges only — Human Reviewed or Pending Human Review, and Legally Reviewed (with reviewer name) or Pending Legal Review.
+These rules govern all custom meta key `name` values written to `wp_postmeta`.
 
-### `[ws_legal_updates jurisdiction="california" count="5"]`
-Renders recent legal updates. Scoped to a jurisdiction when the `jurisdiction` parameter is provided; site-wide when omitted. Queries the `ws-legal-update` CPT. Default count is 5.
+1. All custom meta keys carry a `ws_` prefix. No bare unprefixed keys.
+2. Auto-stamp keys — written exclusively by hook logic, never by human
+   input — carry the `ws_auto_` prefix:
+   `ws_auto_date_created`, `ws_auto_last_edited`,
+   `ws_auto_create_author`, `ws_auto_last_edited_author`,
+   `ws_auto_source_method`, `ws_auto_source_name`,
+   `ws_auto_verified_by`, `ws_auto_verified_date`,
+   `ws_auto_plain_english_by`, `ws_auto_plain_english_date`,
+   `ws_auto_plain_english_reviewed_by`, `ws_auto_plain_english_reviewed_date`.
+3. Private audit-only keys additionally carry a leading underscore per the
+   WordPress hidden-meta convention:
+   `_ws_auto_date_created_gmt`, `_ws_auto_last_edited_gmt`.
+4. Content CPT meta keys carry a CPT infix:
+   `ws_jx_*`, `ws_agency_*`, `ws_aorg_*`,
+   `ws_legal_update_*`, `ws_jx_interp_*`, `ws_jx_citation_*`, `ws_proc_*`.
+5. Data-type suffixes: `_url` (URL string), `_wysiwyg` (rich-text),
+   `_id` (integer foreign key or term ID).
+6. Meta key infixes and CPT slugs are always singular:
+   `ws_aorg_*` not `ws_aorgs_*`, `ws_agency_*` not `ws_agencies_*`.
+   PHP source filenames may be plural. When in doubt, singular wins.
 
-### `[ws_jurisdiction_index]`
-Renders the full jurisdictions index page: type filter tabs (All, U.S. States, Federal, U.S. Territories, District of Columbia) with item counts, and an alphabetical grid of all published jurisdictions. Tabs with no matching jurisdictions are hidden automatically. Client-side filtering — no jQuery dependency.
+### Render Function Names
 
-### `[ws_disclaimer_notice]`
-Renders the standard "not legal advice" notice box. Copy is managed centrally in `shortcodes.php` — editing `$notice_text` there propagates to all jurisdiction pages automatically. Styled by `.ws-summary-notice` in `ws-core-front.css`.
+Render functions are named after their **data type**, not the page section
+they produce. The data type is unambiguous; the section name requires context.
 
-### `[ws_footer]`
-Renders the site-wide footer block: mission statement, policy page links, contact email, and copyright line.
-
----
-
-## ACF Field Groups
-
-### Jurisdiction Core (on `jurisdiction` CPT)
-
-| Tab | Fields |
-|---|---|
-| Identity | `ws_jurisdiction_name`, `ws_jurisdiction_type` (select), `ws_jurisdiction_flag` (image), `ws_flag_attribution`, `ws_flag_attribution_url`, `ws_flag_license` |
-| Government URLs | `ws_gov_portal_url/label`, `ws_governor_url/label`, `ws_mayor_url/label`, `ws_legal_authority_url/label` |
-| Related Content | `ws_related_summary` → `jx-summary`, `ws_related_resources` → `jx-resources`, `ws_related_procedures` → `jx-procedures`, `ws_related_statutes` → `jx-statutes` |
-
-`ws_jurisdiction_type` select values: `state`, `federal`, `territory`, `district`
-
-### Jurisdiction Summary (on `jx-summary` CPT)
-
-| Tab | Fields |
-|---|---|
-| Content | `ws_jurisdiction`, `ws_jurisdiction_type`, `ws_summary` (WYSIWYG), `ws_summary_sources` |
-| Dates | `ws_date_created` (auto-fill on creation), `ws_last_reviewed` (auto-fill, editor updates manually) |
-| Authorship & Review | `ws_author` (User, Author+, auto-fills current user), `ws_human_reviewed` (toggle), `ws_legal_review_completed` (toggle), `ws_legal_reviewer` (conditional — visible only when legal review is checked) |
-
-### Legal Update (on `ws-legal-update` CPT)
-
-Fields: `ws_legal_update_jurisdiction` (relationship → `jurisdiction`, multi-select), `ws_legal_update_law_name`, `ws_legal_update_summary` (WYSIWYG), `ws_legal_update_effective_date`, `ws_legal_update_source_url`, `ws_legal_update_author` (User, auto-fills current user).
-
----
-
-## Audit Trail
-
-Two hidden post meta keys are written on every save of any ws-core CPT (`jurisdiction`, `jx-summary`, `jx-resources`, `jx-procedures`, `jx-statutes`, `ws-legal-update`). Both use a leading underscore — WordPress treats them as hidden and they do not appear in the Custom Fields meta box.
-
-| Meta Key | Behavior |
-|---|---|
-| `_ws_last_edited_by` | Overwritten on each save. Stores `{user_id, display_name, timestamp}`. |
-| `_ws_edit_history` | Append-only. Each save adds one entry. Never overwritten. |
-
-**Reading audit data from PHP:**
 ```php
-$last    = ws_get_last_editor( $post_id );  // array or null
-$history = ws_get_edit_history( $post_id ); // array of entries
+ws_render_jx_citations()   // correct — data type
+ws_render_jx_case_law()    // wrong — section name
 ```
 
----
-
-## One-Time Cleanup Routines
-
-Two routines run once on `admin_init` after first deployment and never again (guarded by option flags):
-
-**`ws_cleanup_jurisdiction_type_taxonomy`** — Removes all orphaned `jurisdiction-type` taxonomy terms and term relationships from the database. The `jurisdiction-type` taxonomy was removed in favor of the `ws_jurisdiction_type` ACF select field. Completion flag: `ws_jx_type_taxonomy_cleanup`.
-
-**`ws_cleanup_metabox_remnants`** — Deletes all post meta rows for deprecated Meta Box field keys (`sources_public`, `ws_postal_code`, `ws_government_portal_url`, `ws_flag_image`, `ws_state_leadership_last_verified`, `ws_state_gov_office_url`, `ws_state_ag_office_url`). Completion flag: `ws_metabox_cleanup_v2`.
-
-Both routines display a dismissible admin notice confirming how many rows were removed.
+Exception: wrapper functions that compose multiple data types into a named
+page region may use a section name, provided the docblock lists every data
+type consumed.
 
 ---
 
-## Notes for Future Development
+## Date Conventions
 
-- `ws_jurisdiction_type` select options can be extended to add `county` without breaking existing data. A separate CPT is recommended for county-level data rather than extending `jurisdiction`.
-- `ws_legal_reviewer` is conditionally visible in ACF — it only appears when `ws_legal_review_completed` is checked.
-- `[ws_legal_updates]` uses a LIKE meta query to match ACF relationship field data. If ACF changes how relationship fields are serialized, this query may need updating.
-- All four `jx-*` addendum CPTs (`jx-resources`, `jx-procedures`, `jx-statutes`) are registered and visible in the admin but have no ACF field groups yet. They are placeholders for future content expansion.
+All date values written to post meta by plugin code use:
+
+```php
+current_time( 'Y-m-d' )   // local site date, date-only
+```
+
+GMT audit timestamps (hidden `_ws_auto_*_gmt` keys) use `gmdate( 'Y-m-d' )`.
+`current_time( 'mysql' )` is reserved for `wp_insert_post` / `wp_update_post`
+`post_date` arguments only — never for custom meta keys.
 
 ---
 
-## Contact Emails
+## Query Layer Return Keys
 
-`admin@whistleblowershield.org` — general contact (appears in `[ws_footer]` output).
-`corrections@whistleblowershield.org` — corrections channel only. These two addresses must never appear on the same line or in the same sentence in any template or shortcode output.
+The query layer strips all `ws_` and `ws_auto_` prefixes from PHP array
+return keys. Meta key naming rules govern what is stored in the database;
+they do not govern what is exposed through the query layer API.
+
+Within each sub-array, keys are scoped to their context with no prefix:
+
+```
+record  → created_by, created_by_name, created_date,
+          edited_by, edited_by_name, edited_date
+
+plain   → has_content, plain_content, written_by, written_by_name,
+          written_date, is_reviewed, reviewed_by, reviewed_by_name,
+          reviewed_date
+
+verify  → source_method, source_name, verified_by, verified_by_name,
+          verified_date, verify_status, needs_review
+```
+
+The `ws_` prefix prevents collisions in `wp_postmeta`. Inside a PHP return
+array there is no collision risk and the prefix adds noise. See
+`includes/queries/query-jurisdiction.php` for the full per-function key
+reference.
+
+---
+
+## Seeder Gates
+
+All matrix seeders use a `ws_seeded_{slug}` option key with a semver string
+value. To re-run a seeder, bump its version string — never delete the option.
+The `WS_MATRIX_SEEDING_IN_PROGRESS` constant prevents seeders from triggering
+false divergence flags in `admin-matrix-watch.php`.
+
+---
+
+## Version History
+
+| Version | Summary |
+|---|---|
+| 1.0.0 | Initial release |
+| 2.1.0 | Refactored for ws-core architecture |
+| 2.3.1 | Citations, agencies, legal updates added |
+| 3.0.0 | Taxonomy join replaces post meta join; attach-flag pattern; federal append; relationship fields removed; matrix seeders |
+| 3.1.0 | ACF key naming rules; meta key naming rules; stamp field audit; query layer return key standardization |
+| 3.2.0 | `ws_auto_` prefix pass; legal update system overhaul; taxonomy join for legal updates |
+| 3.3.0 | Dataset completeness pass; source verify system; query layer split into four files |
+| 3.4.0 | Admin layer audit; plain English fields centralized; source verify role gates |
+| 3.5.0 | jx-statute ingest alignment; `ws_employer_defense` taxonomy; ACF overhaul |
+| 3.6.0 | Query layer split (helpers/shared/jurisdiction/agencies); render function naming rules |
+| 3.7.0 | `ws_employment_sector` taxonomy; deprecated taxonomy cleanup; nationwide assist org query |
+| 3.8.0 | Court matrix split; interpretation system; section anchors; reference page implementation |
+| 3.8.1 | Post-audit pass — PHP 8 fatal fix, output escaping, race conditions, memory, caching |
+| 3.9.0 | `ws-ag-procedure` CPT; agency render pipeline; statute cross-reference validation; procedure seeder |
+| 3.10.0 | `ws_procedure_type` taxonomy; source verify coverage for procedures |
