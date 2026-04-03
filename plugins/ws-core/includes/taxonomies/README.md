@@ -8,9 +8,16 @@ Taxonomy registration and seeding for all ws-core taxonomies.
 
 | File | Purpose |
 |---|---|
-| `register-taxonomies.php` | Registers all 16 taxonomies and runs seeders on first admin load |
-| `register-glossary.php` | Registers the `ws_glossary` taxonomy and seeds 25 initial terms |
+| `register-taxonomies.php` | Registers all 17 taxonomies and runs seeders on first admin load |
+| `register-glossary.php` | Registers the `ws_glossary` taxonomy and seeds terms |
+| `taxonomy-statutes.txt` | Taxonomy reference for jx-statute, jx-citation, jx-interpretation, jx-common-law |
+| `taxonomy-citations.txt` | Taxonomy reference for jx-citation (mirrors statutes) |
+| `taxonomy-interpretations.txt` | Taxonomy reference for jx-interpretation (mirrors statutes) |
+| `taxonomy-agencies.txt` | Taxonomy reference for ws-agency |
+| `taxonomy-aorgs.txt` | Taxonomy reference for ws-assist-org |
 | `taxonomy-tables.txt` | Human-readable flat reference of all taxonomy terms and slugs |
+
+`taxonomy-common-law.txt` — pending creation for jx-common-law pipeline reference.
 
 ---
 
@@ -61,18 +68,66 @@ Flat taxonomies use `wp_insert_term()` directly with a
 
 ---
 
+## has-details Sentinel Pattern
+
+Five taxonomies include a `has-details` sentinel term:
+`ws_protected_class`, `ws_disclosure_targets`, `ws_adverse_action_types`,
+`ws_remedies`, `ws_employer_defense`, `ws_employee_standard`.
+
+When an editor selects `has-details` in a taxonomy multi-select field,
+a companion ACF freetext `_details` textarea becomes visible via dynamic
+conditional logic (injected at field load time — not at registration time,
+because term IDs are only available at runtime).
+
+This pattern applies to `jx-statute`, `jx-common-law`, `jx-citation`,
+and `jx-interpretation`. The PHP is the single source of truth for which
+taxonomies carry the sentinel. The `taxonomy-*.txt` reference files must
+reflect this — any taxonomy listed without `has-details` in the text file
+but with it in the PHP is a documentation divergence.
+
+---
+
+## PHP is the Single Source of Truth
+
+`register-taxonomies.php` is authoritative. The `taxonomy-*.txt` reference
+files exist for the AI research pipeline (prompt templates reference them
+directly). Any divergence between PHP and text files is a bug in the text
+files, not in the PHP.
+
+Whenever taxonomy slugs, parents, or sentinel terms change in PHP, the
+corresponding text file must be updated in the same pass.
+
+---
+
 ## Taxonomy Reference
 
-16 taxonomies registered. Key ones:
+17 taxonomies registered.
+
+### Shared Doctrinal Taxonomies
+Attach to `jx-statute`, `jx-citation`, `jx-interpretation`, `jx-common-law`:
+
+| Slug | Type | has-details | Notes |
+|---|---|---|---|
+| `ws_disclosure_type` | hierarchical | No | 6 parents, 26 children |
+| `ws_protected_class` | hierarchical | Yes | 4 parents, 12 children |
+| `ws_disclosure_targets` | hierarchical | Yes | 5 parents, 13 children |
+| `ws_adverse_action_types` | flat | Yes | 14 terms |
+| `ws_process_type` | flat | No | 9 terms |
+| `ws_remedies` | flat | Yes | 20 terms |
+| `ws_fee_shifting` | flat | No | 4 terms |
+| `ws_employer_defense` | flat | Yes | 6 terms |
+| `ws_employee_standard` | flat | Yes | 6 terms |
+
+### Other Taxonomies
 
 | Slug | Type | Attaches To | Notes |
 |---|---|---|---|
-| `ws_jurisdiction` | flat | All content CPTs | Canonical join key. USPS slug (e.g. `ca`, `us`). |
-| `ws_disclosure_type` | hierarchical | `jx-statute`, `jx-citation`, `ws-agency`, `ws-ag-procedure`, `ws-assist-org` | |
-| `ws_process_type` | flat | `jx-statute`, `jx-interpretation`, `ws-agency` | |
-| `ws_procedure_type` | flat | `ws-ag-procedure` | Replaces retired `ws_proc_type` ACF select |
-| `ws_employment_sector` | flat | `ws-assist-org` | For Phase 2 filter cascade |
-| `ws_case_stage` | flat | `ws-assist-org` | Q1 split in Phase 2 cascade |
+| `ws_jurisdiction` | flat | All content CPTs | Canonical join key. USPS slug. |
+| `ws_languages` | flat | `ws-agency`, `ws-assist-org` | `additional` sentinel |
+| `ws_case_stage` | flat | `ws-assist-org` | Phase 2 filter axis |
+| `ws_aorg_type` | flat | `ws-assist-org` | Single-value |
+| `ws_employment_sector` | flat | `ws-assist-org` | Phase 2 filter axis |
+| `ws_aorg_cost_model` | flat | `ws-assist-org` | Single-value |
+| `ws_aorg_service` | flat | `ws-assist-org` | `additional` sentinel |
+| `ws_procedure_type` | flat | `ws-ag-procedure` | 3 stable terms |
 | `ws_glossary` | flat | *(unattached)* | Admin-only; no public archive |
-
-Full taxonomy inventory in `ws-core/README.md`.

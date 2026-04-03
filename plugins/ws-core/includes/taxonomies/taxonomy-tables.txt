@@ -308,6 +308,7 @@ expungement-of-personnel-record Expungement of Personnel Record
 bounty-qui-tam-award            Bounty / Qui Tam Award
 wage-differential               Wage Differential
 liquidated-damages              Liquidated Damages
+consequential-damages           Consequential / Special Damages
 has-details                     Has Details (sentinel — jx-statute only)
 
 

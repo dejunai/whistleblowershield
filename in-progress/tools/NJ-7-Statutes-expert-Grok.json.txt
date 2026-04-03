@@ -1,0 +1,96 @@
+{
+  "meta": {
+    "json_format_version": "2.0",
+    "source_method": "ai_assisted",
+    "source_name": "Grok",
+    "jurisdiction_id": "NJ",
+    "generated_date": "2026-04-03",
+    "generated_by": "Grok by xAI",
+    "record_count": 1,
+    "proposed_count": 0,
+    "new_terms_proposed": [],
+    "json_run_notes": "Focused exclusively on the primary requested statute (CEPA / N.J.S.A. 34:19-1 et seq.) using text and definitions extracted from approved secondary sources (law.justia.com). Could not identify or fully verify 6 additional distinct state-level whistleblower statutes with sufficient confidence from official legislature or approved sources without risking fabrication or inference. Other anti-retaliation provisions exist in secondary statutes (e.g., LAD §10:5-12(d), Family Leave Act §34:11B-9, False Claims Act §2A:32C-10, Civil Service §11A:2-24) but were excluded as they are not standalone whistleblower laws and full statutory text/verification was not obtained in this pass. No new taxonomy terms proposed. Citations omitted due to lack of verifiable URLs from approved case-law sources.",
+    "batch_completed": "2026-04-03 07:21 UTC"
+  },
+  "records": [
+    {
+      "jurisdiction_id": "NJ",
+      "statute_id": "NJ-34:19-3",
+      "official_name": "Conscientious Employee Protection Act",
+      "common_name": "CEPA",
+      "legal_basis": {
+        "statute_citation": "N.J.S.A. 34:19-1 et seq.",
+        "disclosure_types": [],
+        "protected_class": [
+          "has-details"
+        ],
+        "protected_class_details": "Any individual who performs services for and under the control and direction of an employer for wages or other remuneration (broadly covers private-sector and public-sector employees; employer definition explicitly includes all branches of state government, counties, municipalities, school districts, authorities, and political subdivisions).",
+        "disclosure_targets": [
+          "internal-supervisor",
+          "agency-federal",
+          "agency-state",
+          "agency-local",
+          "law-enforcement",
+          "legislative-federal",
+          "legislative-state",
+          "judicial"
+        ],
+        "adverse_action_scope": "Retaliatory action defined as discharge, suspension or demotion of an employee, or other adverse employment action taken against an employee in the terms and conditions of employment."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": false,
+        "limit_value": 1,
+        "limit_unit": "years",
+        "trigger": "date of the retaliatory action",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "process_type": [
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "suspension",
+          "demotion",
+          "has-details"
+        ],
+        "adverse_action_details": "discharge, suspension or demotion, or other adverse employment action taken against an employee in the terms and conditions of employment",
+        "remedies": [
+          "reinstatement",
+          "back-pay",
+          "compensatory-damages",
+          "punitive-damages",
+          "attorney-fees",
+          "litigation-costs"
+        ],
+        "fee_shifting": [
+          "unilateral-pro-plaintiff"
+        ]
+      },
+      "burden_of_proof": {
+        "employee_standard": []
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://law.justia.com/codes/new-jersey/title-34/section-34-19-3/",
+        "is_official": false,
+        "url_source": "law.justia.com"
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      "_review_notes": "CEPA is NJ's primary and broadest whistleblower statute. Protected activity includes: (a) disclosing/threatening to disclose to supervisor or public body any activity/policy/practice reasonably believed to violate law/rule/regulation (or improper patient care if healthcare professional); (b) providing information/testifying before public body investigating such violation; (c) providing information involving deception/misrepresentation to shareholders/investors/etc. Also protects objecting to/refusing to participate in such activity. Applies to all employers/employees (public and private). Explicit 1-year SOL from retaliatory action; civil action with jury trial option; full remedies including reinstatement, back pay with interest, compensatory/punitive damages, attorney fees/costs. No qui tam or reward. Reviewer: confirm full chapter (34:19-1 through 34:19-8) and any 2025+ amendments on official NJ legislature site."
+    }
+  ],
+  "integrity": {
+    "with_errors": true,
+    "error_details": [
+      "Batch truncated — only 1 statute record (NJ-34:19-3 / CEPA) completed with reasonable confidence using approved sources; could not locate/verify 6 additional distinct state-level whistleblower statutes meeting the requested scope without fabrication or inference",
+      "No case citations attached — no verifiable URLs obtained from approved case-law sources (official courts, courtlistener.com, casetext.com) in this research pass"
+    ],
+    "error_count": 2
+  }
+}

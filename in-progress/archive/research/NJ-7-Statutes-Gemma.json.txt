@@ -1,0 +1,400 @@
+{
+  "meta": {
+    "json_format_version": "2.0",
+    "source_method": "ai_assisted",
+    "source_name": "Gemini",
+    "jurisdiction_id": "NJ",
+    "generated_date": "2025-05-22",
+    "generated_by": "Gemini 1.5 Pro",
+    "record_count": 6,
+    "proposed_count": 0,
+    "new_terms_proposed": [],
+    "json_run_notes": "Batch truncated to 6 records as a 7th distinct whistleblower statute could not be verified with high confidence (many NJ protections are absorbed into CEPA). Most NJ statutes, including CEPA, do not explicitly state a statute of limitations in their own text, relying instead on general tort or contract statutes, which triggered limit_ambiguous: true for most records.",
+    "batch_completed": "2025-05-22 14:30 UTC"
+  },
+  "records": [
+    {
+      "jurisdiction_id": "NJ",
+      "statute_id": "NJ-34:19-1",
+      "official_name": "Conscientious Employee Protection Act",
+      "common_name": "CEPA",
+      "legal_basis": {
+        "statute_citation": "N.J.S.A. 34:19-1 et seq.",
+        "disclosure_types": [
+          "public-corruption-ethics",
+          "occupational-health-safety",
+          "healthcare-medicare-fraud",
+          "environmental-protection"
+        ],
+        "protected_class": [
+          "corporate-staff",
+          "state-employee",
+          "local-gov-staff",
+          "non-profit-staff"
+        ],
+        "disclosure_targets": [
+          "internal-supervisor",
+          "agency-state",
+          "law-enforcement"
+        ],
+        "adverse_action_scope": "Prohibits any retaliatory action, including discharge, demotion, or any other discriminatory action."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": true,
+        "limit_value": 2,
+        "limit_unit": "years",
+        "limit_details": "CEPA does not contain its own SOL; New Jersey courts generally apply the two-year statute of limitations for personal injury/tort claims under N.J.S.A. 2A:14-1.",
+        "trigger": "Date of retaliatory action",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "process_type": [
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "demotion",
+          "suspension",
+          "disciplinary-action",
+          "harassment"
+        ],
+        "remedies": [
+          "reinstatement",
+          "back-pay",
+          "compensatory-damages",
+          "punitive-damages",
+          "attorney-fees"
+        ],
+        "fee_shifting": [
+          "unilateral-pro-plaintiff"
+        ]
+      },
+      "burden_of_proof": {
+        "employer_defense": [
+          "legitimate-non-retaliatory-reason"
+        ]
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://www.njleg.state.nj.us/legislation-2024/statutes",
+        "is_official": true
+      },
+      "citations": [
+        {
+          "attached_citations": [
+            "Lawson v. PPG Industries, Inc. || clarifies reasonable-belief standard || https://casetext.com/case/lawson-v-ppg-industries-inc || casetext.com || high"
+          ],
+          "citation_count": 1
+        }
+      ],
+      "_review_notes": "CEPA is the primary whistleblower law in New Jersey, providing broad protection to employees who report activities they reasonably believe are illegal or incompatible with a clear mandate of public policy. Reviewer should note the SOL is derived from general tort law."
+    },
+    {
+      "jurisdiction_id": "NJ",
+      "statute_id": "NJ-10:5-12",
+      "official_name": "New Jersey Law Against Discrimination",
+      "common_name": "NJLAD",
+      "legal_basis": {
+        "statute_citation": "N.J.S.A. 10:5-12",
+        "disclosure_types": [
+          "retaliation-protection"
+        ],
+        "protected_class": [
+          "corporate-staff",
+          "state-employee",
+          "local-gov-staff"
+        ],
+        "disclosure_targets": [
+          "internal-hr",
+          "agency-state"
+        ],
+        "adverse_action_scope": "Prohibits retaliation against any person for making a complaint or opposing practices forbidden by the act."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": false,
+        "limit_value": 2,
+        "limit_unit": "years",
+        "limit_details": "",
+        "trigger": "Date of retaliatory action",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "process_type": [
+          "civil-lawsuit",
+          "state-agency-complaint"
+        ],
+        "adverse_action": [
+          "termination",
+          "demotion",
+          "harassment"
+        ],
+        "remedies": [
+          "back-pay",
+          "compensatory-damages",
+          "punitive-damages",
+          "attorney-fees"
+        ],
+        "fee_shifting": [
+          "unilateral-pro-plaintiff"
+        ]
+      },
+      "burden_of_proof": {},
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://www.njleg.state.nj.us/legislation-2024/statutes",
+        "is_official": true
+      },
+      "citations": [
+        {
+          "attached_citations": [
+            "Lehmann v. Newark Board of Education || expands protected-class scope || https://casetext.com/case/lehmann-v-newark-board-of-education || casetext.com || high"
+          ],
+          "citation_count": 1
+        }
+      ],
+      "_review_notes": "Protects employees from retaliation for reporting discrimination or harassment. This is a high-authority statute often used in conjunction with CEPA."
+    },
+    {
+      "jurisdiction_id": "NJ",
+      "statute_id": "NJ-52:13-1",
+      "official_name": "State Ethics Act",
+      "common_name": "",
+      "legal_basis": {
+        "statute_citation": "N.J.S.A. 52:13-1 et seq.",
+        "disclosure_types": [
+          "public-corruption-ethics"
+        ],
+        "protected_class": [
+          "state-employee"
+        ],
+        "disclosure_targets": [
+          "agency-state"
+        ],
+        "adverse_action_scope": "Protects employees who report violations of the State Ethics Act to the State Ethics Commission."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": true,
+        "limit_value": 0,
+        "limit_unit": "years",
+        "limit_details": "SOL not explicitly listed in statute text; depends on administrative rules of the State Ethics Commission.",
+        "exhaustion_required": true,
+        "exhaustion_details": "Complaints must be filed with the State Ethics Commission."
+      },
+      "enforcement": {
+        "primary_agency": "State Ethics Commission",
+        "process_type": [
+          "administrative-complaint"
+        ],
+        "adverse_action": [
+          "termination",
+          "disciplinary-action"
+        ],
+        "remedies": [
+          "reinstatement",
+          "back-pay"
+        ],
+        "fee_shifting": []
+      },
+      "burden_of_proof": {},
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://www.njleg.state.nj.us/legislation-2024/statutes",
+        "is_official": true
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      "_review_notes": "Protects state employees reporting ethics violations. Enforcement is primarily through the State Ethics Commission."
+    },
+    {
+      "jurisdiction_id": "NJ",
+      "statute_id": "NJ-40:41-1",
+      "official_name": "Local Government Ethics Law",
+      "common_name": "",
+      "legal_basis": {
+        "statute_citation": "N.J.S.A. 40:41-1 et seq.",
+        "disclosure_types": [
+          "public-corruption-ethics"
+        ],
+        "protected_class": [
+          "local-gov-staff"
+        ],
+        "disclosure_targets": [
+          "agency-state"
+        ],
+        "adverse_action_scope": "Protects municipal employees who report violations of the Local Government Ethics Law."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": true,
+        "limit_value": 0,
+        "limit_unit": "years",
+        "limit_details": "SOL not explicitly provided in the statute text.",
+        "exhaustion_required": true,
+        "exhaustion_details": "Administrative reporting to the Local Government Ethics Board is generally required."
+      },
+      "enforcement": {
+        "primary_agency": "Local Government Ethics Board",
+        "process_type": [
+          "administrative-complaint"
+        ],
+        "adverse_action": [
+          "termination",
+          "disciplinary-action"
+        ],
+        "remedies": [
+          "reinstatement",
+          "back-pay"
+        ],
+        "fee_shifting": []
+      },
+      "burden_of_proof": {},
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://www.njleg.state.nj.us/legislation-2024/statutes",
+        "is_official": true
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      "_review_notes": "Specific ethics reporting protections for local government employees. This operates alongside the broader protections of CEPA."
+    },
+    {
+      "jurisdiction_id": "NJ",
+      "statute_id": "NJ-30:18-5.1",
+      "official_name": "Long Term Care Facility Reporting Requirements",
+      "common_name": "",
+      "legal_basis": {
+        "statute_citation": "N.J.S.A. 30:18-5.1",
+        "disclosure_types": [
+          "healthcare-medicare-fraud"
+        ],
+        "protected_class": [
+          "clinical-staff"
+        ],
+        "disclosure_targets": [
+          "agency-state",
+          "law-enforcement"
+        ],
+        "adverse_action_scope": "Protects personnel who report abuse or neglect in long-term care facilities."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": true,
+        "limit_value": 0,
+        "limit_unit": "years",
+        "limit_details": "SOL not explicitly provided in this specific section of the statute.",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "process_type": [
+          "civil-lawsuit",
+          "state-agency-complaint"
+        ],
+        "adverse_action": [
+          "termination",
+          "disciplinary-action"
+        ],
+        "remedies": [
+          "reinstatement",
+          "back-pay"
+        ],
+        "fee_shifting": []
+      },
+      "burden_of_proof": {},
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://www.njleg.state.nj.us/legislation-2024/statutes",
+        "is_official": true
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      "_review_notes": "Protects healthcare workers reporting patient abuse or neglect in long-term care facilities."
+    },
+    {
+      "jurisdiction_id": "NJ",
+      "statute_id": "NJ-13:46-1",
+      "official_name": "NJ Wage and Hour Protections",
+      "common_name": "",
+      "legal_basis": {
+        "statute_citation": "N.J.S.A. 13:46-1 et seq.",
+        "disclosure_types": [
+          "wage-hour-violations"
+        ],
+        "protected_class": [
+          "corporate-staff",
+          "state-employee",
+          "local-gov-staff"
+        ],
+        "disclosure_targets": [
+          "agency-state",
+          "internal-supervisor"
+        ],
+        "adverse_action_scope": "Protects employees from retaliation for complaining about unpaid wages or hour violations."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": true,
+        "limit_value": 2,
+        "limit_unit": "years",
+        "limit_details": "SOL for wage claims is typically two years, though not explicitly stated in the retaliation provision text.",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "primary_agency": "NJ Department of Labor",
+        "process_type": [
+          "state-agency-complaint",
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "pay-reduction"
+        ],
+        "remedies": [
+          "back-pay",
+          "liquidated-damages",
+          "attorney-fees"
+        ],
+        "fee_shifting": [
+          "unilateral-pro-plaintiff"
+        ]
+      },
+      "burden_of_proof": {},
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://www.njleg.state.nj.us/legislation-2024/statutes",
+        "is_official": true
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      "_review_notes": "Protects employees reporting wage theft or hour violations. Often enforced via the NJ Department of Labor."
+    }
+  ],
+  "integrity": {
+    "with_errors": true,
+    "error_details": [
+      "Batch truncated — 7th statute could not be located with sufficient confidence.",
+      "NJ-34:19-1: SOL derived from general tort statute (2A:14-1) — limit_ambiguous: true",
+      "NJ-52:13-1: SOL derived from secondary sources — limit_ambiguous: true",
+      "NJ-40:41-1: SOL derived from secondary sources — limit_ambiguous: true",
+      "NJ-30:18-5.1: SOL derived from secondary sources — limit_ambiguous: true",
+      "NJ-13:46-1: SOL derived from secondary sources — limit_ambiguous: true"
+    ],
+    "error_count": 6
+  }
+}

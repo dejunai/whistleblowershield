@@ -1,0 +1,236 @@
+{
+  "meta": {
+    "json_format_version": "2.0",
+    "source_method": "ai_assisted",
+    "source_name": "Grok",
+    "jurisdiction_id": "NJ",
+    "generated_date": "2026-04-03",
+    "generated_by": "Grok by xAI (reasoning model)",
+    "record_count": 3,
+    "proposed_count": 0,
+    "new_terms_proposed": [],
+    "json_run_notes": "Scope requested 7 records focused on state-level whistleblower laws including CEPA. Only CEPA (N.J.S.A. 34:19-1 et seq.) is the primary comprehensive whistleblower retaliation statute. NJ False Claims Act (N.J.S.A. 2A:32C-1 et seq.) includes retaliation protections and qui tam provisions. Public sector/government employee protections are largely covered under CEPA (broad employer definition includes public entities) or general civil service rules without a dedicated standalone whistleblower statute easily verifiable at official sources. No additional distinct statutes located with high confidence via approved sources (njleg.state.nj.us primary; Justia secondary). Batch limited to 3 high-confidence records. No parent taxonomy slugs used.",
+    "batch_completed": "2026-04-03 07:45 UTC"
+  },
+  "records": [
+    {
+      "jurisdiction_id": "NJ",
+      "statute_id": "NJ-34:19",
+      "official_name": "Conscientious Employee Protection Act",
+      "common_name": "CEPA",
+      "legal_basis": {
+        "statute_citation": "N.J.S.A. 34:19-1 et seq.",
+        "disclosure_types": [
+          "workplace-employment",
+          "public-health-safety"
+        ],
+        "protected_class": [
+          "corporate-staff",
+          "non-profit-staff",
+          "contractor-gig"
+        ],
+        "disclosure_targets": [
+          "internal-supervisor",
+          "public-body"
+        ],
+        "adverse_action_scope": "Any retaliatory action including discharge, suspension, demotion, or other adverse employment action taken because the employee engaged in protected activity."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": true,
+        "limit_value": 1,
+        "limit_unit": "years",
+        "limit_details": "One year from the date of the retaliatory action (derived from secondary sources and case law; not explicitly stated in CEPA text itself).",
+        "trigger": "Date of retaliatory action",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "primary_agency": "",
+        "process_type": [
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "suspension",
+          "demotion",
+          "disciplinary-action",
+          "harassment"
+        ],
+        "remedies": [
+          "reinstatement",
+          "back-pay",
+          "compensatory-damages",
+          "punitive-damages",
+          "attorney-fees",
+          "litigation-costs"
+        ],
+        "fee_shifting": [
+          "unilateral-pro-plaintiff"
+        ]
+      },
+      "burden_of_proof": {
+        "employee_standard": [
+          "reasonable-belief"
+        ],
+        "employer_defense": []
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://law.justia.com/codes/new-jersey/title-34/section-34-19-1/",
+        "is_official": false,
+        "url_source": "law.justia.com"
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      "_review_notes": "CEPA is New Jersey's primary and broadest whistleblower protection statute (N.J.S.A. 34:19-1 to -8). It protects employees who disclose or threaten to disclose to a supervisor or public body activities believed to violate law/rule/regulation, or (for healthcare professionals) improper patient care; or who provide information/testify before public bodies; or who refuse to participate in such activities. 'Employee' broadly interpreted to include some independent contractors per NJ Supreme Court cases (D'Annunzio and Stomel). No explicit exhaustion required; direct civil action available. Verify full text at official NJ legislature site if available. SOL is consistently described as 1 year but derived, hence ambiguous flag."
+    },
+    {
+      "jurisdiction_id": "NJ",
+      "statute_id": "NJ-2A:32C",
+      "official_name": "New Jersey False Claims Act",
+      "common_name": "NJ False Claims Act",
+      "legal_basis": {
+        "statute_citation": "N.J.S.A. 2A:32C-1 et seq.",
+        "disclosure_types": [
+          "financial-corporate",
+          "government-accountability"
+        ],
+        "protected_class": [
+          "corporate-staff"
+        ],
+        "disclosure_targets": [],
+        "adverse_action_scope": "Retaliation in the terms and conditions of employment because of lawful acts in furtherance of a False Claims Act action or investigation."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": true,
+        "limit_value": 6,
+        "limit_unit": "years",
+        "limit_details": "Generally six years for qui tam actions; retaliation claims may align with general civil SOL or CEPA interaction (derived from secondary sources).",
+        "trigger": "",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "primary_agency": "New Jersey Attorney General",
+        "process_type": [
+          "qui-tam",
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "demotion",
+          "harassment"
+        ],
+        "remedies": [
+          "reinstatement",
+          "double-back-pay",
+          "compensatory-damages",
+          "attorney-fees",
+          "litigation-costs",
+          "bounty-qui-tam-award"
+        ],
+        "fee_shifting": [
+          "unilateral-pro-plaintiff"
+        ]
+      },
+      "burden_of_proof": {
+        "employee_standard": [],
+        "employer_defense": []
+      },
+      "reward": {
+        "available": true,
+        "reward_details": "Relator share of 15-30% of recovery depending on government intervention."
+      },
+      "links": {
+        "statute_url": "",
+        "is_official": false
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      "_review_notes": "NJ False Claims Act provides qui tam mechanism for fraud against the state and includes specific retaliation protections for whistleblowers who act in furtherance of FCA claims/investigations. Rewards available to successful relators. Retaliation remedies include 2x back pay plus interest and special damages. Primary focus is fraud recovery rather than general whistleblowing. Confirm full official text and interaction with CEPA."
+    },
+    {
+      "jurisdiction_id": "NJ",
+      "statute_id": "NJ-CEPA-HEALTH",
+      "official_name": "Conscientious Employee Protection Act (Healthcare Provisions)",
+      "common_name": "",
+      "legal_basis": {
+        "statute_citation": "N.J.S.A. 34:19-3 (healthcare subsections)",
+        "disclosure_types": [
+          "public-health-safety"
+        ],
+        "protected_class": [
+          "clinical-staff"
+        ],
+        "protected_class_details": "Licensed or certified health care professionals",
+        "disclosure_targets": [
+          "internal-supervisor",
+          "public-body"
+        ],
+        "adverse_action_scope": "Retaliatory action prohibited for disclosures or objections related to improper quality of patient care."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": true,
+        "limit_value": 1,
+        "limit_unit": "years",
+        "limit_details": "One year (same as general CEPA; derived).",
+        "trigger": "Date of retaliatory action",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "primary_agency": "",
+        "process_type": [
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "suspension",
+          "demotion",
+          "harassment"
+        ],
+        "remedies": [
+          "reinstatement",
+          "back-pay",
+          "compensatory-damages",
+          "punitive-damages",
+          "attorney-fees"
+        ],
+        "fee_shifting": [
+          "unilateral-pro-plaintiff"
+        ]
+      },
+      "burden_of_proof": {
+        "employee_standard": [
+          "reasonable-belief"
+        ],
+        "employer_defense": []
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://law.justia.com/codes/new-jersey/title-34/section-34-19-3/",
+        "is_official": false,
+        "url_source": "law.justia.com"
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      "_review_notes": "This record highlights the specific healthcare professional protections within CEPA (improper quality of patient care disclosures). Treated as a focused subset record per scope emphasis on CEPA. Protected class uses has-details equivalent via details field for licensed/certified healthcare staff. Overlaps with main CEPA record but captures specialized patient care provisions. Verify if separate treatment is preferred or merge with primary CEPA."
+    }
+  ],
+  "integrity": {
+    "with_errors": true,
+    "error_details": [
+      "Only 3 records produced instead of 7 requested; additional distinct NJ state whistleblower statutes (beyond CEPA and NJFCA) could not be confidently located or verified at approved official/secondary sources.",
+      "SOL values for all records marked limit_ambiguous true as derived from secondary sources/case law rather than explicit text in the whistleblower statutes themselves.",
+      "Citations omitted across records; no verifiable URLs from approved case law sources (e.g., courtlistener, official court sites) could be confirmed for high-authority interpretations in this pass."
+    ],
+    "error_count": 3
+  }
+}

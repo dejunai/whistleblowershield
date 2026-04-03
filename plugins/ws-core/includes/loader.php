@@ -155,10 +155,11 @@
  *         sections added. acf/workflow/ and admin/monitors/ subdirectory
  *         load blocks added.
  * 3.10.2  ws-statute-bold added to render files.
+ * 3.13.0  cpt-jx-common-law and acf-jx-common-law added.
  *
  * @package WhistleblowerShield
  * @since   2.1.0
- * @version 3.10.0
+ * @version 3.13.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit;
@@ -172,7 +173,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 	$cpt_files = [
 		'cpt-jurisdictions', 'cpt-jx-summaries', 'cpt-jx-statutes', 'cpt-legal-updates',
 		'cpt-jx-citations', 'cpt-agencies', 'cpt-ag-procedures', 'cpt-assist-orgs',
-		'cpt-jx-interpretations', 'cpt-references',
+		'cpt-jx-interpretations', 'cpt-jx-common-law', 'cpt-references',
 	];
 	foreach ( $cpt_files as $file ) {
 		$path = WS_CORE_PATH . "includes/cpt/{$file}.php";
@@ -344,7 +345,7 @@ if ( is_admin() ) {
     $acf_files = [
         'acf-jurisdictions', 'acf-jx-summaries', 'acf-jx-statutes', 'acf-legal-updates',
         'acf-jx-citations', 'acf-agencies', 'acf-ag-procedures', 'acf-assist-orgs',
-        'acf-jx-interpretations', 'acf-references',
+        'acf-jx-interpretations', 'acf-jx-common-law', 'acf-references',
     ];
 
     foreach ( $acf_files as $file ) {
@@ -479,7 +480,7 @@ if ( ! is_admin() ) {
 	// would never fire here. Check the server error log if assembly layer output is silently broken.
 	$render_files = [
 		'render-general', 'render-section', 'render-jurisdiction', 'render-directory', 'render-agency',
-		'ws-statute-bold',
+		'render-common-law', 'ws-statute-bold',
 	];
 	foreach ( $render_files as $file ) {
 		$path = WS_CORE_PATH . "includes/render/{$file}.php";

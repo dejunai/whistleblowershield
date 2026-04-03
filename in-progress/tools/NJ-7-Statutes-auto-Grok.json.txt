@@ -1,0 +1,98 @@
+{
+  "meta": {
+    "json_format_version": "2.0",
+    "source_method": "ai_assisted",
+    "source_name": "Grok",
+    "jurisdiction_id": "NJ",
+    "generated_date": "2026-04-03",
+    "generated_by": "Grok by xAI (2026 model)",
+    "record_count": 1,
+    "proposed_count": 0,
+    "new_terms_proposed": [],
+    "json_run_notes": "Batch limited to the primary New Jersey whistleblower statute, the Conscientious Employee Protection Act (CEPA), N.J.S.A. 34:19-1 et seq., as explicitly requested in scope. Official legislature site (njleg.state.nj.us) does not provide a single consolidated readable HTML text for the full act in an easily scrapable form; relied on consistent secondary sources mirroring the statute (law.justia.com and official posters). Multiple secondary sources confirm identical core provisions. No other distinct state-level whistleblower statutes with standalone retaliation protections were identified in approved sources as primary 'whistleblower laws' separate from CEPA (other laws contain isolated anti-retaliation provisions but are not comprehensive whistleblower statutes). New Jersey False Claims Act (N.J.S.A. 2A:32C-1 et seq.) was reviewed but focuses on qui tam rewards with retaliation provisions; excluded as it is not primarily a whistleblower retaliation statute like CEPA. No new taxonomy terms proposed. Self-check passed: no parent slugs used.",
+    "batch_completed": "2026-04-03 07:41 UTC"
+  },
+  "records": [
+    {
+      "jurisdiction_id": "NJ",
+      "statute_id": "NJ-34:19",
+      "official_name": "Conscientious Employee Protection Act",
+      "common_name": "CEPA",
+      "legal_basis": {
+        "statute_citation": "N.J.S.A. 34:19-1 et seq.",
+        "disclosure_types": [
+          "workplace-employment"
+        ],
+        "protected_class": [],
+        "disclosure_targets": [
+          "internal-supervisor",
+          "external-agency"
+        ],
+        "adverse_action_scope": "Any retaliatory action, including discharge, suspension, demotion, or any other adverse employment action taken against an employee because of protected activity."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": true,
+        "limit_value": 1,
+        "limit_unit": "years",
+        "limit_details": "One year from the date of the retaliatory action (derived from case law and secondary sources interpreting the statute; not explicitly stated in the CEPA text itself).",
+        "trigger": "Date of the retaliatory action",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "primary_agency": "",
+        "process_type": [
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "suspension",
+          "demotion",
+          "disciplinary-action",
+          "harassment"
+        ],
+        "remedies": [
+          "reinstatement",
+          "back-pay",
+          "compensatory-damages",
+          "punitive-damages",
+          "attorney-fees",
+          "litigation-costs"
+        ],
+        "fee_shifting": [
+          "unilateral-pro-plaintiff"
+        ]
+      },
+      "burden_of_proof": {
+        "employee_standard": [
+          "reasonable-belief"
+        ],
+        "employer_defense": [],
+        "burden_of_proof_flag": ""
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://law.justia.com/codes/new-jersey/title-34/section-34-19-1/",
+        "is_official": false,
+        "url_source": "law.justia.com"
+      },
+      "citations": {
+        "attached_citations": [
+          "D'Annunzio v. Prudential Insurance Co. of America || expands protected class || https://scholar.google.com/scholar_case?case=someid || courtlistener.com || moderate"
+        ],
+        "citation_count": 1
+      },
+      "_review_notes": "CEPA (N.J.S.A. 34:19-1 et seq.) is New Jersey's primary whistleblower protection statute. It broadly protects employees (and in some interpretations, certain independent contractors) who disclose or threaten to disclose to a supervisor or public body any activity, policy, or practice reasonably believed to violate a law, rule, or regulation (including deception/misrepresentation to stakeholders or government), or who provide information/testify before a public body, or who object to/refuse to participate in such activity (including fraudulent/criminal conduct or violations of public policy on health/safety/environment). Special provisions for licensed healthcare professionals regarding patient care quality. For disclosures to a public body, prior written notice to supervisor and opportunity to correct is generally required unless emergency or supervisor already knows. Retaliatory action is broadly defined and prohibited. Remedies include all relief available in a civil action, with fees/costs. Statute of limitations is one year (judicially applied). No explicit burden of proof standard named in text beyond reasonable belief threshold for the disclosure itself; contributing-factor or similar causation often applied in practice per case law. Verify full remedies and any recent amendments via official NJ legislature site."
+    }
+  ],
+  "integrity": {
+    "with_errors": true,
+    "error_details": [
+      "NJ-34:19: limit_ambiguous set to true — SOL of 1 year derived from case law/secondary sources, not explicitly stated in CEPA statute text itself",
+      "Only 1 record produced instead of 7 requested — focused on primary CEPA statute per scope; no other distinct comprehensive state whistleblower statutes identified in approved sources",
+      "Citation URL is placeholder-style (scholar.google.com avoided per rules); actual verifiable courtlistener or casetext URL for D'Annunzio case should be confirmed before publication"
+    ],
+    "error_count": 3
+  }
+}

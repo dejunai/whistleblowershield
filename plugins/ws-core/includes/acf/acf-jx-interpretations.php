@@ -68,7 +68,7 @@
  *        ws_disclosure_targets, ws_adverse_action_types, ws_process_type
  *        (moved from Summary tab), ws_remedies, ws_fee_shifting,
  *        ws_employer_defense, ws_employee_standard — mirrors jx-statute palette
- *        (no has-details sentinels on interpretations).
+ *        including has-details sentinel pattern and companion _details fields.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -260,7 +260,9 @@ function ws_register_acf_jx_interpretations() {
             //
             // Doctrinal taxonomy fields mirroring jx-statute. Tag only what
             // the interpretation genuinely addresses or clarifies — do not
-            // inherit from the parent statute. No has-details sentinels.
+            // inherit from the parent statute. has-details sentinel pattern
+            // active on all supporting taxonomies — companion _details fields
+            // follow each.
             // ────────────────────────────────────────────────────────────────
 
             [

@@ -1,0 +1,202 @@
+I have compiled the structured JSON data for the New Jersey whistleblower statutes identified in the research. This analysis includes the Conscientious Employee Protection Act (CEPA), the New Jersey False Claims Act, the Wage Theft Act, the SAFE Act, and the Workers' Compensation retaliation provisions.
+
+I have processed the research and generated the JSON file for the five primary New Jersey whistleblower and anti-retaliation statutes. Each record includes the specific citation, protected activities, and remedies available under the law. 
+
+* **Records Generated**: 5 (CEPA, NJFCA, Wage Theft Act, SAFE Act, Workers' Compensation).
+* **Compliance**: Followed the v2.0.13 template requirements, including the exclusion of common law records from the `statute` records array while referencing them in `key_cases` and `notes`.
+* **Integrity**: No errors identified in the source research.
+
+{
+  "meta": {
+    "jurisdiction": "New Jersey",
+    "jurisdiction_id": "NJ",
+    "record_type": "statute",
+    "total_records": 5
+  },
+  "records": [
+    {
+      "statute_id": "NJ-CEPA",
+      "full_name": "Conscientious Employee Protection Act",
+      "short_name": "CEPA",
+      "citation": "N.J.S.A. 34:19-1 et seq.",
+      "brief_summary": "Regarded as one of the nation's strongest whistleblower laws, CEPA protects employees from retaliation for reporting or objecting to conduct they reasonably believe is unlawful, fraudulent, or harmful to public policy.",
+      "protected_activities": [
+        "Disclosing or threatening to disclose to a supervisor or public body an activity, policy, or practice the employee reasonably believes is in violation of a law, rule, or regulation.",
+        "Providing information to, or testifying before, any public body conducting an investigation or inquiry into a violation of law.",
+        "Objecting to or refusing to participate in any activity, policy, or practice which the employee reasonably believes is in violation of a law, is fraudulent or criminal, or is incompatible with a clear mandate of public policy.",
+        "For licensed/certified healthcare professionals: objecting to or refusing to participate in practices that constitute improper quality of patient care."
+      ],
+      "adverse_actions": [
+        "Discharge",
+        "Suspension",
+        "Demotion",
+        "Any other adverse employment action taken against an employee in the terms and conditions of employment."
+      ],
+      "statute_of_limitations": {
+        "value": 1,
+        "unit": "year",
+        "notes": "One year from the date of the retaliatory action."
+      },
+      "remedies": [
+        "Reinstatement with seniority",
+        "Back pay",
+        "Compensatory damages for emotional distress",
+        "Punitive damages (for malicious conduct)",
+        "Reasonable attorney fees and litigation costs"
+      ],
+      "administrative_requirements": [
+        "Written notice to a supervisor is generally required for external disclosures to a public body, allowing the employer a reasonable opportunity to correct the activity.",
+        "Notice is waived in emergencies, where the employee fears physical harm, or where the employee is reasonably certain the activity is known to a supervisor."
+      ],
+      "key_cases": [
+        "Estate of Roach v. TRW, Inc., 164 N.J. 598 (2000) (Confirms reasonable belief standard; actual violation not required)",
+        "Dzwonar v. McDevitt, 177 N.J. 451 (2003) (Belief must be tied to law/public policy, not internal bylaws)",
+        "Chiofalo v. State, 236 N.J. 220 (2018) (Distinguishes between routine grievances and public policy whistleblowing)",
+        "D'Annunzio v. Prudential Insurance Co., 192 N.J. 110 (2007) (Extends protection to certain independent contractors)"
+      ],
+      "notes": "Initiating a lawsuit under CEPA waives the employee's right to pursue concurrent claims under other state laws or common law (Pierce claims) for the same conduct."
+    },
+    {
+      "statute_id": "NJ-FCA",
+      "full_name": "New Jersey False Claims Act",
+      "short_name": "NJFCA",
+      "citation": "N.J.S.A. 2A:32C-10",
+      "brief_summary": "Protects individuals from retaliation for disclosing fraud against the state or for acting in furtherance of a qui tam action under the False Claims Act.",
+      "protected_activities": [
+        "Lawful acts done by an employee, contractor, or agent in furtherance of an action under the False Claims Act.",
+        "Disclosing information to a state or law enforcement agency regarding fraudulent claims against public funds.",
+        "Efforts to stop one or more violations of the NJFCA."
+      ],
+      "adverse_actions": [
+        "Discharge",
+        "Demotion",
+        "Suspension",
+        "Threats",
+        "Harassment",
+        "Discrimination in any other manner in the terms and conditions of employment."
+      ],
+      "statute_of_limitations": {
+        "value": 3,
+        "unit": "years",
+        "notes": "Three years from the date of the retaliatory action."
+      },
+      "remedies": [
+        "Reinstatement with the same seniority status",
+        "Two times (2x) the amount of back pay",
+        "Interest on back pay",
+        "Compensation for special damages sustained",
+        "Litigation costs and reasonable attorney fees",
+        "Punitive damages where appropriate"
+      ],
+      "administrative_requirements": [],
+      "key_cases": [],
+      "notes": "The statute specifically prohibits employers from creating policies that prevent employees from disclosing information to law enforcement concerning false claims."
+    },
+    {
+      "statute_id": "NJ-WTA",
+      "full_name": "New Jersey Wage Theft Act (2019 Amendments)",
+      "short_name": "Wage Theft Act",
+      "citation": "N.J.S.A. 34:11-4.10",
+      "brief_summary": "Provides robust protections against retaliation for employees who complain about unpaid wages, including a powerful rebuttable presumption of retaliation.",
+      "protected_activities": [
+        "Complaining to the employer or the commissioner about unpaid wages or improper wage calculations.",
+        "Informing any other person of their rights under the wage and hour laws.",
+        "Instituting or testifying in a proceeding regarding wage payment violations."
+      ],
+      "adverse_actions": [
+        "Discharge",
+        "Discrimination concerning compensation or conditions of employment",
+        "Retaliatory discharge"
+      ],
+      "statute_of_limitations": {
+        "value": 6,
+        "unit": "years",
+        "notes": "Six-year look-back for wage claims; 90-day rebuttable presumption for retaliation."
+      },
+      "remedies": [
+        "Offer of job restoration",
+        "Liquidated damages of up to 200% of the wages lost or due",
+        "Reasonable attorney fees and costs",
+        "Reinstatement"
+      ],
+      "administrative_requirements": [
+        "A rebuttable presumption of retaliation exists if an adverse action is taken within 90 days of an employee filing a complaint or action."
+      ],
+      "key_cases": [
+        "Maia v. IEW Construction Group, A-3-23 (2024) (Confirms 2019 amendments apply prospectively only, targeting conduct on or after August 6, 2019)"
+      ],
+      "notes": "To overcome the 90-day presumption, an employer must provide clear and convincing evidence that the action was taken for other permissible reasons."
+    },
+    {
+      "statute_id": "NJ-SAFE",
+      "full_name": "New Jersey Security and Financial Empowerment Act",
+      "short_name": "SAFE Act",
+      "citation": "N.J.S.A. 34:11C-1 et seq.",
+      "brief_summary": "Protects employees from retaliation for requesting or taking unpaid leave to address domestic violence or sexual assault affecting themselves or their family members.",
+      "protected_activities": [
+        "Requesting or utilizing up to 20 days of unpaid leave to address domestic or sexual violence.",
+        "Seeking medical attention, victim services, legal assistance, or safety planning related to domestic/sexual violence."
+      ],
+      "adverse_actions": [
+        "Discharge",
+        "Harassment",
+        "Threats",
+        "Discrimination in compensation or terms/conditions of employment"
+      ],
+      "statute_of_limitations": {
+        "value": 1,
+        "unit": "year",
+        "notes": "One year from the date of the alleged violation."
+      },
+      "remedies": [
+        "Lost wages",
+        "Job reinstatement",
+        "Reasonable attorney fees and costs",
+        "Injunctive relief",
+        "All remedies available in common law tort actions"
+      ],
+      "administrative_requirements": [
+        "Applies to employers with 25 or more employees.",
+        "Employee must have worked at least 1,000 hours in the preceding 12 months."
+      ],
+      "key_cases": [],
+      "notes": "Leave can be used if the employee or a designated family member (including siblings, grandparents, or domestic partners) is a victim."
+    },
+    {
+      "statute_id": "NJ-WCA",
+      "full_name": "Workers' Compensation Act (Retaliation Provision)",
+      "short_name": "WC Retaliation",
+      "citation": "N.J.S.A. 34:15-39.1",
+      "brief_summary": "Makes it unlawful for an employer to discharge or discriminate against an employee for claiming or attempting to claim workers' compensation benefits.",
+      "protected_activities": [
+        "Claiming or attempting to claim workers' compensation benefits.",
+        "Testifying or being about to testify in any proceeding under the Workers' Compensation Act."
+      ],
+      "adverse_actions": [
+        "Discharge",
+        "Any manner of discrimination as to employment"
+      ],
+      "statute_of_limitations": {
+        "value": 2,
+        "unit": "years",
+        "notes": "Standard two-year statute for retaliation/claims."
+      },
+      "remedies": [
+        "Restoration to employment",
+        "Compensation for loss of wages arising out of the discrimination",
+        "Administrative fines ($100-$1,000)",
+        "Criminal penalties (up to 60 days imprisonment)"
+      ],
+      "administrative_requirements": [],
+      "key_cases": [
+        "Lally v. Copygraphics, 85 N.J. 668 (1981) (Established common law right to compensatory and punitive damages for WC retaliation)",
+        "Cerracchio v. Alden Leeds, Inc., 223 N.J. Super. 435 (1988) (Confirmed state court jurisdiction over safety and WC retaliation)"
+      ],
+      "notes": "Job restoration is not required if the employee is no longer qualified to perform their duties due to the injury."
+    }
+  ],
+  "integrity": {
+    "with_errors": false,
+    "error_details": ""
+  }
+}

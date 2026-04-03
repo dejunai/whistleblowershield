@@ -1,0 +1,372 @@
+{
+  "meta": {
+    "json_format_version": "2.0",
+    "source_method": "ai_assisted",
+    "source_name": "NotebookLM Reconciliation",
+    "jurisdiction_id": "NJ",
+    "generated_date": "2026-04-03",
+    "generated_by": "NotebookLM Legal Fact-Checker",
+    "record_count": 5,
+    "proposed_count": 1,
+    "new_terms_proposed": [
+      {
+        "taxonomy": "ws_protected_class",
+        "term_id": "victim-of-domestic-violence-or-sexual-assault",
+        "term_label": "Victim of Domestic Violence or Sexual Assault",
+        "notes": "Covers employees who are victims (or whose family members are victims) of domestic or sexual violence taking leave under the SAFE Act. No existing child slug covers this.",
+        "seen_in": [
+          "NJ-34:11C-1"
+        ],
+        "count": 1
+      }
+    ],
+    "json_run_notes": "Generated 5 statute records from the provided source texts (CEPA, NJFCA, Wage Theft Act, SAFE Act, Workers' Compensation Act). The run scope requested 7 records, but only 5 distinct statutes could be confidently identified in the reference materials. Excluded all case law citations because verifiable URLs to approved sources could not be confirmed from the raw text alone.",
+    "batch_completed": "2026-04-03 02:31 UTC"
+  },
+  "records": [
+    {
+      "jurisdiction_id": "NJ",
+      "statute_id": "NJ-34:19-1",
+      "official_name": "Conscientious Employee Protection Act",
+      "common_name": "CEPA",
+      "legal_basis": {
+        "statute_citation": "N.J.S.A. 34:19-1 et seq.",
+        "disclosure_types": [
+          "retaliation-protection",
+          "public-corruption-ethics",
+          "healthcare-medicare-fraud",
+          "environmental-protection"
+        ],
+        "protected_class": [
+          "corporate-staff",
+          "state-employee",
+          "local-gov-staff",
+          "contractor-gig",
+          "clinical-staff"
+        ],
+        "disclosure_targets": [
+          "internal-supervisor",
+          "agency-state",
+          "law-enforcement"
+        ],
+        "adverse_action_scope": "Broadly defined as discharge, suspension, demotion, or any other adverse employment action taken against an employee in the terms and conditions of employment."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": false,
+        "limit_value": 1,
+        "limit_unit": "years",
+        "trigger": "Date of the retaliatory action",
+        "exhaustion_required": true,
+        "exhaustion_details": "Written notice to a supervisor is generally required for external disclosures to a public body, allowing the employer a reasonable opportunity to correct the activity."
+      },
+      "enforcement": {
+        "process_type": [
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "suspension",
+          "demotion"
+        ],
+        "remedies": [
+          "reinstatement",
+          "back-pay",
+          "compensatory-damages",
+          "punitive-damages",
+          "attorney-fees",
+          "litigation-costs"
+        ],
+        "fee_shifting": [
+          "unilateral-pro-plaintiff"
+        ]
+      },
+      "burden_of_proof": {
+        "employee_standard": [
+          "reasonable-belief"
+        ],
+        "employer_defense": []
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://www.njleg.state.nj.us/",
+        "is_official": true
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      "_review_notes": "CEPA is New Jersey's primary whistleblower statute. Incorporates strict 1-year SOL and requires written notice to a supervisor for external disclosures unless an emergency exception applies."
+    },
+    {
+      "jurisdiction_id": "NJ",
+      "statute_id": "NJ-2A:32C-10",
+      "official_name": "New Jersey False Claims Act",
+      "common_name": "NJFCA",
+      "legal_basis": {
+        "statute_citation": "N.J.S.A. 2A:32C-10",
+        "disclosure_types": [
+          "procurement-spending-fraud",
+          "healthcare-medicare-fraud"
+        ],
+        "protected_class": [
+          "corporate-staff",
+          "contractor-gig"
+        ],
+        "disclosure_targets": [
+          "agency-state",
+          "law-enforcement"
+        ],
+        "adverse_action_scope": "Includes discharge, demotion, suspension, threats, harassment, or discrimination in any other manner in the terms and conditions of employment."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": false,
+        "limit_value": 3,
+        "limit_unit": "years",
+        "trigger": "Date of the retaliatory action",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "process_type": [
+          "qui-tam",
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "demotion",
+          "suspension",
+          "harassment"
+        ],
+        "remedies": [
+          "reinstatement",
+          "double-back-pay",
+          "consequential-damages",
+          "punitive-damages",
+          "attorney-fees",
+          "litigation-costs"
+        ],
+        "fee_shifting": [
+          "unilateral-pro-plaintiff"
+        ]
+      },
+      "burden_of_proof": {
+        "employee_standard": [],
+        "employer_defense": []
+      },
+      "reward": {
+        "available": true,
+        "reward_details": "Relator receives between 15-25% of recovery if the Attorney General intervenes, and 25-30% if they proceed independently."
+      },
+      "links": {
+        "statute_url": "https://www.njleg.state.nj.us/",
+        "is_official": true
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      "_review_notes": "Statute offers double back pay and a generous 3-year SOL. Rewards for qui tam interventions are codified."
+    },
+    {
+      "jurisdiction_id": "NJ",
+      "statute_id": "NJ-34:11-4.10",
+      "official_name": "New Jersey Wage Theft Act",
+      "common_name": "Wage Theft Act",
+      "legal_basis": {
+        "statute_citation": "N.J.S.A. 34:11-4.10",
+        "disclosure_types": [
+          "wage-hour-violations"
+        ],
+        "protected_class": [
+          "corporate-staff"
+        ],
+        "disclosure_targets": [
+          "internal-supervisor",
+          "agency-state",
+          "court-filing"
+        ],
+        "adverse_action_scope": "Discharge, discrimination concerning compensation or conditions of employment, or retaliatory discharge based on complaining about unpaid wages or wage calculation."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": true,
+        "limit_value": 6,
+        "limit_unit": "years",
+        "limit_details": "The 6-year period applies to general wage claims. Retaliation presumption specifically applies to actions within 90 days of an employee filing a complaint.",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "process_type": [
+          "administrative-complaint",
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "pay-reduction"
+        ],
+        "remedies": [
+          "reinstatement",
+          "liquidated-damages",
+          "attorney-fees",
+          "litigation-costs"
+        ],
+        "fee_shifting": [
+          "unilateral-pro-plaintiff"
+        ]
+      },
+      "burden_of_proof": {
+        "employee_standard": [],
+        "employer_defense": [
+          "has-details"
+        ],
+        "employer_defense_details": "To overcome the 90-day presumption, an employer must provide clear and convincing evidence that the action was taken for other permissible reasons.",
+        "burden_of_proof_flag": "90-day-rebuttable-presumption"
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://www.njleg.state.nj.us/",
+        "is_official": true
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      "_review_notes": "Significantly updated by the 2019 amendments. Includes a 90-day rebuttable presumption of retaliation requiring an elevated clear and convincing standard for the employer defense."
+    },
+    {
+      "jurisdiction_id": "NJ",
+      "statute_id": "NJ-34:11C-1",
+      "official_name": "New Jersey Security and Financial Empowerment Act",
+      "common_name": "SAFE Act",
+      "legal_basis": {
+        "statute_citation": "N.J.S.A. 34:11C-1 et seq.",
+        "disclosure_types": [
+          "retaliation-protection"
+        ],
+        "protected_class": [
+          "has-details"
+        ],
+        "protected_class_details": "Employees who are victims of domestic violence or sexual assault, or whose family members are victims, taking protected leave.",
+        "disclosure_targets": [
+          "internal-supervisor",
+          "internal-hr"
+        ],
+        "adverse_action_scope": "Discharge, harassment, threats, or discrimination in compensation or terms/conditions of employment."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": false,
+        "limit_value": 1,
+        "limit_unit": "years",
+        "trigger": "Date of the alleged violation",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "process_type": [
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "harassment"
+        ],
+        "remedies": [
+          "lost-wages",
+          "reinstatement",
+          "attorney-fees",
+          "injunctive-relief"
+        ],
+        "fee_shifting": [
+          "unilateral-pro-plaintiff"
+        ]
+      },
+      "burden_of_proof": {
+        "employee_standard": [],
+        "employer_defense": []
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://www.njleg.state.nj.us/",
+        "is_official": true
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      "_review_notes": "Provides job security and 20 days of unpaid leave for victims of domestic/sexual violence. Contains explicit anti-retaliation provisions for invoking leave rights."
+    },
+    {
+      "jurisdiction_id": "NJ",
+      "statute_id": "NJ-34:15-39.1",
+      "official_name": "Workers' Compensation Act",
+      "common_name": "WC Retaliation",
+      "legal_basis": {
+        "statute_citation": "N.J.S.A. 34:15-39.1",
+        "disclosure_types": [
+          "occupational-health-safety",
+          "retaliation-protection"
+        ],
+        "protected_class": [
+          "corporate-staff"
+        ],
+        "disclosure_targets": [
+          "agency-state"
+        ],
+        "adverse_action_scope": "Discharge or any manner of discrimination as to employment for claiming or attempting to claim workers' compensation benefits."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": true,
+        "limit_value": 2,
+        "limit_unit": "years",
+        "limit_details": "Derived from the standard two-year statute of limitations applying generally to workers' compensation cases.",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "process_type": [
+          "administrative-complaint",
+          "civil-lawsuit",
+          "criminal-referral"
+        ],
+        "adverse_action": [
+          "termination"
+        ],
+        "remedies": [
+          "reinstatement",
+          "lost-wages",
+          "civil-penalty",
+          "compensatory-damages",
+          "punitive-damages"
+        ],
+        "fee_shifting": []
+      },
+      "burden_of_proof": {
+        "employee_standard": [],
+        "employer_defense": []
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://www.njleg.state.nj.us/",
+        "is_official": true
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      "_review_notes": "Prohibits retaliation for filing workers comp claims. Allows for both administrative/criminal penalties under statute and a common law cause of action for civil damages based on case law."
+    }
+  ],
+  "integrity": {
+    "with_errors": true,
+    "error_details": [
+      "record_count is less than records_requested (5 found in source, 7 requested).",
+      "Citations omitted because verifiable URLs could not be confirmed from approved sources.",
+      "NJ-34:11-4.10: SOL value derived from general wage claim provisions — limit_ambiguous: true.",
+      "NJ-34:15-39.1: SOL value derived from standard workers compensation claim deadlines — limit_ambiguous: true."
+    ],
+    "error_count": 4
+  }
+}

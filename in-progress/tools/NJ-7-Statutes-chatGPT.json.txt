@@ -1,0 +1,491 @@
+{
+  "meta": {
+    "json_format_version": "2.0",
+    "source_method": "ai_assisted",
+    "source_name": "ChatGPT",
+    "jurisdiction_id": "NJ",
+    "generated_date": "2026-04-03",
+    "generated_by": "GPT-5.4 Thinking",
+    "record_count": 7,
+    "proposed_count": 2,
+    "new_terms_proposed": [
+      {
+        "taxonomy": "ws_protected_class",
+        "parent": "healthcare-staff",
+        "term_id": "health-care-worker",
+        "term_label": "Health Care Worker",
+        "notes": "Covers broader facility-based health care workers protected by statute, including non-clinical staff and support workers. Existing slugs such as clinical-staff and medical-student are too narrow for statutes protecting any health care worker.",
+        "seen_in": [
+          "NJ-26:2H-5.21",
+          "NJ-26:2H-14.13"
+        ],
+        "count": 2
+      },
+      {
+        "taxonomy": "ws_disclosure_type",
+        "parent": "public-health-safety",
+        "term_id": "workplace-violence-safety",
+        "term_label": "Workplace Violence Safety",
+        "notes": "Needed for statutes protecting reports of violent incidents in health care facilities. Existing child slugs cover occupational safety generally, but not reporting workplace violence as a distinct safety concern in patient-care settings.",
+        "seen_in": [
+          "NJ-26:2H-5.21"
+        ],
+        "count": 1
+      }
+    ],
+    "json_run_notes": "CEPA (NJ-34:19-1) and the New Jersey False Claims Act anti-retaliation provision (NJ-2A:32C-10) are broader than the current ws_disclosure_type child palette; I left some disclosure_types arrays empty rather than force a misleading child slug. I used approved secondary statute sources from law.justia.com for several records because the New Jersey Legislature site surfaced chapter-law or bill-text material inconsistently for current codified sections. I included high-authority case citations for CEPA and a published Appellate Division citation that discusses PEOSH and related retaliation statutes, but several niche statutes had no clearly verifiable on-point published case URL located from the approved case-law sources. No parent slugs were used in any record arrays.",
+    "batch_completed": "2026-04-03 07:24 UTC"
+  },
+  "records": [
+    {
+      "jurisdiction_id": "NJ",
+      "statute_id": "NJ-34:19-1",
+      "official_name": "Conscientious Employee Protection Act",
+      "common_name": "CEPA",
+      "legal_basis": {
+        "statute_citation": "N.J. Stat. §§ 34:19-1 to 34:19-8",
+        "disclosure_types": [],
+        "protected_class": [
+          "has-details"
+        ],
+        "protected_class_details": "Covers any employee performing services for and under the control and direction of an employer for wages or other remuneration; former employees may sue under the remedies section.",
+        "disclosure_targets": [
+          "internal-supervisor",
+          "agency-federal",
+          "agency-state",
+          "agency-local",
+          "law-enforcement",
+          "legislative-federal",
+          "legislative-state",
+          "court-filing"
+        ],
+        "adverse_action_scope": "Covers discharge, suspension, demotion, and other adverse employment action in the terms and conditions of employment tied to disclosures, testimony, objections, or refusals to participate in unlawful or fraudulent conduct."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": false,
+        "limit_value": 1,
+        "limit_unit": "years",
+        "trigger": "retaliatory action",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "process_type": [
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "constructive-discharge",
+          "demotion",
+          "suspension",
+          "has-details"
+        ],
+        "adverse_action_details": "The statute also reaches other adverse employment action in the terms and conditions of employment beyond discharge, suspension, or demotion.",
+        "remedies": [
+          "reinstatement",
+          "benefits-restoration",
+          "lost-wages",
+          "compensatory-damages",
+          "punitive-damages",
+          "attorney-fees",
+          "litigation-costs",
+          "injunctive-relief",
+          "civil-penalty"
+        ],
+        "fee_shifting": [
+          "unilateral-pro-plaintiff"
+        ]
+      },
+      "burden_of_proof": {},
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://pub.njleg.state.nj.us/Bills/2004/PL05/329_.PDF",
+        "is_official": true,
+        "is_pdf": true
+      },
+      "citations": {
+        "attached_citations": [
+          "Lippman v. Ethicon, Inc. || expands watchdog employee coverage || https://law.justia.com/cases/new-jersey/supreme-court/2015/a-65-13.html || law.justia.com || high",
+          "Donelson v. DuPont Chambers Works || clarifies constructive-discharge damages || https://law.justia.com/cases/new-jersey/supreme-court/2011/a-112-09-opn.html || law.justia.com || high"
+        ],
+        "citation_count": 2
+      },
+      "_review_notes": "This is New Jersey's main whistleblower statute and the clearest statewide entry point for general retaliation claims. The disclosure-subject taxonomy is narrower than CEPA's text, which covers legal violations, fraud, and clear public-policy mandates across many industries, so I left disclosure_types empty rather than overstate fit. Reviewers should confirm whether the site wants the official_name kept at the act level or mirrored to the first codified section."
+    },
+    {
+      "jurisdiction_id": "NJ",
+      "statute_id": "NJ-2A:32C-10",
+      "official_name": "Disclosure of information by employee, employee protections",
+      "common_name": "New Jersey False Claims Act anti-retaliation provision",
+      "legal_basis": {
+        "statute_citation": "N.J. Stat. § 2A:32C-10",
+        "disclosure_types": [],
+        "protected_class": [
+          "has-details"
+        ],
+        "protected_class_details": "Protects an employee, contractor, or agent acting to further a false-claims action or other efforts to stop one or more violations of the act.",
+        "disclosure_targets": [
+          "agency-state",
+          "law-enforcement"
+        ],
+        "adverse_action_scope": "Protects lawful acts in furtherance of a false-claims action and other efforts to stop violations of the New Jersey False Claims Act."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": false,
+        "limit_value": 3,
+        "limit_unit": "years",
+        "trigger": "date when the retaliation occurred",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "process_type": [
+          "civil-lawsuit",
+          "qui-tam",
+          "state-agency-complaint"
+        ],
+        "adverse_action": [
+          "termination",
+          "demotion",
+          "suspension",
+          "harassment",
+          "has-details"
+        ],
+        "adverse_action_details": "The statute also covers threats and any other discrimination in the terms and conditions of employment.",
+        "remedies": [
+          "reinstatement",
+          "double-back-pay",
+          "punitive-damages",
+          "litigation-costs",
+          "attorney-fees",
+          "has-details"
+        ],
+        "remedies_details": "Also includes interest on back pay and compensation for special damages sustained as a result of the discrimination.",
+        "fee_shifting": [
+          "unilateral-pro-plaintiff"
+        ]
+      },
+      "burden_of_proof": {},
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://pub.njleg.state.nj.us/Bills/2022/PL23/73_.PDF",
+        "is_official": true,
+        "is_pdf": true
+      },
+      "citations": {
+        "attached_citations": [
+          "MCDERMOTT v. LIFE SOURCE SERVICES, LLC et al || applies NJFCA retaliation pleading || https://law.justia.com/cases/federal/district-courts/new-jersey/njdce/2%3A2019cv15360/412098/303/ || law.justia.com || low"
+        ],
+        "citation_count": 1
+      },
+      "_review_notes": "This record is limited to the anti-retaliation section, not the entire False Claims Act. The subject-matter taxonomy does not neatly capture the statute's broad false-claims coverage against the State, so disclosure_types is left empty. Reviewers may wish to decide whether statewide fraud against government should eventually get a dedicated child slug."
+    },
+    {
+      "jurisdiction_id": "NJ",
+      "statute_id": "NJ-34:5A-17",
+      "official_name": "Discharge or penalizing of employee for exercising rights; complaint; adjudication",
+      "common_name": "Worker and Community Right to Know anti-retaliation provision",
+      "legal_basis": {
+        "statute_citation": "N.J. Stat. § 34:5A-17",
+        "disclosure_types": [
+          "occupational-health-safety"
+        ],
+        "protected_class": [
+          "has-details"
+        ],
+        "protected_class_details": "Protects employees covered by the Worker and Community Right to Know Act who exercise rights established by that act.",
+        "disclosure_targets": [
+          "agency-state",
+          "internal-supervisor"
+        ],
+        "adverse_action_scope": "Protects employees who exercise rights under the Worker and Community Right to Know Act, including complaints tied to hazardous-substance information rights."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": false,
+        "limit_value": 30,
+        "limit_unit": "days",
+        "trigger": "violation or obtaining knowledge that the violation occurred",
+        "exhaustion_required": true,
+        "exhaustion_details": "The employee may file a complaint with the Commissioner of Labor; the statute routes enforcement through investigation, possible referral to the Office of Administrative Law, and final agency action."
+      },
+      "enforcement": {
+        "primary_agency": "New Jersey Department of Labor",
+        "process_type": [
+          "administrative-complaint",
+          "state-agency-complaint"
+        ],
+        "adverse_action": [
+          "disciplinary-action",
+          "has-details"
+        ],
+        "adverse_action_details": "The statute covers discharge and broader discipline, penalties, or discrimination for exercising rights under the act.",
+        "remedies": [
+          "has-details"
+        ],
+        "remedies_details": "The commissioner may order relief after agency adjudication; the text expressly creates burden-shifting but does not enumerate a detailed remedial list in this section.",
+        "fee_shifting": []
+      },
+      "burden_of_proof": {
+        "employee_standard": [],
+        "employer_defense": [
+          "has-details"
+        ],
+        "employer_defense_details": "If the Commissioner of Labor or the employee shows the employee exercised a right under the act before the alleged violation, the employer must show just cause for its action by clear and convincing evidence.",
+        "burden_of_proof_details": "This section contains a meaningful burden shift after proof that the employee exercised a statutory right before the challenged action.",
+        "burden_of_proof_flag": "clear-and-convincing just-cause defense"
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://law.justia.com/codes/new-jersey/title-34/section-34-5a-17/",
+        "is_official": false,
+        "url_source": "law.justia.com"
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      "_review_notes": "This is an industry-specific workplace safety and hazardous-substance reporting protection, not a general whistleblower law. The section expressly provides a 30-day administrative complaint route and a notable burden shift requiring the employer to show just cause by clear and convincing evidence once the employee's protected activity is shown. I did not locate a clearly on-point published case URL from the approved case-law sources during this run."
+    },
+    {
+      "jurisdiction_id": "NJ",
+      "statute_id": "NJ-34:6A-45",
+      "official_name": "Retaliatory discrimination prohibited",
+      "common_name": "PEOSH anti-retaliation provision",
+      "legal_basis": {
+        "statute_citation": "N.J. Stat. § 34:6A-45",
+        "disclosure_types": [
+          "occupational-health-safety"
+        ],
+        "protected_class": [
+          "state-employee",
+          "local-gov-staff"
+        ],
+        "disclosure_targets": [
+          "agency-state"
+        ],
+        "adverse_action_scope": "Protects public employees who file complaints, institute proceedings, testify, or exercise rights under the Public Employees' Occupational Safety and Health Act."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": false,
+        "limit_value": 180,
+        "limit_unit": "days",
+        "trigger": "employee first has knowledge the violation occurred",
+        "exhaustion_required": true,
+        "exhaustion_details": "The employee files a complaint with the commissioner, who investigates and may order relief; hearing rights are then available within the agency process."
+      },
+      "enforcement": {
+        "process_type": [
+          "administrative-complaint",
+          "state-agency-complaint"
+        ],
+        "adverse_action": [
+          "disciplinary-action",
+          "has-details"
+        ],
+        "adverse_action_details": "The statute covers discharge and any other discipline or discrimination tied to protected safety complaints or proceedings.",
+        "remedies": [
+          "reinstatement",
+          "back-pay",
+          "litigation-costs"
+        ],
+        "fee_shifting": []
+      },
+      "burden_of_proof": {},
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://law.justia.com/codes/new-jersey/title-34/section-34-6a-45/",
+        "is_official": false,
+        "url_source": "law.justia.com"
+      },
+      "citations": {
+        "attached_citations": [
+          "Lepore v. National Tool and Mfg. Co. || confirms statutory retaliation landscape || https://law.justia.com/cases/new-jersey/appellate-division-published/1988/224-n-j-super-463-0.html || law.justia.com || moderate"
+        ],
+        "citation_count": 1
+      },
+      "_review_notes": "This provision is specific to New Jersey public employees under PEOSH, not private-sector workers generally. The section expressly provides a 180-day administrative route and authorizes appropriate relief including reinstatement, back pay, and reasonable legal costs. The cited case discusses this statute in the broader retaliation framework rather than construing every element of the section directly."
+    },
+    {
+      "jurisdiction_id": "NJ",
+      "statute_id": "NJ-34:11-56.66",
+      "official_name": "Retaliation against complaining worker; offense, other sanctions, fines, penalties",
+      "common_name": "Prevailing wage anti-retaliation provision",
+      "legal_basis": {
+        "statute_citation": "N.J. Stat. § 34:11-56.66",
+        "disclosure_types": [
+          "wage-hour-violations"
+        ],
+        "protected_class": [
+          "has-details"
+        ],
+        "protected_class_details": "Protects workers employed by contractors, subcontractors, or covered airport or related location employers who complain about nonpayment of wages required by the act.",
+        "disclosure_targets": [
+          "internal-supervisor",
+          "agency-state"
+        ],
+        "adverse_action_scope": "Protects workers who complain that they have not been paid wages in accordance with the act, institute proceedings, or testify in those proceedings."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": true,
+        "limit_details": "This section expressly sets a 15-day hearing request period after notice of an administrative penalty, but it does not clearly state a worker-specific filing deadline for initiating a retaliation complaint in the section text located during this run.",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "primary_agency": "New Jersey Commissioner of Labor and Workforce Development",
+        "process_type": [
+          "state-agency-complaint"
+        ],
+        "adverse_action": [
+          "termination",
+          "has-details"
+        ],
+        "adverse_action_details": "The statute covers discharge or any other discrimination against a worker for wage complaints, proceedings, or testimony.",
+        "remedies": [
+          "civil-penalty",
+          "has-details"
+        ],
+        "remedies_details": "Creates disorderly-persons liability and authorizes administrative penalties collected by the commissioner.",
+        "fee_shifting": []
+      },
+      "burden_of_proof": {},
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://law.justia.com/codes/new-jersey/title-34/section-34-11-56-66/",
+        "is_official": false,
+        "url_source": "law.justia.com"
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      "_review_notes": "This record is limited to the retaliation section tied to wage complaints under the act. I could confirm the offense and administrative-penalty language from the codified text, but not a worker-facing filing deadline in this section itself, so the SOL block is flagged ambiguous. Reviewers may want to pair this section with the broader act context if the site later creates a separate wage-enforcement template."
+    },
+    {
+      "jurisdiction_id": "NJ",
+      "statute_id": "NJ-26:2H-5.21",
+      "official_name": "Retaliatory action prohibited",
+      "common_name": "Health care workplace violence reporting anti-retaliation provision",
+      "legal_basis": {
+        "statute_citation": "N.J. Stat. § 26:2H-5.21",
+        "disclosure_types": [
+          "occupational-health-safety"
+        ],
+        "protected_class": [
+          "has-details"
+        ],
+        "protected_class_details": "Protects any health care worker covered by the facility violence-prevention law; the existing healthcare-staff children are narrower than the statutory coverage.",
+        "disclosure_targets": [
+          "internal-supervisor",
+          "has-details"
+        ],
+        "disclosure_targets_details": "The section protects reporting violent incidents, but the section text does not itself enumerate a complete destination list beyond the reporting context established by the act.",
+        "adverse_action_scope": "Bars retaliatory action by a covered health care facility against a health care worker for reporting violent incidents."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": true,
+        "limit_details": "No filing deadline was located in this codified section during this run.",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "process_type": [],
+        "adverse_action": [
+          "has-details"
+        ],
+        "adverse_action_details": "Uses CEPA's definition of retaliatory action by reference rather than listing specific adverse actions in this section.",
+        "remedies": [],
+        "fee_shifting": []
+      },
+      "burden_of_proof": {},
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://law.justia.com/codes/new-jersey/title-26/section-26-2h-5-21/",
+        "is_official": false,
+        "url_source": "law.justia.com"
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      "_review_notes": "This is a narrow health-care-sector protection focused on reporting violent incidents. The statute incorporates CEPA's retaliatory-action definition, but the codified section I located does not spell out a separate remedies or filing-deadline scheme, so those fields remain sparse. I proposed a protected-class term because the current taxonomy does not cleanly capture the statute's broader health-care-worker coverage."
+    },
+    {
+      "jurisdiction_id": "NJ",
+      "statute_id": "NJ-26:2H-14.13",
+      "official_name": "Certain retaliatory actions against health care worker prohibited",
+      "common_name": "Safe patient handling anti-retaliation provision",
+      "legal_basis": {
+        "statute_citation": "N.J. Stat. § 26:2H-14.13",
+        "disclosure_types": [
+          "occupational-health-safety"
+        ],
+        "protected_class": [
+          "has-details"
+        ],
+        "protected_class_details": "Protects any covered health care worker under the safe patient handling law, which is broader than the current healthcare-staff child terms.",
+        "disclosure_targets": [
+          "internal-supervisor"
+        ],
+        "adverse_action_scope": "Protects a health care worker who refuses a patient-handling task because of a reasonable concern about worker or patient safety or because appropriate equipment or aids are not available."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": true,
+        "limit_details": "No filing deadline was located in this codified section during this run.",
+        "trigger": "not stated in section located",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "process_type": [
+          "internal-disclosure"
+        ],
+        "adverse_action": [
+          "has-details"
+        ],
+        "adverse_action_details": "The section bars retaliatory action, but it does not enumerate a separate list of adverse acts beyond that phrase.",
+        "remedies": [],
+        "fee_shifting": []
+      },
+      "burden_of_proof": {
+        "employee_standard": [
+          "reasonable-belief"
+        ]
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://law.justia.com/codes/new-jersey/title-26/section-26-2h-14-13/",
+        "is_official": false,
+        "url_source": "law.justia.com"
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      "_review_notes": "This is a refusal-right statute tied to safe patient handling, not a general public reporting law. I tagged reasonable-belief because the section explicitly conditions protection on a reasonable concern about worker or patient safety. Reviewers should confirm whether the project wants refusal-to-perform safety protections grouped with whistleblower laws or separated later into a distinct safety-rights subtype."
+    }
+  ],
+  "integrity": {
+    "with_errors": true,
+    "error_details": [
+      "NJ-34:11-56.66: statute_of_limitations left ambiguous because the section located did not clearly state a worker-facing filing deadline; only the 15-day hearing request period for assessed administrative penalties was explicit.",
+      "NJ-26:2H-5.21: statute_of_limitations left ambiguous because no filing deadline was located in the codified section during this run.",
+      "NJ-26:2H-14.13: statute_of_limitations left ambiguous because no filing deadline was located in the codified section during this run.",
+      "NJ-34:5A-17: no clearly verifiable on-point published case URL from the approved case-law sources was located during this run, so citations were omitted.",
+      "NJ-34:11-56.66: no clearly verifiable on-point published case URL from the approved case-law sources was located during this run, so citations were omitted.",
+      "NJ-26:2H-5.21: no clearly verifiable on-point published case URL from the approved case-law sources was located during this run, so citations were omitted.",
+      "NJ-26:2H-14.13: no clearly verifiable on-point published case URL from the approved case-law sources was located during this run, so citations were omitted.",
+      "NJ-2A:32C-10: attached citation is a federal district-court decision applying the New Jersey False Claims Act and has limited precedential weight."
+    ],
+    "error_count": 8
+  }
+}

@@ -1,0 +1,404 @@
+{
+  "meta": {
+    "json_format_version": "2.0",
+    "source_method": "ai_assisted",
+    "source_name": "Gemini",
+    "jurisdiction_id": "NJ",
+    "generated_date": "2026-04-03",
+    "generated_by": "gemini-2.5-flash-preview-09-2025",
+    "record_count": 5,
+    "proposed_count": 1,
+    "new_terms_proposed": [
+      {
+        "taxonomy": "ws_protected_class",
+        "term_id": "victim-of-domestic-violence-or-sexual-assault",
+        "term_label": "Victim of Domestic Violence or Sexual Assault",
+        "notes": "Specifically protected under the NJ SAFE Act for taking leave or seeking assistance. No existing slug in ws_protected_class covers this specific status.",
+        "seen_in": [
+          "NJ-34:11C-1"
+        ],
+        "count": 1
+      }
+    ],
+    "json_run_notes": "Reformatted New Jersey whistleblower research into the v2.0.13.a schema. Identified one potential new taxonomy term for the SAFE Act. All taxonomy slugs verified against hierarchical child rules. Parent slugs removed during self-check where applicable.",
+    "batch_completed": "2026-04-03 02:16 UTC"
+  },
+  "records": [
+    {
+      "jurisdiction_id": "NJ",
+      "statute_id": "NJ-34:19-1",
+      "official_name": "Conscientious Employee Protection Act",
+      "common_name": "CEPA",
+      "legal_basis": {
+        "statute_citation": "N.J.S.A. §§ 34:19-1 to 34:19-14",
+        "disclosure_types": [
+          "retaliation-protection",
+          "wrongful-termination",
+          "public-corruption-ethics",
+          "healthcare-medicare-fraud",
+          "environmental-protection",
+          "tax-evasion-fraud"
+        ],
+        "protected_class": [
+          "corporate-staff",
+          "contractor-gig",
+          "clinical-staff"
+        ],
+        "disclosure_targets": [
+          "internal-supervisor",
+          "agency-state",
+          "agency-local",
+          "law-enforcement",
+          "legislative-state"
+        ],
+        "adverse_action_scope": "Broadly defined as discharge, suspension, demotion, or other adverse employment action taken against an employee in the terms and conditions of employment."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": false,
+        "limit_value": 1,
+        "limit_unit": "years",
+        "trigger": "Date of the retaliatory action or when the employee became aware of the action.",
+        "exhaustion_required": false,
+        "tolling_notes": "Statute of limitations for CEPA is strictly enforced; common law claims are waived upon filing a CEPA complaint."
+      },
+      "enforcement": {
+        "process_type": [
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "demotion",
+          "suspension",
+          "disciplinary-action"
+        ],
+        "remedies": [
+          "reinstatement",
+          "back-pay",
+          "compensatory-damages",
+          "punitive-damages",
+          "attorney-fees",
+          "litigation-costs",
+          "injunctive-relief"
+        ],
+        "fee_shifting": [
+          "unilateral-pro-plaintiff"
+        ]
+      },
+      "burden_of_proof": {
+        "employee_standard": [
+          "reasonable-belief"
+        ],
+        "employer_defense": [
+          "legitimate-non-retaliatory-reason"
+        ],
+        "burden_of_proof_details": "Plaintiff must prove they reasonably believed the employer's conduct violated a law or public policy."
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://law.justia.com/codes/new-jersey/2023/title-34/section-34-19-1/",
+        "is_official": false,
+        "url_source": "law.justia.com"
+      },
+      "citations": {
+        "attached_citations": [
+          "Estate of Roach v. TRW, Inc. || confirms reasonable belief standard || https://casetext.com/case/estate-of-roach-v-trw-inc || casetext.com || high",
+          "Dzwonar v. McDevitt || clarifies public policy requirement || https://casetext.com/case/dzwonar-v-mcdevitt || casetext.com || high",
+          "D'Annunzio v. Prudential Insurance Co. || expands coverage to contractors || https://casetext.com/case/dannunzio-v-prudential-ins-co-of-america || casetext.com || high"
+        ],
+        "citation_count": 3
+      },
+      "_review_notes": "NJ CEPA is one of the nation's broadest whistleblower laws. Note the 'waiver provision' where filing a CEPA claim precludes other state law remedies for the same retaliatory conduct. Map 'actual damages' to compensatory-damages."
+    },
+    {
+      "jurisdiction_id": "NJ",
+      "statute_id": "NJ-2A:32C-10",
+      "official_name": "New Jersey False Claims Act (Retaliation Provision)",
+      "common_name": "NJFCA",
+      "legal_basis": {
+        "statute_citation": "N.J.S.A. § 2A:32C-10",
+        "disclosure_types": [
+          "procurement-spending-fraud",
+          "public-corruption-ethics",
+          "healthcare-medicare-fraud",
+          "tax-evasion-fraud"
+        ],
+        "protected_class": [
+          "corporate-staff",
+          "contractor-gig"
+        ],
+        "disclosure_targets": [
+          "agency-state",
+          "law-enforcement",
+          "court-filing"
+        ],
+        "adverse_action_scope": "Includes discharge, demotion, suspension, threats, harassment, or discrimination in any other manner in the terms and conditions of employment."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": false,
+        "limit_value": 3,
+        "limit_unit": "years",
+        "trigger": "Date the retaliation occurred."
+      },
+      "enforcement": {
+        "process_type": [
+          "qui-tam",
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "demotion",
+          "suspension",
+          "harassment"
+        ],
+        "remedies": [
+          "reinstatement",
+          "double-back-pay",
+          "consequential-damages",
+          "attorney-fees",
+          "litigation-costs"
+        ],
+        "fee_shifting": [
+          "unilateral-pro-plaintiff"
+        ]
+      },
+      "burden_of_proof": {
+        "employee_standard": [
+          "preponderance"
+        ],
+        "employer_defense": [
+          "legitimate-non-retaliatory-reason"
+        ]
+      },
+      "reward": {
+        "available": true,
+        "reward_details": "Whistleblowers (relators) may receive a percentage of the state's recovery in a successful qui tam action."
+      },
+      "links": {
+        "statute_url": "https://law.justia.com/codes/new-jersey/2023/title-2a/section-2a-32c-10/",
+        "is_official": false,
+        "url_source": "law.justia.com"
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      "_review_notes": "Statute explicitly provides for double back pay. Map 'special damages' to consequential-damages."
+    },
+    {
+      "jurisdiction_id": "NJ",
+      "statute_id": "NJ-34:11-4.10",
+      "official_name": "New Jersey Wage Theft Act",
+      "common_name": "Wage Theft Act",
+      "legal_basis": {
+        "statute_citation": "N.J.S.A. § 34:11-4.10",
+        "disclosure_types": [
+          "wage-hour-violations"
+        ],
+        "protected_class": [
+          "corporate-staff",
+          "agricultural-worker"
+        ],
+        "disclosure_targets": [
+          "internal-supervisor",
+          "agency-state"
+        ],
+        "adverse_action_scope": "Discharge or any other manner of discrimination against an employee because they made a complaint or provided information."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": true,
+        "limit_value": 6,
+        "limit_unit": "years",
+        "limit_details": "The 6-year period applies to wage claims; the specific retaliation claim window should be verified as it often tracks the 90-day presumption window for administrative convenience.",
+        "trigger": "Occurrence of the wage violation or retaliatory act."
+      },
+      "enforcement": {
+        "process_type": [
+          "administrative-complaint",
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "pay-reduction"
+        ],
+        "remedies": [
+          "back-pay",
+          "liquidated-damages",
+          "reinstatement",
+          "attorney-fees"
+        ],
+        "fee_shifting": [
+          "unilateral-pro-plaintiff"
+        ]
+      },
+      "burden_of_proof": {
+        "employee_standard": [
+          "preponderance"
+        ],
+        "employer_defense": [
+          "has-details"
+        ],
+        "employer_defense_details": "Employer must rebut the 90-day presumption of retaliation with clear and convincing evidence.",
+        "rebuttable_presumption": "Retaliation is presumed if adverse action occurs within 90 days of protected activity.",
+        "burden_of_proof_flag": "90-day rebuttable presumption"
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://law.justia.com/codes/new-jersey/2023/title-34/section-34-11-4-10/",
+        "is_official": false,
+        "url_source": "law.justia.com"
+      },
+      "citations": {
+        "attached_citations": [
+          "Maia v. IEW Construction Group || clarifies prospective application || https://law.justia.com/cases/new-jersey/supreme-court/2024/a-3-23.html || law.justia.com || high"
+        ],
+        "citation_count": 1
+      },
+      "_review_notes": "Statute provides for up to 200% liquidated damages (totaling 3x back pay). The 90-day rebuttable presumption is a significant employee-friendly feature."
+    },
+    {
+      "jurisdiction_id": "NJ",
+      "statute_id": "NJ-34:11C-1",
+      "official_name": "New Jersey Security and Financial Empowerment Act",
+      "common_name": "SAFE Act",
+      "legal_basis": {
+        "statute_citation": "N.J.S.A. §§ 34:11C-1 to 34:11C-5",
+        "disclosure_types": [
+          "retaliation-protection"
+        ],
+        "protected_class": [
+          "has-details"
+        ],
+        "protected_class_details": "Employees who are victims (or whose family members are victims) of domestic violence or sexual assault.",
+        "disclosure_targets": [
+          "internal-supervisor",
+          "internal-hr"
+        ],
+        "adverse_action_scope": "Includes discharge, harassment, or other discrimination in compensation or terms/conditions of employment."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": false,
+        "limit_value": 1,
+        "limit_unit": "years",
+        "trigger": "Date of the alleged violation."
+      },
+      "enforcement": {
+        "process_type": [
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "harassment",
+          "disciplinary-action"
+        ],
+        "remedies": [
+          "lost-wages",
+          "reinstatement",
+          "attorney-fees",
+          "litigation-costs",
+          "injunctive-relief"
+        ],
+        "fee_shifting": [
+          "unilateral-pro-plaintiff"
+        ]
+      },
+      "burden_of_proof": {
+        "employee_standard": [
+          "preponderance"
+        ]
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://law.justia.com/codes/new-jersey/2023/title-34/section-34-11c-1/",
+        "is_official": false,
+        "url_source": "law.justia.com"
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      "_review_notes": "Protects against retaliation for taking leave related to domestic or sexual violence. Reviewer should verify if coverage extends to employers with fewer than 25 employees."
+    },
+    {
+      "jurisdiction_id": "NJ",
+      "statute_id": "NJ-34:15-39.1",
+      "official_name": "Workers' Compensation Act (Retaliation Provision)",
+      "common_name": "Workers' Comp Retaliation",
+      "legal_basis": {
+        "statute_citation": "N.J.S.A. § 34:15-39.1",
+        "disclosure_types": [
+          "retaliation-protection",
+          "occupational-health-safety"
+        ],
+        "protected_class": [
+          "corporate-staff"
+        ],
+        "disclosure_targets": [
+          "agency-state",
+          "internal-supervisor"
+        ],
+        "adverse_action_scope": "To discharge or in any other manner discriminate against an employee because such employee has claimed or attempted to claim workers' compensation benefits."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": true,
+        "limit_value": 2,
+        "limit_unit": "years",
+        "limit_details": "The 2-year limit tracks standard workers' compensation claim deadlines but is often interpreted via case law for the civil retaliation component.",
+        "trigger": "The date of the retaliatory discharge or discriminatory act."
+      },
+      "enforcement": {
+        "process_type": [
+          "state-agency-complaint",
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "disciplinary-action"
+        ],
+        "remedies": [
+          "reinstatement",
+          "lost-wages"
+        ],
+        "fee_shifting": [
+          "none-american-rule"
+        ]
+      },
+      "burden_of_proof": {
+        "employee_standard": [
+          "preponderance"
+        ]
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://law.justia.com/codes/new-jersey/2023/title-34/section-34-15-39-1/",
+        "is_official": false,
+        "url_source": "law.justia.com"
+      },
+      "citations": {
+        "attached_citations": [
+          "Lally v. Copygraphics || establishes common law claim || https://casetext.com/case/lally-v-copygraphics || casetext.com || high",
+          "Cerracchio v. Alden Leeds, Inc. || confirms state jurisdiction || https://casetext.com/case/cerracchio-v-alden-leeds-inc || casetext.com || moderate"
+        ],
+        "citation_count": 2
+      },
+      "_review_notes": "Statute provides for administrative penalties. Lally v. Copygraphics established a parallel common law right allowing for compensatory and punitive damages not explicitly in the statute."
+    }
+  ],
+  "integrity": {
+    "with_errors": true,
+    "error_details": [
+      "NJ-34:11-4.10: SOL value (6 years) derived from general wage claim statute rather than specific retaliation text; set limit_ambiguous to true.",
+      "NJ-34:15-39.1: SOL value (2 years) derived from general workers' compensation procedures; set limit_ambiguous to true.",
+      "NJ-34:11C-1: Removed parent slug 'special-status' from protected_class during self-check — used 'has-details' for victim status.",
+      "NJ-34:19-1: Removed parent slug 'workplace-employment' and 'public-health-safety' from disclosure_types — used child slugs."
+    ],
+    "error_count": 4
+  }
+}

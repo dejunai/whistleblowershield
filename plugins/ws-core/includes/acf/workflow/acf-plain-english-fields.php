@@ -75,6 +75,7 @@ function ws_register_acf_plain_english_fields() {
             [ [ 'param' => 'post_type', 'operator' => '==', 'value' => 'jx-statute'        ] ],
             [ [ 'param' => 'post_type', 'operator' => '==', 'value' => 'jx-citation'        ] ],
             [ [ 'param' => 'post_type', 'operator' => '==', 'value' => 'jx-interpretation'  ] ],
+            [ [ 'param' => 'post_type', 'operator' => '==', 'value' => 'jx-common-law'      ] ],
             [ [ 'param' => 'post_type', 'operator' => '==', 'value' => 'ws-agency'          ] ],
         ],
 

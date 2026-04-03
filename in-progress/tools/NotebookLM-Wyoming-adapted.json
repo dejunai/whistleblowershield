@@ -1,0 +1,225 @@
+{
+  "meta": {
+    "json_format_version": "2.0",
+    "source_method": "ai_assisted",
+    "source_name": "NotebookLM Reconciliation",
+    "jurisdiction_id": "WY",
+    "generated_date": "2026-04-02",
+    "generated_by": "NotebookLM Legal Fact-Checker",
+    "record_count": 3,
+    "proposed_count": 0,
+    "new_terms_proposed": [],
+    "json_run_notes": "Executed fresh web research for WY. Wyoming lacks a general private-sector whistleblower law, relying heavily on the common law public policy exception which is excluded from this statute-only template. Found and verified exactly three explicit statutory protections: State Employee Whistleblower Act, OSHA Anti-Retaliation, and Medicaid False Claims Act. All taxonomy arrays have been rigorously scrubbed of parent slugs.",
+    "batch_completed": "2026-04-02 16:15 UTC"
+  },
+  "records": [
+    {
+      "jurisdiction_id": "WY",
+      "statute_id": "WY-9-11-103",
+      "official_name": "State Employees and Officials Whistle Blower Act",
+      "common_name": "State Employee Whistleblower Act",
+      "legal_basis": {
+        "statute_citation": "Wyo. Stat. § 9-11-103",
+        "disclosure_types": [
+          "public-corruption-ethics",
+          "procurement-spending-fraud"
+        ],
+        "protected_class": [
+          "state-employee"
+        ],
+        "disclosure_targets": [
+          "internal-supervisor",
+          "agency-state"
+        ],
+        "adverse_action_scope": "Discharge, discipline, or retaliation against a state employee for reporting in good faith."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": true,
+        "limit_value": 0,
+        "limit_unit": "years",
+        "limit_details": "The statute (§ 9-11-103) does not explicitly state a deadline. Claims against the state are generally subject to the Wyoming Governmental Claims Act notice requirements (Wyo. Stat. § 1-39-101 et seq.).",
+        "exhaustion_required": true,
+        "exhaustion_details": "Wyo. Stat. § 9-11-103(b) requires that the employee exhaust all available administrative remedies before bringing a civil action."
+      },
+      "enforcement": {
+        "primary_agency": "Wyoming Department of Administration and Information",
+        "process_type": [
+          "administrative-complaint",
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "demotion",
+          "suspension",
+          "disciplinary-action"
+        ],
+        "remedies": [
+          "reinstatement",
+          "back-pay",
+          "attorney-fees",
+          "has-details"
+        ],
+        "remedies_details": "The court may order reinstatement, back pay, and reasonable attorney fees.",
+        "fee_shifting": [
+          "unilateral-pro-plaintiff"
+        ]
+      },
+      "burden_of_proof": {
+        "employee_standard": [],
+        "employer_defense": []
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://wyoleg.gov/statutes/9-11-103",
+        "is_official": true
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      "_review_notes": "Protects state employees who report waste, fraud, abuse of authority, or violations of law. Evaluator must note that exhaustion of administrative remedies is a strict statutory prerequisite before court access."
+    },
+    {
+      "jurisdiction_id": "WY",
+      "statute_id": "WY-27-11-109",
+      "official_name": "Wyoming Occupational Health and Safety Act - Employee Protections",
+      "common_name": "Wyoming OSHA Anti-Retaliation",
+      "legal_basis": {
+        "statute_citation": "Wyo. Stat. § 27-11-109(e)",
+        "disclosure_types": [
+          "occupational-health-safety"
+        ],
+        "protected_class": [
+          "corporate-staff",
+          "state-employee",
+          "local-gov-staff"
+        ],
+        "disclosure_targets": [
+          "agency-state",
+          "internal-supervisor"
+        ],
+        "adverse_action_scope": "Discharge or any manner of discrimination against an employee for filing a complaint, instituting a proceeding, or testifying regarding workplace safety."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": false,
+        "limit_value": 30,
+        "limit_unit": "days",
+        "limit_details": "Explicitly defined in § 27-11-109(e): an employee must file a complaint with the commission within thirty (30) days after the violation occurs.",
+        "exhaustion_required": true,
+        "exhaustion_details": "The employee must file a complaint with the state commission; the administrator is then tasked with investigating and bringing an action in district court if appropriate."
+      },
+      "enforcement": {
+        "primary_agency": "Wyoming Department of Workforce Services, OSHA Commission",
+        "process_type": [
+          "state-agency-complaint"
+        ],
+        "adverse_action": [
+          "termination"
+        ],
+        "remedies": [
+          "reinstatement",
+          "back-pay"
+        ],
+        "fee_shifting": [
+          "none-american-rule"
+        ]
+      },
+      "burden_of_proof": {
+        "employee_standard": [],
+        "employer_defense": []
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://wyoleg.gov/statutes/27-11-109",
+        "is_official": true
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      "_review_notes": "State equivalent of federal OSHA section 11(c). Unlike the state employee act, the SOL is explicit in the statute text at 30 days. Enforcement is primarily driven by the state administrator rather than a direct private right of action."
+    },
+    {
+      "jurisdiction_id": "WY",
+      "statute_id": "WY-42-4-304",
+      "official_name": "Wyoming Medicaid False Claims Act",
+      "common_name": "Medicaid False Claims Whistleblower Protection",
+      "legal_basis": {
+        "statute_citation": "Wyo. Stat. § 42-4-304",
+        "disclosure_types": [
+          "healthcare-medicare-fraud",
+          "procurement-spending-fraud"
+        ],
+        "protected_class": [
+          "corporate-staff",
+          "contractor-gig"
+        ],
+        "disclosure_targets": [
+          "internal-supervisor",
+          "agency-state",
+          "law-enforcement"
+        ],
+        "adverse_action_scope": "Discharged, demoted, suspended, threatened, harassed or otherwise discriminated against in the terms and conditions of employment."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": true,
+        "limit_value": 0,
+        "limit_unit": "years",
+        "limit_details": "The retaliation provision (§ 42-4-304) does not contain a specific statute of limitations. It defaults to the general civil tort limitations under Wyo. Stat. § 1-3-105.",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "process_type": [
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "demotion",
+          "suspension",
+          "harassment"
+        ],
+        "remedies": [
+          "reinstatement",
+          "double-back-pay",
+          "compensatory-damages",
+          "attorney-fees",
+          "litigation-costs"
+        ],
+        "fee_shifting": [
+          "unilateral-pro-plaintiff"
+        ]
+      },
+      "burden_of_proof": {
+        "employee_standard": [],
+        "employer_defense": []
+      },
+      "reward": {
+        "available": true,
+        "reward_details": "The statute allows for qui tam actions, meaning the whistleblower may receive a percentage of the recovered Medicaid funds."
+      },
+      "links": {
+        "statute_url": "https://wyoleg.gov/statutes/42-4-304",
+        "is_official": true
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      "_review_notes": "Closely tracks the federal False Claims Act retaliation provisions (31 U.S.C. 3730(h)), offering double back pay and specialized damages for those reporting Medicaid fraud to the state."
+    }
+  ],
+  "integrity": {
+    "with_errors": true,
+    "error_details": [
+      "WY-9-11-103: SOL field limit_ambiguous is true; limit_value was derived from general Government Claims Act, not verified against the explicit text of the specific whistleblower statute.",
+      "WY-42-4-304: SOL field limit_ambiguous is true; limit_value was derived from general civil procedure statute Wyo. Stat. § 1-3-105, not verified against the explicit text of the specific whistleblower statute.",
+      "WY-9-11-103: exhaustion_details populated from verifiable statute text § 9-11-103(b) to indicate that administrative remedies must be exhausted.",
+      "WY-27-11-109: exhaustion_details populated from verifiable statute text indicating mandatory 30-day agency filing requirement."
+    ],
+    "error_count": 4
+  }
+}

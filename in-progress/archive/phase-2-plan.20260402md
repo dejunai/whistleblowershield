@@ -1,6 +1,6 @@
 # Phase 2 — Plan & Design
 
-**Last updated:** 2026-04-03
+**Last updated:** 2026-03-26
 **Status:** Planning complete — ready to execute after demo milestone
 
 ---
@@ -36,33 +36,15 @@ problem, not a data model problem.
    stress test — complex, well-documented, lots of case law. Taxonomy
    completeness audit required before cascade testing begins.
 
-4. **Manual data build — thin jurisdiction (Wyoming)** — genuinely thin
-   legal landscape. Proves the fallback sequence works and that the
-   platform handles incompleteness honestly. Wyoming data set:
-   - 3 statutes: `WY-9-11-103`, `WY-27-11-109`, `WY-42-4-304`
-   - 1 common law doctrine: `WY-CL-PUBLIC-POLICY` (Wrongful Discharge
-     in Violation of Public Policy — private sector primary protection)
-   Wyoming's common law record is critical to the fallback demo —
-   it demonstrates that the platform represents the actual legal
-   landscape honestly, including judicially-recognized protections
-   that exist outside codified statute.
+4. **Manual data build — thin jurisdiction** — Wyoming recommended.
+   Genuinely thin legal landscape. Proves the fallback sequence works
+   and that the platform handles incompleteness honestly.
 
-5. **`render-common-law.php` implementation** — currently a stub.
-   Must be implemented before the Wyoming jurisdiction page can
-   surface common law records. See render README for implementation notes.
-
-6. **`render-assist-org.php` extraction** — assist org rendering must be
-   extracted from `render-section.php` into its own file before Phase 2.
-   Assist org cards render differently in the directory context than on
-   a jurisdiction page. The Phase 2 filter cascade needs to call them
-   independently. This is a pre-Phase 2 prerequisite, not an optional
-   refactor.
-
-7. **Build `tool-generate-prompt.php`** — prerequisite for production
+5. **Build `tool-generate-prompt.php`** — prerequisite for production
    data runs. Build after demo data is complete so you have a validated
    dataset to test against.
 
-8. **Build `tool-ingest.php`** — same reasoning. Manual population for
+6. **Build `tool-ingest.php`** — same reasoning. Manual population for
    demo phase. Tools built against real validated data post-demo.
 
 ### Phase 2 build — five unified pieces
@@ -104,20 +86,6 @@ Two parallel render paths. Never merged.
 - `attach_flag` is an editorial curation tool for the curated path only
 - It is invisible to the filtered path — document this explicitly in
   every function that touches the filtered render
-
-### Common law records in the filtered path
-
-`jx-common-law` records participate in the filtered path the same way
-`jx-statute` records do — via taxonomy match, `attach_flag` ignored.
-`ws_get_jx_common_law_data()` is the query function. The filter cascade
-must query both CPTs and surface common law results in their own section,
-distinct from statutes, with appropriate framing.
-
-The `ws_cl_statutory_preclusion` flag is relevant to the filtered path:
-when `true`, the platform should note that the common law claim may be
-unavailable if a statutory remedy applies — surface this as a user-facing
-notice, not a filter exclusion. The record is still shown; the preclusion
-is a clarification.
 
 ### Directory filter vs. jurisdiction filter
 
@@ -246,7 +214,6 @@ Q4: Are you thinking of reporting internally or to an outside authority?
 
 → Results:
    Priority 1 — Relevant statutes (what protects you)
-   Priority 1b — Relevant common law protections (where applicable)
    Priority 2 — Relevant agencies (who enforces it)
    Priority 3 — Assist organizations (who can help you decide)
 ```
@@ -282,10 +249,10 @@ Q5: What would be most helpful right now?
 
 | Q5 answer | Results order |
 |---|---|
-| Understand my rights | Statutes → common law → procedures → assist orgs |
+| Understand my rights | Statutes → procedures → assist orgs |
 | File a complaint | Procedures (deadline-bearing first) → agencies → statutes |
 | Find legal help | Assist orgs → procedures → statutes |
-| All of the above / not sure | Statutes → common law → procedures → agencies → assist orgs |
+| All of the above / not sure | Statutes → procedures → agencies → assist orgs |
 
 ---
 
@@ -339,9 +306,10 @@ $ws_filter_thin_threshold_default = 3;
 
 The table is a living config. Values are editorial judgments about
 what "thin results" means for a given jurisdiction's actual legal
-landscape — not arithmetic. Wyoming's threshold accounts for its
-thin statutory landscape — the common law record supplements but
-does not change its genuinely limited coverage for most situations.
+landscape — not arithmetic. Calibrated against real data as coverage
+grows. May also need per-jurisdiction calculation as a ratio of
+filtered results to total published records for that jurisdiction —
+surfaces as a refinement once real data is available.
 
 ### Fallback behavior
 
@@ -353,7 +321,8 @@ Show what matched — even thin results — then append:
 Never hide thin results in favor of a clean fallback. Show everything
 the platform has, then be honest about the limits.
 
-Zero results: same behavior. The user still gets the fallback resources.
+Zero results: same behavior. The percentage math bottoms out at zero.
+The user still gets the fallback resources.
 
 ---
 
@@ -371,7 +340,7 @@ fallback. Logging observes it without changing their logic.
     'timestamp'          => gmdate( 'Y-m-d H:i:s' ),
     'jurisdiction'       => 'ca',
     'filter_context'     => [ 'ws_disclosure_type' => [12], 'ws_employment_sector' => [8] ],
-    'result_counts'      => [ 'statutes' => 3, 'common_law' => 1, 'citations' => 1, 'interpretations' => 0 ],
+    'result_counts'      => [ 'statutes' => 3, 'citations' => 1, 'interpretations' => 0 ],
     'fallback_triggered' => false,
     'directory_request'  => false,
 ]
@@ -400,19 +369,13 @@ Federal append working correctly under filter conditions.
 holds under filter conditions.
 
 **Wyoming** — honesty test. Genuinely thin legal landscape.
-3 statutes + 1 common law doctrine (`WY-CL-PUBLIC-POLICY`).
 Proves the fallback sequence reads as honest and helpful rather
-than broken. The common law record demonstrates the platform
-surfaces the full picture of what a jurisdiction actually offers —
-including judicially-recognized protections outside codified statute.
-The statutory preclusion notice on the common law record is a concrete
-example of editorial honesty: "this protection may not be available
-if a statutory remedy exists."
+than broken. The platform handles incompleteness with integrity.
 
 **Three entry paths to validate:**
 1. Jurisdiction page → filtered cascade view
 2. Directory → "Get Help" narrowed results
-3. Thin jurisdiction (Wyoming) → fallback sequence + common law notice
+3. Thin jurisdiction → fallback sequence
 
 Demo is internally solid before any external contact.
 
@@ -457,7 +420,7 @@ who just got fired for reporting something. Tell me if you can find
 what you need. Tell me where you got stuck."
 
 Send some people to Wyoming deliberately — tests fallback sequence
-and common law notice with real lay users.
+with real lay users.
 
 Feedback via email reply. Not a form — too much friction. One sentence
 is enough: "I was trying to find X and got stuck at Y."
@@ -474,10 +437,7 @@ a separate non-profit.
 ### Expense basis
 
 - Domain registration: March 3rd 2026 (citable via WHOIS)
-- Labor: Fixed monthly stipend equivalent to California minimum wage
-  ($17.28/hour) × 28 hours/week (~$1,935/month). This represents a
-  modest baseline acknowledgment of ongoing work, not a cap on hours
-  invested or a guarantee of compensation.
+- Labor: California minimum wage ($17.28/hour) × 28 hours/week
 - Retro pay calculated from March 3rd forward
 - Ongoing: ~$1,935/month
 
@@ -506,7 +466,7 @@ maintenance). Prominently recognized.
 
 ### Campaign narrative
 
-Transparent expense ledger. Modest retro stipend.
+Transparent expense ledger. Modest retro pay at minimum wage.
 Specific operational commitment with a 7-day update window.
 Jurisdiction-funding model makes donations concrete and mission-connected.
 Org outreach responses provide social proof before launch.
@@ -518,20 +478,12 @@ Org outreach responses provide social proof before launch.
 Taxonomy completeness is the data build requirement — not just field
 completeness. A statute with no `ws_disclosure_type` terms is invisible
 to Path A entirely. A procedure with no taxonomy coverage is invisible
-to Path B. A common law record with no `ws_protected_class` terms is
-invisible to any query filtering on protected class.
+to Path B.
 
 **Pre-cascade checklist for California data:**
 Every statute, citation, interpretation, agency, procedure, and assist
 org audited for taxonomy coverage on every relevant axis. Gaps documented
 explicitly rather than left as silent omissions.
-
-**Pre-cascade checklist for Wyoming data:**
-All 3 statutes and the `WY-CL-PUBLIC-POLICY` common law record audited
-for taxonomy completeness. The common law record's `ws_cl_statutory_preclusion`
-flag verified correct (true for Wyoming). `ws_cl_public_policy_sources`
-confirmed (constitution, statute, administrative-rule per Allen v. Safeway
-and McLean v. Hyland precedent).
 
 The cascade is only as good as the taxonomy assignments on the records
 it queries. This is the editorial discipline the data build requires.

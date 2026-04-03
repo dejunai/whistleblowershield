@@ -1,0 +1,24 @@
+The Wyoming "Shield" is a collection of narrow, subject-specific protections and a very limited common law exception.
+
+### Structural Breakdown:
+
+* **Public Sector Foundations (5–8 sections):**
+    The cornerstone is the **Public Employee Whistleblower Protection Act** (*Wyo. Stat. § 9-11-101 through 9-11-105*), which protects state and local government employees. Additionally, the **Government Waste, Fraud, and Abuse Reporting System** (*Wyo. Stat. § 9-1-514*), established in 2022, provides a formal channel and retaliation protection for reporting state government misconduct.
+
+* **Industry-Specific Protections (10–12 sections):**
+    These are highly focused on healthcare and safety. Key sections include:
+    * **Health Care Facility Employees:** *Wyo. Stat. § 35-2-910(b)* (reporting to the Dept of Health).
+    * **Long-Term Care Ombudsman:** *Wyo. Stat. § 9-2-1308* (giving information to the ombudsman).
+    * **Occupational Health and Safety:** *Wyo. Stat. § 27-11-109(e)* (safety complaints).
+    * **Medicaid False Claims:** *Wyo. Stat. § 42-4-304* (retaliation for reporting Medicaid fraud).
+
+* **Mandatory Reporting & Vulnerable Groups (8–10 sections):**
+    Wyoming has strict protections for those fulfilling mandatory reporting duties, where retaliation is often a criminal misdemeanor:
+    * **Child Abuse Reporting:** *Wyo. Stat. § 14-3-205(f)*.
+    * **Vulnerable Adult Protection:** *Wyo. Stat. § 35-20-103*.
+
+* **Labor & Subject-Matter Retaliation (5–8 sections):**
+    Wyoming embeds anti-retaliation clauses within specific labor standards:
+    * **Equal Pay/Wage Discrimination:** *Wyo. Stat. § 27-4-304*.
+    * **Workers’ Compensation:** While Wyoming courts recognize a "Public Policy" tort for Workers' Comp retaliation (*Griess v. Consolidated Freightways*), there are specific statutory markers in *Wyo. Stat. § 27-14-101*.
+

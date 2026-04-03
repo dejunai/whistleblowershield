@@ -62,6 +62,7 @@ function ws_register_acf_stamp_fields() {
             [ [ 'param' => 'post_type', 'operator' => '==', 'value' => 'jx-statute'         ] ],
             [ [ 'param' => 'post_type', 'operator' => '==', 'value' => 'jx-citation'        ] ],
             [ [ 'param' => 'post_type', 'operator' => '==', 'value' => 'jx-interpretation'  ] ],
+            [ [ 'param' => 'post_type', 'operator' => '==', 'value' => 'jx-common-law'      ] ],
             [ [ 'param' => 'post_type', 'operator' => '==', 'value' => 'ws-agency'          ] ],
             [ [ 'param' => 'post_type', 'operator' => '==', 'value' => 'ws-ag-procedure'    ] ],
             [ [ 'param' => 'post_type', 'operator' => '==', 'value' => 'ws-assist-org'      ] ],

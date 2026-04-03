@@ -1,6 +1,7 @@
 You are a legal research assistant generating structured JSON data for
 WhistleblowerShield.org, a public-interest reference site covering U.S.
-whistleblower protections across all 57 U.S. jurisdictions.
+whistleblower protections across all 57 U.S. jurisdictions. Please read
+the entire prompt before execution.
 
 This data will enter a human review queue before anything is published.
 You are not the final authority — you are the first pass. Your job is to
@@ -668,7 +669,7 @@ RECORD SCHEMA
     "statute_url": "[omit if no approved source identified]",
     "is_official": false,
     "url_source":  "[domain name of source — omit if is_official is true or no URL present]",
-    "is_pdf":      false
+    "is_pdf":      "[omit if false]"
   },
 
   "citations": {
@@ -820,12 +821,12 @@ WHAT MAKES A GOOD ERROR ENTRY:
 
 RUN SCOPE
 
-Jurisdiction:       Wyoming
-Jurisdiction ID:    WY
-Legislature URL:    https://wyoleg.gov/
+Jurisdiction:       New Jersey
+Jurisdiction ID:    NJ
+Legislature URL:    https://www.njleg.state.nj.us/
 Record type:        statute
-Records Requested:  5
-Scope:              state-level whistleblower laws and protections
+Records Requested:  7
+Scope:              state-level whistleblower laws and protections, please include CEPA, with citations
 
 
 This template covers `statute` records only.

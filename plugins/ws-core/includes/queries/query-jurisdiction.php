@@ -1430,3 +1430,122 @@ add_action( 'before_delete_post', function( $post_id ) {
         ws_invalidate_jurisdiction_list_and_index_caches();
     }
 } );
+
+
+// ════════════════════════════════════════════════════════════════════════════
+// Common Law Protection Data
+//
+// Returns all attached jx-common-law records for a jurisdiction, appending
+// federal common law doctrine records the same way ws_get_jx_statute_data()
+// appends federal statutes.
+//
+// @param int $jx_term_id  The ws_jurisdiction term ID for the jurisdiction.
+// @return array           Flat array of common law doctrine row arrays.
+//                         Empty array if no records exist.
+// ════════════════════════════════════════════════════════════════════════════
+
+function ws_get_jx_common_law_data( $jx_term_id ) {
+
+    $term_id    = (int) $jx_term_id;
+    $us_term_id = ws_get_us_term_id();
+    if ( ! $term_id ) {
+        return [];
+    }
+
+    $fetch = function( $tid, $is_fed ) {
+        $q = new WP_Query( [
+            'post_type'      => 'jx-common-law',
+            'post_status'    => 'publish',
+            'posts_per_page' => -1,
+            'orderby'        => 'meta_value_num',
+            'meta_key'       => 'ws_display_order',
+            'order'          => 'ASC',
+            'no_found_rows'  => true,
+            'meta_query'     => [ [
+                'key'     => 'ws_attach_flag',
+                'value'   => '1',
+                'compare' => '=',
+            ] ],
+            'tax_query'      => [ [
+                'taxonomy' => WS_JURISDICTION_TAXONOMY,
+                'field'    => 'term_id',
+                'terms'    => $tid,
+            ] ],
+        ] );
+        $rows = [];
+        foreach ( $q->posts as $record ) {
+            $rid    = $record->ID;
+            $rows[] = [
+                'id'      => $rid,
+                'title'   => get_the_title( $rid ),
+                'url'     => get_permalink( $rid ),
+                'status'  => get_post_status( $rid ),
+                'content' => get_post_field( 'post_content', $rid ),
+                'order'   => (int) get_post_meta( $rid, 'ws_display_order', true ),
+                'is_fed'  => $is_fed,
+
+                // ── Legal Basis ───────────────────────────────────────────
+                'doctrine_name'          => get_post_meta( $rid, 'ws_cl_doctrine_name',          true ),
+                'doctrine_id'            => get_post_meta( $rid, 'ws_cl_doctrine_id',             true ),
+                'common_name'            => get_post_meta( $rid, 'ws_cl_common_name',             true ),
+                'precedent_url'          => get_post_meta( $rid, 'ws_cl_precedent_url',           true ),
+                'public_policy_sources'  => get_post_meta( $rid, 'ws_cl_public_policy_sources',  true ),
+                'other_sources'          => get_post_meta( $rid, 'ws_cl_other_sources',           true ),
+                'doctrine_basis'         => get_post_meta( $rid, 'ws_cl_doctrine_basis',          true ),
+                'recognition_status'     => get_post_meta( $rid, 'ws_cl_recognition_status',      true ),
+                'disclosure_type'      => get_field( 'ws_cl_disclosure_type',      $rid ),
+                'protected_class'      => get_field( 'ws_cl_protected_class',      $rid ),
+                'disclosure_targets'   => get_field( 'ws_cl_disclosure_targets',   $rid ),
+                'adverse_action_scope' => get_post_meta( $rid, 'ws_cl_adverse_action_scope',  true ),
+                'attach_flag'          => (bool) get_post_meta( $rid, 'ws_attach_flag',        true ),
+
+                // ── Statute of Limitations ────────────────────────────────
+                'sol_value'           => get_post_meta( $rid, 'ws_cl_sol_value',           true ),
+                'sol_unit'            => get_post_meta( $rid, 'ws_cl_sol_unit',            true ),
+                'sol_trigger'         => get_post_meta( $rid, 'ws_cl_sol_trigger',         true ),
+                'sol_has_details'     => (bool) get_post_meta( $rid, 'ws_cl_sol_has_details',     true ),
+                'sol_details'         => get_post_meta( $rid, 'ws_cl_sol_details',         true ),
+                'tolling_has_details' => (bool) get_post_meta( $rid, 'ws_cl_tolling_has_details', true ),
+                'tolling_details'     => get_post_meta( $rid, 'ws_cl_tolling_details',     true ),
+                'has_exhaustion'      => (bool) get_post_meta( $rid, 'ws_cl_has_exhaustion',      true ),
+                'exhaustion_details'  => get_post_meta( $rid, 'ws_cl_exhaustion_details',  true ),
+
+                // ── Enforcement ───────────────────────────────────────────
+                'process_type'     => get_field( 'ws_cl_process_type',     $rid ),
+                'adverse_action'   => get_field( 'ws_cl_adverse_action',   $rid ),
+                'fee_shifting'     => get_field( 'ws_cl_fee_shifting',     $rid ),
+                'remedies'         => get_field( 'ws_cl_remedies',         $rid ),
+                'related_agencies' => get_field( 'ws_cl_related_agencies', $rid ),
+
+                // ── Burden of Proof ───────────────────────────────────────
+                'statutory_preclusion'         => (bool) get_post_meta( $rid, 'ws_cl_statutory_preclusion',         true ),
+                'statutory_preclusion_details' => get_post_meta( $rid, 'ws_cl_statutory_preclusion_details', true ),
+                'employee_standard'        => get_field( 'ws_cl_employee_standard',        $rid ),
+                'employer_defense'         => get_field( 'ws_cl_employer_defense',         $rid ),
+                'employer_defense_details' => get_post_meta( $rid, 'ws_cl_employer_defense_details', true ),
+                'rebuttable_has_details'   => (bool) get_post_meta( $rid, 'ws_cl_rebuttable_has_details', true ),
+                'rebuttable_details'       => get_post_meta( $rid, 'ws_cl_rebuttable_details',       true ),
+                'bop_has_details'          => (bool) get_post_meta( $rid, 'ws_cl_bop_has_details',   true ),
+                'bop_details'              => get_post_meta( $rid, 'ws_cl_bop_details',              true ),
+
+                // ── Reward ────────────────────────────────────────────────
+                'has_reward'     => (bool) get_post_meta( $rid, 'ws_cl_has_reward',     true ),
+                'reward_details' => get_post_meta( $rid, 'ws_cl_reward_details', true ),
+
+                // Record management
+                'plain'  => ws_build_plain_english_array( $rid ),
+                'verify' => ws_build_source_verify_array( $rid ),
+                'record' => ws_build_record_array( $rid ),
+            ];
+        }
+        return $rows;
+    };
+
+    $results = $fetch( $term_id, false );
+
+    if ( $us_term_id && $term_id !== $us_term_id ) {
+        $results = array_merge( $results, $fetch( $us_term_id, true ) );
+    }
+
+    return $results;
+}
