@@ -703,7 +703,7 @@ RECORD SCHEMA
   },
 
   "_review_notes": "",
-  "_reconciled_notes": "[NOTEBOOKLM ONLY — leave this key empty. First Pass Research models must not populate this field.]"
+  "_reconciled_notes": "[Must be included — leave this key empty. First Pass Research models must not populate this field.]"
 }
 
 ---
@@ -847,12 +847,12 @@ WHAT MAKES A GOOD ERROR ENTRY:
 
 RUN SCOPE
 
-Jurisdiction:       New Jersey
-Jurisdiction ID:    NJ
-Legislature URL:    https://www.njleg.state.nj.us/
+Jurisdiction:       Colorado
+Jurisdiction ID:    CO
+Legislature URL:    https://leg.colorado.gov/
 Record type:        statute
 Records Requested:  7
-Scope:              state-level whistleblower laws and protections, please include CEPA, with citations
+Scope:              state-level whistleblower laws and protections
 
 
 This template covers `statute` records only.

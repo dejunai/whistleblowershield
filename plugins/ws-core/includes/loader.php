@@ -156,6 +156,7 @@
  *         load blocks added.
  * 3.10.2  ws-statute-bold added to render files.
  * 3.13.0  cpt-jx-common-law and acf-jx-common-law added.
+ * 3.13.1  tool-generate-prompt added to tools load block.
  *
  * @package WhistleblowerShield
  * @since   2.1.0
@@ -169,6 +170,20 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 1. UNIVERSAL LAYER (Necessary for Permalinks & API)
 ---------------------------------------------------------
 */
+		$file = 'sentry_init.php';
+		$path = WS_CORE_PATH . "includes/sentry_init.php";
+		if ( file_exists( $path ) ) {
+			require_once $path;
+		} else {
+			error_log( sprintf(
+				'[ws-core] Missing SENTRY INIT file: %s (expected at %s, referenced from %s line %d)',
+				$file,
+				$path,
+				__FILE__,
+				__LINE__
+			) );
+		}
+
 	// CPT Layer: Must load everywhere so WordPress understands the URLs
 	$cpt_files = [
 		'cpt-jurisdictions', 'cpt-jx-summaries', 'cpt-jx-statutes', 'cpt-legal-updates',
@@ -459,6 +474,34 @@ if ( is_admin() ) {
     }
 
     // admin-relationships.php removed — Phase 3.6: relationship model replaced by taxonomy scoping.
+
+    // TOOLS — Admin-only tools loaded from /includes/admin/tools/
+    // Each tool registers its own admin menu page via add_submenu_page().
+    $tool_files = [
+        'tool-generate-prompt',
+    ];
+    foreach ( $tool_files as $file ) {
+        $path = WS_CORE_PATH . "/includes/admin/tools/{$file}.php";
+        if ( file_exists( $path ) ) {
+            require_once $path;
+        } else {
+            error_log( sprintf(
+                '[ws-core] Missing TOOL file: %s (expected at %s, referenced from %s line %d)',
+                $file . '.php',
+                $path,
+                __FILE__,
+                __LINE__
+            ) );
+            add_action( 'admin_notices', function() use ( $file ) {
+                echo '<div class="notice notice-error"><p>';
+                printf(
+                    '<strong>WhistleblowerShield:</strong> Missing tool file: <code>%s.php</code> — check error log for details.',
+                    esc_html( $file )
+                );
+                echo '</p></div>';
+            } );
+        }
+    }
 
 }
 

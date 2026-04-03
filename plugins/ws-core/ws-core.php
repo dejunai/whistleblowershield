@@ -120,7 +120,18 @@ function ws_core_init() {
         return;
     }
 
+    // ── Developer ───────────────────────────────────────────────────────────
+	//
+	// Sentry loaded by /vendor/autoload.php
+
+	if (file_exists(__DIR__ . '/vendor/autoload.php')) {
+		require_once __DIR__ . '/vendor/autoload.php';
+	}
+	define('WS_ENABLE_SENTRY', true);
+
     require_once WS_CORE_PATH . 'includes/loader.php';
+	
+	ws_sentry_init();
 
     // Flush rewrite rules once after activation — deferred so all CPTs are
     // registered before the flush runs.

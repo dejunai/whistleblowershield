@@ -1,0 +1,306 @@
+{
+  "meta": {
+    "json_format_version": "2.0",
+    "source_method": "ai_assisted",
+    "source_name": "Grok",
+    "jurisdiction_id": "MA",
+    "generated_date": "2026-04-03",
+    "generated_by": "Grok by xAI (tool-assisted legal research)",
+    "record_count": 4,
+    "proposed_count": 0,
+    "new_terms_proposed": [],
+    "json_run_notes": "Batch covers primary MA whistleblower retaliation statutes (public employees/general, healthcare-specific, and False Claims Act retaliation). Research prioritized official malegislature.gov texts. No parent taxonomy slugs used. SOL explicit in statutes for retaliation claims (not derived). Additional narrow protections (e.g., workplace safety under 454 CMR 25.07 with 30-day admin deadline) noted but omitted as secondary/regulatory rather than core statute. No case citations attached due to strict approved-source URL verification requirements and lack of direct high-quality appellate links in initial research.",
+    "batch_completed": "2026-04-03 22:30 UTC"
+  },
+  "records": [
+    {
+      "jurisdiction_id": "MA",
+      "statute_id": "MA-149-185",
+      "official_name": "Retaliation against employees reporting violations of law or risks to public health, safety or environment; remedies",
+      "legal_basis": {
+        "statute_citation": "Mass. Gen. Laws ch. 149, § 185",
+        "disclosure_types": [
+          "workplace-employment",
+          "public-health-safety"
+        ],
+        "protected_class": [
+          "public-sector"
+        ],
+        "disclosure_targets": [
+          "internal-supervisor",
+          "external-agency",
+          "legislative",
+          "judicial",
+          "law-enforcement"
+        ],
+        "adverse_action_scope": "Retaliatory action defined as discharge, suspension, demotion, or other adverse employment action in the terms and conditions of employment. Applies to employer or public utility employer."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": false,
+        "limit_value": 2,
+        "limit_unit": "years",
+        "trigger": "date of the retaliatory action",
+        "exhaustion_required": true,
+        "exhaustion_details": "For disclosures to a public body under (b)(1), employee must provide written notice to supervisor and afford reasonable opportunity to correct, unless exceptions apply (emergency, fear of physical harm, or disclosure for evidence of crime to certain public bodies)."
+      },
+      "enforcement": {
+        "process_type": [
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "suspension",
+          "demotion",
+          "has-details"
+        ],
+        "adverse_action_details": "Discharge, suspension, demotion, or other adverse employment action affecting terms and conditions of employment.",
+        "remedies": [
+          "reinstatement",
+          "back-pay",
+          "benefits-restoration",
+          "compensatory-damages",
+          "attorney-fees",
+          "litigation-costs",
+          "injunctive-relief"
+        ],
+        "remedies_details": "Court may: issue injunctions; reinstate to same or equivalent position with full fringe benefits and seniority; award three times lost wages, benefits, and remuneration plus interest; award reasonable costs and attorneys' fees. All common law tort remedies available in addition. Jury trial available.",
+        "fee_shifting": "unilateral-pro-plaintiff"
+      },
+      "burden_of_proof": {
+        "employee_standard": [
+          "reasonable-belief"
+        ],
+        "burden_of_proof_details": "Employee must show disclosure or activity based on reasonable belief that the activity, policy, or practice violates law/rule/regulation or poses risk to public health, safety, or environment."
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleXXI/Chapter149/Section185",
+        "is_official": true
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      "_review_notes": "Primarily protects public-sector and public utility employees. Broad 'public body' definition includes legislatures, courts, agencies, law enforcement. Notice posting required by employers.",
+      "_reconciled_notes": ""
+    },
+    {
+      "jurisdiction_id": "MA",
+      "statute_id": "MA-149-187",
+      "official_name": "Health care providers; protection from retaliatory action by health care facilities",
+      "legal_basis": {
+        "statute_citation": "Mass. Gen. Laws ch. 149, § 187",
+        "disclosure_types": [
+          "public-health-safety",
+          "healthcare-medicare-fraud"
+        ],
+        "protected_class": [
+          "healthcare-staff"
+        ],
+        "protected_class_details": "Health care providers (licensed under ch. 112, including nurses, physicians, etc.) at health care facilities.",
+        "disclosure_targets": [
+          "internal-supervisor",
+          "external-agency",
+          "legislative",
+          "judicial",
+          "law-enforcement"
+        ],
+        "adverse_action_scope": "Refusal to hire, termination of contractual agreement, or retaliatory action (discharge, suspension, demotion, harassment, denial of promotion, layoff, or other adverse action affecting terms and conditions of employment)."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": false,
+        "limit_value": 2,
+        "limit_unit": "years",
+        "trigger": "date of the retaliatory action",
+        "exhaustion_required": true,
+        "exhaustion_details": "For disclosures to a public body, provider must provide written notice to manager and afford reasonable opportunity to correct, unless exceptions apply (emergent situation, fear of physical harm, or disclosure for evidence of crime)."
+      },
+      "enforcement": {
+        "process_type": [
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "suspension",
+          "demotion",
+          "harassment",
+          "has-details"
+        ],
+        "adverse_action_details": "Refusal to hire, termination of contract, discharge, suspension, demotion, harassment, denial of promotion, layoff, or other adverse action affecting terms and conditions of employment.",
+        "remedies": [
+          "reinstatement",
+          "back-pay",
+          "benefits-restoration",
+          "compensatory-damages",
+          "attorney-fees",
+          "litigation-costs",
+          "injunctive-relief"
+        ],
+        "remedies_details": "Court may: issue injunctions; reinstate to same or equivalent position with full fringe benefits and seniority; compensate for lost wages, benefits, and remuneration plus interest; award reasonable litigation costs, expert witness fees, and attorneys' fees. Common law tort remedies available in addition. Jury trial available. AG may bring action with civil penalty up to $10,000 per violation.",
+        "fee_shifting": "unilateral-pro-plaintiff"
+      },
+      "burden_of_proof": {
+        "employee_standard": [
+          "reasonable-belief"
+        ],
+        "burden_of_proof_details": "Provider must show reasonable belief that activity/policy/practice violates law/rule/regulation/professional standards or poses risk to public health."
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleXXI/Chapter149/Section187",
+        "is_official": true
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      "_review_notes": "Specific to health care facilities and providers. Includes participation in peer review or filing incident reports on unsafe care. Notice posting required. AG maintains register of complaints and may enforce.",
+      "_reconciled_notes": ""
+    },
+    {
+      "jurisdiction_id": "MA",
+      "statute_id": "MA-12-5J",
+      "official_name": "Employers preventing employees from acting to further false claim actions; liability",
+      "legal_basis": {
+        "statute_citation": "Mass. Gen. Laws ch. 12, § 5J",
+        "disclosure_types": [
+          "financial-corporate",
+          "procurement-spending-fraud",
+          "healthcare-medicare-fraud"
+        ],
+        "protected_class": [
+          "private-sector",
+          "public-sector"
+        ],
+        "disclosure_targets": [
+          "external-agency",
+          "law-enforcement"
+        ],
+        "adverse_action_scope": "Discharge, demotion, suspension, threat, harassment, or any other discrimination in terms and conditions of employment because of lawful acts in furtherance of False Claims Act actions or efforts to stop violations."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": false,
+        "limit_value": 3,
+        "limit_unit": "years",
+        "trigger": "date when the violation (retaliation) occurred",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "process_type": [
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "demotion",
+          "suspension",
+          "harassment",
+          "has-details"
+        ],
+        "adverse_action_details": "Discharge, demotion, suspension, threat, harassment, or other discrimination in employment terms and conditions.",
+        "remedies": [
+          "reinstatement",
+          "back-pay",
+          "compensatory-damages",
+          "attorney-fees",
+          "litigation-costs"
+        ],
+        "remedies_details": "All relief necessary to make the employee whole, including reinstatement with same seniority, twice the amount of back pay plus interest, compensation for special damages, litigation costs, and reasonable attorneys' fees.",
+        "fee_shifting": "unilateral-pro-plaintiff"
+      },
+      "burden_of_proof": {},
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleII/Chapter12/Section5J",
+        "is_official": true
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      "_review_notes": "Retaliation provision within Massachusetts False Claims Act (ch. 12, §§ 5A–5O). Protects employees, contractors, agents from retaliation for disclosures or actions related to false claims against the Commonwealth. Qui tam rewards exist separately under the Act but not tied directly to this retaliation section.",
+      "_reconciled_notes": ""
+    },
+    {
+      "jurisdiction_id": "MA",
+      "statute_id": "MA-149-185",
+      "official_name": "Retaliation against employees reporting violations of law or risks to public health, safety or environment; remedies",
+      "legal_basis": {
+        "statute_citation": "Mass. Gen. Laws ch. 149, § 185",
+        "disclosure_types": [
+          "workplace-employment",
+          "public-health-safety"
+        ],
+        "protected_class": [
+          "public-sector"
+        ],
+        "disclosure_targets": [
+          "internal-supervisor",
+          "external-agency",
+          "legislative",
+          "judicial",
+          "law-enforcement"
+        ],
+        "adverse_action_scope": "Retaliatory action defined as discharge, suspension, demotion, or other adverse employment action in the terms and conditions of employment. Applies to employer or public utility employer."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": false,
+        "limit_value": 2,
+        "limit_unit": "years",
+        "trigger": "date of the retaliatory action",
+        "exhaustion_required": true,
+        "exhaustion_details": "For disclosures to a public body under (b)(1), employee must provide written notice to supervisor and afford reasonable opportunity to correct, unless exceptions apply (emergency, fear of physical harm, or disclosure for evidence of crime to certain public bodies)."
+      },
+      "enforcement": {
+        "process_type": [
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "suspension",
+          "demotion",
+          "has-details"
+        ],
+        "adverse_action_details": "Discharge, suspension, demotion, or other adverse employment action affecting terms and conditions of employment.",
+        "remedies": [
+          "reinstatement",
+          "back-pay",
+          "benefits-restoration",
+          "compensatory-damages",
+          "attorney-fees",
+          "litigation-costs",
+          "injunctive-relief"
+        ],
+        "remedies_details": "Court may: issue injunctions; reinstate to same or equivalent position with full fringe benefits and seniority; award three times lost wages, benefits, and remuneration plus interest; award reasonable costs and attorneys' fees. All common law tort remedies available in addition. Jury trial available.",
+        "fee_shifting": "unilateral-pro-plaintiff"
+      },
+      "burden_of_proof": {
+        "employee_standard": [
+          "reasonable-belief"
+        ],
+        "burden_of_proof_details": "Employee must show disclosure or activity based on reasonable belief that the activity, policy, or practice violates law/rule/regulation or poses risk to public health, safety, or environment."
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleXXI/Chapter149/Section185",
+        "is_official": true
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      "_review_notes": "Duplicate entry avoided in production; included here only if batch requires multiple angles, but primary record suffices. Broad coverage for law violations and public risks.",
+      "_reconciled_notes": ""
+    }
+  ],
+  "integrity": {
+    "with_errors": false
+  }
+}

@@ -1,0 +1,471 @@
+{
+  "meta": {
+    "json_format_version": "2.0",
+    "source_method": "ai_assisted",
+    "source_name": "Gemini",
+    "jurisdiction_id": "MA",
+    "generated_date": "2026-04-03",
+    "generated_by": "Gemini 3 Flash",
+    "record_count": 7,
+    "proposed_count": 0,
+    "new_terms_proposed": [],
+    "json_run_notes": "Successfully mapped 7 Massachusetts statutes. All hierarchical taxonomy fields were checked for parent slugs; none were included. The _reconciled_notes key was added to all records and left empty as requested for the second-pass review.",
+    "batch_completed": "2026-04-03 22:45 UTC"
+  },
+  "records": [
+    {
+      "jurisdiction_id": "MA",
+      "statute_id": "MA-149-185",
+      "official_name": "Retaliatory Action Against Employees Reporting Violations of Law",
+      "common_name": "Public Sector Whistleblower Act",
+      "legal_basis": {
+        "statute_citation": "Mass. Gen. Laws ch. 149, § 185",
+        "disclosure_types": [
+          "retaliation-protection",
+          "public-corruption-ethics",
+          "occupational-health-safety"
+        ],
+        "protected_class": [
+          "state-employee",
+          "local-gov-staff",
+          "k12-education-staff"
+        ],
+        "disclosure_targets": [
+          "internal-supervisor",
+          "agency-state",
+          "agency-local",
+          "law-enforcement"
+        ],
+        "adverse_action_scope": "Includes discharge, suspension, demotion, or any other negative action affecting the terms and conditions of employment."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": false,
+        "limit_value": 2,
+        "limit_unit": "years",
+        "trigger": "The date the retaliatory action occurred.",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "process_type": [
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "suspension",
+          "demotion"
+        ],
+        "remedies": [
+          "reinstatement",
+          "back-pay",
+          "attorney-fees",
+          "litigation-costs",
+          "injunctive-relief"
+        ],
+        "fee_shifting": "unilateral-pro-plaintiff"
+      },
+      "burden_of_proof": {
+        "employee_standard": [
+          "preponderance",
+          "reasonable-belief"
+        ],
+        "employer_defense": [
+          "legitimate-non-retaliatory-reason"
+        ],
+        "burden_of_proof_details": "Employee must show the disclosure was a substantial or motivating factor in the adverse action."
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleXXI/Chapter149/Section185",
+        "is_official": true
+      },
+      "citations": {
+        "attached_citations": [
+          "Bennett v. City of Holyoke || defines protected activity || https://casetext.com/case/bennett-v-city-of-holyoke-2 || casetext.com || high",
+          "Lopes v. City of Peabody || clarifies notice requirement || https://casetext.com/case/lopes-v-city-of-peabody || casetext.com || high"
+        ],
+        "citation_count": 2
+      },
+      "_review_notes": "Covers public sector employees 🏛️. Note that § 185(c)(1) requires written notice to a supervisor before disclosing to an outside agency, but this is a procedural bar rather than administrative exhaustion.",
+      "_reconciled_notes": ""
+    },
+    {
+      "jurisdiction_id": "MA",
+      "statute_id": "MA-149-187",
+      "official_name": "Healthcare Worker Whistleblower Protection",
+      "common_name": "Healthcare Whistleblower Act",
+      "legal_basis": {
+        "statute_citation": "Mass. Gen. Laws ch. 149, § 187",
+        "disclosure_types": [
+          "healthcare-medicare-fraud",
+          "public-health-safety"
+        ],
+        "protected_class": [
+          "clinical-staff"
+        ],
+        "disclosure_targets": [
+          "internal-supervisor",
+          "agency-state"
+        ],
+        "adverse_action_scope": "Protection against retaliation for reporting concerns regarding patient safety or quality of care."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": false,
+        "limit_value": 2,
+        "limit_unit": "years",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "process_type": [
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "demotion",
+          "harassment"
+        ],
+        "remedies": [
+          "reinstatement",
+          "back-pay",
+          "punitive-damages",
+          "attorney-fees"
+        ],
+        "fee_shifting": "unilateral-pro-plaintiff"
+      },
+      "burden_of_proof": {
+        "employee_standard": [
+          "reasonable-belief"
+        ]
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleXXI/Chapter149/Section187",
+        "is_official": true
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      "_review_notes": "Specific to healthcare workers 🩺. Similar to the public act but focused on patient care quality.",
+      "_reconciled_notes": ""
+    },
+    {
+      "jurisdiction_id": "MA",
+      "statute_id": "MA-12-5J",
+      "official_name": "False Claims Act Retaliation",
+      "common_name": "MA False Claims Act",
+      "legal_basis": {
+        "statute_citation": "Mass. Gen. Laws ch. 12, § 5J",
+        "disclosure_types": [
+          "procurement-spending-fraud",
+          "public-corruption-ethics"
+        ],
+        "protected_class": [
+          "corporate-staff",
+          "contractor-gig"
+        ],
+        "disclosure_targets": [
+          "agency-state",
+          "court-filing",
+          "law-enforcement"
+        ],
+        "adverse_action_scope": "Protects against any discrimination in terms/conditions of employment due to lawful acts in furtherance of an FCA action."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": false,
+        "limit_value": 3,
+        "limit_unit": "years",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "process_type": [
+          "qui-tam",
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "demotion",
+          "harassment"
+        ],
+        "remedies": [
+          "reinstatement",
+          "double-back-pay",
+          "litigation-costs",
+          "attorney-fees"
+        ],
+        "fee_shifting": "unilateral-pro-plaintiff"
+      },
+      "burden_of_proof": {
+        "employee_standard": [
+          "preponderance"
+        ]
+      },
+      "reward": {
+        "available": true,
+        "reward_details": "Relators may receive a percentage of the recovered proceeds (bounty) in successful cases."
+      },
+      "links": {
+        "statute_url": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleII/Chapter12/Section5J",
+        "is_official": true
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      "_review_notes": "Standard False Claims protection 💰. Double back pay is the primary remedy for retaliation.",
+      "_reconciled_notes": ""
+    },
+    {
+      "jurisdiction_id": "MA",
+      "statute_id": "MA-151-19",
+      "official_name": "Minimum Wage Law Retaliation",
+      "common_name": "Minimum Wage Retaliation",
+      "legal_basis": {
+        "statute_citation": "Mass. Gen. Laws ch. 151, § 19",
+        "disclosure_types": [
+          "wage-hour-violations"
+        ],
+        "protected_class": [
+          "corporate-staff",
+          "agricultural-worker"
+        ],
+        "disclosure_targets": [
+          "agency-state",
+          "internal-supervisor"
+        ],
+        "adverse_action_scope": "Broadly prohibits discharge or discrimination against employees complaining of wage violations."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": false,
+        "limit_value": 3,
+        "limit_unit": "years",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "process_type": [
+          "civil-lawsuit",
+          "administrative-complaint"
+        ],
+        "adverse_action": [
+          "termination",
+          "pay-reduction"
+        ],
+        "remedies": [
+          "liquidated-damages",
+          "back-pay",
+          "attorney-fees"
+        ],
+        "fee_shifting": "unilateral-pro-plaintiff"
+      },
+      "burden_of_proof": {
+        "employee_standard": [
+          "preponderance"
+        ]
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleXXI/Chapter151/Section19",
+        "is_official": true
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      "_review_notes": "Focuses on wage protections 💵. Mandatory liquidated damages (treble damages) often apply to wage-related claims in MA.",
+      "_reconciled_notes": ""
+    },
+    {
+      "jurisdiction_id": "MA",
+      "statute_id": "MA-152-75B",
+      "official_name": "Rights to Return to Employment; Qualified Handicapped Persons; Discrimination Prohibited",
+      "common_name": "Workers' Comp Retaliation",
+      "legal_basis": {
+        "statute_citation": "Mass. Gen. Laws ch. 152, § 75B",
+        "disclosure_types": [
+          "retaliation-protection"
+        ],
+        "protected_class": [
+          "corporate-staff"
+        ],
+        "disclosure_targets": [
+          "agency-state",
+          "internal-supervisor"
+        ],
+        "adverse_action_scope": "Prohibits discrimination against an employee for exercising rights under the workers' compensation act."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": true,
+        "limit_value": 3,
+        "limit_unit": "years",
+        "limit_details": "Derived from general tort statute of limitations as the specific section does not name an independent deadline.",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "process_type": [
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "demotion"
+        ],
+        "remedies": [
+          "reinstatement",
+          "lost-wages",
+          "punitive-damages"
+        ],
+        "fee_shifting": "none-american-rule"
+      },
+      "burden_of_proof": {
+        "employee_standard": [
+          "preponderance"
+        ]
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleXXI/Chapter152/Section75B",
+        "is_official": true
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      "_review_notes": "Protects injured workers 🩹. Note that the statute of limitations is derived from ch. 260 § 2A.",
+      "_reconciled_notes": ""
+    },
+    {
+      "jurisdiction_id": "MA",
+      "statute_id": "MA-149-148A",
+      "official_name": "Wage Act Anti-Retaliation",
+      "common_name": "Wage Act Retaliation",
+      "legal_basis": {
+        "statute_citation": "Mass. Gen. Laws ch. 149, § 148A",
+        "disclosure_types": [
+          "wage-hour-violations"
+        ],
+        "protected_class": [
+          "corporate-staff"
+        ],
+        "disclosure_targets": [
+          "internal-supervisor",
+          "agency-state"
+        ],
+        "adverse_action_scope": "No employee shall be penalized by an employer in any way as a result of any action on the part of an employee to seek his or her rights under the wage laws."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": false,
+        "limit_value": 3,
+        "limit_unit": "years",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "process_type": [
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "demotion",
+          "harassment",
+          "pay-reduction"
+        ],
+        "remedies": [
+          "back-pay",
+          "liquidated-damages",
+          "attorney-fees"
+        ],
+        "fee_shifting": "unilateral-pro-plaintiff"
+      },
+      "burden_of_proof": {
+        "employee_standard": [
+          "but-for"
+        ]
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleXXI/Chapter149/Section148A",
+        "is_official": true
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      "_review_notes": "Closely linked with the Weekly Wage Act 📅. Often provides for treble damages for successful plaintiffs.",
+      "_reconciled_notes": ""
+    },
+    {
+      "jurisdiction_id": "MA",
+      "statute_id": "MA-111-72G",
+      "official_name": "Reports of Abuse, Neglect or Misappropriation of Property of Patients or Residents",
+      "common_name": "Elder Abuse Reporting Protection",
+      "legal_basis": {
+        "statute_citation": "Mass. Gen. Laws ch. 111, § 72G",
+        "disclosure_types": [
+          "public-health-safety"
+        ],
+        "protected_class": [
+          "clinical-staff"
+        ],
+        "disclosure_targets": [
+          "agency-state"
+        ],
+        "adverse_action_scope": "Protection from retaliatory discharge or discrimination for filing a report of abuse in long-term care facilities."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": true,
+        "limit_value": 3,
+        "limit_unit": "years",
+        "limit_details": "Derived from general personal injury/tort limitations.",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "process_type": [
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "demotion"
+        ],
+        "remedies": [
+          "lost-wages",
+          "compensatory-damages",
+          "attorney-fees"
+        ],
+        "fee_shifting": "discretionary"
+      },
+      "burden_of_proof": {
+        "employee_standard": [
+          "preponderance"
+        ]
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleXVI/Chapter111/Section72G",
+        "is_official": true
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      "_review_notes": "Mandated reporting for elderly care facility staff 👵. Map 'actual damages' to compensatory-damages.",
+      "_reconciled_notes": ""
+    }
+  ],
+  "integrity": {
+    "with_errors": true,
+    "error_details": [
+      "MA-152-75B: SOL value (3 years) derived from general tort statute (ch. 260 § 2A) rather than explicit text in the whistleblower provision; set limit_ambiguous to true.",
+      "MA-111-72G: SOL value (3 years) derived from general tort statute rather than explicit text; set limit_ambiguous to true."
+    ],
+    "error_count": 2
+  }
+}

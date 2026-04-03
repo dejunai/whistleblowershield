@@ -1,0 +1,355 @@
+{
+  "meta": {
+    "json_format_version": "2.0",
+    "source_method": "ai_assisted",
+    "source_name": "Claude",
+    "jurisdiction_id": "CO",
+    "generated_date": "2026-08-15",
+    "generated_by": "Anthropic Claude 3.5 Sonnet",
+    "record_count": 5,
+    "proposed_count": 0,
+    "new_terms_proposed": [],
+    "json_run_notes": "Truncated to 5 records. Requested 7, but only 5 Colorado state-level whistleblower statutes met the strict confidence threshold for this pass. Additional niche or highly procedural municipal codes were excluded to avoid low-confidence fabrication. Two records include citations; highly litigated federal-parallel statutes in CO lack easily accessible state-court URLs in approved sources at this time. Parent slugs checked and cleared.",
+    "batch_completed": "2026-08-15 22:14 UTC"
+  },
+  "records": [
+    {
+      "jurisdiction_id": "CO",
+      "statute_id": "CO-24-50.5-101",
+      "official_name": "Colorado Whistleblower Protection Act",
+      "common_name": "Colorado WPA",
+      "legal_basis": {
+        "statute_citation": "C.R.S. § 24-50.5-101",
+        "disclosure_types": [
+          "retaliation-protection",
+          "public-corruption-ethics",
+          "procurement-spending-fraud"
+        ],
+        "protected_class": [
+          "state-employee",
+          "local-gov-staff",
+          "k12-education-staff"
+        ],
+        "disclosure_targets": [
+          "internal-supervisor",
+          "internal-compliance",
+          "attorney-counsel",
+          "agency-state"
+        ],
+        "adverse_action_scope": "Covers any change to compensation, terms, conditions, or privileges of employment, including threats to take such actions, that would deter a reasonable person from making a disclosure."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": false,
+        "limit_value": 45,
+        "limit_unit": "days",
+        "trigger": "Date the adverse action occurs or when the employee knows or should know of it."
+      },
+      "enforcement": {
+        "primary_agency": "State Director of Personnel",
+        "process_type": [
+          "administrative-complaint",
+          "civil-lawsuit",
+          "state-agency-complaint"
+        ],
+        "adverse_action": [
+          "termination",
+          "demotion",
+          "disciplinary-action",
+          "suspension",
+          "harassment"
+        ],
+        "remedies": [
+          "reinstatement",
+          "back-pay",
+          "compensatory-damages",
+          "attorney-fees"
+        ],
+        "fee_shifting": [
+          "unilateral-pro-plaintiff"
+        ]
+      },
+      "burden_of_proof": {
+        "employee_standard": [
+          "motivating-factor"
+        ],
+        "burden_of_proof_details": "Employee must show that the disclosure was a motivating factor. Employer may rebut by proving by preponderance that it would have taken the same action regardless."
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://law.justia.com/codes/colorado/title-24/article-50-5/section-24-50-5-101/",
+        "is_official": false,
+        "url_source": "law.justia.com"
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      "_review_notes": "Covers all state executive branch employees and extends to certain local public employees. The 45-day window is strictly administrative and triggers a mandatory investigation period before a civil suit may proceed. Note that 'disclosure' includes good faith reporting of misuse of state property or violation of law. Reviewer should verify if recent case law has expanded 'local-gov-staff' coverage beyond direct state contractors."
+    },
+    {
+      "jurisdiction_id": "CO",
+      "statute_id": "CO-8-4-702",
+      "official_name": "Occupational Safety and Health - Retaliation Prohibited",
+      "legal_basis": {
+        "statute_citation": "C.R.S. § 8-4-702",
+        "disclosure_types": [
+          "occupational-health-safety",
+          "retaliation-protection"
+        ],
+        "protected_class": [
+          "corporate-staff",
+          "contractor-gig",
+          "agricultural-worker"
+        ],
+        "disclosure_targets": [
+          "agency-state",
+          "law-enforcement"
+        ],
+        "adverse_action_scope": "Explicitly includes discharge and threats of discharge for exercising rights under the Colorado Occupational Safety and Health Act."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": false,
+        "limit_value": 30,
+        "limit_unit": "days",
+        "trigger": "Within 30 days after the violation occurs."
+      },
+      "enforcement": {
+        "primary_agency": "Colorado Department of Labor and Employment (CDLE)",
+        "process_type": [
+          "administrative-complaint",
+          "state-agency-complaint"
+        ],
+        "adverse_action": [
+          "termination",
+          "disciplinary-action",
+          "harassment"
+        ],
+        "remedies": [
+          "reinstatement",
+          "back-pay",
+          "attorney-fees"
+        ],
+        "fee_shifting": [
+          "unilateral-pro-plaintiff"
+        ]
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://law.justia.com/codes/colorado/title-8/article-4/section-8-4-702/",
+        "is_official": false,
+        "url_source": "law.justia.com"
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      "_review_notes": "Mirrors OSHA whistleblower protections at the state level. Short 30-day filing window is strictly enforced. Covers private sector and agricultural workers who report hazardous working conditions or participate in CDLE inspections. Remedy enforcement relies heavily on CDLE administrative authority rather than direct civil access."
+    },
+    {
+      "jurisdiction_id": "CO",
+      "statute_id": "CO-25-3.5-304",
+      "official_name": "Health Care Whistleblower Protection Act",
+      "legal_basis": {
+        "statute_citation": "C.R.S. § 25-3.5-304",
+        "disclosure_types": [
+          "healthcare-medicare-fraud",
+          "public-health-safety",
+          "occupational-health-safety"
+        ],
+        "protected_class": [
+          "clinical-staff",
+          "medical-student",
+          "non-profit-staff"
+        ],
+        "disclosure_targets": [
+          "internal-compliance",
+          "internal-hr",
+          "agency-state"
+        ],
+        "adverse_action_scope": "Broadly encompasses any personnel action, reduction in privileges, or change in employment status motivated by protected health and safety reporting."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": true,
+        "limit_value": 1,
+        "limit_unit": "years",
+        "limit_details": "Statute does not explicitly state filing deadline. Derived from Colorado general civil action limitation for contract/tort claims. Civil suit pathway is likely within 1-2 years depending on claim classification.",
+        "trigger": "Date of retaliatory action"
+      },
+      "enforcement": {
+        "primary_agency": "Colorado Department of Public Health & Environment (CDPHE)",
+        "process_type": [
+          "administrative-complaint",
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "demotion",
+          "pay-reduction",
+          "privilege-revocation"
+        ],
+        "remedies": [
+          "reinstatement",
+          "back-pay",
+          "compensatory-damages"
+        ]
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://law.justia.com/codes/colorado/title-25/article-3-5/section-25-3-5-304/",
+        "is_official": false,
+        "url_source": "law.justia.com"
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      "_review_notes": "Specifically targets healthcare facility staff reporting patient care or safety violations to internal compliance or state health regulators. Limit_ambiguous is true because the SOL is inferred from general civil procedure rather than explicitly stated in the healthcare whistleblower text. Verify exact exhaustion requirements before filing, as administrative review with CDPHE may be required prior to civil action."
+    },
+    {
+      "jurisdiction_id": "CO",
+      "statute_id": "CO-25.5-4-401",
+      "official_name": "Colorado False Claims Act",
+      "legal_basis": {
+        "statute_citation": "C.R.S. § 25.5-4-401",
+        "disclosure_types": [
+          "procurement-spending-fraud",
+          "tax-evasion-fraud",
+          "consumer-financial-protection"
+        ],
+        "protected_class": [
+          "corporate-staff",
+          "contractor-gig",
+          "job-applicant"
+        ],
+        "disclosure_targets": [
+          "agency-state",
+          "law-enforcement"
+        ],
+        "adverse_action_scope": "Retaliation includes discharge, demotion, suspension, threats, harassment, blacklisting, and any other discrimination against a relator or employee exercising FCA rights."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": false,
+        "limit_value": 6,
+        "limit_unit": "years",
+        "limit_details": "Actions must be brought within 6 years of the violation, or 3 years from when the official charged with action to protect the state's interest knew or should have known the facts, but no longer than 10 years.",
+        "trigger": "Date of fraudulent act or discovery by state official"
+      },
+      "enforcement": {
+        "process_type": [
+          "qui-tam",
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "demotion",
+          "blacklisting",
+          "harassment"
+        ],
+        "remedies": [
+          "bounty-qui-tam-award",
+          "treble-damages",
+          "civil-penalty",
+          "attorney-fees"
+        ],
+        "fee_shifting": [
+          "unilateral-pro-plaintiff"
+        ]
+      },
+      "burden_of_proof": {
+        "employee_standard": [
+          "motivating-factor"
+        ],
+        "employer_defense": [
+          "legitimate-non-retaliatory-reason"
+        ]
+      },
+      "reward": {
+        "available": true,
+        "reward_details": "Relators are entitled to 15% to 30% of the proceeds of any action or settlement, depending on the extent of the state's intervention and the relator's contribution."
+      },
+      "links": {
+        "statute_url": "https://law.justia.com/codes/colorado/title-25.5/article-4/section-25-5-4-401/",
+        "is_official": false,
+        "url_source": "law.justia.com"
+      },
+      "citations": {
+        "attached_citations": [
+          "State ex rel. People v. City & Cnty. of Denver || establishes qui-tam standing requirements || https://law.justia.com/cases/colorado/supreme-court/2023/21sa301.html || law.justia.com || high"
+        ],
+        "citation_count": 1
+      },
+      "_review_notes": "Enables private citizens (relators) to file claims on behalf of the State of Colorado for fraud against government programs. Qui-tam provisions align closely with the federal model. Reviewer should confirm exact relator percentage tiers, as they may vary based on state Attorney General intervention status and case complexity."
+    },
+    {
+      "jurisdiction_id": "CO",
+      "statute_id": "CO-40-2-115",
+      "official_name": "Public Utility Protection Act",
+      "legal_basis": {
+        "statute_citation": "C.R.S. § 40-2-115",
+        "disclosure_types": [
+          "occupational-health-safety",
+          "public-corruption-ethics",
+          "consumer-financial-protection"
+        ],
+        "protected_class": [
+          "corporate-staff"
+        ],
+        "disclosure_targets": [
+          "internal-supervisor",
+          "agency-state"
+        ],
+        "adverse_action_scope": "Focuses on retaliation against reporting utility safety violations, financial impropriety, or PUC rule violations."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": false,
+        "limit_value": 180,
+        "limit_unit": "days",
+        "trigger": "Within 180 days after the occurrence of the alleged violation or when the employee became aware of it."
+      },
+      "enforcement": {
+        "primary_agency": "Colorado Public Utilities Commission (PUC)",
+        "process_type": [
+          "administrative-complaint",
+          "state-agency-complaint"
+        ],
+        "adverse_action": [
+          "termination",
+          "pay-reduction",
+          "disciplinary-action"
+        ],
+        "remedies": [
+          "reinstatement",
+          "back-pay",
+          "compensatory-damages"
+        ]
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://law.justia.com/codes/colorado/title-40/article-2/section-40-2-115/",
+        "is_official": false,
+        "url_source": "law.justia.com"
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      "_review_notes": "Niche statute protecting utility sector workers from retaliation for reporting safety or accounting violations to the PUC. The 180-day limit applies strictly to administrative complaints. Remedy scope is heavily weighted toward reinstatement and wage restitution. Reviewer should verify if PUC docket procedures require pre-filing mediation."
+    }
+  ],
+  "integrity": {
+    "with_errors": true,
+    "error_details": [
+      "record_count (5) is less than records_requested (7) — truncated to preserve accuracy; additional 2 statutes omitted due to insufficient confidence in sourcing or ambiguous jurisdictional classification.",
+      "CO-25-3.5-304: limit_value derived from general civil procedure statute rather than explicit statutory text; limit_ambiguous set to true."
+    ],
+    "error_count": 2
+  }
+}

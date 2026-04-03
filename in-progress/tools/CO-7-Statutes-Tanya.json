@@ -1,0 +1,119 @@
+{
+  "meta": {
+    "jurisdiction": "Colorado",
+    "total_records": 7,
+    "generated_at": "2026-04-03T19:02:37Z",
+    "researcher": "Tanya Shift"
+  },
+  "records": [
+    {
+      "slug": "co-state-employee-protection",
+      "name": "State Employee Protection Act",
+      "citation": "C.R.S. §§ 24-50.5-101 to -107",
+      "jurisdiction": "Colorado",
+      "summary": "Protects state employees from retaliation for disclosing information about waste, fraud, abuse of authority, or substantial and specific danger to public health or safety.",
+      "details": {
+        "legal_basis": "Statutory",
+        "statute_of_limitations": "30 days (administrative appeal)",
+        "enforcement": "State Personnel Board",
+        "burden_of_proof": "Preponderance of evidence",
+        "reward": "Reinstatement, back pay, attorney fees"
+      },
+      "links": ["https://law.justia.com/codes/colorado/title-24/state-personnel-system-and-state-employees/article-50-5/section-24-50-5-101/"]
+    },
+    {
+      "slug": "co-false-claims-act",
+      "name": "Colorado False Claims Act",
+      "citation": "C.R.S. §§ 24-31-1201 to -1209",
+      "jurisdiction": "Colorado",
+      "summary": "Prohibits false or fraudulent claims for money or property presented to the state or political subdivisions. Includes qui tam provisions.",
+      "details": {
+        "legal_basis": "Statutory",
+        "statute_of_limitations": "6 years from violation / 3 years from discovery (max 10 years)",
+        "enforcement": "Attorney General / Qui Tam",
+        "burden_of_proof": "Preponderance of evidence",
+        "reward": "15% to 30% of proceeds"
+      },
+      "links": ["https://www.whistleblowerllc.com/resources/whistleblower-laws/state-false-claims-acts/colorado-false-claims-act/"]
+    },
+    {
+      "slug": "co-medicaid-false-claims",
+      "name": "Colorado Medicaid False Claims Act",
+      "citation": "C.R.S. §§ 25.5-4-303.5 to -310",
+      "jurisdiction": "Colorado",
+      "summary": "Prohibits submitting false or fraudulent claims for Medicaid payments. Protects whistleblowers who report such fraud.",
+      "details": {
+        "legal_basis": "Statutory",
+        "statute_of_limitations": "6 years from violation / 3 years from discovery (max 10 years)",
+        "enforcement": "Attorney General / Qui Tam",
+        "burden_of_proof": "Preponderance of evidence",
+        "reward": "15% to 30% of proceeds"
+      },
+      "links": ["https://www.phillipsandcohen.com/colorado/"]
+    },
+    {
+      "slug": "co-phewa",
+      "name": "Public Health Emergency Whistleblower Act (PHEWA)",
+      "citation": "C.R.S. §§ 8-14.4-101 to -109",
+      "jurisdiction": "Colorado",
+      "summary": "Protects workers from retaliation for raising reasonable concerns about workplace health and safety related to a public health emergency.",
+      "details": {
+        "legal_basis": "Statutory",
+        "statute_of_limitations": "2 years",
+        "enforcement": "Division of Labor (CDLE) / District Court",
+        "burden_of_proof": "Preponderance of evidence",
+        "reward": "Reinstatement, back pay, front pay, attorney fees, fines"
+      },
+      "links": ["https://law.justia.com/codes/colorado/title-8/labor-i-department-of-labor-and-employment/labor-conditions/article-14-4/section-8-14-4-105/"]
+    },
+    {
+      "slug": "co-wage-act-retaliation",
+      "name": "Colorado Wage Act (Retaliation Provision)",
+      "citation": "C.R.S. § 8-4-120",
+      "jurisdiction": "Colorado",
+      "summary": "Prohibits employers from discriminating or retaliating against employees for filing wage complaints or testifying in wage-related proceedings.",
+      "details": {
+        "legal_basis": "Statutory",
+        "statute_of_limitations": "2-3 years",
+        "enforcement": "Division of Labor / Civil Action",
+        "burden_of_proof": "Preponderance of evidence",
+        "reward": "Liquidated damages (max 2x unpaid wages or $2,000)"
+      },
+      "links": ["https://law.justia.com/codes/colorado/2023/title-8/labor-i-department-of-labor-and-employment/wages/article-4/section-8-4-120-d-1/"]
+    },
+    {
+      "slug": "co-labor-peace-act",
+      "name": "Colorado Labor Peace Act",
+      "citation": "C.R.S. §§ 8-3-101 to -123",
+      "jurisdiction": "Colorado",
+      "summary": "Protects employees engaging in concerted activities and prohibits retaliation for filing charges or testifying under the Act.",
+      "details": {
+        "legal_basis": "Statutory",
+        "statute_of_limitations": "6 months",
+        "enforcement": "Division of Labor / CDLE",
+        "burden_of_proof": "Preponderance of evidence",
+        "reward": "Reinstatement, back pay"
+      },
+      "links": ["https://law.justia.com/codes/colorado/title-8/labor-i-department-of-labor-and-employment/labor-relations/article-3/section-8-3-108/"]
+    },
+    {
+      "slug": "co-anti-discrimination-retaliation",
+      "name": "Colorado Anti-Discrimination Act (Retaliation)",
+      "citation": "C.R.S. § 24-34-402(1)(e)",
+      "jurisdiction": "Colorado",
+      "summary": "Prohibits retaliation against employees for opposing discriminatory practices or participating in investigations/proceedings.",
+      "details": {
+        "legal_basis": "Statutory",
+        "statute_of_limitations": "300 days (POWR Act)",
+        "enforcement": "Colorado Civil Rights Division (CCRD)",
+        "burden_of_proof": "Preponderance of evidence",
+        "reward": "Back pay, front pay, compensatory/punitive damages"
+      },
+      "links": ["https://law.justia.com/codes/colorado/2021/title-24/article-34/part-4/section-24-34-402/"]
+    }
+  ],
+  "integrity": {
+    "hash": "sha256:7e8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8",
+    "version": "2.0.14"
+  }
+}

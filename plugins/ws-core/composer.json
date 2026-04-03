@@ -1,0 +1,17 @@
+{
+  "name": "whistleblowershield/ws-core",
+  "description": "Core plugin for WhistleblowerShield.org",
+  "type": "project",
+  "require": {
+    "sentry/sentry": "^4.0"
+  },
+  "config": {
+    "optimize-autoloader": true,
+    "sort-packages": true
+  },
+  "autoload": {
+    "psr-4": {
+      "WSCore\\": "includes/"
+    }
+  }
+}
