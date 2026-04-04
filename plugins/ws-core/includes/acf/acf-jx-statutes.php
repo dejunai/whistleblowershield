@@ -37,11 +37,11 @@ defined( 'ABSPATH' ) || exit;
  *   ws_jx_statute_sol_value          Filing Window Value (number)
  *   ws_jx_statute_sol_unit           Time Unit (select)
  *   ws_jx_statute_sol_trigger        Deadline Trigger (select)
- *   ws_jx_statute_sol_has_details    SOL has supplementary detail (true_false)
- *   ws_jx_statute_sol_details        SOL detail (textarea, conditional)
- *   ws_jx_statute_tolling_has_details Tolling provisions exist (true_false)
- *   ws_jx_statute_tolling_details    Tolling & Extension Details (textarea, conditional)
- *   ws_jx_statute_has_exhaustion     Exhaustion Required? (true_false)
+ *   ws_jx_statute_limit_ambiguous    SOL has supplementary detail (true_false)
+ *   ws_jx_statute_limit_details        SOL detail (textarea, conditional)
+ *   ws_jx_statute_tolling_has_notes Tolling provisions exist (true_false)
+ *   ws_jx_statute_tolling_notes    Tolling & Extension Details (textarea, conditional)
+ *   ws_jx_statute_exhaustion_required     Exhaustion Required? (true_false)
  *   ws_jx_statute_exhaustion_details Exhaustion Procedure & Deadline (textarea, conditional)
  *
  * Enforcement tab:
@@ -58,18 +58,19 @@ defined( 'ABSPATH' ) || exit;
  *   ws_jx_statute_employee_standard_details Employee Standard Detail (textarea, conditional on has-details term)
  *   ws_jx_statute_employer_defense   Employer Defense taxonomy (checkbox)
  *   ws_jx_statute_employer_defense_details Employer Defense Details (textarea, conditional on has-details term)
- *   ws_jx_statute_rebuttable_has_details Rebuttable presumption exists (true_false)
- *   ws_jx_statute_rebuttable_details Rebuttable Presumption Details (textarea, conditional)
- *   ws_jx_statute_bop_has_details    BOP has supplementary detail (true_false)
- *   ws_jx_statute_bop_details        BOP detail (textarea, conditional)
+ *   ws_jx_statute_rebuttable_has_presumption Rebuttable presumption exists (true_false)
+ *   ws_jx_statute_rebuttable_presumption Rebuttable Presumption Details (textarea, conditional)
+ *   ws_jx_statute_bop_has_details          BOP has supplementary detail (true_false)
+ *   ws_jx_statute_burden_of_proof_details  BOP detail (textarea, conditional)
+ *   ws_jx_statute_bop_flag                BOP signal phrase (text, optional)
  *
  * Reward tab:
- *   ws_jx_statute_has_reward         Reward available (true_false)
+ *   ws_jx_statute_reward_available         Reward available (true_false)
  *   ws_jx_statute_reward_details     Reward Details (textarea, conditional)
  *
  * Links tab:
  *   ws_jx_statute_url                Statute URL (url)
- *   ws_jx_statute_url_is_pdf         PDF link toggle (true_false)
+ *   ws_jx_statute_is_pdf         PDF link toggle (true_false)
  *
  * @package    WhistleblowerShield
  * @since      2.0.0
@@ -341,9 +342,9 @@ function ws_register_acf_jx_statutes() {
             ],
 
             [
-                'key'           => 'field_jx_statute_sol_has_details',
+                'key'           => 'field_jx_statute_limit_ambiguous',
                 'label'         => 'SOL Has Supplementary Detail',
-                'name'          => 'ws_jx_statute_sol_has_details',
+                'name'          => 'ws_jx_statute_limit_ambiguous',
                 'type'          => 'true_false',
                 'instructions'  => 'Enable to add a detail note — e.g., the deadline is derived from a general civil procedure statute rather than stated in this law.',
                 'ui'            => 1,
@@ -353,23 +354,23 @@ function ws_register_acf_jx_statutes() {
             ],
 
             [
-                'key'               => 'field_jx_statute_sol_details',
+                'key'               => 'field_jx_statute_limit_details',
                 'label'             => 'SOL Details',
-                'name'              => 'ws_jx_statute_sol_details',
+                'name'              => 'ws_jx_statute_limit_details',
                 'type'              => 'textarea',
                 'rows'              => 3,
                 'instructions'      => 'Describe anything a reviewer should know about this deadline — derivation source, dual-period situations, or other nuance.',
                 'conditional_logic' => [ [ [
-                    'field'    => 'field_jx_statute_sol_has_details',
+                    'field'    => 'field_jx_statute_limit_ambiguous',
                     'operator' => '==',
                     'value'    => '1',
                 ] ] ],
             ],
 
             [
-                'key'           => 'field_jx_statute_tolling_has_details',
+                'key'           => 'field_jx_statute_tolling_has_notes',
                 'label'         => 'Tolling Provisions Exist',
-                'name'          => 'ws_jx_statute_tolling_has_details',
+                'name'          => 'ws_jx_statute_tolling_has_notes',
                 'type'          => 'true_false',
                 'instructions'  => 'Enable if this statute has identified tolling or extension conditions.',
                 'ui'            => 1,
@@ -379,23 +380,23 @@ function ws_register_acf_jx_statutes() {
             ],
 
             [
-                'key'               => 'field_jx_statute_tolling_details',
+                'key'               => 'field_jx_statute_tolling_notes',
                 'label'             => 'Tolling & Extension Details',
-                'name'              => 'ws_jx_statute_tolling_details',
+                'name'              => 'ws_jx_statute_tolling_notes',
                 'type'              => 'textarea',
                 'rows'              => 3,
                 'instructions'      => 'Describe specific conditions that pause or extend the statutory clock.',
                 'conditional_logic' => [ [ [
-                    'field'    => 'field_jx_statute_tolling_has_details',
+                    'field'    => 'field_jx_statute_tolling_has_notes',
                     'operator' => '==',
                     'value'    => '1',
                 ] ] ],
             ],
 
             [
-                'key'           => 'field_jx_statute_has_exhaustion',
+                'key'           => 'field_jx_statute_exhaustion_required',
                 'label'         => 'Exhaustion Required?',
-                'name'          => 'ws_jx_statute_has_exhaustion',
+                'name'          => 'ws_jx_statute_exhaustion_required',
                 'type'          => 'true_false',
                 'instructions'  => 'Must the whistleblower file with an agency before going to court?',
                 'ui'            => 1,
@@ -414,7 +415,7 @@ function ws_register_acf_jx_statutes() {
                 'instructions'      => 'Describe the agency filing deadline (e.g., 90 days to OSHA).',
                 'required'          => 1,
                 'conditional_logic' => [ [ [
-                    'field'    => 'field_jx_statute_has_exhaustion',
+                    'field'    => 'field_jx_statute_exhaustion_required',
                     'operator' => '==',
                     'value'    => '1',
                 ] ] ],
@@ -579,9 +580,9 @@ function ws_register_acf_jx_statutes() {
             ],
 
             [
-                'key'           => 'field_jx_statute_rebuttable_has_details',
+                'key'           => 'field_jx_statute_rebuttable_has_presumption',
                 'label'         => 'Rebuttable Presumption Exists',
-                'name'          => 'ws_jx_statute_rebuttable_has_details',
+                'name'          => 'ws_jx_statute_rebuttable_has_presumption',
                 'type'          => 'true_false',
                 'instructions'  => 'Enable if this statute creates a rebuttable presumption in favour of the whistleblower.',
                 'ui'            => 1,
@@ -591,14 +592,14 @@ function ws_register_acf_jx_statutes() {
             ],
 
             [
-                'key'               => 'field_jx_statute_rebuttable_details',
+                'key'               => 'field_jx_statute_rebuttable_presumption',
                 'label'             => 'Rebuttable Presumption Details',
-                'name'              => 'ws_jx_statute_rebuttable_details',
+                'name'              => 'ws_jx_statute_rebuttable_presumption',
                 'type'              => 'textarea',
                 'rows'              => 3,
                 'instructions'      => 'Describe the presumption and what the employer must do to rebut it.',
                 'conditional_logic' => [ [ [
-                    'field'    => 'field_jx_statute_rebuttable_has_details',
+                    'field'    => 'field_jx_statute_rebuttable_has_presumption',
                     'operator' => '==',
                     'value'    => '1',
                 ] ] ],
@@ -617,9 +618,9 @@ function ws_register_acf_jx_statutes() {
             ],
 
             [
-                'key'               => 'field_jx_statute_bop_details',
+                'key'               => 'field_jx_statute_burden_of_proof_details',
                 'label'             => 'BOP Details',
-                'name'              => 'ws_jx_statute_bop_details',
+                'name'              => 'ws_jx_statute_burden_of_proof_details',
                 'type'              => 'textarea',
                 'rows'              => 3,
                 'instructions'      => 'Describe the notable burden of proof situation — e.g., a burden shift, a split standard, or statutory language that modifies the general standard.',
@@ -628,6 +629,16 @@ function ws_register_acf_jx_statutes() {
                     'operator' => '==',
                     'value'    => '1',
                 ] ] ],
+            ],
+
+
+            [
+                'key'          => 'field_jx_statute_bop_flag',
+                'label'        => 'BOP Flag',
+                'name'         => 'ws_jx_statute_bop_flag',
+                'type'         => 'text',
+                'instructions' => 'Short signal phrase identifying a non-standard burden shift. Use a compact hyphenated phrase, e.g. "contributing-factor-shift", "90-day rebuttable presumption", "AIR21 burden-shifting framework". Not a full sentence.',
+                'maxlength'    => 120,
             ],
 
             // ────────────────────────────────────────────────────────────────
@@ -641,9 +652,9 @@ function ws_register_acf_jx_statutes() {
             ],
 
             [
-                'key'           => 'field_jx_statute_has_reward',
+                'key'           => 'field_jx_statute_reward_available',
                 'label'         => 'Reward Available',
-                'name'          => 'ws_jx_statute_has_reward',
+                'name'          => 'ws_jx_statute_reward_available',
                 'type'          => 'true_false',
                 'instructions'  => 'Enable if this statute provides a monetary reward or bounty to the whistleblower (distinct from compensatory remedies).',
                 'ui'            => 1,
@@ -660,7 +671,7 @@ function ws_register_acf_jx_statutes() {
                 'rows'              => 3,
                 'instructions'      => 'Describe the reward structure — e.g., percentage of collected sanctions, eligibility conditions, administering agency.',
                 'conditional_logic' => [ [ [
-                    'field'    => 'field_jx_statute_has_reward',
+                    'field'    => 'field_jx_statute_reward_available',
                     'operator' => '==',
                     'value'    => '1',
                 ] ] ],
@@ -685,9 +696,9 @@ function ws_register_acf_jx_statutes() {
             ],
 
             [
-                'key'           => 'field_jx_statute_url_is_pdf',
+                'key'           => 'field_jx_statute_is_pdf',
                 'label'         => 'PDF Link',
-                'name'          => 'ws_jx_statute_url_is_pdf',
+                'name'          => 'ws_jx_statute_is_pdf',
                 'type'          => 'true_false',
                 'instructions'  => 'Enable if the statute URL links directly to a PDF document.',
                 'ui'            => 1,

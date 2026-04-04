@@ -34,8 +34,8 @@ until the Wyoming data build and jurisdiction page layout work begins.
 - Surface `ws_cl_statutory_preclusion` as a prominent notice when
   true — critical user-facing signal that a statutory remedy may
   block the common law claim.
-- SOL is almost always ambiguous for common law — render `sol_details`
-  prominently when `sol_has_details` is true.
+- SOL is almost always ambiguous for common law — render `limit_details`
+  prominently when `limit_ambiguous` is true.
 - The `render-assist-org.php` refactor (extracting assist-org rendering
   from `render-section.php`) must happen before Phase 2 — do not
   implement `render-common-law.php` in isolation if that work is imminent.

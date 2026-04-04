@@ -233,7 +233,7 @@ function ws_seed_fed_statutes_matrix() {
             'ws_jx_statute_sol_value'     => $statute['limit_value']                 ?? '',
             'ws_jx_statute_sol_unit'      => $statute['limit_unit']                  ?? '',
             'ws_jx_statute_sol_trigger'   => $statute['trigger']                     ?? '',
-            'ws_jx_statute_has_exhaustion'   => $statute['exhaustion_required']      ?? 0,
+            'ws_jx_statute_exhaustion_required'   => $statute['exhaustion_required']      ?? 0,
             'ws_jx_statute_exhaustion_details' => $statute['exhaustion_details']     ?? '',
             'ws_jx_statute_bop_standard'  => $statute['burden_of_proof']             ?? '',
             'ws_attach_flag'              => '1',

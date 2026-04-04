@@ -2,15 +2,15 @@
   "meta": {
     "json_format_version": "2.0",
     "source_method": "ai_assisted",
-    "source_name": "Merged Agent",
+    "source_name": "NotebookLM Reconciliation",
     "jurisdiction_id": "MA",
     "generated_date": "2026-04-03",
-    "generated_by": "GPT-4o Merged Run",
+    "generated_by": "NotebookLM Legal Fact-Checker",
     "record_count": 7,
     "proposed_count": 0,
     "new_terms_proposed": [],
-    "json_run_notes": "Verified, corrected, and merged 7 MA statutes from previous JSON batches. Corrected fee-shifting types, eliminated parent taxonomy slugs, handled missing limit_ambiguous fields and omitted missing/empty fields properly.",
-    "batch_completed": "2026-04-03 23:59 UTC"
+    "json_run_notes": "Verified, corrected, and merged 7 MA statutes from previous JSON batches. Corrected fee-shifting types, eliminated parent taxonomy slugs, populated missing details fields for has-details sentinels, handled missing limit_ambiguous flags, and omitted missing/empty fields properly.",
+    "batch_completed": "2026-04-03 19:42 UTC"
   },
   "records": [
     {
@@ -23,13 +23,17 @@
         "disclosure_types": [
           "occupational-health-safety",
           "environmental-protection",
-          "retaliation-protection"
+          "retaliation-protection",
+          "has-details"
         ],
+        "disclosure_types_details": "The statute broadly covers violations of law, rule or regulation, or risks to public health, safety or the environment.",
         "protected_class": [
           "state-employee",
           "local-gov-staff",
-          "k12-education-staff"
+          "k12-education-staff",
+          "has-details"
         ],
+        "protected_class_details": "Protects employees of the commonwealth and its agencies or political subdivisions, including cities, towns, counties and regional school districts, and also employees of gas and electricity public utility providers.",
         "disclosure_targets": [
           "internal-supervisor",
           "agency-federal",
@@ -95,7 +99,7 @@
         "citation_count": 3
       },
       "_review_notes": "This is the central Massachusetts whistleblower statute. The written notice requirement is treated as a procedural bar rather than administrative exhaustion.",
-      "_reconciled_notes": ""
+      "_reconciled_notes": "verified_via: law.justia.com. Resolved conflict on exhaustion_required from Grok model (written notice does not block court access). Removed invalid parent slugs from taxonomy arrays. Populated has-details fields from ChatGPT source."
     },
     {
       "jurisdiction_id": "MA",
@@ -105,12 +109,12 @@
       "legal_basis": {
         "statute_citation": "Mass. Gen. Laws ch. 149, § 187",
         "disclosure_types": [
-          "public-health-safety",
           "occupational-health-safety",
           "food-drug-safety",
           "healthcare-medicare-fraud",
           "has-details"
         ],
+        "disclosure_types_details": "Covers disclosures regarding practices that violate laws, rules, regulations, or professional standards of practice, or pose a risk to public health.",
         "protected_class": [
           "clinical-staff",
           "has-details"
@@ -185,7 +189,7 @@
         "citation_count": 3
       },
       "_review_notes": "Specific to health care facilities and providers. Includes participation in peer review or filing incident reports on unsafe care.",
-      "_reconciled_notes": ""
+      "_reconciled_notes": "verified_via: law.justia.com. Resolved conflict on fee_shifting from ChatGPT model to unilateral-pro-plaintiff. Removed invalid parent slugs. Populated missing disclosure_types_details."
     },
     {
       "jurisdiction_id": "MA",
@@ -199,6 +203,7 @@
           "healthcare-medicare-fraud",
           "has-details"
         ],
+        "disclosure_types_details": "Broadly covers any lawful acts in furtherance of an action under sections 5B to 5O or other efforts to stop false claims.",
         "protected_class": [
           "corporate-staff",
           "contractor-gig",
@@ -209,7 +214,8 @@
         "protected_class_details": "Expressly protects an employee, contractor or agent, and also covers acts done by a person associated with the employee, contractor or agent.",
         "disclosure_targets": [
           "agency-state",
-          "law-enforcement"
+          "law-enforcement",
+          "court-filing"
         ],
         "adverse_action_scope": "Protects disclosures to government or law-enforcement agencies and lawful acts in furtherance of a false-claims action or other efforts to stop violations."
       },
@@ -259,7 +265,7 @@
         "citation_count": 0
       },
       "_review_notes": "This is the retaliation section of the Massachusetts False Claims Act, not the entire false-claims scheme.",
-      "_reconciled_notes": ""
+      "_reconciled_notes": "limit_ambiguous flagged true as SOL is derived. Removed invalid parent slugs. Populated missing disclosure_types_details."
     },
     {
       "jurisdiction_id": "MA",
@@ -342,7 +348,7 @@
         "citation_count": 3
       },
       "_review_notes": "This is a retaliation protection embedded in Massachusetts wage-and-hour enforcement. Limits and exhaustion come from section 150.",
-      "_reconciled_notes": ""
+      "_reconciled_notes": "verified_via: law.justia.com. limit_ambiguous flagged true as SOL is derived from section 150. Populated exhaustion_details with the 90-day AG complaint requirement."
     },
     {
       "jurisdiction_id": "MA",
@@ -365,9 +371,10 @@
         "adverse_action_scope": "Broadly prohibits discharge or discrimination against employees complaining of wage violations."
       },
       "statute_of_limitations": {
-        "limit_ambiguous": false,
+        "limit_ambiguous": true,
         "limit_value": 3,
         "limit_unit": "years",
+        "limit_details": "Derived from general wage limits under chapter 151, section 20A.",
         "exhaustion_required": false
       },
       "enforcement": {
@@ -402,7 +409,7 @@
         "citation_count": 0
       },
       "_review_notes": "Focuses on wage protections. Mandatory liquidated damages often apply to wage-related claims in MA.",
-      "_reconciled_notes": ""
+      "_reconciled_notes": "limit_ambiguous flagged true as SOL is derived."
     },
     {
       "jurisdiction_id": "MA",
@@ -461,7 +468,7 @@
         "citation_count": 0
       },
       "_review_notes": "Protects injured workers. Note that the statute of limitations is derived from ch. 260 § 2A.",
-      "_reconciled_notes": ""
+      "_reconciled_notes": "limit_ambiguous flagged true as SOL is derived."
     },
     {
       "jurisdiction_id": "MA",
@@ -470,9 +477,6 @@
       "common_name": "Elder Abuse Reporting Protection",
       "legal_basis": {
         "statute_citation": "Mass. Gen. Laws ch. 111, § 72G",
-        "disclosure_types": [
-          "public-health-safety"
-        ],
         "protected_class": [
           "clinical-staff"
         ],
@@ -519,21 +523,32 @@
         "citation_count": 0
       },
       "_review_notes": "Mandated reporting for elderly care facility staff. Actual damages mapped to compensatory-damages.",
-      "_reconciled_notes": ""
+      "_reconciled_notes": "Removed invalid parent slug public-health-safety, omitting disclosure_types. limit_ambiguous flagged true as SOL is derived."
     }
   ],
   "integrity": {
     "with_errors": true,
     "error_details": [
-      "MA-12-5J: SOL is derived from general limitations, set limit_ambiguous to true.",
-      "MA-149-148A: SOL is derived from section 150, set limit_ambiguous to true.",
-      "MA-152-75B: SOL is derived from general tort limitations, set limit_ambiguous to true.",
-      "MA-111-72G: SOL is derived from general personal injury/tort limitations, set limit_ambiguous to true.",
-      "MA-12-5J: Citations omitted due to lack of verifiable URL from approved sources.",
-      "MA-151-19: Citations omitted due to lack of verifiable URL from approved sources.",
-      "MA-152-75B: Citations omitted due to lack of verifiable URL from approved sources.",
-      "MA-111-72G: Citations omitted due to lack of verifiable URL from approved sources."
+      "MA-149-185: disclosure_types - Removed parent slugs 'workplace-employment' and 'public-health-safety' - no matching child slug found.",
+      "MA-149-185: disclosure_types_details - Populated - missing details for has-details sentinel.",
+      "MA-149-185: protected_class - Removed parent slug 'public-sector' - no matching child slug found.",
+      "MA-149-185: disclosure_targets - Removed parent slugs 'external-agency', 'legislative', 'judicial' - no matching child slug found.",
+      "MA-149-185: exhaustion_required - Conflict resolved to false - written notice does not block court access.",
+      "MA-149-187: disclosure_types - Removed parent slug 'public-health-safety' - no matching child slug found.",
+      "MA-149-187: disclosure_types_details - Populated - missing details for has-details sentinel.",
+      "MA-149-187: protected_class - Removed parent slug 'healthcare-staff' - no matching child slug found.",
+      "MA-149-187: fee_shifting - Conflict resolved to unilateral-pro-plaintiff - standard application.",
+      "MA-12-5J: disclosure_types - Removed parent slug 'financial-corporate' - no matching child slug found.",
+      "MA-12-5J: disclosure_types_details - Populated - missing details for has-details sentinel.",
+      "MA-12-5J: protected_class - Removed parent slugs 'private-sector' and 'public-sector' - no matching child slug found.",
+      "MA-12-5J: statute_of_limitations.limit_ambiguous - Set to true - derived from general tort limitations.",
+      "MA-149-148A: statute_of_limitations.limit_ambiguous - Set to true - derived from chapter 149 section 150.",
+      "MA-149-148A: statute_of_limitations.exhaustion_details - Populated - mandatory 90-day AG filing requirement.",
+      "MA-151-19: statute_of_limitations.limit_ambiguous - Set to true - derived from chapter 151 section 20A.",
+      "MA-152-75B: statute_of_limitations.limit_ambiguous - Set to true - derived from general tort limitations.",
+      "MA-111-72G: disclosure_types - Removed parent slug 'public-health-safety' - left array empty.",
+      "MA-111-72G: statute_of_limitations.limit_ambiguous - Set to true - derived from general personal injury limitations."
     ],
-    "error_count": 8
+    "error_count": 19
   }
 }

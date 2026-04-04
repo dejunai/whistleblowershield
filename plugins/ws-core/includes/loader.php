@@ -479,6 +479,7 @@ if ( is_admin() ) {
     // Each tool registers its own admin menu page via add_submenu_page().
     $tool_files = [
         'tool-generate-prompt',
+        'tool-ingest',
     ];
     foreach ( $tool_files as $file ) {
         $path = WS_CORE_PATH . "/includes/admin/tools/{$file}.php";

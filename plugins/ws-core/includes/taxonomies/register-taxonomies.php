@@ -676,73 +676,73 @@ function ws_bulk_insert_hierarchical( array $hierarchy, string $taxonomy ) {
 
 add_action( 'admin_init', function() {
 
-    if ( get_option( 'ws_seeded_disclosure_type' ) !== '1.0.0' ) {
+    if ( get_option( 'ws_seeded_disclosure_type' ) !== '1.1.2' ) {
         ws_seed_disclosure_taxonomy();
-        update_option( 'ws_seeded_disclosure_type', '1.0.0' );
+        update_option( 'ws_seeded_disclosure_type', '1.1.2' );
     }
-    if ( get_option( 'ws_seeded_process_type' ) !== '1.0.0' ) {
+    if ( get_option( 'ws_seeded_process_type' ) !== '1.1.2' ) {
         ws_seed_process_taxonomy();
-        update_option( 'ws_seeded_process_type', '1.0.0' );
+        update_option( 'ws_seeded_process_type', '1.1.2' );
     }
-    if ( get_option( 'ws_seeded_remedies' ) !== '1.1.0' ) {
+    if ( get_option( 'ws_seeded_remedies' ) !== '1.1.2' ) {
         ws_seed_remedies_taxonomy();
-        update_option( 'ws_seeded_remedies', '1.1.0' );
+        update_option( 'ws_seeded_remedies', '1.1.2' );
     }
-    if ( get_option( 'ws_seeded_protected_class' ) !== '1.1.0' ) {
+    if ( get_option( 'ws_seeded_protected_class' ) !== '1.1.2' ) {
         ws_seed_protected_class_taxonomy();
-        update_option( 'ws_seeded_protected_class', '1.1.0' );
+        update_option( 'ws_seeded_protected_class', '1.1.2' );
     }
-    if ( get_option( 'ws_seeded_adverse_action_types' ) !== '1.1.0' ) {
+    if ( get_option( 'ws_seeded_adverse_action_types' ) !== '1.1.2' ) {
         ws_seed_adverse_action_types_taxonomy();
-        update_option( 'ws_seeded_adverse_action_types', '1.1.0' );
+        update_option( 'ws_seeded_adverse_action_types', '1.1.2' );
     }
-    if ( get_option( 'ws_seeded_languages_taxonomy' ) !== '1.0.0' ) {
+    if ( get_option( 'ws_seeded_languages_taxonomy' ) !== '1.1.2' ) {
         ws_seed_languages_taxonomy();
-        update_option( 'ws_seeded_languages_taxonomy', '1.0.0' );
+        update_option( 'ws_seeded_languages_taxonomy', '1.1.2' );
     }
-    if ( get_option( 'ws_seeded_case_stage' ) !== '1.0.0' ) {
+    if ( get_option( 'ws_seeded_case_stage' ) !== '1.1.2' ) {
         ws_seed_case_stage_taxonomy();
-        update_option( 'ws_seeded_case_stage', '1.0.0' );
+        update_option( 'ws_seeded_case_stage', '1.1.2' );
     }
-    if ( get_option( 'ws_seeded_jurisdiction' ) !== '1.0.0' ) {
+    if ( get_option( 'ws_seeded_jurisdiction' ) !== '1.1.2' ) {
         ws_seed_jurisdiction_taxonomy();
-        update_option( 'ws_seeded_jurisdiction', '1.0.0' );
+        update_option( 'ws_seeded_jurisdiction', '1.1.2' );
     }
-    if ( get_option( 'ws_seeded_disclosure_targets' ) !== '1.1.0' ) {
+    if ( get_option( 'ws_seeded_disclosure_targets' ) !== '1.1.2' ) {
         ws_seed_disclosure_targets_taxonomy();
-        update_option( 'ws_seeded_disclosure_targets', '1.1.0' );
+        update_option( 'ws_seeded_disclosure_targets', '1.1.2' );
     }
-    if ( get_option( 'ws_seeded_fee_shifting' ) !== '1.0.0' ) {
+    if ( get_option( 'ws_seeded_fee_shifting' ) !== '1.1.2' ) {
         ws_seed_fee_shifting_taxonomy();
-        update_option( 'ws_seeded_fee_shifting', '1.0.0' );
+        update_option( 'ws_seeded_fee_shifting', '1.1.2' );
     }
-    if ( get_option( 'ws_seeded_employer_defense' ) !== '1.1.0' ) {
+    if ( get_option( 'ws_seeded_employer_defense' ) !== '1.1.2' ) {
         ws_seed_employer_defense_taxonomy();
-        update_option( 'ws_seeded_employer_defense', '1.1.0' );
+        update_option( 'ws_seeded_employer_defense', '1.1.2' );
     }
-    if ( get_option( 'ws_seeded_aorg_type' ) !== '1.0.0' ) {
+    if ( get_option( 'ws_seeded_aorg_type' ) !== '1.1.2' ) {
         ws_seed_aorg_type_taxonomy();
-        update_option( 'ws_seeded_aorg_type', '1.0.0' );
+        update_option( 'ws_seeded_aorg_type', '1.1.2' );
     }
-    if ( get_option( 'ws_seeded_employment_sector' ) !== '1.0.0' ) {
+    if ( get_option( 'ws_seeded_employment_sector' ) !== '1.1.2' ) {
         ws_seed_employment_sector_taxonomy();
-        update_option( 'ws_seeded_employment_sector', '1.0.0' );
+        update_option( 'ws_seeded_employment_sector', '1.1.2' );
     }
-    if ( get_option( 'ws_seeded_aorg_service' ) !== '1.0.0' ) {
+    if ( get_option( 'ws_seeded_aorg_service' ) !== '1.1.2' ) {
         ws_seed_aorg_service_taxonomy();
-        update_option( 'ws_seeded_aorg_service', '1.0.0' );
+        update_option( 'ws_seeded_aorg_service', '1.1.2' );
     }
-    if ( get_option( 'ws_seeded_aorg_cost_model' ) !== '1.0.0' ) {
+    if ( get_option( 'ws_seeded_aorg_cost_model' ) !== '1.1.2' ) {
         ws_seed_aorg_cost_model_taxonomy();
-        update_option( 'ws_seeded_aorg_cost_model', '1.0.0' );
+        update_option( 'ws_seeded_aorg_cost_model', '1.1.2' );
     }
-    if ( get_option( 'ws_seeded_procedure_type' ) !== '1.0.0' ) {
+    if ( get_option( 'ws_seeded_procedure_type' ) !== '1.1.2' ) {
         ws_seed_proc_type_taxonomy();
-        update_option( 'ws_seeded_procedure_type', '1.0.0' );
+        update_option( 'ws_seeded_procedure_type', '1.1.2' );
     }
-    if ( get_option( 'ws_seeded_employee_standard' ) !== '1.0.0' ) {
+    if ( get_option( 'ws_seeded_employee_standard' ) !== '1.1.2' ) {
         ws_seed_employee_standard_taxonomy();
-        update_option( 'ws_seeded_employee_standard', '1.0.0' );
+        update_option( 'ws_seeded_employee_standard', '1.1.2' );
     }
 
 } );

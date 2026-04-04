@@ -470,11 +470,11 @@ function ws_get_jx_statute_data( $jx_term_id ) {
                 'sol_value'           => get_post_meta( $sid, 'ws_jx_statute_sol_value',           true ),
                 'sol_unit'            => get_post_meta( $sid, 'ws_jx_statute_sol_unit',            true ),
                 'sol_trigger'         => get_post_meta( $sid, 'ws_jx_statute_sol_trigger',         true ),
-                'sol_has_details'     => (bool) get_post_meta( $sid, 'ws_jx_statute_sol_has_details',     true ),
-                'sol_details'         => get_post_meta( $sid, 'ws_jx_statute_sol_details',         true ),
-                'tolling_has_details' => (bool) get_post_meta( $sid, 'ws_jx_statute_tolling_has_details', true ),
-                'tolling_details'     => get_post_meta( $sid, 'ws_jx_statute_tolling_details',     true ),
-                'has_exhaustion'      => (bool) get_post_meta( $sid, 'ws_jx_statute_has_exhaustion',      true ),
+                'sol_has_details'     => (bool) get_post_meta( $sid, 'ws_jx_statute_limit_ambiguous',     true ),
+                'sol_details'         => get_post_meta( $sid, 'ws_jx_statute_limit_details',         true ),
+                'tolling_has_details' => (bool) get_post_meta( $sid, 'ws_jx_statute_tolling_has_notes', true ),
+                'tolling_details'     => get_post_meta( $sid, 'ws_jx_statute_tolling_notes',     true ),
+                'has_exhaustion'      => (bool) get_post_meta( $sid, 'ws_jx_statute_exhaustion_required',      true ),
                 'exhaustion_details'  => get_post_meta( $sid, 'ws_jx_statute_exhaustion_details',  true ),
 
                 // ── Enforcement ───────────────────────────────────────────
@@ -488,18 +488,18 @@ function ws_get_jx_statute_data( $jx_term_id ) {
                 'bop_standard'             => get_post_meta( $sid, 'ws_jx_statute_bop_standard',             true ),
                 'employer_defense'         => get_field( 'ws_jx_statute_employer_defense', $sid ),
                 'employer_defense_details' => get_post_meta( $sid, 'ws_jx_statute_employer_defense_details', true ),
-                'rebuttable_has_details'   => (bool) get_post_meta( $sid, 'ws_jx_statute_rebuttable_has_details', true ),
-                'rebuttable_details'       => get_post_meta( $sid, 'ws_jx_statute_rebuttable_details',       true ),
+                'rebuttable_has_details'   => (bool) get_post_meta( $sid, 'ws_jx_statute_rebuttable_has_presumption', true ),
+                'rebuttable_details'       => get_post_meta( $sid, 'ws_jx_statute_rebuttable_presumption',       true ),
                 'bop_has_details'          => (bool) get_post_meta( $sid, 'ws_jx_statute_bop_has_details',   true ),
-                'bop_details'              => get_post_meta( $sid, 'ws_jx_statute_bop_details',              true ),
+                'bop_details'              => get_post_meta( $sid, 'ws_jx_statute_burden_of_proof_details',              true ),
 
                 // ── Reward ────────────────────────────────────────────────
-                'has_reward'     => (bool) get_post_meta( $sid, 'ws_jx_statute_has_reward',     true ),
+                'has_reward'     => (bool) get_post_meta( $sid, 'ws_jx_statute_reward_available',     true ),
                 'reward_details' => get_post_meta( $sid, 'ws_jx_statute_reward_details', true ),
 
                 // ── Links ─────────────────────────────────────────────────
                 'statute_url' => get_post_meta( $sid, 'ws_jx_statute_url',        true ),
-                'url_is_pdf'  => (bool) get_post_meta( $sid, 'ws_jx_statute_url_is_pdf', true ),
+                'url_is_pdf'  => (bool) get_post_meta( $sid, 'ws_jx_statute_is_pdf', true ),
 
                 'last_reviewed' => get_post_meta( $sid, 'ws_jx_statute_last_reviewed', true ),
                 'ref_materials' => ws_get_ref_materials( $sid ),
@@ -1503,11 +1503,11 @@ function ws_get_jx_common_law_data( $jx_term_id ) {
                 'sol_value'           => get_post_meta( $rid, 'ws_cl_sol_value',           true ),
                 'sol_unit'            => get_post_meta( $rid, 'ws_cl_sol_unit',            true ),
                 'sol_trigger'         => get_post_meta( $rid, 'ws_cl_sol_trigger',         true ),
-                'sol_has_details'     => (bool) get_post_meta( $rid, 'ws_cl_sol_has_details',     true ),
-                'sol_details'         => get_post_meta( $rid, 'ws_cl_sol_details',         true ),
-                'tolling_has_details' => (bool) get_post_meta( $rid, 'ws_cl_tolling_has_details', true ),
-                'tolling_details'     => get_post_meta( $rid, 'ws_cl_tolling_details',     true ),
-                'has_exhaustion'      => (bool) get_post_meta( $rid, 'ws_cl_has_exhaustion',      true ),
+                'sol_has_details'     => (bool) get_post_meta( $rid, 'ws_cl_limit_ambiguous',     true ),
+                'sol_details'         => get_post_meta( $rid, 'ws_cl_limit_details',         true ),
+                'tolling_has_details' => (bool) get_post_meta( $rid, 'ws_cl_tolling_has_notes', true ),
+                'tolling_details'     => get_post_meta( $rid, 'ws_cl_tolling_notes',     true ),
+                'has_exhaustion'      => (bool) get_post_meta( $rid, 'ws_cl_exhaustion_required',      true ),
                 'exhaustion_details'  => get_post_meta( $rid, 'ws_cl_exhaustion_details',  true ),
 
                 // ── Enforcement ───────────────────────────────────────────
@@ -1523,13 +1523,13 @@ function ws_get_jx_common_law_data( $jx_term_id ) {
                 'employee_standard'        => get_field( 'ws_cl_employee_standard',        $rid ),
                 'employer_defense'         => get_field( 'ws_cl_employer_defense',         $rid ),
                 'employer_defense_details' => get_post_meta( $rid, 'ws_cl_employer_defense_details', true ),
-                'rebuttable_has_details'   => (bool) get_post_meta( $rid, 'ws_cl_rebuttable_has_details', true ),
-                'rebuttable_details'       => get_post_meta( $rid, 'ws_cl_rebuttable_details',       true ),
+                'rebuttable_has_details'   => (bool) get_post_meta( $rid, 'ws_cl_rebuttable_has_presumption', true ),
+                'rebuttable_details'       => get_post_meta( $rid, 'ws_cl_rebuttable_presumption',       true ),
                 'bop_has_details'          => (bool) get_post_meta( $rid, 'ws_cl_bop_has_details',   true ),
-                'bop_details'              => get_post_meta( $rid, 'ws_cl_bop_details',              true ),
+                'bop_details'              => get_post_meta( $rid, 'ws_cl_burden_of_proof_details',              true ),
 
                 // ── Reward ────────────────────────────────────────────────
-                'has_reward'     => (bool) get_post_meta( $rid, 'ws_cl_has_reward',     true ),
+                'has_reward'     => (bool) get_post_meta( $rid, 'ws_cl_reward_available',     true ),
                 'reward_details' => get_post_meta( $rid, 'ws_cl_reward_details', true ),
 
                 // Record management

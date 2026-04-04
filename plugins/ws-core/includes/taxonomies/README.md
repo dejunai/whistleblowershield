@@ -17,7 +17,7 @@ Taxonomy registration and seeding for all ws-core taxonomies.
 | `taxonomy-aorgs.txt` | Taxonomy reference for ws-assist-org |
 | `taxonomy-tables.txt` | Human-readable flat reference of all taxonomy terms and slugs |
 
-`taxonomy-common-law.txt` — pending creation for jx-common-law pipeline reference.
+`taxonomy-common-law.txt` — pending creation for jx-common-law pipeline reference. Create when Wyoming data build begins.
 
 ---
 
@@ -70,7 +70,7 @@ Flat taxonomies use `wp_insert_term()` directly with a
 
 ## has-details Sentinel Pattern
 
-Five taxonomies include a `has-details` sentinel term:
+Six taxonomies include a `has-details` sentinel term:
 `ws_protected_class`, `ws_disclosure_targets`, `ws_adverse_action_types`,
 `ws_remedies`, `ws_employer_defense`, `ws_employee_standard`.
 

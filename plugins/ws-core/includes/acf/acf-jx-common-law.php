@@ -45,11 +45,11 @@ defined( 'ABSPATH' ) || exit;
  *   ws_cl_sol_value              Filing Window Value (number)
  *   ws_cl_sol_unit               Time Unit (select)
  *   ws_cl_sol_trigger            Deadline Trigger (select)
- *   ws_cl_sol_has_details        SOL has supplementary detail (true_false)
- *   ws_cl_sol_details            SOL detail (textarea, conditional)
- *   ws_cl_tolling_has_details    Tolling provisions exist (true_false)
- *   ws_cl_tolling_details        Tolling & Extension Details (textarea, conditional)
- *   ws_cl_has_exhaustion         Exhaustion Required? (true_false)
+ *   ws_cl_limit_ambiguous        SOL has supplementary detail (true_false)
+ *   ws_cl_limit_details            SOL detail (textarea, conditional)
+ *   ws_cl_tolling_has_notes    Tolling provisions exist (true_false)
+ *   ws_cl_tolling_notes        Tolling & Extension Details (textarea, conditional)
+ *   ws_cl_exhaustion_required         Exhaustion Required? (true_false)
  *   ws_cl_exhaustion_details     Exhaustion Procedure & Deadline (textarea, conditional)
  *
  * Enforcement tab:
@@ -69,13 +69,15 @@ defined( 'ABSPATH' ) || exit;
  *   ws_cl_employee_standard_details  Employee Standard Detail (textarea, conditional)
  *   ws_cl_employer_defense           Employer Defense taxonomy (checkbox)
  *   ws_cl_employer_defense_details   Employer Defense Details (textarea, conditional)
- *   ws_cl_rebuttable_has_details     Rebuttable presumption exists (true_false)
- *   ws_cl_rebuttable_details         Rebuttable Presumption Details (textarea, conditional)
+ *   ws_cl_rebuttable_has_presumption     Rebuttable presumption exists (true_false)
+ *   ws_cl_rebuttable_presumption         Rebuttable Presumption Details (textarea, conditional)
  *   ws_cl_bop_has_details            BOP has supplementary detail (true_false)
- *   ws_cl_bop_details                BOP detail (textarea, conditional)
+ *   ws_cl_burden_of_proof_details     BOP detail (textarea, conditional)
+ *   ws_cl_bop_flag                    BOP signal phrase (text, optional)
+ *   ws_cl_burden_of_proof_details                BOP detail (textarea, conditional)
  *
  * Reward tab:
- *   ws_cl_has_reward             Reward available (true_false)
+ *   ws_cl_reward_available             Reward available (true_false)
  *   ws_cl_reward_details         Reward Details (textarea, conditional)
  *
  * @package    WhistleblowerShield
@@ -375,9 +377,9 @@ function ws_register_acf_jx_common_law() {
             ],
 
             [
-                'key'           => 'field_jx_cl_sol_has_details',
+                'key'           => 'field_jx_cl_limit_ambiguous',
                 'label'         => 'SOL Has Supplementary Detail',
-                'name'          => 'ws_cl_sol_has_details',
+                'name'          => 'ws_cl_limit_ambiguous',
                 'type'          => 'true_false',
                 'instructions'  => 'Enable to document the analogous statute the limitations period is borrowed from. Almost always required for common law claims.',
                 'ui'            => 1,
@@ -387,23 +389,23 @@ function ws_register_acf_jx_common_law() {
             ],
 
             [
-                'key'               => 'field_jx_cl_sol_details',
+                'key'               => 'field_jx_cl_limit_details',
                 'label'             => 'SOL Details',
-                'name'              => 'ws_cl_sol_details',
+                'name'              => 'ws_cl_limit_details',
                 'type'              => 'textarea',
                 'rows'              => 3,
                 'instructions'      => 'Identify the analogous statute the limitations period is borrowed from and any judicial authority for that borrowing.',
                 'conditional_logic' => [ [ [
-                    'field'    => 'field_jx_cl_sol_has_details',
+                    'field'    => 'field_jx_cl_limit_ambiguous',
                     'operator' => '==',
                     'value'    => '1',
                 ] ] ],
             ],
 
             [
-                'key'           => 'field_jx_cl_tolling_has_details',
+                'key'           => 'field_jx_cl_tolling_has_notes',
                 'label'         => 'Tolling Provisions Exist',
-                'name'          => 'ws_cl_tolling_has_details',
+                'name'          => 'ws_cl_tolling_has_notes',
                 'type'          => 'true_false',
                 'instructions'  => 'Enable if identified tolling or extension conditions apply to this doctrine.',
                 'ui'            => 1,
@@ -413,23 +415,23 @@ function ws_register_acf_jx_common_law() {
             ],
 
             [
-                'key'               => 'field_jx_cl_tolling_details',
+                'key'               => 'field_jx_cl_tolling_notes',
                 'label'             => 'Tolling & Extension Details',
-                'name'              => 'ws_cl_tolling_details',
+                'name'              => 'ws_cl_tolling_notes',
                 'type'              => 'textarea',
                 'rows'              => 3,
                 'instructions'      => 'Describe specific conditions that pause or extend the limitations period.',
                 'conditional_logic' => [ [ [
-                    'field'    => 'field_jx_cl_tolling_has_details',
+                    'field'    => 'field_jx_cl_tolling_has_notes',
                     'operator' => '==',
                     'value'    => '1',
                 ] ] ],
             ],
 
             [
-                'key'           => 'field_jx_cl_has_exhaustion',
+                'key'           => 'field_jx_cl_exhaustion_required',
                 'label'         => 'Exhaustion Required?',
-                'name'          => 'ws_cl_has_exhaustion',
+                'name'          => 'ws_cl_exhaustion_required',
                 'type'          => 'true_false',
                 'instructions'  => 'Must the claimant file with an agency before going to court under this doctrine?',
                 'ui'            => 1,
@@ -448,7 +450,7 @@ function ws_register_acf_jx_common_law() {
                 'instructions'      => 'Describe the required administrative filing step and its deadline.',
                 'required'          => 1,
                 'conditional_logic' => [ [ [
-                    'field'    => 'field_jx_cl_has_exhaustion',
+                    'field'    => 'field_jx_cl_exhaustion_required',
                     'operator' => '==',
                     'value'    => '1',
                 ] ] ],
@@ -639,9 +641,9 @@ function ws_register_acf_jx_common_law() {
             ],
 
             [
-                'key'           => 'field_jx_cl_rebuttable_has_details',
+                'key'           => 'field_jx_cl_rebuttable_has_presumption',
                 'label'         => 'Rebuttable Presumption Exists',
-                'name'          => 'ws_cl_rebuttable_has_details',
+                'name'          => 'ws_cl_rebuttable_has_presumption',
                 'type'          => 'true_false',
                 'instructions'  => 'Enable if this doctrine creates a rebuttable presumption in favour of the claimant.',
                 'ui'            => 1,
@@ -651,14 +653,14 @@ function ws_register_acf_jx_common_law() {
             ],
 
             [
-                'key'               => 'field_jx_cl_rebuttable_details',
+                'key'               => 'field_jx_cl_rebuttable_presumption',
                 'label'             => 'Rebuttable Presumption Details',
-                'name'              => 'ws_cl_rebuttable_details',
+                'name'              => 'ws_cl_rebuttable_presumption',
                 'type'              => 'textarea',
                 'rows'              => 3,
                 'instructions'      => 'Describe the presumption and what the employer must do to rebut it.',
                 'conditional_logic' => [ [ [
-                    'field'    => 'field_jx_cl_rebuttable_has_details',
+                    'field'    => 'field_jx_cl_rebuttable_has_presumption',
                     'operator' => '==',
                     'value'    => '1',
                 ] ] ],
@@ -677,9 +679,9 @@ function ws_register_acf_jx_common_law() {
             ],
 
             [
-                'key'               => 'field_jx_cl_bop_details',
+                'key'               => 'field_jx_cl_burden_of_proof_details',
                 'label'             => 'BOP Details',
-                'name'              => 'ws_cl_bop_details',
+                'name'              => 'ws_cl_burden_of_proof_details',
                 'type'              => 'textarea',
                 'rows'              => 3,
                 'instructions'      => 'Describe the notable burden of proof situation under this doctrine.',
@@ -691,6 +693,16 @@ function ws_register_acf_jx_common_law() {
             ],
 
             // ────────────────────────────────────────────────────────────────
+
+            [
+                'key'          => 'field_jx_cl_bop_flag',
+                'label'        => 'BOP Flag',
+                'name'         => 'ws_cl_bop_flag',
+                'type'         => 'text',
+                'instructions' => 'Short signal phrase identifying a non-standard burden shift. Use a compact hyphenated phrase, e.g. "contributing-factor-shift", "90-day rebuttable presumption". Not a full sentence.',
+                'maxlength'    => 120,
+            ],
+
             // Tab: Reward
             // ────────────────────────────────────────────────────────────────
 
@@ -701,9 +713,9 @@ function ws_register_acf_jx_common_law() {
             ],
 
             [
-                'key'           => 'field_jx_cl_has_reward',
+                'key'           => 'field_jx_cl_reward_available',
                 'label'         => 'Reward Available',
-                'name'          => 'ws_cl_has_reward',
+                'name'          => 'ws_cl_reward_available',
                 'type'          => 'true_false',
                 'instructions'  => 'Enable if this doctrine provides a monetary reward or bounty (distinct from compensatory remedies).',
                 'ui'            => 1,
@@ -720,7 +732,7 @@ function ws_register_acf_jx_common_law() {
                 'rows'              => 3,
                 'instructions'      => 'Describe the reward structure.',
                 'conditional_logic' => [ [ [
-                    'field'    => 'field_jx_cl_has_reward',
+                    'field'    => 'field_jx_cl_reward_available',
                     'operator' => '==',
                     'value'    => '1',
                 ] ] ],

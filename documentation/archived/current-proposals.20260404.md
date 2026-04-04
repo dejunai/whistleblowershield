@@ -34,10 +34,9 @@ to be destructive until that notice is removed.
 The following systems are complete, tested in staging, and considered
 ready for production subject to the pre-launch checklist below:
 
-**Data layer:** All 11 CPTs registered (including `jx-common-law` added v3.13.0).
-All 17 taxonomies registered and seeded. All 15 ACF field groups registered.
-Matrix seeders for all 9 seeder files with correct dependency order and
-idempotent gates. ACF field names synced to JSON schema keys (v3.14.0).
+**Data layer:** All 10 CPTs registered. All 16 taxonomies registered
+and seeded. All 14 ACF field groups registered. Matrix seeders for
+all 9 seeder files with correct dependency order and idempotent gates.
 
 **Query layer:** All dataset functions for all CPTs. Transient caching
 with correct invalidation. Federal append pattern for statutes,
@@ -59,16 +58,6 @@ Procedure statute link validation with publish gate and admin override.
 schedules). Inoreader feed monitor with staged review UI. Matrix
 divergence watch dashboard widget. Jurisdiction dashboard completion
 tracker. Runtime health check admin notice.
-
-**Admin tools** (`includes/admin/tools/`): `tool-generate-prompt.php`
-— generates AI research prompts from live taxonomy data for all four
-record types. `tool-ingest.php` — processes validated JSON batches,
-writes statute records to `jx-statute` CPT, maintains four log files
-in `wp-content/logs/ws-ingest/`.
-
-**Ingest pipeline:** Operational multi-model AI research pipeline
-(ChatGPT, Gemini 3.0 Thinking, NotebookLM) with human review gate.
-NJ (7) and MA (7) statutes ingested. CA (22) and WY in progress.
 
 ---
 
@@ -130,10 +119,12 @@ live server and the development-only notice removed from `ws-core.php`:
 - [ ] Remove the `DEVELOPMENT ONLY` notice block from `ws-core.php`
 - [ ] Audit all `@todo` items flagged "pre-launch only" throughout
       the codebase
-- [ ] Implement `render-common-law.php` stub (prerequisite for Wyoming)
-- [ ] Extract `render-assist-org.php` from `render-section.php`
-      (prerequisite for Phase 2)
-- [ ] Verify CSS conditional loading is optimized for production
+- [ ] Run the full testing pass documented separately in
+      `project-status.md` (not yet written — required before launch)
+- [ ] Verify CSS conditional loading is optimized for production — both
+      CSS files currently enqueue globally for singular contexts;
+      a final design pass against GeneratePress Premium is deferred
+      to pre-launch
 
 **Design:**
 - [ ] GeneratePress theme CSS integration pass — color, border, and

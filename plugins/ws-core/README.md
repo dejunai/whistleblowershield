@@ -5,7 +5,7 @@ model, editorial workflow, and public-facing output for the platform.
 
 **Stack:** WordPress + ACF Pro
 **Requires:** PHP 8.0+, WordPress 6.0+, ACF Pro
-**Version:** 3.13.0
+**Version:** 3.14.0
 
 Full project documentation is in `/documentation/`. This file covers the
 rules a developer needs open while writing code.
@@ -21,6 +21,8 @@ Universal Layer   CPTs, taxonomies, ACF field groups, query functions
                   Loaded on frontend and admin
 Matrix Layer      Idempotent seeders — run once on install (admin only)
 Admin Layer       ACF hooks, audit trail, monitoring, dashboard (admin only)
+Tools Layer       Admin tools in includes/admin/tools/ — prompt generator,
+                  ingest tool. Write to wp-content/logs/ws-ingest/.
 Assembly Layer    Render functions + shortcodes → HTML (frontend only)
 Assets            Conditionally loaded CSS + JS
 ```
@@ -237,3 +239,5 @@ value. To re-run a seeder, bump its version string — never delete the option.
 | 3.11.0 | `has-details` sentinel added to 5 taxonomies |
 | 3.12.0 | `ws_employee_standard` taxonomy; ACF companion field pattern for has-details |
 | 3.13.0 | `jx-common-law` CPT + ACF + query function + render stub; all shared taxonomies updated to include jx-common-law; `ws_cl_doctrine_id`, `ws_cl_statutory_preclusion`, `ws_cl_public_policy_sources`, `ws_cl_precedent_url` fields |
+| 3.13.1 | `tool-generate-prompt.php` added to `includes/admin/tools/`; reads live taxonomy data via `get_terms()` — no hardcoded arrays |
+| 3.14.0 | `tool-ingest.php` added; ACF field names renamed throughout `acf-jx-statutes.php` and `acf-jx-common-law.php` to match JSON schema keys; four ingest log files added to `wp-content/logs/ws-ingest/` |

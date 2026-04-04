@@ -1,0 +1,101 @@
+================================================
+WS INGEST RUN LOG
+================================================
+Run timestamp:    2026-04-04 09:36:19 UTC
+Jurisdiction:     MA
+Source:           NotebookLM Reconciliation
+Source method:    ai_assisted
+Batch completed:  2026-04-03 19:42 UTC
+
+── SUMMARY ──────────────────────────────────────
+Created:          7
+Skipped (dupe):   0
+Failed:           0
+Proposed new:     0
+Proposed merged:  0
+Blacklist size:   1
+
+── PREFLIGHT WARNINGS ───────────────────────────
+  Assistant reported with_errors: true.
+    → MA-149-185: disclosure_types - Removed parent slugs 'workplace-employment' and 'public-health-safety' - no matching child slug found.
+    → MA-149-185: disclosure_types_details - Populated - missing details for has-details sentinel.
+    → MA-149-185: protected_class - Removed parent slug 'public-sector' - no matching child slug found.
+    → MA-149-185: disclosure_targets - Removed parent slugs 'external-agency', 'legislative', 'judicial' - no matching child slug found.
+    → MA-149-185: exhaustion_required - Conflict resolved to false - written notice does not block court access.
+    → MA-149-187: disclosure_types - Removed parent slug 'public-health-safety' - no matching child slug found.
+    → MA-149-187: disclosure_types_details - Populated - missing details for has-details sentinel.
+    → MA-149-187: protected_class - Removed parent slug 'healthcare-staff' - no matching child slug found.
+    → MA-149-187: fee_shifting - Conflict resolved to unilateral-pro-plaintiff - standard application.
+    → MA-12-5J: disclosure_types - Removed parent slug 'financial-corporate' - no matching child slug found.
+    → MA-12-5J: disclosure_types_details - Populated - missing details for has-details sentinel.
+    → MA-12-5J: protected_class - Removed parent slugs 'private-sector' and 'public-sector' - no matching child slug found.
+    → MA-12-5J: statute_of_limitations.limit_ambiguous - Set to true - derived from general tort limitations.
+    → MA-149-148A: statute_of_limitations.limit_ambiguous - Set to true - derived from chapter 149 section 150.
+    → MA-149-148A: statute_of_limitations.exhaustion_details - Populated - mandatory 90-day AG filing requirement.
+    → MA-151-19: statute_of_limitations.limit_ambiguous - Set to true - derived from chapter 151 section 20A.
+    → MA-152-75B: statute_of_limitations.limit_ambiguous - Set to true - derived from general tort limitations.
+    → MA-111-72G: disclosure_types - Removed parent slug 'public-health-safety' - left array empty.
+    → MA-111-72G: statute_of_limitations.limit_ambiguous - Set to true - derived from general personal injury limitations.
+
+── RECORD DETAIL ────────────────────────────────
+✓ MA-149-185 [post #1717]
+    ⚠ MA-149-185 [ws_disclosure_type]: removed 'has-details' (unregistered slug)
+    · jurisdiction: assigned 'ma'
+    · omitted (no ACF field): links.is_official = 1
+    · omitted (no ACF field): _review_notes = This is the central Massachusetts whistleblower statute. The written notice requ
+    · omitted (no ACF field): _reconciled_notes = verified_via: law.justia.com. Resolved conflict on exhaustion_required from Grok
+    · omitted (no ACF field): citations.attached_citations = Bennett v. City of Holyoke || applies written-notice requirement || https://law.
+    · omitted (no ACF field): citations.citation_count = 3
+    · MA-149-185: created as post #1717 (draft, unverified)
+✓ MA-149-187 [post #1718]
+    ⚠ MA-149-187 [ws_disclosure_type]: removed 'has-details' (unregistered slug)
+    · jurisdiction: assigned 'ma'
+    · omitted (no ACF field): enforcement.primary_agency = Massachusetts Attorney General
+    · omitted (no ACF field): links.is_official = 1
+    · omitted (no ACF field): _review_notes = Specific to health care facilities and providers. Includes participation in peer
+    · omitted (no ACF field): _reconciled_notes = verified_via: law.justia.com. Resolved conflict on fee_shifting from ChatGPT mod
+    · omitted (no ACF field): citations.attached_citations = Blanchard v. Steward Carney Hospital, Inc. || clarifies mandatory-reporting over
+    · omitted (no ACF field): citations.citation_count = 3
+    · MA-149-187: created as post #1718 (draft, unverified)
+✓ MA-12-5J [post #1719]
+    ⚠ MA-12-5J [ws_disclosure_type]: removed 'has-details' (unregistered slug)
+    · jurisdiction: assigned 'ma'
+    · omitted (no ACF field): links.is_official = 1
+    · omitted (no ACF field): _review_notes = This is the retaliation section of the Massachusetts False Claims Act, not the e
+    · omitted (no ACF field): _reconciled_notes = limit_ambiguous flagged true as SOL is derived. Removed invalid parent slugs. Po
+    · omitted (no ACF field): citations.citation_count = 0
+    · MA-12-5J: created as post #1719 (draft, unverified)
+✓ MA-149-148A [post #1720]
+    · jurisdiction: assigned 'ma'
+    · omitted (no ACF field): enforcement.primary_agency = Massachusetts Attorney General
+    · omitted (no ACF field): links.is_official = 1
+    · omitted (no ACF field): _review_notes = This is a retaliation protection embedded in Massachusetts wage-and-hour enforce
+    · omitted (no ACF field): _reconciled_notes = verified_via: law.justia.com. limit_ambiguous flagged true as SOL is derived fro
+    · omitted (no ACF field): citations.attached_citations = Smith v. Winter Place LLC || confirms wage-complaint retaliation scope || https:
+    · omitted (no ACF field): citations.citation_count = 3
+    · MA-149-148A: created as post #1720 (draft, unverified)
+✓ MA-151-19 [post #1721]
+    · jurisdiction: assigned 'ma'
+    · omitted (no ACF field): links.is_official = 1
+    · omitted (no ACF field): _review_notes = Focuses on wage protections. Mandatory liquidated damages often apply to wage-re
+    · omitted (no ACF field): _reconciled_notes = limit_ambiguous flagged true as SOL is derived.
+    · omitted (no ACF field): citations.citation_count = 0
+    · MA-151-19: created as post #1721 (draft, unverified)
+✓ MA-152-75B [post #1722]
+    · jurisdiction: assigned 'ma'
+    · omitted (no ACF field): links.is_official = 1
+    · omitted (no ACF field): _review_notes = Protects injured workers. Note that the statute of limitations is derived from c
+    · omitted (no ACF field): _reconciled_notes = limit_ambiguous flagged true as SOL is derived.
+    · omitted (no ACF field): citations.citation_count = 0
+    · MA-152-75B: created as post #1722 (draft, unverified)
+✓ MA-111-72G [post #1723]
+    · jurisdiction: assigned 'ma'
+    · omitted (no ACF field): links.is_official = 1
+    · omitted (no ACF field): _review_notes = Mandated reporting for elderly care facility staff. Actual damages mapped to com
+    · omitted (no ACF field): _reconciled_notes = Removed invalid parent slug public-health-safety, omitting disclosure_types. lim
+    · omitted (no ACF field): citations.citation_count = 0
+    · MA-111-72G: created as post #1723 (draft, unverified)
+
+================================================
+END OF LOG
+================================================

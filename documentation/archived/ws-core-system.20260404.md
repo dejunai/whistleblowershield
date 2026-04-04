@@ -21,7 +21,7 @@ This document does not describe individual field groups (see
 |---|---|
 | Plugin Name | WhistleblowerShield Core |
 | Plugin File | `ws-core/ws-core.php` |
-| Current Version | 3.14.0 |
+| Current Version | 3.10.0 |
 | Requires | WordPress 6.0+, ACF Pro |
 | Text Domain | `ws-core` |
 

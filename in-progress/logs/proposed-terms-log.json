@@ -1,0 +1,17 @@
+{
+    "proposed_terms": [
+        {
+            "taxonomy": "ws_protected_class",
+            "term_id": "victim-of-domestic-violence-or-sexual-assault",
+            "term_label": "Victim of Domestic Violence or Sexual Assault",
+            "notes": "Specifically protected under the NJ SAFE Act for taking leave or seeking assistance. No existing slug in ws_protected_class covers this specific status.",
+            "seen_in": [
+                "NJ-34:11C-1"
+            ],
+            "count": 1,
+            "status": "pending",
+            "resolved_on": null,
+            "resolution": null
+        }
+    ]
+}

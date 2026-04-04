@@ -9,19 +9,19 @@ know what a field is called, what type it is, or why it exists.
 
 ACF field groups are registered in PHP, not stored in the database. The
 source of truth is always the relevant `includes/acf/` file. This
-document describes what is in those files as of v3.14.0.
+document describes what is in those files as of v3.10.0.
 
 ---
 
 ## Field Group Architecture
 
-Fifteen field groups are registered. Thirteen are CPT-specific. Two are
+Fourteen field groups are registered. Twelve are CPT-specific. Two are
 shared groups that attach to multiple CPTs via their location rules:
 
 | Shared Group | Group Key | Attaches To | Purpose |
 |---|---|---|---|
 | Stamp Fields | `group_stamp_metadata` | All 9 content CPTs | Created/edited timestamps and authorship |
-| Plain English Fields | `group_plain_english_metadata` | `jx-statute`, `jx-common-law`, `jx-citation`, `jx-interpretation`, `ws-agency` | Plain language overlay toggle, content, and review stamps |
+| Plain English Fields | `group_plain_english_metadata` | `jx-statute`, `jx-citation`, `jx-interpretation`, `ws-agency` | Plain language overlay toggle, content, and review stamps |
 | Source Verify Fields | `group_source_verify_metadata` | All content CPTs except `jurisdiction` | Source method, verification status, needs-review flag |
 | Major Edit | `group_major_edit_metadata` | `jx-summary`, `jx-statute`, `jx-citation`, `jx-interpretation`, `ws-ag-procedure` | Flag + describe a major editorial change that triggers a legal update post |
 

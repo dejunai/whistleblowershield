@@ -1,0 +1,364 @@
+```json
+{
+  "meta": {
+    "json_format_version": "2.0",
+    "source_method": "ai_assisted",
+    "source_name": "Gemini",
+    "jurisdiction_id": "PA",
+    "generated_date": "2026-04-03",
+    "generated_by": "Gemini",
+    "record_count": 7,
+    "proposed_count": 0,
+    "new_terms_proposed": [],
+    "json_run_notes": "Could not find the full text of some statutes on the official Pennsylvania legislature website. Information was pieced together from secondary sources and case law, which may result in some inaccuracies or omissions.",
+    "batch_completed": "2026-04-03 19:52 UTC"
+  },
+  "records": [
+    {
+      "jurisdiction_id": "PA",
+      "statute_id": "PA-1421",
+      "official_name": "Whistleblower Law",
+      "common_name": "Pennsylvania Whistleblower Law",
+      "legal_basis": {
+        "statute_citation": "43 P.S. §§ 1421-1428",
+        "disclosure_types": [
+          "waste-fraud-abuse",
+          "violation-of-law"
+        ],
+        "protected_class": [
+          "public-sector",
+          "state-employee",
+          "local-gov-staff"
+        ],
+        "disclosure_targets": [
+          "internal-supervisor",
+          "external-agency"
+        ],
+        "adverse_action_scope": "discharge, threaten or otherwise discriminate or retaliate against an employee regarding the employee’s compensation, terms, conditions, location or privileges of employment"
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": false,
+        "limit_value": 180,
+        "limit_unit": "days",
+        "trigger": "occurrence of the alleged violation"
+      },
+      "enforcement": {
+        "process_type": [
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "demotion",
+          "suspension",
+          "harassment"
+        ],
+        "remedies": [
+          "reinstatement",
+          "back-pay",
+          "compensatory-damages",
+          "attorney-fees",
+          "litigation-costs"
+        ],
+        "fee_shifting": "unilateral-pro-plaintiff"
+      },
+      "burden_of_proof": {
+        "employee_standard": [
+          "preponderance"
+        ],
+        "employer_defense": [
+          "legitimate-non-retaliatory-reason"
+        ]
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://www.legis.state.pa.us/cfdocs/legis/LI/consCheck.cfm?txtType=HTM&ttl=43&div=0&chpt=25",
+        "is_official": true
+      },
+      "citations": {
+        "citation_count": 0
+      },
+      "_review_notes": "",
+      "_reconciled_notes": ""
+    },
+    {
+      "jurisdiction_id": "PA",
+      "statute_id": "PA-951",
+      "official_name": "Pennsylvania Human Relations Act",
+      "common_name": "PHRA",
+      "legal_basis": {
+        "statute_citation": "43 P.S. §§ 951-963",
+        "disclosure_types": [
+          "discrimination",
+          "harassment"
+        ],
+        "protected_class": [
+          "private-sector",
+          "public-sector"
+        ],
+        "disclosure_targets": [
+          "internal-supervisor",
+          "external-agency"
+        ],
+        "adverse_action_scope": "discriminate against any individual with respect to compensation, hire, tenure, term, condition or privilege of employment or contract"
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": false,
+        "limit_value": 180,
+        "limit_unit": "days",
+        "trigger": "the alleged act of discrimination"
+      },
+      "enforcement": {
+        "primary_agency": "Pennsylvania Human Relations Commission",
+        "process_type": [
+          "administrative-complaint",
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "failure-to-hire"
+        ],
+        "remedies": [
+          "reinstatement",
+          "back-pay",
+          "injunctive-relief",
+          "attorney-fees"
+        ],
+        "fee_shifting": "discretionary"
+      },
+      "burden_of_proof": {
+        "employee_standard": [
+          "preponderance"
+        ]
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://www.legis.state.pa.us/cfdocs/legis/LI/consCheck.cfm?txtType=HTM&ttl=43&div=0&chpt=17",
+        "is_official": true
+      },
+      "citations": {
+        "citation_count": 0
+      },
+      "_review_notes": "",
+      "_reconciled_notes": ""
+    },
+    {
+      "jurisdiction_id": "PA",
+      "statute_id": "PA-1131",
+      "official_name": "Public Employe Relations Act",
+      "common_name": "PERA",
+      "legal_basis": {
+        "statute_citation": "43 P.S. § 1101.101 et seq.",
+        "disclosure_types": [
+          "collective-bargaining"
+        ],
+        "protected_class": [
+          "public-sector",
+          "state-employee",
+          "local-gov-staff"
+        ],
+        "disclosure_targets": [
+          "internal-supervisor"
+        ],
+        "adverse_action_scope": "interfering with, restraining or coercing employes in the exercise of the rights guaranteed in Article IV of this act."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": false,
+        "limit_value": 4,
+        "limit_unit": "months",
+        "trigger": "from the date of the alleged unfair practice"
+      },
+      "enforcement": {
+        "primary_agency": "Pennsylvania Labor Relations Board",
+        "process_type": [
+          "administrative-complaint"
+        ],
+        "adverse_action": [
+          "termination",
+          "discrimination"
+        ],
+        "remedies": [
+          "reinstatement",
+          "back-pay"
+        ]
+      },
+      "burden_of_proof": {},
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://www.legis.state.pa.us/cfdocs/legis/LI/consCheck.cfm?txtType=HTM&ttl=43&div=0&chpt=22",
+        "is_official": true
+      },
+      "citations": {
+        "citation_count": 0
+      },
+      "_review_notes": "",
+      "_reconciled_notes": ""
+    },
+    {
+      "jurisdiction_id": "PA",
+      "statute_id": "PA-2224",
+      "official_name": "Health Care Facilities Act",
+      "legal_basis": {
+        "statute_citation": "35 P.S. § 448.803",
+        "disclosure_types": [
+          "patient-safety"
+        ],
+        "protected_class": [
+          "healthcare-staff"
+        ],
+        "disclosure_targets": [
+          "internal-supervisor",
+          "external-agency"
+        ]
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": true,
+        "limit_value": 180,
+        "limit_unit": "days"
+      },
+      "enforcement": {
+        "process_type": [
+          "civil-lawsuit"
+        ],
+        "remedies": [
+          "reinstatement",
+          "back-pay"
+        ]
+      },
+      "burden_of_proof": {},
+      "reward": {
+        "available": false
+      },
+      "links": {},
+      "citations": {
+        "citation_count": 0
+      },
+      "_review_notes": "Statute of limitations is not explicitly in the act, but likely follows the pattern of other whistleblower laws in PA.",
+      "_reconciled_notes": ""
+    },
+    {
+      "jurisdiction_id": "PA",
+      "statute_id": "PA-6301",
+      "official_name": "Child Protective Services Law",
+      "legal_basis": {
+        "statute_citation": "23 Pa.C.S.A. § 6311",
+        "disclosure_types": [
+          "child-abuse"
+        ],
+        "protected_class": [
+          "any-person"
+        ],
+        "disclosure_targets": [
+          "law-enforcement",
+          "external-agency"
+        ]
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": true
+      },
+      "enforcement": {
+        "remedies": [
+          "civil-penalty"
+        ]
+      },
+      "burden_of_proof": {},
+      "reward": {
+        "available": false
+      },
+      "links": {},
+      "citations": {
+        "citation_count": 0
+      },
+      "_review_notes": "This law mandates reporting and provides immunity, but does not have a specific whistleblower protection section in the traditional sense. It is included as it protects the act of reporting.",
+      "_reconciled_notes": ""
+    },
+    {
+      "jurisdiction_id": "PA",
+      "statute_id": "PA-301",
+      "official_name": "Pennsylvania Solid Waste Management Act",
+      "legal_basis": {
+        "statute_citation": "35 P.S. § 6018.101 et seq.",
+        "disclosure_types": [
+          "environmental-protection"
+        ],
+        "protected_class": [
+          "any-person"
+        ],
+        "disclosure_targets": [
+          "external-agency"
+        ]
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": true
+      },
+      "enforcement": {
+        "process_type": [
+          "civil-lawsuit"
+        ],
+        "remedies": [
+          "injunctive-relief",
+          "civil-penalty"
+        ]
+      },
+      "burden_of_proof": {},
+      "reward": {
+        "available": true,
+        "reward_details": "The court may award up to $2,500 to any person for information which leads to a conviction."
+      },
+      "links": {},
+      "citations": {
+        "citation_count": 0
+      },
+      "_review_notes": "",
+      "_reconciled_notes": ""
+    },
+    {
+      "jurisdiction_id": "PA",
+      "statute_id": "PA-4101",
+      "official_name": "Public Official and Employee Ethics Act",
+      "legal_basis": {
+        "statute_citation": "65 Pa.C.S.A. § 1101 et seq.",
+        "disclosure_types": [
+          "public-corruption-ethics"
+        ],
+        "protected_class": [
+          "public-sector"
+        ],
+        "disclosure_targets": [
+          "external-agency"
+        ]
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": true
+      },
+      "enforcement": {
+        "primary_agency": "State Ethics Commission"
+      },
+      "burden_of_proof": {},
+      "reward": {
+        "available": false
+      },
+      "links": {},
+      "citations": {
+        "citation_count": 0
+      },
+      "_review_notes": "This act focuses on financial disclosures and conflicts of interest, and while it provides a mechanism for complaints, it is not a traditional whistleblower protection statute.",
+      "_reconciled_notes": ""
+    }
+  ],
+  "integrity": {
+    "with_errors": true,
+    "error_details": [
+      "Could not find the full text of some statutes on the official Pennsylvania legislature website. Information was pieced together from secondary sources and case law, which may result in some inaccuracies or omissions.",
+      "Statute of limitations for several statutes is ambiguous and not explicitly stated in the law.",
+      "Some of the included statutes are not traditional whistleblower laws but are included because they protect reporting of misconduct."
+    ],
+    "error_count": 3
+  }
+}
+```
