@@ -1,0 +1,472 @@
+{
+  "meta": {
+    "json_format_version": "2.0",
+    "source_method": "ai_assisted",
+    "source_name": "Gemini",
+    "jurisdiction_id": "PA",
+    "generated_date": "2026-04-03",
+    "generated_by": "Gemini 3 Flash",
+    "record_count": 7,
+    "proposed_count": 0,
+    "new_terms_proposed": [],
+    "json_run_notes": "Mapped seven primary Pennsylvania whistleblower and anti-retaliation statutes. Removed all parent taxonomy slugs during self-check. Omitted all empty optional fields per schema rules. Ensured _reconciled_notes is present and empty in all records.",
+    "batch_completed": "2026-04-04 04:15 UTC"
+  },
+  "records": [
+    {
+      "jurisdiction_id": "PA",
+      "statute_id": "PA-1421",
+      "official_name": "Pennsylvania Whistleblower Law",
+      "common_name": "The Whistleblower Law",
+      "legal_basis": {
+        "statute_citation": "43 P.S. §§ 1421–1428",
+        "disclosure_types": [
+          "retaliation-protection",
+          "public-corruption-ethics",
+          "procurement-spending-fraud"
+        ],
+        "protected_class": [
+          "state-employee",
+          "local-gov-staff",
+          "k12-education-staff",
+          "non-profit-staff"
+        ],
+        "disclosure_targets": [
+          "internal-supervisor",
+          "agency-state",
+          "agency-local",
+          "law-enforcement",
+          "legislative-state"
+        ],
+        "adverse_action_scope": "Includes discharge, threats, discrimination, or retaliation regarding compensation, terms, conditions, locations, or privileges of employment."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": false,
+        "limit_value": 180,
+        "limit_unit": "days",
+        "trigger": "The occurrence of the alleged violation.",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "process_type": [
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "disciplinary-action",
+          "harassment",
+          "pay-reduction"
+        ],
+        "remedies": [
+          "reinstatement",
+          "back-pay",
+          "attorney-fees",
+          "litigation-costs",
+          "injunctive-relief"
+        ],
+        "fee_shifting": "unilateral-pro-plaintiff"
+      },
+      "burden_of_proof": {
+        "employee_standard": [
+          "preponderance"
+        ],
+        "employer_defense": [
+          "legitimate-non-retaliatory-reason"
+        ],
+        "burden_of_proof_details": "Employee must show the report of wrongdoing was made to a supervisor or public body. Employer must show the action was taken for separate, legitimate reasons.",
+        "burden_of_proof_flag": "preponderance-burden-shift"
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://www.legis.state.pa.us/cfdocs/legis/LI/consCheck.cfm?txtType=HTM&ttl=43&div=0&chpt=25",
+        "is_official": true
+      },
+      "citations": {
+        "attached_citations": [
+          "Bailets v. Pennsylvania Turnpike Commission || expands definition of public body || https://casetext.com/case/bailets-v-pa-turnpike-commn-1 || casetext.com || high",
+          "Saltzman v. Thomas Jefferson Univ. Hosps. || clarifies coverage for private entities || https://casetext.com/case/saltzman-v-thomas-jefferson-univ-hosps-inc || casetext.com || high"
+        ],
+        "citation_count": 2
+      },
+      "_review_notes": "Primary law for public employees and employees of entities receiving public funds. Map 'actual damages' to compensatory-damages.",
+      "_reconciled_notes": ""
+    },
+    {
+      "jurisdiction_id": "PA",
+      "statute_id": "PA-448.814",
+      "official_name": "Health Care Facilities Act (Whistleblower Protection)",
+      "common_name": "Healthcare Facility Whistleblower Protection",
+      "legal_basis": {
+        "statute_citation": "35 P.S. § 448.814",
+        "disclosure_types": [
+          "healthcare-medicare-fraud",
+          "public-health-safety"
+        ],
+        "protected_class": [
+          "clinical-staff"
+        ],
+        "disclosure_targets": [
+          "agency-state",
+          "internal-supervisor"
+        ],
+        "adverse_action_scope": "Protection from retaliatory action for reporting violations of law, regulations, or standards regarding health care facility operations."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": true,
+        "limit_value": 2,
+        "limit_unit": "years",
+        "limit_details": "Derived from Pennsylvania general tort statute of limitations (42 Pa. C.S. § 5524).",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "process_type": [
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "demotion",
+          "harassment"
+        ],
+        "remedies": [
+          "reinstatement",
+          "back-pay",
+          "injunctive-relief"
+        ],
+        "fee_shifting": "discretionary"
+      },
+      "burden_of_proof": {
+        "employee_standard": [
+          "reasonable-belief"
+        ]
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://www.legis.state.pa.us/cfdocs/legis/LI/uconsCheck.cfm?txtType=HTM&yr=1979&sessInd=0&smthLwInd=0&act=48&chpt=8&sctn=14&subsctn=0",
+        "is_official": true
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      "_review_notes": "Protects healthcare facility staff reporting health and safety violations. SOL is derived from general personal injury law.",
+      "_reconciled_notes": ""
+    },
+    {
+      "jurisdiction_id": "PA",
+      "statute_id": "PA-333.112",
+      "official_name": "Pennsylvania Minimum Wage Act",
+      "common_name": "Minimum Wage Retaliation",
+      "legal_basis": {
+        "statute_citation": "43 P.S. § 333.112",
+        "disclosure_types": [
+          "wage-hour-violations"
+        ],
+        "protected_class": [
+          "corporate-staff",
+          "agricultural-worker"
+        ],
+        "disclosure_targets": [
+          "agency-state"
+        ],
+        "adverse_action_scope": "Prohibits discharge or discrimination for testifying or providing information regarding wage violations."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": true,
+        "limit_value": 2,
+        "limit_unit": "years",
+        "limit_details": "Derived from the general 2-year statute for tortious or statutory penalties where not specified.",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "process_type": [
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "disciplinary-action"
+        ],
+        "remedies": [
+          "back-pay",
+          "civil-penalty"
+        ],
+        "fee_shifting": "unilateral-pro-plaintiff"
+      },
+      "burden_of_proof": {
+        "employee_standard": [
+          "preponderance"
+        ]
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://www.legis.state.pa.us/cfdocs/legis/LI/uconsCheck.cfm?txtType=HTM&yr=1968&sessInd=0&smthLwInd=0&act=5&sctn=12",
+        "is_official": true
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      "_review_notes": "Anti-retaliation provision within the Minimum Wage Act. Note that SOL is not explicitly stated in the section.",
+      "_reconciled_notes": ""
+    },
+    {
+      "jurisdiction_id": "PA",
+      "statute_id": "PA-260.9a",
+      "official_name": "Wage Payment and Collection Law",
+      "common_name": "WPCL Retaliation",
+      "legal_basis": {
+        "statute_citation": "43 P.S. § 260.9a",
+        "disclosure_types": [
+          "wage-hour-violations"
+        ],
+        "protected_class": [
+          "corporate-staff"
+        ],
+        "disclosure_targets": [
+          "agency-state",
+          "internal-supervisor"
+        ],
+        "adverse_action_scope": "Prohibits any discriminatory action or discharge for filing a complaint or instituting a proceeding under this act."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": false,
+        "limit_value": 3,
+        "limit_unit": "years",
+        "trigger": "Explicitly set by 43 P.S. § 260.9a(g).",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "process_type": [
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "disciplinary-action"
+        ],
+        "remedies": [
+          "liquidated-damages",
+          "back-pay",
+          "attorney-fees"
+        ],
+        "fee_shifting": "unilateral-pro-plaintiff"
+      },
+      "burden_of_proof": {
+        "employee_standard": [
+          "preponderance"
+        ]
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://www.legis.state.pa.us/cfdocs/legis/LI/uconsCheck.cfm?txtType=HTM&yr=1961&sessInd=0&smthLwInd=0&act=329&sctn=9&subsctn=1",
+        "is_official": true
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      "_review_notes": "WPCL provides a longer 3-year statute of limitations compared to many other PA laws. Often used alongside the Minimum Wage Act.",
+      "_reconciled_notes": ""
+    },
+    {
+      "jurisdiction_id": "PA",
+      "statute_id": "PA-10225.303",
+      "official_name": "Older Adult Protective Services Act",
+      "common_name": "Elder Abuse Whistleblower Protection",
+      "legal_basis": {
+        "statute_citation": "35 P.S. § 10225.303",
+        "disclosure_types": [
+          "public-health-safety"
+        ],
+        "protected_class": [
+          "clinical-staff",
+          "corporate-staff"
+        ],
+        "disclosure_targets": [
+          "agency-state",
+          "internal-supervisor"
+        ],
+        "adverse_action_scope": "Prohibits retaliatory action or discrimination against an employee for reporting elder abuse or cooperating in an investigation."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": false,
+        "limit_value": 180,
+        "limit_unit": "days",
+        "trigger": "Specified in 35 P.S. § 10225.303(b).",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "process_type": [
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "demotion",
+          "harassment"
+        ],
+        "remedies": [
+          "reinstatement",
+          "back-pay",
+          "attorney-fees",
+          "litigation-costs"
+        ],
+        "fee_shifting": "unilateral-pro-plaintiff"
+      },
+      "burden_of_proof": {
+        "employee_standard": [
+          "preponderance"
+        ]
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://www.legis.state.pa.us/cfdocs/legis/LI/uconsCheck.cfm?txtType=HTM&yr=1987&sessInd=0&smthLwInd=0&act=79&sctn=303",
+        "is_official": true
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      "_review_notes": "Protects staff in long-term care or elderly services reporting abuse. Note the short 180-day SOL similar to the general Whistleblower Law.",
+      "_reconciled_notes": ""
+    },
+    {
+      "jurisdiction_id": "PA",
+      "statute_id": "PA-6018.611",
+      "official_name": "Solid Waste Management Act",
+      "common_name": "Waste Management Whistleblower",
+      "legal_basis": {
+        "statute_citation": "35 P.S. § 6018.611",
+        "disclosure_types": [
+          "environmental-protection"
+        ],
+        "protected_class": [
+          "corporate-staff"
+        ],
+        "disclosure_targets": [
+          "agency-state",
+          "internal-supervisor"
+        ],
+        "adverse_action_scope": "Protection from retaliation for notifying the department of a violation or assisting in a proceeding under the act."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": true,
+        "limit_value": 2,
+        "limit_unit": "years",
+        "limit_details": "Derived from general personal injury/tort limitations (42 Pa. C.S. § 5524).",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "process_type": [
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "demotion"
+        ],
+        "remedies": [
+          "lost-wages",
+          "compensatory-damages",
+          "attorney-fees"
+        ],
+        "fee_shifting": "discretionary"
+      },
+      "burden_of_proof": {
+        "employee_standard": [
+          "preponderance"
+        ]
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://www.legis.state.pa.us/cfdocs/legis/LI/uconsCheck.cfm?txtType=HTM&yr=1980&sessInd=0&smthLwInd=0&act=97&sctn=611",
+        "is_official": true
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      "_review_notes": "Specific environmental whistleblower protection. Map 'actual damages' to compensatory-damages.",
+      "_reconciled_notes": ""
+    },
+    {
+      "jurisdiction_id": "PA",
+      "statute_id": "PA-1422",
+      "official_name": "Protection of Legislative Employees",
+      "common_name": "Legislative Whistleblower Protection",
+      "legal_basis": {
+        "statute_citation": "43 P.S. §§ 1422.1–1422.5",
+        "disclosure_types": [
+          "retaliation-protection",
+          "public-corruption-ethics"
+        ],
+        "protected_class": [
+          "state-employee"
+        ],
+        "disclosure_targets": [
+          "legislative-state",
+          "agency-state"
+        ],
+        "adverse_action_scope": "Protects employees of the General Assembly from discharge or discrimination for reporting waste or wrongdoing."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": false,
+        "limit_value": 180,
+        "limit_unit": "days",
+        "trigger": "Specified in 43 P.S. § 1422.2.",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "process_type": [
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "demotion"
+        ],
+        "remedies": [
+          "reinstatement",
+          "back-pay",
+          "attorney-fees",
+          "litigation-costs"
+        ],
+        "fee_shifting": "unilateral-pro-plaintiff"
+      },
+      "burden_of_proof": {
+        "employee_standard": [
+          "preponderance"
+        ]
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://www.legis.state.pa.us/cfdocs/legis/LI/uconsCheck.cfm?txtType=HTM&yr=1986&sessInd=0&smthLwInd=0&act=169&sctn=2&subsctn=1",
+        "is_official": true
+      },
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      "_review_notes": "Specifically protects legislative staff. SOL mirrors the general Whistleblower Law.",
+      "_reconciled_notes": ""
+    }
+  ],
+  "integrity": {
+    "with_errors": true,
+    "error_details": [
+      "PA-448.814: SOL value (2 years) derived from general tort statute (42 Pa. C.S. § 5524) rather than explicit text; set limit_ambiguous to true.",
+      "PA-333.112: SOL value (2 years) derived from general 2-year statutory limit rather than explicit text; set limit_ambiguous to true.",
+      "PA-6018.611: SOL value (2 years) derived from general tort statute rather than explicit text; set limit_ambiguous to true."
+    ],
+    "error_count": 3
+  }
+}

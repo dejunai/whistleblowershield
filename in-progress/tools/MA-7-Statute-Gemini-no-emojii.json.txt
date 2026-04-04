@@ -9,8 +9,8 @@
     "record_count": 7,
     "proposed_count": 0,
     "new_terms_proposed": [],
-    "json_run_notes": "Successfully mapped 7 Massachusetts statutes. All hierarchical taxonomy fields were checked for parent slugs; none were included. The _reconciled_notes key was added to all records and left empty as requested for the second-pass review.",
-    "batch_completed": "2026-04-03 16:07 UTC"
+    "json_run_notes": "Mapped seven core Massachusetts whistleblower statutes. Removed all parent taxonomy slugs during self-check. Omitted all empty optional fields per schema rules. Ensured _reconciled_notes is present and empty in all records.",
+    "batch_completed": "2026-04-03 23:15 UTC"
   },
   "records": [
     {
@@ -42,7 +42,6 @@
         "limit_ambiguous": false,
         "limit_value": 2,
         "limit_unit": "years",
-        "trigger": "The date the retaliatory action occurred.",
         "exhaustion_required": false
       },
       "enforcement": {
@@ -70,8 +69,7 @@
         ],
         "employer_defense": [
           "legitimate-non-retaliatory-reason"
-        ],
-        "burden_of_proof_details": "Employee must show the disclosure was a substantial or motivating factor in the adverse action."
+        ]
       },
       "reward": {
         "available": false
@@ -87,7 +85,7 @@
         ],
         "citation_count": 2
       },
-      "_review_notes": "Covers public sector employees 🏛️. Note that § 185(c)(1) requires written notice to a supervisor before disclosing to an outside agency, but this is a procedural bar rather than administrative exhaustion.",
+      "_review_notes": "Covers public sector employees. Note that § 185(c)(1) requires written notice to a supervisor before disclosing to an outside agency, but this is a procedural bar rather than administrative exhaustion.",
       "_reconciled_notes": ""
     },
     {
@@ -149,7 +147,7 @@
         "attached_citations": [],
         "citation_count": 0
       },
-      "_review_notes": "Specific to healthcare workers 🩺. Similar to the public act but focused on patient care quality.",
+      "_review_notes": "Specific to healthcare workers. Similar to the public act but focused on patient care quality.",
       "_reconciled_notes": ""
     },
     {
@@ -215,7 +213,7 @@
         "attached_citations": [],
         "citation_count": 0
       },
-      "_review_notes": "Standard False Claims protection 💰. Double back pay is the primary remedy for retaliation.",
+      "_review_notes": "Standard False Claims protection. Double back pay is the primary remedy for retaliation.",
       "_reconciled_notes": ""
     },
     {
@@ -276,7 +274,7 @@
         "attached_citations": [],
         "citation_count": 0
       },
-      "_review_notes": "Focuses on wage protections 💵. Mandatory liquidated damages (treble damages) often apply to wage-related claims in MA.",
+      "_review_notes": "Focuses on wage protections. Mandatory liquidated damages (treble damages) often apply to wage-related claims in MA.",
       "_reconciled_notes": ""
     },
     {
@@ -302,7 +300,7 @@
         "limit_ambiguous": true,
         "limit_value": 3,
         "limit_unit": "years",
-        "limit_details": "Derived from general tort statute of limitations as the specific section does not name an independent deadline.",
+        "limit_details": "Derived from general personal injury statute (ch. 260 § 2A) as the specific section does not name an independent deadline.",
         "exhaustion_required": false
       },
       "enforcement": {
@@ -336,7 +334,7 @@
         "attached_citations": [],
         "citation_count": 0
       },
-      "_review_notes": "Protects injured workers 🩹. Note that the statute of limitations is derived from ch. 260 § 2A.",
+      "_review_notes": "Protects injured workers. Note that the statute of limitations is derived from ch. 260 § 2A.",
       "_reconciled_notes": ""
     },
     {
@@ -397,7 +395,7 @@
         "attached_citations": [],
         "citation_count": 0
       },
-      "_review_notes": "Closely linked with the Weekly Wage Act 📅. Often provides for treble damages for successful plaintiffs.",
+      "_review_notes": "Closely linked with the Weekly Wage Act. Often provides for treble damages for successful plaintiffs.",
       "_reconciled_notes": ""
     },
     {
@@ -422,7 +420,7 @@
         "limit_ambiguous": true,
         "limit_value": 3,
         "limit_unit": "years",
-        "limit_details": "Derived from general personal injury/tort limitations.",
+        "limit_details": "Derived from general personal injury statute (ch. 260 § 2A).",
         "exhaustion_required": false
       },
       "enforcement": {
@@ -456,15 +454,15 @@
         "attached_citations": [],
         "citation_count": 0
       },
-      "_review_notes": "Mandated reporting for elderly care facility staff 👵. Map 'actual damages' to compensatory-damages.",
+      "_review_notes": "Mandated reporting for elderly care facility staff. Map 'actual damages' to compensatory-damages.",
       "_reconciled_notes": ""
     }
   ],
   "integrity": {
     "with_errors": true,
     "error_details": [
-      "MA-152-75B: SOL value (3 years) derived from general tort statute (ch. 260 § 2A) rather than explicit text in the whistleblower provision; set limit_ambiguous to true.",
-      "MA-111-72G: SOL value (3 years) derived from general tort statute rather than explicit text; set limit_ambiguous to true."
+      "MA-152-75B: SOL value (3 years) derived from general personal injury statute (ch. 260 § 2A) rather than explicit text in the whistleblower provision; set limit_ambiguous to true.",
+      "MA-111-72G: SOL value (3 years) derived from general personal injury statute (ch. 260 § 2A) rather than explicit text; set limit_ambiguous to true."
     ],
     "error_count": 2
   }

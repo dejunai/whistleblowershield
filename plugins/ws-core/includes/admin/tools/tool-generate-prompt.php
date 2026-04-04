@@ -353,6 +353,14 @@ CITATIONS
 Citation format:
   "CASE NAME v. CASE NAME || SPECIFIC_IMPACT || URL || SOURCE || QUALITY"
 
+SPECIFIC_IMPACT: 3-8 words, action-verb first, describing the functional
+legal impact of this ruling. Use one of these patterns:
+  "defines [legal concept]"       "clarifies [legal standard]"
+  "establishes [rule/test]"       "applies [statute/standard]"
+  "limits [scope/protection]"     "expands [scope/protection]"
+  "interprets [term/phrase]"      "confirms [legal principle]"
+  "rejects [legal argument]"      "resolves [conflict/ambiguity]"
+
 QUALITY values:
   high     — appellate or supreme court; frequently cited
   moderate — appellate but narrower scope or less cited
@@ -548,11 +556,34 @@ BLOCK;
 function ws_prompt_proposal_block(): string {
     return <<<'BLOCK'
 ---
-
 PROPOSING NEW TAXONOMY TERMS
 
 When you encounter a concept that does not fit any slug in the known taxonomy,
-propose it. Each proposal must follow this shape:
+propose it. Proposals are expected and valued at every stage of this pipeline.
+
+A proposal that does not become a registered taxonomy term is not discarded.
+It enters a human review queue where it may serve as an edge-case signal —
+a last-resort reference for a user whose situation does not fit any existing
+term. The person using this site may have nowhere else to turn. A concept
+you surface here, even once, even in a single statute, could be the most
+useful thing in this entire batch for that person.
+
+Propose it.
+
+Before proposing, consider two things — not as gates, but as guidance:
+
+  1. Is this concept likely to appear in other statutes across other
+     jurisdictions? If yes, it is a strong candidate. If it feels entirely
+     specific to one statute in one jurisdiction, note it in json_run_notes
+     as well so the human reviewer has full context.
+
+  2. Can this concept be accurately represented by combining three or fewer
+     existing child slugs across the relevant taxonomy fields? If yes,
+     use that combination in the record — and also propose the term.
+     A workaround combination and a clean proposal are not mutually exclusive.
+
+Do not propose new taxonomy tables or new parent terms. Use json_run_notes
+to recommend them
 
   {
     "taxonomy":   "[REGISTERED TAXONOMY TABLE SLUG]",

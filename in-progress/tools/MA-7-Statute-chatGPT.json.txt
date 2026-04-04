@@ -10,7 +10,7 @@
     "proposed_count": 0,
     "new_terms_proposed": [],
     "json_run_notes": "This batch includes Massachusetts' core general whistleblower statute, the false-claims retaliation section, the health-care whistleblower statute, wage-law retaliation, and three narrower reporting/industry anti-retaliation protections. Several statutes do not state a filing deadline in their own section text; where a deadline could not be confirmed directly in the section itself, statute_of_limitations.limit_ambiguous was set to true and surfaced in integrity.error_details. For several narrower statutes, no clearly verifiable on-point case URL was located from the approved case-law sources during this run, so attached_citations were omitted rather than padded with weak authority.",
-    "batch_completed": "2026-04-04 00:14 UTC"
+    "batch_completed": "2026-04-03 16:07 UTC"
   },
   "records": [
     {

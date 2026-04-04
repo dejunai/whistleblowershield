@@ -10,7 +10,7 @@
     "proposed_count": 0,
     "new_terms_proposed": [],
     "json_run_notes": "Batch covers primary MA whistleblower retaliation statutes (public employees/general, healthcare-specific, and False Claims Act retaliation). Research prioritized official malegislature.gov texts. No parent taxonomy slugs used. SOL explicit in statutes for retaliation claims (not derived). Additional narrow protections (e.g., workplace safety under 454 CMR 25.07 with 30-day admin deadline) noted but omitted as secondary/regulatory rather than core statute. No case citations attached due to strict approved-source URL verification requirements and lack of direct high-quality appellate links in initial research.",
-    "batch_completed": "2026-04-03 22:30 UTC"
+    "batch_completed": "2026-04-03 16:07 UTC"
   },
   "records": [
     {

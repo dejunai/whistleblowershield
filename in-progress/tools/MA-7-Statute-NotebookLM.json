@@ -1,0 +1,539 @@
+{
+  "meta": {
+    "json_format_version": "2.0",
+    "source_method": "ai_assisted",
+    "source_name": "Merged Agent",
+    "jurisdiction_id": "MA",
+    "generated_date": "2026-04-03",
+    "generated_by": "GPT-4o Merged Run",
+    "record_count": 7,
+    "proposed_count": 0,
+    "new_terms_proposed": [],
+    "json_run_notes": "Verified, corrected, and merged 7 MA statutes from previous JSON batches. Corrected fee-shifting types, eliminated parent taxonomy slugs, handled missing limit_ambiguous fields and omitted missing/empty fields properly.",
+    "batch_completed": "2026-04-03 23:59 UTC"
+  },
+  "records": [
+    {
+      "jurisdiction_id": "MA",
+      "statute_id": "MA-149-185",
+      "official_name": "Retaliation against employees reporting violations of law or risks to public health, safety or environment; remedies",
+      "common_name": "Massachusetts Whistleblower Act",
+      "legal_basis": {
+        "statute_citation": "Mass. Gen. Laws ch. 149, § 185",
+        "disclosure_types": [
+          "occupational-health-safety",
+          "environmental-protection",
+          "retaliation-protection"
+        ],
+        "protected_class": [
+          "state-employee",
+          "local-gov-staff",
+          "k12-education-staff"
+        ],
+        "disclosure_targets": [
+          "internal-supervisor",
+          "agency-federal",
+          "agency-state",
+          "agency-local",
+          "law-enforcement",
+          "legislative-federal",
+          "legislative-state",
+          "court-filing"
+        ],
+        "adverse_action_scope": "Covers discharge, suspension, demotion and other adverse employment action affecting the terms and conditions of employment. Written notice to a supervisor is generally required before disclosure to a public body under subsection (b)(1), subject to the statutory exceptions."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": false,
+        "limit_value": 2,
+        "limit_unit": "years",
+        "trigger": "date of the retaliatory action",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "process_type": [
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "suspension",
+          "demotion",
+          "has-details"
+        ],
+        "adverse_action_details": "Also covers other adverse employment action in the terms and conditions of employment.",
+        "remedies": [
+          "reinstatement",
+          "benefits-restoration",
+          "treble-damages",
+          "attorney-fees",
+          "litigation-costs",
+          "injunctive-relief",
+          "compensatory-damages",
+          "has-details"
+        ],
+        "remedies_details": "The statute provides common-law tort remedies in addition to legal or equitable relief, including three times lost wages, benefits and other remuneration, plus interest.",
+        "fee_shifting": "unilateral-pro-plaintiff"
+      },
+      "burden_of_proof": {
+        "employee_standard": [
+          "reasonable-belief"
+        ],
+        "burden_of_proof_details": "Employee must show disclosure or activity based on reasonable belief that the activity, policy, or practice violates law/rule/regulation or poses risk to public health, safety, or environment."
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleXXI/Chapter149/Section185",
+        "is_official": true
+      },
+      "citations": {
+        "attached_citations": [
+          "Bennett v. City of Holyoke || applies written-notice requirement || https://law.justia.com/cases/federal/appellate-courts/F3/362/1/632823/ || law.justia.com || high",
+          "Dirrane v. Brookline Police Dep't || limits bypass of notice rule || https://law.justia.com/cases/federal/appellate-courts/F3/315/65/633064/ || law.justia.com || high",
+          "Saunders v. Town of Hull || clarifies subsection (b)(1) framework || https://law.justia.com/cases/federal/appellate-courts/ca1/17-1174/17-1174-2017-10-27.html || law.justia.com || high"
+        ],
+        "citation_count": 3
+      },
+      "_review_notes": "This is the central Massachusetts whistleblower statute. The written notice requirement is treated as a procedural bar rather than administrative exhaustion.",
+      "_reconciled_notes": ""
+    },
+    {
+      "jurisdiction_id": "MA",
+      "statute_id": "MA-149-187",
+      "official_name": "Health care providers; protection from retaliatory action by health care facilities",
+      "common_name": "Massachusetts Health Care Whistleblower Act",
+      "legal_basis": {
+        "statute_citation": "Mass. Gen. Laws ch. 149, § 187",
+        "disclosure_types": [
+          "public-health-safety",
+          "occupational-health-safety",
+          "food-drug-safety",
+          "healthcare-medicare-fraud",
+          "has-details"
+        ],
+        "protected_class": [
+          "clinical-staff",
+          "has-details"
+        ],
+        "protected_class_details": "Protects licensed health care providers under chapter 112 and other health care providers performing care-related services under the control of a health care facility.",
+        "disclosure_targets": [
+          "internal-supervisor",
+          "agency-federal",
+          "agency-state",
+          "agency-local",
+          "law-enforcement",
+          "legislative-federal",
+          "legislative-state",
+          "has-details"
+        ],
+        "disclosure_targets_details": "The statute defines 'public body' broadly to include public agencies, legislatures and law-enforcement bodies.",
+        "adverse_action_scope": "Covers refusal to hire, termination of a contractual agreement, discharge, suspension, demotion, harassment, denial of promotion, layoff and other adverse action affecting the terms and conditions of employment."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": false,
+        "limit_value": 2,
+        "limit_unit": "years",
+        "trigger": "date of the retaliatory action",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "primary_agency": "Massachusetts Attorney General",
+        "process_type": [
+          "civil-lawsuit",
+          "internal-disclosure"
+        ],
+        "adverse_action": [
+          "termination",
+          "contract-non-renewal",
+          "suspension",
+          "demotion",
+          "harassment",
+          "has-details"
+        ],
+        "adverse_action_details": "Also expressly covers refusal to hire, denial of promotion, layoff and other adverse action affecting terms and conditions of employment.",
+        "remedies": [
+          "reinstatement",
+          "benefits-restoration",
+          "lost-wages",
+          "attorney-fees",
+          "litigation-costs",
+          "injunctive-relief",
+          "civil-penalty",
+          "has-details"
+        ],
+        "remedies_details": "Prevailing plaintiffs may access all common-law tort remedies. The attorney general may bring a public-interest action, and the court may impose a civil penalty of up to $10,000 per violation.",
+        "fee_shifting": "unilateral-pro-plaintiff"
+      },
+      "burden_of_proof": {
+        "employee_standard": [
+          "reasonable-belief"
+        ]
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleXXI/Chapter149/Section187",
+        "is_official": true
+      },
+      "citations": {
+        "attached_citations": [
+          "Blanchard v. Steward Carney Hospital, Inc. || clarifies mandatory-reporting overlap || https://law.justia.com/cases/massachusetts/supreme-court/2017/sjc-12141.html || law.justia.com || high",
+          "Commodore v. Genesis Health Ventures, Inc. || interprets health-care facility coverage || https://law.justia.com/cases/massachusetts/court-of-appeals/volumes/63/63massappct57.html || law.justia.com || moderate",
+          "Romero v. UHS of Westwood Pembroke, Inc. || applies provider-protection requirements || https://law.justia.com/cases/massachusetts/court-of-appeals/volumes/72/72massappct539.html || law.justia.com || moderate"
+        ],
+        "citation_count": 3
+      },
+      "_review_notes": "Specific to health care facilities and providers. Includes participation in peer review or filing incident reports on unsafe care.",
+      "_reconciled_notes": ""
+    },
+    {
+      "jurisdiction_id": "MA",
+      "statute_id": "MA-12-5J",
+      "official_name": "Employers preventing employees from acting to further false claim actions; liability",
+      "common_name": "Massachusetts False Claims Act anti-retaliation provision",
+      "legal_basis": {
+        "statute_citation": "Mass. Gen. Laws ch. 12, § 5J",
+        "disclosure_types": [
+          "procurement-spending-fraud",
+          "healthcare-medicare-fraud",
+          "has-details"
+        ],
+        "protected_class": [
+          "corporate-staff",
+          "contractor-gig",
+          "state-employee",
+          "local-gov-staff",
+          "has-details"
+        ],
+        "protected_class_details": "Expressly protects an employee, contractor or agent, and also covers acts done by a person associated with the employee, contractor or agent.",
+        "disclosure_targets": [
+          "agency-state",
+          "law-enforcement"
+        ],
+        "adverse_action_scope": "Protects disclosures to government or law-enforcement agencies and lawful acts in furtherance of a false-claims action or other efforts to stop violations."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": true,
+        "limit_value": 3,
+        "limit_unit": "years",
+        "limit_details": "No filing deadline was confirmed in the text of section 5J itself; derived from general tort limitations.",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "process_type": [
+          "civil-lawsuit",
+          "qui-tam"
+        ],
+        "adverse_action": [
+          "termination",
+          "demotion",
+          "suspension",
+          "harassment",
+          "has-details"
+        ],
+        "adverse_action_details": "Also covers threats and other discrimination in the terms and conditions of employment.",
+        "remedies": [
+          "reinstatement",
+          "double-back-pay",
+          "attorney-fees",
+          "litigation-costs",
+          "has-details"
+        ],
+        "remedies_details": "Also provides interest on back pay and compensation for special damages sustained as a result of the discrimination.",
+        "fee_shifting": "unilateral-pro-plaintiff"
+      },
+      "burden_of_proof": {
+        "employee_standard": [
+          "preponderance"
+        ]
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleII/Chapter12/Section5J",
+        "is_official": true
+      },
+      "citations": {
+        "citation_count": 0
+      },
+      "_review_notes": "This is the retaliation section of the Massachusetts False Claims Act, not the entire false-claims scheme.",
+      "_reconciled_notes": ""
+    },
+    {
+      "jurisdiction_id": "MA",
+      "statute_id": "MA-149-148A",
+      "official_name": "Employees seeking rights under provisions of this chapter; discharge or discrimination; punishment",
+      "common_name": "Wage Act Retaliation",
+      "legal_basis": {
+        "statute_citation": "Mass. Gen. Laws ch. 149, § 148A",
+        "disclosure_types": [
+          "wage-hour-violations"
+        ],
+        "protected_class": [
+          "corporate-staff",
+          "contractor-gig",
+          "has-details"
+        ],
+        "protected_class_details": "Applies to employees seeking rights under the wages and hours provisions of chapter 149.",
+        "disclosure_targets": [
+          "agency-state",
+          "internal-supervisor",
+          "has-details"
+        ],
+        "disclosure_targets_details": "Expressly covers complaints to the attorney general or any other person, assistance in an investigation under the chapter, instituting a proceeding or testifying in a proceeding.",
+        "adverse_action_scope": "Covers being penalized in any way for seeking rights under the wage-and-hour provisions of chapter 149, including discharge and other discrimination."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": true,
+        "limit_value": 3,
+        "limit_unit": "years",
+        "limit_details": "The three-year period and private action mechanism are derived from chapter 149, section 150 rather than stated in section 148A itself.",
+        "trigger": "date of the violation",
+        "exhaustion_required": true,
+        "exhaustion_details": "An employee claiming to be aggrieved proceeds under chapter 149, section 150, which generally requires filing a complaint with the attorney general and waiting 90 days unless the attorney general assents sooner."
+      },
+      "enforcement": {
+        "primary_agency": "Massachusetts Attorney General",
+        "process_type": [
+          "administrative-complaint",
+          "civil-lawsuit",
+          "state-agency-complaint"
+        ],
+        "adverse_action": [
+          "termination",
+          "demotion",
+          "harassment",
+          "pay-reduction",
+          "has-details"
+        ],
+        "adverse_action_details": "The section also covers being penalized or otherwise discriminated against for seeking wage-and-hour rights.",
+        "remedies": [
+          "treble-damages",
+          "liquidated-damages",
+          "back-pay",
+          "lost-wages",
+          "injunctive-relief",
+          "attorney-fees",
+          "has-details"
+        ],
+        "remedies_details": "Civil citations and orders are available through section 27C, while the private action and damages route is derived from section 150.",
+        "fee_shifting": "unilateral-pro-plaintiff"
+      },
+      "burden_of_proof": {
+        "employee_standard": [
+          "but-for"
+        ]
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleXXI/Chapter149/Section148A",
+        "is_official": true
+      },
+      "citations": {
+        "attached_citations": [
+          "Smith v. Winter Place LLC || confirms wage-complaint retaliation scope || https://law.justia.com/cases/massachusetts/supreme-court/volumes/447/447mass363.html || law.justia.com || high",
+          "Fraelick v. PerkettPR, Inc. || clarifies reasonable-belief protection || https://law.justia.com/cases/massachusetts/court-of-appeals/volumes/83/83massappct698.html || law.justia.com || moderate",
+          "Parker v. EnerNOC, Inc. || confirms trebling of lost wages || https://law.justia.com/cases/massachusetts/supreme-court/volumes/484/484mass128.html || law.justia.com || high"
+        ],
+        "citation_count": 3
+      },
+      "_review_notes": "This is a retaliation protection embedded in Massachusetts wage-and-hour enforcement. Limits and exhaustion come from section 150.",
+      "_reconciled_notes": ""
+    },
+    {
+      "jurisdiction_id": "MA",
+      "statute_id": "MA-151-19",
+      "official_name": "Minimum Wage Law Retaliation",
+      "common_name": "Minimum Wage Retaliation",
+      "legal_basis": {
+        "statute_citation": "Mass. Gen. Laws ch. 151, § 19",
+        "disclosure_types": [
+          "wage-hour-violations"
+        ],
+        "protected_class": [
+          "corporate-staff",
+          "agricultural-worker"
+        ],
+        "disclosure_targets": [
+          "internal-supervisor",
+          "agency-state"
+        ],
+        "adverse_action_scope": "Broadly prohibits discharge or discrimination against employees complaining of wage violations."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": false,
+        "limit_value": 3,
+        "limit_unit": "years",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "process_type": [
+          "civil-lawsuit",
+          "administrative-complaint"
+        ],
+        "adverse_action": [
+          "termination",
+          "pay-reduction"
+        ],
+        "remedies": [
+          "back-pay",
+          "attorney-fees",
+          "liquidated-damages"
+        ],
+        "fee_shifting": "unilateral-pro-plaintiff"
+      },
+      "burden_of_proof": {
+        "employee_standard": [
+          "preponderance"
+        ]
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleXXI/Chapter151/Section19",
+        "is_official": true
+      },
+      "citations": {
+        "citation_count": 0
+      },
+      "_review_notes": "Focuses on wage protections. Mandatory liquidated damages often apply to wage-related claims in MA.",
+      "_reconciled_notes": ""
+    },
+    {
+      "jurisdiction_id": "MA",
+      "statute_id": "MA-152-75B",
+      "official_name": "Rights to Return to Employment; Qualified Handicapped Persons; Discrimination Prohibited",
+      "common_name": "Workers' Comp Retaliation",
+      "legal_basis": {
+        "statute_citation": "Mass. Gen. Laws ch. 152, § 75B",
+        "disclosure_types": [
+          "retaliation-protection"
+        ],
+        "protected_class": [
+          "corporate-staff"
+        ],
+        "disclosure_targets": [
+          "internal-supervisor",
+          "agency-state"
+        ],
+        "adverse_action_scope": "Prohibits discrimination against an employee for exercising rights under the workers' compensation act."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": true,
+        "limit_value": 3,
+        "limit_unit": "years",
+        "limit_details": "Derived from general tort statute of limitations as the specific section does not name an independent deadline.",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "process_type": [
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "demotion"
+        ],
+        "remedies": [
+          "reinstatement",
+          "lost-wages",
+          "punitive-damages"
+        ],
+        "fee_shifting": "none-american-rule"
+      },
+      "burden_of_proof": {
+        "employee_standard": [
+          "preponderance"
+        ]
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleXXI/Chapter152/Section75B",
+        "is_official": true
+      },
+      "citations": {
+        "citation_count": 0
+      },
+      "_review_notes": "Protects injured workers. Note that the statute of limitations is derived from ch. 260 § 2A.",
+      "_reconciled_notes": ""
+    },
+    {
+      "jurisdiction_id": "MA",
+      "statute_id": "MA-111-72G",
+      "official_name": "Reports of Abuse, Neglect or Misappropriation of Property of Patients or Residents",
+      "common_name": "Elder Abuse Reporting Protection",
+      "legal_basis": {
+        "statute_citation": "Mass. Gen. Laws ch. 111, § 72G",
+        "disclosure_types": [
+          "public-health-safety"
+        ],
+        "protected_class": [
+          "clinical-staff"
+        ],
+        "disclosure_targets": [
+          "agency-state"
+        ],
+        "adverse_action_scope": "Protection from retaliatory discharge or discrimination for filing a report of abuse in long-term care facilities."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": true,
+        "limit_value": 3,
+        "limit_unit": "years",
+        "limit_details": "Derived from general personal injury/tort limitations.",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "process_type": [
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "demotion"
+        ],
+        "remedies": [
+          "lost-wages",
+          "compensatory-damages",
+          "attorney-fees"
+        ],
+        "fee_shifting": "discretionary"
+      },
+      "burden_of_proof": {
+        "employee_standard": [
+          "preponderance"
+        ]
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleXVI/Chapter111/Section72G",
+        "is_official": true
+      },
+      "citations": {
+        "citation_count": 0
+      },
+      "_review_notes": "Mandated reporting for elderly care facility staff. Actual damages mapped to compensatory-damages.",
+      "_reconciled_notes": ""
+    }
+  ],
+  "integrity": {
+    "with_errors": true,
+    "error_details": [
+      "MA-12-5J: SOL is derived from general limitations, set limit_ambiguous to true.",
+      "MA-149-148A: SOL is derived from section 150, set limit_ambiguous to true.",
+      "MA-152-75B: SOL is derived from general tort limitations, set limit_ambiguous to true.",
+      "MA-111-72G: SOL is derived from general personal injury/tort limitations, set limit_ambiguous to true.",
+      "MA-12-5J: Citations omitted due to lack of verifiable URL from approved sources.",
+      "MA-151-19: Citations omitted due to lack of verifiable URL from approved sources.",
+      "MA-152-75B: Citations omitted due to lack of verifiable URL from approved sources.",
+      "MA-111-72G: Citations omitted due to lack of verifiable URL from approved sources."
+    ],
+    "error_count": 8
+  }
+}
