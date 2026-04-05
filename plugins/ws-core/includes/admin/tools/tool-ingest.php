@@ -63,6 +63,9 @@ define( 'WS_INGEST_VERSION',       '3.14.0' );
 define( 'WS_INGEST_SCHEMA_VERSION', '2.0' );
 define( 'WS_PROPOSED_TERMS_LOG',   WP_CONTENT_DIR . '/logs/ws-ingest/proposed-terms-log.json' );
 define( 'WS_INGEST_LOG_DIR',       WP_CONTENT_DIR . '/logs/ws-ingest/' );
+define( 'WS_INGEST_INBOX_DIR',     WP_CONTENT_DIR . '/logs/ws-ingest/inbox/' );
+define( 'WS_INGEST_ARCHIVE_DIR',   WP_CONTENT_DIR . '/logs/ws-ingest/archive/' );
+define( 'WS_INGEST_CONFIRM_TTL',   30 * MINUTE_IN_SECONDS );
 
 
 // ── Admin menu registration ───────────────────────────────────────────────────
@@ -88,11 +91,204 @@ function ws_ingest_bootstrap_log_dir(): void {
         wp_mkdir_p( WS_INGEST_LOG_DIR );
         file_put_contents( WS_INGEST_LOG_DIR . '.htaccess', "Deny from all\n" );
     }
+    if ( ! file_exists( WS_INGEST_INBOX_DIR ) ) {
+        wp_mkdir_p( WS_INGEST_INBOX_DIR );
+        file_put_contents( trailingslashit( WS_INGEST_INBOX_DIR ) . '.htaccess', "Deny from all\n" );
+    }
+    if ( ! file_exists( WS_INGEST_ARCHIVE_DIR ) ) {
+        wp_mkdir_p( WS_INGEST_ARCHIVE_DIR );
+        file_put_contents( trailingslashit( WS_INGEST_ARCHIVE_DIR ) . '.htaccess', "Deny from all\n" );
+    }
     if ( ! file_exists( WS_PROPOSED_TERMS_LOG ) ) {
         file_put_contents( WS_PROPOSED_TERMS_LOG, json_encode(
             [ 'proposed_terms' => [] ],
             JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES
         ) );
+    }
+}
+
+function ws_ingest_get_inbox_files(): array {
+    ws_ingest_bootstrap_log_dir();
+
+    $files = glob( trailingslashit( WS_INGEST_INBOX_DIR ) . '*.json' );
+    if ( ! is_array( $files ) ) {
+        return [];
+    }
+
+    $files = array_values( array_filter( $files, 'is_file' ) );
+    sort( $files, SORT_NATURAL | SORT_FLAG_CASE );
+    return $files;
+}
+
+function ws_ingest_decode_json_payload( string $raw ): array {
+    $corrections = [];
+
+    // Remove UTF-8 BOM from FTP-uploaded files when present.
+    if ( strncmp( $raw, "\xEF\xBB\xBF", 3 ) === 0 ) {
+        $raw = substr( $raw, 3 );
+        $corrections[] = 'Removed UTF-8 BOM from file payload.';
+    }
+
+    $data = json_decode( $raw, true );
+    if ( json_last_error() !== JSON_ERROR_NONE ) {
+        return [
+            'ok'          => false,
+            'data'        => null,
+            'json'        => $raw,
+            'corrections' => $corrections,
+            'error'       => json_last_error_msg(),
+        ];
+    }
+
+    return [
+        'ok'          => true,
+        'data'        => $data,
+        'json'        => $raw,
+        'corrections' => $corrections,
+        'error'       => '',
+    ];
+}
+
+function ws_ingest_apply_safe_json_corrections( array $data ): array {
+    $notes = [];
+
+    if ( isset( $data['meta']['jurisdiction_id'] ) && is_string( $data['meta']['jurisdiction_id'] ) ) {
+        $normalized = strtoupper( trim( $data['meta']['jurisdiction_id'] ) );
+        if ( $normalized !== $data['meta']['jurisdiction_id'] ) {
+            $data['meta']['jurisdiction_id'] = $normalized;
+            $notes[] = 'Normalized meta.jurisdiction_id to uppercase.';
+        }
+    }
+
+    if ( ! empty( $data['records'] ) && is_array( $data['records'] ) ) {
+        foreach ( $data['records'] as $i => $record ) {
+            if ( isset( $record['jurisdiction_id'] ) && is_string( $record['jurisdiction_id'] ) ) {
+                $normalized = strtoupper( trim( $record['jurisdiction_id'] ) );
+                if ( $normalized !== $record['jurisdiction_id'] ) {
+                    $data['records'][ $i ]['jurisdiction_id'] = $normalized;
+                    $notes[] = sprintf( 'Normalized records[%d].jurisdiction_id to uppercase.', $i );
+                }
+            }
+        }
+    }
+
+    if ( isset( $data['meta'] ) && is_array( $data['meta'] ) && isset( $data['records'] ) && is_array( $data['records'] ) ) {
+        $actual = count( $data['records'] );
+        $declared = isset( $data['meta']['record_count'] ) ? (int) $data['meta']['record_count'] : null;
+        if ( $declared !== $actual ) {
+            $data['meta']['record_count'] = $actual;
+            $notes[] = sprintf( 'Adjusted meta.record_count from %s to %d.', (string) $declared, $actual );
+        }
+    }
+
+    if ( isset( $data['meta'] ) && is_array( $data['meta'] ) && empty( $data['meta']['batch_completed'] ) ) {
+        $data['meta']['batch_completed'] = gmdate( 'Y-m-d H:i UTC' );
+        $notes[] = 'Filled missing meta.batch_completed with current UTC timestamp.';
+    }
+
+    return [ 'data' => $data, 'notes' => array_values( array_unique( $notes ) ) ];
+}
+
+function ws_ingest_stamp_archive_notes( array $data, array $notes ): array {
+    if ( empty( $notes ) ) {
+        return $data;
+    }
+
+    if ( empty( $data['meta'] ) || ! is_array( $data['meta'] ) ) {
+        $data['meta'] = [];
+    }
+
+    $existing = $data['meta']['ws_ingest_archive_notes'] ?? [];
+    if ( ! is_array( $existing ) ) {
+        $existing = [ (string) $existing ];
+    }
+
+    $merged = array_values( array_unique( array_merge( $existing, $notes ) ) );
+    $data['meta']['ws_ingest_archive_notes'] = $merged;
+    $data['meta']['ws_ingest_archive_corrected_on'] = gmdate( 'Y-m-d H:i UTC' );
+
+    return $data;
+}
+
+function ws_ingest_archive_json_file( string $source_path, string $filename, array $data ): array {
+    ws_ingest_bootstrap_log_dir();
+
+    $stamp = gmdate( 'Ymd-His' );
+    $target_path = trailingslashit( WS_INGEST_ARCHIVE_DIR ) . $stamp . '-' . basename( $filename );
+    $encoded = wp_json_encode( $data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE );
+
+    if ( ! is_string( $encoded ) || file_put_contents( $target_path, $encoded ) === false ) {
+        return [ 'ok' => false, 'path' => '', 'error' => 'Failed to write archive JSON file.' ];
+    }
+
+    if ( ! @unlink( $source_path ) ) {
+        return [ 'ok' => false, 'path' => $target_path, 'error' => 'Archived copy written, but failed to delete source file from inbox.' ];
+    }
+
+    return [ 'ok' => true, 'path' => $target_path, 'error' => '' ];
+}
+
+function ws_ingest_archive_raw_file( string $source_path, string $filename ): array {
+    ws_ingest_bootstrap_log_dir();
+
+    $stamp = gmdate( 'Ymd-His' );
+    $target_path = trailingslashit( WS_INGEST_ARCHIVE_DIR ) . $stamp . '-' . basename( $filename );
+
+    if ( @rename( $source_path, $target_path ) ) {
+        return [ 'ok' => true, 'path' => $target_path, 'error' => '' ];
+    }
+
+    return [ 'ok' => false, 'path' => '', 'error' => 'Failed to move raw file to archive.' ];
+}
+
+
+// ── Confirmation payload helpers ─────────────────────────────────────────────
+
+/**
+ * Stores raw ingest JSON for confirmation step and returns the token key.
+ */
+function ws_ingest_store_confirm_payload( string $json, string $filename ): string {
+    $token = strtolower( wp_generate_password( 20, false, false ) );
+    $key   = 'ws_ingest_confirm_' . $token;
+
+    set_transient( $key, [
+        'user_id'  => get_current_user_id(),
+        'json'     => $json,
+        'filename' => $filename,
+        'created'  => time(),
+    ], WS_INGEST_CONFIRM_TTL );
+
+    return $token;
+}
+
+/**
+ * Loads a previously stored confirmation payload by token.
+ */
+function ws_ingest_load_confirm_payload( string $token ): ?array {
+    $safe = preg_replace( '/[^a-z0-9]/', '', strtolower( $token ) );
+    if ( empty( $safe ) ) {
+        return null;
+    }
+
+    $data = get_transient( 'ws_ingest_confirm_' . $safe );
+    if ( ! is_array( $data ) ) {
+        return null;
+    }
+
+    if ( (int) ( $data['user_id'] ?? 0 ) !== get_current_user_id() ) {
+        return null;
+    }
+
+    return $data;
+}
+
+/**
+ * Deletes a stored confirmation payload token.
+ */
+function ws_ingest_delete_confirm_payload( string $token ): void {
+    $safe = preg_replace( '/[^a-z0-9]/', '', strtolower( $token ) );
+    if ( ! empty( $safe ) ) {
+        delete_transient( 'ws_ingest_confirm_' . $safe );
     }
 }
 
@@ -475,20 +671,46 @@ function ws_ingest_process_statute_record( array $record, array $meta, array $bl
     $sid = $record['statute_id'] ?? 'UNKNOWN';
 
     // ── Step 1: Check for duplicate ──────────────────────────────────────
-    $existing = get_posts( [
-        'post_type'   => 'jx-statute',
-        'post_status' => 'any',
-        'meta_query'  => [ [
-            'key'     => 'ws_jx_statute_citation',
-            'value'   => $record['legal_basis']['statute_citation'] ?? '',
-            'compare' => '=',
-        ] ],
-        'posts_per_page' => 1,
-        'fields'         => 'ids',
-    ] );
+    $jx_slug     = strtolower( (string) ( $record['jurisdiction_id'] ?? '' ) );
+    $record_key  = $jx_slug && $sid !== 'UNKNOWN' ? strtolower( $jx_slug . '|' . $sid ) : '';
+    $duplicates  = [];
 
-    if ( ! empty( $existing ) ) {
-        $result['warnings'][] = "$sid: duplicate detected (post #{$existing[0]}) — skipped.";
+    if ( $record_key ) {
+        $duplicates = get_posts( [
+            'post_type'      => 'jx-statute',
+            'post_status'    => 'any',
+            'meta_query'     => [ [
+                'key'     => 'ws_ingest_record_key',
+                'value'   => $record_key,
+                'compare' => '=',
+            ] ],
+            'posts_per_page' => 1,
+            'fields'         => 'ids',
+            'no_found_rows'  => true,
+        ] );
+    }
+
+    // Legacy fallback for records ingested before ws_ingest_record_key existed.
+    if ( empty( $duplicates ) ) {
+        $legacy_citation = (string) ( $record['legal_basis']['statute_citation'] ?? '' );
+        if ( $legacy_citation !== '' ) {
+            $duplicates = get_posts( [
+                'post_type'      => 'jx-statute',
+                'post_status'    => 'any',
+                'meta_query'     => [ [
+                    'key'     => 'ws_jx_statute_citation',
+                    'value'   => $legacy_citation,
+                    'compare' => '=',
+                ] ],
+                'posts_per_page' => 1,
+                'fields'         => 'ids',
+                'no_found_rows'  => true,
+            ] );
+        }
+    }
+
+    if ( ! empty( $duplicates ) ) {
+        $result['warnings'][] = "$sid: duplicate detected (post #{$duplicates[0]}) — skipped.";
         return $result;
     }
 
@@ -520,7 +742,6 @@ function ws_ingest_process_statute_record( array $record, array $meta, array $bl
     }
 
     // ── Step 4: Assign ws_jurisdiction taxonomy term ──────────────────────
-    $jx_slug = strtolower( $record['jurisdiction_id'] ?? '' );
     if ( $jx_slug ) {
         $term = get_term_by( 'slug', $jx_slug, WS_JURISDICTION_TAXONOMY );
         if ( $term && ! is_wp_error( $term ) ) {
@@ -529,6 +750,10 @@ function ws_ingest_process_statute_record( array $record, array $meta, array $bl
         } else {
             $result['warnings'][] = "$sid: jurisdiction term '{$jx_slug}' not found in ws_jurisdiction taxonomy.";
         }
+    }
+
+    if ( $record_key ) {
+        update_post_meta( $post_id, 'ws_ingest_record_key', $record_key );
     }
 
     // ── Step 5: Field map ────────────────────────────────────────────────
@@ -653,7 +878,7 @@ function ws_ingest_process_statute_record( array $record, array $meta, array $bl
  * Filename: [JX]-[YYYYMMDD-HHmm]-ingest.txt
  * FTP-accessible, .htaccess protected.
  */
-function ws_ingest_write_run_log( array $result ): void {
+function ws_ingest_write_run_log( array $result ): bool {
     $summary = $result['summary'] ?? [];
     $jx      = strtoupper( $summary['jurisdiction'] ?? 'XX' );
     $ts      = date( 'Ymd-Hi' );
@@ -707,7 +932,7 @@ function ws_ingest_write_run_log( array $result ): void {
     $lines[] = 'END OF LOG';
     $lines[] = '================================================';
 
-    file_put_contents( $path, implode( "\n", $lines ) . "\n" );
+    return file_put_contents( $path, implode( "\n", $lines ) . "\n" ) !== false;
 }
 
 
@@ -717,19 +942,19 @@ function ws_ingest_write_run_log( array $result ): void {
  * Appends a line to the preflight errors ledger.
  * One entry per failed preflight — filename, timestamp, reasons.
  */
-function ws_ingest_log_preflight_failure( string $filename, array $errors ): void {
+function ws_ingest_log_preflight_failure( string $filename, array $errors ): bool {
     $path   = WS_INGEST_LOG_DIR . 'preflight-errors.log';
     $ts     = date( 'Y-m-d H:i:s' );
     $reason = implode( ' | ', $errors );
     $line   = "[{$ts} UTC]  {$filename}  —  {$reason}" . PHP_EOL;
-    file_put_contents( $path, $line, FILE_APPEND | LOCK_EX );
+    return file_put_contents( $path, $line, FILE_APPEND | LOCK_EX ) !== false;
 }
 
 /**
  * Appends a line to the imported batches ledger.
  * One entry per successfully processed batch.
  */
-function ws_ingest_log_imported_batch( string $filename, array $summary, bool $with_errors ): void {
+function ws_ingest_log_imported_batch( string $filename, array $summary, bool $with_errors ): bool {
     $path    = WS_INGEST_LOG_DIR . 'imported.log';
     $ts      = date( 'Y-m-d H:i:s' );
     $jx      = strtoupper( $summary['jurisdiction'] ?? 'XX' );
@@ -738,7 +963,7 @@ function ws_ingest_log_imported_batch( string $filename, array $summary, bool $w
     $failed  = (int) ( $summary['failed']   ?? 0 );
     $errors  = $with_errors ? 'true' : 'false';
     $line    = "[{$ts} UTC]  {$filename}  {$jx}  created:{$created}  skipped:{$skipped}  failed:{$failed}  errors:{$errors}" . PHP_EOL;
-    file_put_contents( $path, $line, FILE_APPEND | LOCK_EX );
+    return file_put_contents( $path, $line, FILE_APPEND | LOCK_EX ) !== false;
 }
 
 
@@ -747,8 +972,8 @@ function ws_ingest_log_imported_batch( string $filename, array $summary, bool $w
  * One entry per statute that has attached_citations.
  * Human review trail only — not enough data for a jx-citation record.
  */
-function ws_ingest_log_citation_breadcrumbs( string $filename, string $jx, string $statute_id, array $citations ): void {
-    if ( empty( $citations ) ) return;
+function ws_ingest_log_citation_breadcrumbs( string $filename, string $jx, string $statute_id, array $citations ): bool {
+    if ( empty( $citations ) ) return true;
 
     $path = WS_INGEST_LOG_DIR . 'citations-breadcrumbs.log';
     $ts   = date( 'Y-m-d H:i:s' );
@@ -761,76 +986,30 @@ function ws_ingest_log_citation_breadcrumbs( string $filename, string $jx, strin
     $lines[] = '---';
     $lines[] = '';
 
-    file_put_contents( $path, implode( PHP_EOL, $lines ) . PHP_EOL, FILE_APPEND | LOCK_EX );
+    return file_put_contents( $path, implode( PHP_EOL, $lines ) . PHP_EOL, FILE_APPEND | LOCK_EX ) !== false;
 }
 
-// ── Main handler ──────────────────────────────────────────────────────────────
-
-function ws_handle_ingest_submission(): array {
+function ws_ingest_process_batch_data( array $data, string $batch_filename ): array {
     $result = [
-        'phase'     => '',
-        'preflight' => null,
-        'records'   => [],
-        'summary'   => [],
-        'errors'    => [],
+        'phase'            => 'processing',
+        'preflight'        => null,
+        'records'          => [],
+        'summary'          => [],
+        'errors'           => [],
+        'runtime_warnings' => [],
+        'confirm_token'    => '',
     ];
 
-    if ( empty( $_POST['ws_ingest_nonce'] ) || ! wp_verify_nonce( $_POST['ws_ingest_nonce'], 'ws_run_ingest' ) ) {
-        $result['errors'][] = 'Security check failed.';
-        return $result;
-    }
-
-    if ( ! current_user_can( 'manage_options' ) ) {
-        $result['errors'][] = 'Insufficient permissions.';
-        return $result;
-    }
-
-    ws_ingest_bootstrap_log_dir();
-
-    $batch_filename = sanitize_text_field( wp_unslash( $_POST['ws_ingest_filename'] ?? 'unknown' ) );
-
-    // ── Read JSON ────────────────────────────────────────────────────────
-    $json_input = sanitize_textarea_field( wp_unslash( $_POST['ws_ingest_json'] ?? '' ) );
-    if ( empty( $json_input ) ) {
-        $result['errors'][] = 'No JSON provided.';
-        return $result;
-    }
-
-    $data = json_decode( $json_input, true );
-    if ( json_last_error() !== JSON_ERROR_NONE ) {
-        $result['errors'][] = 'JSON parse error: ' . json_last_error_msg();
-        return $result;
-    }
-
-    // ── Phase 1: Pre-Flight ──────────────────────────────────────────────
-    $result['phase']     = 'preflight';
-    $preflight           = ws_ingest_preflight( $data );
-    $result['preflight'] = $preflight;
-
-    if ( ! $preflight['pass'] ) {
-        ws_ingest_log_preflight_failure( $batch_filename, $preflight['errors'] );
-        return $result;
-    }
-
-    // Check if user confirmed after seeing preflight
-    $confirmed = ! empty( $_POST['ws_ingest_confirmed'] );
-    if ( ! $confirmed ) {
-        // Return preflight results — show confirmation UI
-        return $result;
-    }
-
-    // ── Phase 1 continued: Proposed terms merge ──────────────────────────
-    $result['phase'] = 'processing';
     $log             = ws_ingest_load_proposed_terms_log();
     $new_terms       = $data['meta']['new_terms_proposed'] ?? [];
     $merge_counts    = ws_ingest_merge_proposed_terms( $log, $new_terms );
-    ws_ingest_save_proposed_terms_log( $log );
+    if ( ! ws_ingest_save_proposed_terms_log( $log ) ) {
+        $result['runtime_warnings'][] = 'Failed to persist proposed-terms log merge. Ingest continues, but review queue may be stale.';
+    }
 
     $blacklist = ws_ingest_build_blacklist( $log );
-
-    // ── Phase 2: Record Processing ───────────────────────────────────────
-    $meta    = $data['meta'];
-    $records = $data['records'];
+    $meta      = $data['meta'];
+    $records   = $data['records'];
 
     $created  = 0;
     $skipped  = 0;
@@ -841,10 +1020,11 @@ function ws_handle_ingest_submission(): array {
         $record_result = ws_ingest_process_statute_record( $record, $meta, $blacklist );
         $sid           = $record['statute_id'] ?? 'UNKNOWN';
 
-        // Log citation breadcrumbs
         $raw_citations = $record['citations']['attached_citations'] ?? [];
         if ( ! empty( $raw_citations ) ) {
-            ws_ingest_log_citation_breadcrumbs( $batch_filename, $meta['jurisdiction_id'] ?? '', $sid, $raw_citations );
+            if ( ! ws_ingest_log_citation_breadcrumbs( $batch_filename, $meta['jurisdiction_id'] ?? '', $sid, $raw_citations ) ) {
+                $result['runtime_warnings'][] = "$sid: failed to append citation breadcrumb log.";
+            }
         }
 
         $all_logs[] = [
@@ -873,23 +1053,295 @@ function ws_handle_ingest_submission(): array {
         'proposed_new'    => $merge_counts['new'],
         'proposed_merged' => $merge_counts['merged'],
         'blacklist_size'  => count( $blacklist ),
-        'source_name'     => $meta['source_name']     ?? '',
-        'source_method'   => $meta['source_method']   ?? '',
+        'source_name'     => $meta['source_name']      ?? '',
+        'source_method'   => $meta['source_method']    ?? '',
         'jurisdiction'    => $meta['jurisdiction_id']  ?? '',
         'batch_completed' => $meta['batch_completed']  ?? '',
     ];
 
-    // Write persistent run log and update ledgers
-    if ( $result['phase'] === 'processing' ) {
-        ws_ingest_write_run_log( $result );
-        $has_warnings = ! empty( array_filter(
-            array_column( $result['records'], 'warnings' ),
-            fn( $w ) => ! empty( $w )
-        ) );
-        ws_ingest_log_imported_batch( $batch_filename, $result['summary'], $has_warnings );
+    if ( ! ws_ingest_write_run_log( $result ) ) {
+        $result['runtime_warnings'][] = 'Failed to write detailed run log file.';
+    }
+
+    $has_warnings = ! empty( array_filter(
+        array_column( $result['records'], 'warnings' ),
+        fn( $w ) => ! empty( $w )
+    ) );
+    if ( ! ws_ingest_log_imported_batch( $batch_filename, $result['summary'], $has_warnings ) ) {
+        $result['runtime_warnings'][] = 'Failed to append imported batch ledger log.';
     }
 
     return $result;
+}
+
+function ws_handle_ingest_folder_submission(): array {
+    $result = [
+        'phase'            => 'folder-processing',
+        'preflight'        => null,
+        'records'          => [],
+        'summary'          => [],
+        'errors'           => [],
+        'runtime_warnings' => [],
+        'confirm_token'    => '',
+        'folder'           => [
+            'inbox_count'        => 0,
+            'processed_files'    => 0,
+            'archived_files'     => 0,
+            'corrected_files'    => 0,
+            'ready_files'        => 0,
+            'blocked_files'      => 0,
+            'created_total'      => 0,
+            'skipped_total'      => 0,
+            'failed_total'       => 0,
+            'limit'              => 0,
+            'dry_run'            => false,
+            'files'              => [],
+        ],
+    ];
+
+    $limit = max( 1, min( 100, (int) ( $_POST['ws_ingest_folder_limit'] ?? 25 ) ) );
+    $dry_run = ! empty( $_POST['ws_ingest_folder_dry_run'] );
+    $inbox_files = ws_ingest_get_inbox_files();
+    $result['folder']['inbox_count'] = count( $inbox_files );
+    $result['folder']['limit'] = $limit;
+    $result['folder']['dry_run'] = $dry_run;
+
+    if ( empty( $inbox_files ) ) {
+        $result['errors'][] = 'Inbox is empty. Upload JSON files to the ingest inbox folder first.';
+        return $result;
+    }
+
+    $to_process = array_slice( $inbox_files, 0, $limit );
+
+    foreach ( $to_process as $source_path ) {
+        $filename = basename( $source_path );
+        $file_report = [
+            'filename'    => $filename,
+            'status'      => 'unknown',
+            'corrections' => [],
+            'errors'      => [],
+            'summary'     => [],
+            'archive'     => '',
+        ];
+
+        $raw = @file_get_contents( $source_path );
+        if ( $raw === false ) {
+            $file_report['status'] = 'read-failed';
+            $file_report['errors'][] = 'Unable to read file from inbox.';
+            $result['folder']['files'][] = $file_report;
+            continue;
+        }
+
+        $decoded = ws_ingest_decode_json_payload( (string) $raw );
+        if ( ! $decoded['ok'] ) {
+            $file_report['status'] = $dry_run ? 'invalid-json-dry-run' : 'invalid-json';
+            $file_report['errors'][] = 'JSON parse error: ' . $decoded['error'];
+            $file_report['corrections'] = $decoded['corrections'];
+
+            if ( ! $dry_run ) {
+                $archive_raw = ws_ingest_archive_raw_file( $source_path, $filename );
+                if ( $archive_raw['ok'] ) {
+                    $file_report['archive'] = $archive_raw['path'];
+                    $result['folder']['archived_files']++;
+                } else {
+                    $file_report['errors'][] = $archive_raw['error'];
+                }
+            }
+
+            $result['folder']['processed_files']++;
+            $result['folder']['blocked_files']++;
+            if ( ! $dry_run ) {
+                $result['folder']['failed_total']++;
+            }
+            $result['folder']['files'][] = $file_report;
+            continue;
+        }
+
+        $data = $decoded['data'];
+        $all_corrections = $decoded['corrections'];
+
+        $fixed = ws_ingest_apply_safe_json_corrections( $data );
+        $data  = $fixed['data'];
+        $all_corrections = array_values( array_unique( array_merge( $all_corrections, $fixed['notes'] ) ) );
+        $file_report['corrections'] = $all_corrections;
+
+        $preflight = ws_ingest_preflight( $data );
+        if ( ! $preflight['pass'] ) {
+            $file_report['status'] = $dry_run ? 'preflight-failed-dry-run' : 'preflight-failed';
+            $file_report['errors'] = array_merge( $file_report['errors'], $preflight['errors'] );
+            if ( ! $dry_run ) {
+                if ( ! ws_ingest_log_preflight_failure( $filename, $preflight['errors'] ) ) {
+                    $result['runtime_warnings'][] = "{$filename}: failed to append preflight failure ledger log.";
+                }
+
+                $archived_payload = ws_ingest_stamp_archive_notes( $data, $all_corrections );
+                $archive_fail = ws_ingest_archive_json_file( $source_path, $filename, $archived_payload );
+                if ( $archive_fail['ok'] ) {
+                    $file_report['archive'] = $archive_fail['path'];
+                    $result['folder']['archived_files']++;
+                } else {
+                    $file_report['errors'][] = $archive_fail['error'];
+                }
+            }
+
+            $result['folder']['processed_files']++;
+            $result['folder']['blocked_files']++;
+            if ( ! $dry_run ) {
+                $result['folder']['failed_total']++;
+            }
+            if ( ! empty( $all_corrections ) ) {
+                $result['folder']['corrected_files']++;
+            }
+            $result['folder']['files'][] = $file_report;
+            continue;
+        }
+
+        if ( $dry_run ) {
+            $file_report['status'] = 'ready-dry-run';
+            $file_report['summary'] = [
+                'would_records'       => count( (array) ( $data['records'] ?? [] ) ),
+                'preflight_warnings'  => count( (array) ( $preflight['warnings'] ?? [] ) ),
+            ];
+
+            $result['folder']['processed_files']++;
+            $result['folder']['ready_files']++;
+            if ( ! empty( $all_corrections ) ) {
+                $result['folder']['corrected_files']++;
+            }
+            $result['folder']['files'][] = $file_report;
+            continue;
+        }
+
+        $batch_result = ws_ingest_process_batch_data( $data, $filename );
+        $file_report['status'] = 'processed';
+        $file_report['summary'] = $batch_result['summary'] ?? [];
+        if ( ! empty( $batch_result['runtime_warnings'] ) ) {
+            $file_report['errors'] = array_merge( $file_report['errors'], $batch_result['runtime_warnings'] );
+        }
+
+        $result['folder']['created_total'] += (int) ( $batch_result['summary']['created'] ?? 0 );
+        $result['folder']['skipped_total'] += (int) ( $batch_result['summary']['skipped'] ?? 0 );
+        $result['folder']['failed_total']  += (int) ( $batch_result['summary']['failed'] ?? 0 );
+
+        $archived_payload = ws_ingest_stamp_archive_notes( $data, $all_corrections );
+        $archive_ok = ws_ingest_archive_json_file( $source_path, $filename, $archived_payload );
+        if ( $archive_ok['ok'] ) {
+            $file_report['archive'] = $archive_ok['path'];
+            $result['folder']['archived_files']++;
+        } else {
+            $file_report['errors'][] = $archive_ok['error'];
+        }
+
+        $result['folder']['processed_files']++;
+        if ( ! empty( $all_corrections ) ) {
+            $result['folder']['corrected_files']++;
+        }
+        $result['folder']['files'][] = $file_report;
+    }
+
+    $result['summary'] = [
+        'created' => $result['folder']['created_total'],
+        'skipped' => $result['folder']['skipped_total'],
+        'failed'  => $result['folder']['failed_total'],
+    ];
+
+    return $result;
+}
+
+// ── Main handler ──────────────────────────────────────────────────────────────
+
+function ws_handle_ingest_submission(): array {
+    $result = [
+        'phase'     => '',
+        'preflight' => null,
+        'records'   => [],
+        'summary'   => [],
+        'errors'    => [],
+        'runtime_warnings' => [],
+        'confirm_token' => '',
+    ];
+
+    if ( empty( $_POST['ws_ingest_nonce'] ) || ! wp_verify_nonce( $_POST['ws_ingest_nonce'], 'ws_run_ingest' ) ) {
+        $result['errors'][] = 'Security check failed.';
+        return $result;
+    }
+
+    if ( ! current_user_can( 'manage_options' ) ) {
+        $result['errors'][] = 'Insufficient permissions.';
+        return $result;
+    }
+
+    ws_ingest_bootstrap_log_dir();
+
+    $mode = sanitize_key( wp_unslash( $_POST['ws_ingest_mode'] ?? 'manual' ) );
+    if ( $mode === 'folder' ) {
+        return ws_handle_ingest_folder_submission();
+    }
+
+    $batch_filename = sanitize_text_field( wp_unslash( $_POST['ws_ingest_filename'] ?? 'unknown' ) );
+
+    // ── Read JSON ────────────────────────────────────────────────────────
+    $confirmed      = ! empty( $_POST['ws_ingest_confirmed'] );
+    $confirm_token  = sanitize_text_field( wp_unslash( $_POST['ws_ingest_confirm_token'] ?? '' ) );
+    $json_input     = '';
+
+    if ( $confirmed ) {
+        if ( empty( $confirm_token ) ) {
+            $result['errors'][] = 'Confirmation token missing. Please run pre-flight again.';
+            return $result;
+        }
+
+        $payload = ws_ingest_load_confirm_payload( $confirm_token );
+        if ( ! $payload ) {
+            $result['errors'][] = 'Confirmation payload expired or invalid. Please run pre-flight again.';
+            return $result;
+        }
+
+        $json_input = (string) ( $payload['json'] ?? '' );
+        if ( $batch_filename === 'unknown' && ! empty( $payload['filename'] ) ) {
+            $batch_filename = sanitize_text_field( $payload['filename'] );
+        }
+
+        // Single-use token.
+        ws_ingest_delete_confirm_payload( $confirm_token );
+    } else {
+        $json_input = (string) wp_unslash( $_POST['ws_ingest_json'] ?? '' );
+    }
+
+    if ( trim( $json_input ) === '' ) {
+        $result['errors'][] = 'No JSON provided.';
+        return $result;
+    }
+
+    $data = json_decode( $json_input, true );
+    if ( json_last_error() !== JSON_ERROR_NONE ) {
+        $result['errors'][] = 'JSON parse error: ' . json_last_error_msg();
+        return $result;
+    }
+
+    // ── Phase 1: Pre-Flight ──────────────────────────────────────────────
+    $result['phase']     = 'preflight';
+    $preflight           = ws_ingest_preflight( $data );
+    $result['preflight'] = $preflight;
+
+    if ( ! $preflight['pass'] ) {
+        if ( ! ws_ingest_log_preflight_failure( $batch_filename, $preflight['errors'] ) ) {
+            $result['runtime_warnings'][] = 'Failed to append preflight failure ledger log. Check filesystem permissions.';
+        }
+        return $result;
+    }
+
+    // Check if user confirmed after seeing preflight
+    if ( ! $confirmed ) {
+        $result['confirm_token'] = ws_ingest_store_confirm_payload( $json_input, $batch_filename );
+        if ( empty( $result['confirm_token'] ) ) {
+            $result['errors'][] = 'Failed to store confirmation payload. Please try again; if this persists, check object cache/transient storage.';
+        }
+        // Return preflight results — show confirmation UI
+        return $result;
+    }
+
+    return ws_ingest_process_batch_data( $data, $batch_filename );
 }
 
 
@@ -908,8 +1360,11 @@ function ws_render_ingest_tool_page() {
     $phase             = $run_result['phase']     ?? '';
     $preflight         = $run_result['preflight'] ?? null;
     $confirmed         = ! empty( $_POST['ws_ingest_confirmed'] );
-    $show_confirmation = ( $phase === 'preflight' && $preflight && $preflight['pass'] && ! $confirmed );
-    $json_input        = sanitize_textarea_field( wp_unslash( $_POST['ws_ingest_json'] ?? '' ) );
+    $confirm_token     = $run_result['confirm_token'] ?? '';
+    $show_confirmation = ( $phase === 'preflight' && $preflight && $preflight['pass'] && ! $confirmed && ! empty( $confirm_token ) );
+    $json_input        = (string) wp_unslash( $_POST['ws_ingest_json'] ?? '' );
+    $batch_filename    = sanitize_text_field( wp_unslash( $_POST['ws_ingest_filename'] ?? '' ) );
+    $inbox_files       = ws_ingest_get_inbox_files();
 
     ?>
     <div class="wrap">
@@ -921,6 +1376,15 @@ function ws_render_ingest_tool_page() {
             <div class="notice notice-error">
                 <?php foreach ( $run_result['errors'] as $err ): ?>
                     <p><?php echo esc_html( $err ); ?></p>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
+
+        <?php if ( ! empty( $run_result['runtime_warnings'] ) ): ?>
+            <div class="notice notice-warning">
+                <p><strong>Ingest completed with runtime warnings.</strong></p>
+                <?php foreach ( $run_result['runtime_warnings'] as $warning ): ?>
+                    <p><?php echo esc_html( $warning ); ?></p>
                 <?php endforeach; ?>
             </div>
         <?php endif; ?>
@@ -981,6 +1445,79 @@ function ws_render_ingest_tool_page() {
                 </div>
             <?php endforeach; ?>
 
+        <?php elseif ( $phase === 'folder-processing' && ! empty( $run_result['folder'] ) ): ?>
+            <?php $f = $run_result['folder']; ?>
+            <div class="notice notice-<?php echo ( (int) ( $f['failed_total'] ?? 0 ) > 0 ) ? 'warning' : 'success'; ?>">
+                <?php if ( ! empty( $f['dry_run'] ) ): ?>
+                    <p><strong>Folder ingest dry run complete.</strong></p>
+                <?php else: ?>
+                    <p><strong>Folder ingest iteration complete.</strong></p>
+                <?php endif; ?>
+                <p>
+                    Files processed: <strong><?php echo (int) ( $f['processed_files'] ?? 0 ); ?></strong>
+                    of <?php echo (int) ( $f['limit'] ?? 0 ); ?> requested
+                    (inbox had <?php echo (int) ( $f['inbox_count'] ?? 0 ); ?>).
+                </p>
+                <?php if ( ! empty( $f['dry_run'] ) ): ?>
+                    <p>
+                        Ready files: <strong><?php echo (int) ( $f['ready_files'] ?? 0 ); ?></strong>
+                        &nbsp;|&nbsp; Blocked files: <strong><?php echo (int) ( $f['blocked_files'] ?? 0 ); ?></strong>
+                        &nbsp;|&nbsp; Corrected JSON previews: <strong><?php echo (int) ( $f['corrected_files'] ?? 0 ); ?></strong>
+                    </p>
+                    <p>No records were written and no files were moved in dry run mode.</p>
+                <?php else: ?>
+                    <p>
+                        Records — ✅ Created: <strong><?php echo (int) ( $f['created_total'] ?? 0 ); ?></strong>
+                        &nbsp;|&nbsp; ⏭ Skipped: <strong><?php echo (int) ( $f['skipped_total'] ?? 0 ); ?></strong>
+                        &nbsp;|&nbsp; ❌ Failed: <strong><?php echo (int) ( $f['failed_total'] ?? 0 ); ?></strong>
+                    </p>
+                    <p>
+                        Archived files: <strong><?php echo (int) ( $f['archived_files'] ?? 0 ); ?></strong>
+                        &nbsp;|&nbsp; Corrected JSON files: <strong><?php echo (int) ( $f['corrected_files'] ?? 0 ); ?></strong>
+                    </p>
+                <?php endif; ?>
+            </div>
+
+            <?php foreach ( (array) ( $f['files'] ?? [] ) as $item ): ?>
+                <div style="margin:10px 0;padding:10px;border:1px solid #ccd0d4;border-radius:4px;background:#fff;">
+                    <p style="margin:0 0 8px 0;"><strong><?php echo esc_html( $item['filename'] ?? '' ); ?></strong> — <?php echo esc_html( $item['status'] ?? 'unknown' ); ?></p>
+
+                    <?php if ( ! empty( $item['summary'] ) ): ?>
+                        <p style="margin:0 0 6px 0;color:#555;">
+                            <?php if ( ! empty( $f['dry_run'] ) ): ?>
+                                would process <?php echo (int) ( $item['summary']['would_records'] ?? 0 ); ?> records,
+                                preflight warnings <?php echo (int) ( $item['summary']['preflight_warnings'] ?? 0 ); ?>
+                            <?php else: ?>
+                                created <?php echo (int) ( $item['summary']['created'] ?? 0 ); ?>,
+                                skipped <?php echo (int) ( $item['summary']['skipped'] ?? 0 ); ?>,
+                                failed <?php echo (int) ( $item['summary']['failed'] ?? 0 ); ?>
+                            <?php endif; ?>
+                        </p>
+                    <?php endif; ?>
+
+                    <?php if ( ! empty( $item['corrections'] ) ): ?>
+                        <p style="margin:0 0 6px 0;color:#555;"><strong>Corrections:</strong></p>
+                        <ul style="margin:4px 0 8px 18px;color:#555;">
+                            <?php foreach ( (array) $item['corrections'] as $note ): ?>
+                                <li><?php echo esc_html( $note ); ?></li>
+                            <?php endforeach; ?>
+                        </ul>
+                    <?php endif; ?>
+
+                    <?php if ( ! empty( $item['errors'] ) ): ?>
+                        <ul style="margin:4px 0 8px 18px;color:#c00;">
+                            <?php foreach ( (array) $item['errors'] as $err ): ?>
+                                <li><?php echo esc_html( $err ); ?></li>
+                            <?php endforeach; ?>
+                        </ul>
+                    <?php endif; ?>
+
+                    <?php if ( ! empty( $item['archive'] ) ): ?>
+                        <p style="margin:0;color:#555;"><strong>Archived:</strong> <?php echo esc_html( str_replace( ABSPATH, '/', (string) $item['archive'] ) ); ?></p>
+                    <?php endif; ?>
+                </div>
+            <?php endforeach; ?>
+
         <?php elseif ( $show_confirmation ): ?>
             <?php // Pre-flight passed — show results and ask for confirmation ?>
             <div class="notice notice-warning">
@@ -999,8 +1536,8 @@ function ws_render_ingest_tool_page() {
             <form method="post" action="">
                 <?php wp_nonce_field( 'ws_run_ingest', 'ws_ingest_nonce' ); ?>
                 <input type="hidden" name="ws_ingest_confirmed" value="1">
-                <input type="hidden" name="ws_ingest_filename" value="<?php echo esc_attr( sanitize_text_field( wp_unslash( $_POST['ws_ingest_filename'] ?? '' ) ) ); ?>">
-                <input type="hidden" name="ws_ingest_json" value="<?php echo esc_attr( $json_input ); ?>">
+                <input type="hidden" name="ws_ingest_confirm_token" value="<?php echo esc_attr( $confirm_token ); ?>">
+                <input type="hidden" name="ws_ingest_filename" value="<?php echo esc_attr( $batch_filename ); ?>">
                 <p>
                     <input type="submit" class="button button-primary" value="✅ Confirm — Write Records">
                     &nbsp;
@@ -1010,8 +1547,63 @@ function ws_render_ingest_tool_page() {
 
         <?php else: ?>
             <?php // Initial form ?>
+
+            <h2>Folder Batch Mode</h2>
+            <p>Upload JSON files via FTP to the inbox directory. If the folder is non-empty, you can process files in iterations.</p>
+            <p>
+                <strong>Inbox:</strong> <code><?php echo esc_html( str_replace( ABSPATH, '/', WS_INGEST_INBOX_DIR ) ); ?></code><br>
+                <strong>Archive:</strong> <code><?php echo esc_html( str_replace( ABSPATH, '/', WS_INGEST_ARCHIVE_DIR ) ); ?></code>
+            </p>
+
+            <?php if ( empty( $inbox_files ) ): ?>
+                <div class="notice notice-info"><p>Inbox is currently empty.</p></div>
+            <?php else: ?>
+                <div class="notice notice-info">
+                    <p><strong>Inbox ready:</strong> <?php echo (int) count( $inbox_files ); ?> file(s) available.</p>
+                </div>
+                <details style="margin:0 0 12px 0;">
+                    <summary>Show inbox files</summary>
+                    <ul style="margin:8px 0 0 18px;">
+                        <?php foreach ( $inbox_files as $pending ): ?>
+                            <li><?php echo esc_html( basename( $pending ) ); ?></li>
+                        <?php endforeach; ?>
+                    </ul>
+                </details>
+            <?php endif; ?>
+
+            <form method="post" action="" style="margin-bottom:20px;">
+                <?php wp_nonce_field( 'ws_run_ingest', 'ws_ingest_nonce' ); ?>
+                <input type="hidden" name="ws_ingest_mode" value="folder">
+                <table class="form-table" role="presentation">
+                    <tr>
+                        <th scope="row"><label for="ws_ingest_folder_limit">Files This Iteration</label></th>
+                        <td>
+                            <input type="number" name="ws_ingest_folder_limit" id="ws_ingest_folder_limit"
+                                   class="small-text" min="1" max="100" value="<?php echo esc_attr( (string) ( $_POST['ws_ingest_folder_limit'] ?? '25' ) ); ?>">
+                            <p class="description">Processes the first N JSON files from inbox (alphabetical). Processed files are archived.</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><label for="ws_ingest_folder_dry_run">Dry Run</label></th>
+                        <td>
+                            <label>
+                                <input type="checkbox" name="ws_ingest_folder_dry_run" id="ws_ingest_folder_dry_run" value="1" <?php checked( ! empty( $_POST['ws_ingest_folder_dry_run'] ) ); ?>>
+                                Preflight and preview corrections only (no record writes, no archive moves)
+                            </label>
+                        </td>
+                    </tr>
+                </table>
+                <p class="submit">
+                    <input type="submit" class="button button-primary" value="Run Folder Ingest Iteration" <?php disabled( empty( $inbox_files ) ); ?>>
+                </p>
+            </form>
+
+            <hr>
+            <h2>Single File / Manual Mode</h2>
+
             <form method="post" action="">
                 <?php wp_nonce_field( 'ws_run_ingest', 'ws_ingest_nonce' ); ?>
+                <input type="hidden" name="ws_ingest_mode" value="manual">
                 <table class="form-table" role="presentation">
                     <tr>
                         <th scope="row"><label for="ws_ingest_filename">Batch Filename</label></th>
@@ -1019,7 +1611,7 @@ function ws_render_ingest_tool_page() {
                             <input type="text" name="ws_ingest_filename" id="ws_ingest_filename"
                                    class="regular-text"
                                    placeholder="e.g. NJ-7-Statutes-NotebookLM-20260403-0843.json"
-                                   value="<?php echo esc_attr( sanitize_text_field( wp_unslash( $_POST['ws_ingest_filename'] ?? '' ) ) ); ?>">
+                                value="<?php echo esc_attr( $batch_filename ); ?>">
                             <p class="description">Used in the run logs for traceability. Paste the original filename of the JSON file.</p>
                         </td>
                     </tr>
@@ -1029,7 +1621,7 @@ function ws_render_ingest_tool_page() {
                             <textarea name="ws_ingest_json" id="ws_ingest_json"
                                       rows="20" class="large-text code"
                                       placeholder='Paste the complete JSON object here — {"meta":{...},"records":[...],"integrity":{...}}'
-                                      required></textarea>
+                                      required><?php echo esc_textarea( $json_input ); ?></textarea>
                             <p class="description">
                                 Paste the complete JSON object from your research model or NotebookLM merge.
                                 Pre-flight checks run first. You will be asked to confirm before any records are written.

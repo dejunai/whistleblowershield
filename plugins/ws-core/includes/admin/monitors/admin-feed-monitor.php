@@ -340,7 +340,10 @@ function ws_feed_monitor_poll() {
 
     // ── Persist ───────────────────────────────────────────────────────────
 
-    ws_feed_monitor_write_staged( $staged );
+    if ( ! ws_feed_monitor_write_staged( $staged ) ) {
+        return -1;
+    }
+
     update_option( 'ws_feed_monitor_last_run', time() );
 
     return $new_count;
@@ -439,7 +442,10 @@ function ws_feed_ingest_item( $guid ) {
     // ── Remove from staged, add to ingested log ───────────────────────────
 
     array_splice( $staged, $index, 1 );
-    ws_feed_monitor_write_staged( $staged );
+    if ( ! ws_feed_monitor_write_staged( $staged ) ) {
+        ws_feed_monitor_set_error( 'Staged queue write failed after ingest; item may appear again until file permissions are fixed.' );
+        return false;
+    }
 
     $ingested   = get_option( 'ws_feed_monitor_ingested', [] );
     $ingested[] = [ 'guid' => $entry['guid'], 'ts' => time() ];
@@ -472,8 +478,19 @@ function ws_feed_monitor_read_staged() {
     if ( ! file_exists( $file ) ) {
         return [];
     }
+
     $raw  = file_get_contents( $file );
+    if ( false === $raw ) {
+        ws_feed_monitor_set_error( 'Unable to read staged feed file. Check filesystem permissions.' );
+        return [];
+    }
+
     $data = json_decode( $raw, true );
+    if ( json_last_error() !== JSON_ERROR_NONE ) {
+        ws_feed_monitor_set_error( 'Invalid staged feed JSON: ' . json_last_error_msg() );
+        return [];
+    }
+
     return is_array( $data ) ? $data : [];
 }
 
@@ -485,7 +502,27 @@ function ws_feed_monitor_read_staged() {
  */
 function ws_feed_monitor_write_staged( array $staged ) {
     $json = wp_json_encode( $staged, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE );
-    return (bool) file_put_contents( ws_feed_staged_file(), $json, LOCK_EX );
+    if ( false === $json ) {
+        ws_feed_monitor_set_error( 'Failed to encode staged feed data as JSON.' );
+        return false;
+    }
+
+    $written = file_put_contents( ws_feed_staged_file(), $json, LOCK_EX );
+    if ( false === $written ) {
+        ws_feed_monitor_set_error( 'Failed to write staged feed file. Check filesystem permissions.' );
+        return false;
+    }
+
+    return true;
+}
+
+/**
+ * Stores a monitor error message for display in admin UI.
+ *
+ * @param string $message Error message text.
+ */
+function ws_feed_monitor_set_error( $message ) {
+    update_option( 'ws_feed_monitor_last_error', sanitize_text_field( $message ) );
 }
 
 
@@ -553,12 +590,15 @@ function ws_feed_monitor_render_page() {
             $guid = sanitize_text_field( wp_unslash( $_POST['ws_feed_guid'] ) );
 
             // Save any edits first.
-            ws_feed_monitor_save_item_edits( $guid );
+            if ( ! ws_feed_monitor_save_item_edits( $guid ) ) {
+                $notice = '<div class="notice notice-error"><p>Could not save staged item edits. Check feed file permissions and try again.</p></div>';
+            } else {
 
-            $post_id = ws_feed_ingest_item( $guid );
-            $notice  = $post_id
-                ? '<div class="notice notice-success"><p>Item ingested. <a href="' . esc_url( get_edit_post_link( $post_id ) ) . '">Edit post &rarr;</a></p></div>'
-                : '<div class="notice notice-error"><p>Ingest failed. Item remains in staging.</p></div>';
+                $post_id = ws_feed_ingest_item( $guid );
+                $notice  = $post_id
+                    ? '<div class="notice notice-success"><p>Item ingested. <a href="' . esc_url( get_edit_post_link( $post_id ) ) . '">Edit post &rarr;</a></p></div>'
+                    : '<div class="notice notice-error"><p>Ingest failed. Item remains in staging.</p></div>';
+            }
         }
 
         // Reject item
@@ -566,15 +606,19 @@ function ws_feed_monitor_render_page() {
             $guid   = sanitize_text_field( wp_unslash( $_POST['ws_feed_guid'] ) );
             $staged = ws_feed_monitor_read_staged();
             $staged = array_filter( $staged, fn( $i ) => $i['guid'] !== $guid );
-            ws_feed_monitor_write_staged( array_values( $staged ) );
-            $notice = '<div class="notice notice-success"><p>Item rejected and removed from staging.</p></div>';
+            $saved  = ws_feed_monitor_write_staged( array_values( $staged ) );
+            $notice = $saved
+                ? '<div class="notice notice-success"><p>Item rejected and removed from staging.</p></div>'
+                : '<div class="notice notice-error"><p>Failed to persist staged queue changes. Item may reappear; check file permissions.</p></div>';
         }
 
         // Save edits only
         if ( $action === 'save_edits' && ! empty( $_POST['ws_feed_guid'] ) ) {
             $guid   = sanitize_text_field( wp_unslash( $_POST['ws_feed_guid'] ) );
-            ws_feed_monitor_save_item_edits( $guid );
-            $notice = '<div class="notice notice-success"><p>Item edits saved.</p></div>';
+            $saved  = ws_feed_monitor_save_item_edits( $guid );
+            $notice = $saved
+                ? '<div class="notice notice-success"><p>Item edits saved.</p></div>'
+                : '<div class="notice notice-error"><p>Failed to save edits to staged queue. Check file permissions.</p></div>';
         }
     }
 
@@ -741,6 +785,7 @@ function ws_feed_monitor_render_page() {
  * Reads editable fields from $_POST and updates the matching staged item.
  *
  * @param  string $guid  GUID of the item to update.
+ * @return bool          True if the staged file was updated.
  */
 function ws_feed_monitor_save_item_edits( $guid ) {
 
@@ -764,7 +809,7 @@ function ws_feed_monitor_save_item_edits( $guid ) {
     }
     unset( $item );
 
-    ws_feed_monitor_write_staged( $staged );
+    return ws_feed_monitor_write_staged( $staged );
 }
 
 

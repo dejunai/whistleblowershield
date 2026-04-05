@@ -17,7 +17,7 @@
  *       Renders the site-wide footer block: mission statement,
  *       policy page links, contact email, and copyright line.
  *
- *   [ws_legal_updates jx="california" count="5"]
+ *   [ws_legal_updates jx="CA" count="5"]
  *       Renders recent legal updates. Scoped to a jurisdiction when jx
  *       is provided; site-wide when omitted. Jurisdiction calls restrict
  *       to WS_LEGAL_UPDATE_SUMMARY_TYPES automatically. Queries the
@@ -143,15 +143,21 @@ function ws_shortcode_legal_updates( $atts ) {
 
     // ── Resolve jurisdiction parameter to a post ID ───────────────────────
     //
-    // Accepts: numeric post ID or USPS code ("CA").
+    // Accepts: numeric jurisdiction post ID or USPS code ("CA").
     // All data reads are delegated to ws_get_legal_updates_data().
 
     $jx_id = 0;
     if ( ! empty( $atts['jx'] ) ) {
         if ( is_numeric( $atts['jx'] ) ) {
-            $jx_id = (int) $atts['jx'];
+            $candidate = (int) $atts['jx'];
+            $jx_id     = ( $candidate > 0 && get_post_type( $candidate ) === 'jurisdiction' ) ? $candidate : 0;
         } else {
-            $jx_id = ws_get_id_by_code( strtoupper( $atts['jx'] ) );
+            $jx_id = ws_get_id_by_code( strtoupper( trim( (string) $atts['jx'] ) ) );
+        }
+
+        // Fail closed when jx is provided but cannot be resolved.
+        if ( ! $jx_id ) {
+            return '';
         }
     }
 

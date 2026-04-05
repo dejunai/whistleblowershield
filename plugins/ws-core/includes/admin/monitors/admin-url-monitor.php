@@ -195,7 +195,32 @@ function ws_url_monitor_run_check_for_map( array $monitor_map, $scope = 'standar
     $lock_option      = "ws_url_monitor_lock_{$scope}";
     $log_option       = "ws_url_monitor_log_{$scope}";
     $last_run_option  = "ws_url_monitor_last_run_{$scope}";
+    $stats_option     = "ws_url_monitor_last_stats_{$scope}";
+    $error_option     = "ws_url_monitor_last_error_{$scope}";
+
+    // Recover from stale locks left behind by a fatal/terminated process.
+    $now      = time();
+    $lock_ttl = (int) apply_filters( 'ws_url_monitor_lock_ttl', 30 * MINUTE_IN_SECONDS );
+    $existing = (int) get_option( $lock_option, 0 );
+
+    if ( $existing > 0 && ( $now - $existing ) > $lock_ttl ) {
+        delete_option( $lock_option );
+    }
+
     if ( ! add_option( $lock_option, time(), '', false ) ) {
+        $locked_at = (int) get_option( $lock_option, 0 );
+        update_option( $stats_option, [
+            'status'         => 'skipped_locked',
+            'scope'          => $scope,
+            'timestamp'      => $now,
+            'lock_age'       => ( $locked_at > 0 ) ? max( 0, $now - $locked_at ) : 0,
+            'checked_urls'   => 0,
+            'unreachable'    => 0,
+            'scanned_posts'  => 0,
+            'warnings'       => 0,
+            'failures'       => 0,
+            'recoveries'     => 0,
+        ] );
         return;
     }
 
@@ -205,6 +230,9 @@ function ws_url_monitor_run_check_for_map( array $monitor_map, $scope = 'standar
         $new_failures = [];
         $new_warnings = [];
         $recoveries   = [];
+        $checked_urls = 0;
+        $unreachable  = 0;
+        $scanned_posts = 0;
 
         // Build a lookup of previously flagged URLs for recovery detection.
         // Keyed by "post_id|meta_key" for O(1) lookup.
@@ -215,24 +243,31 @@ function ws_url_monitor_run_check_for_map( array $monitor_map, $scope = 'standar
 
         foreach ( $monitor_map as $post_type => $meta_keys ) {
 
-            // Limit per CPT — fetching IDs only (fields=ids) is cheap, but an
-            // unbounded query on a very large dataset can still cause memory issues
-            // on cron. 1000 per CPT covers any realistic editorial scale.
-            $posts = get_posts( [
-                'post_type'      => $post_type,
-                'post_status'    => 'publish',
-                'posts_per_page' => 1000,
-                'fields'         => 'ids',
-                'no_found_rows'  => true,
-            ] );
+            // Paginate to avoid silently truncating checks on large datasets.
+            $page      = 1;
+            $per_page  = 500;
+            $has_posts = true;
 
-            if ( empty( $posts ) ) {
-                continue;
-            }
+            while ( $has_posts ) {
 
-            foreach ( $posts as $post_id ) {
+                $posts = get_posts( [
+                    'post_type'      => $post_type,
+                    'post_status'    => 'publish',
+                    'posts_per_page' => $per_page,
+                    'paged'          => $page,
+                    'fields'         => 'ids',
+                    'no_found_rows'  => true,
+                ] );
 
-                foreach ( $meta_keys as $meta_key ) {
+                if ( empty( $posts ) ) {
+                    break;
+                }
+
+                $scanned_posts += count( $posts );
+
+                foreach ( $posts as $post_id ) {
+
+                    foreach ( $meta_keys as $meta_key ) {
 
                     // Direct meta read — URL monitor needs the raw stored value to perform HTTP
                     // validation. The query layer returns rendered shortcode output, not individual
@@ -249,6 +284,8 @@ function ws_url_monitor_run_check_for_map( array $monitor_map, $scope = 'standar
                         continue;
                     }
 
+                    $checked_urls++;
+
                     $log_key = $post_id . '|' . $meta_key;
 
                     $response = wp_remote_head( $url, [
@@ -259,6 +296,7 @@ function ws_url_monitor_run_check_for_map( array $monitor_map, $scope = 'standar
 
                     // WP_Error means unreachable — skip silently, retry next run.
                     if ( is_wp_error( $response ) ) {
+                        $unreachable++;
                         // If previously flagged, preserve the existing log entry
                         // so it is not silently cleared by an unreachable response.
                         if ( isset( $previous_flagged[ $log_key ] ) ) {
@@ -334,13 +372,29 @@ function ws_url_monitor_run_check_for_map( array $monitor_map, $scope = 'standar
                             $new_failures[] = $entry;
                         }
                     }
+                    }
                 }
+
+                $has_posts = count( $posts ) === $per_page;
+                $page++;
             }
         }
 
         // Persist updated log and last-run timestamp.
         update_option( $log_option,      $new_log );
         update_option( $last_run_option, time() );
+        update_option( $stats_option, [
+            'status'         => 'ok',
+            'scope'          => $scope,
+            'timestamp'      => time(),
+            'checked_urls'   => $checked_urls,
+            'unreachable'    => $unreachable,
+            'scanned_posts'  => $scanned_posts,
+            'warnings'       => count( $new_warnings ),
+            'failures'       => count( $new_failures ),
+            'recoveries'     => count( $recoveries ),
+        ] );
+        delete_option( $error_option );
 
         // Send email digests.
         if ( ! empty( $new_failures ) || ! empty( $new_warnings ) ) {
@@ -348,6 +402,43 @@ function ws_url_monitor_run_check_for_map( array $monitor_map, $scope = 'standar
         }
         if ( ! empty( $recoveries ) ) {
             ws_url_monitor_send_recovery_email( $recoveries );
+        }
+
+        // Escalate when transport-level failures are high (unreachable URLs).
+        if ( $checked_urls > 0 ) {
+            $rate            = $unreachable / max( 1, $checked_urls );
+            $min_count       = (int) apply_filters( 'ws_url_monitor_unreachable_alert_min_count', 10 );
+            $min_rate        = (float) apply_filters( 'ws_url_monitor_unreachable_alert_rate', 0.20 );
+            $cooldown        = (int) apply_filters( 'ws_url_monitor_unreachable_alert_cooldown', 12 * HOUR_IN_SECONDS );
+            $alert_option    = "ws_url_monitor_last_transport_alert_{$scope}";
+            $last_alert_time = (int) get_option( $alert_option, 0 );
+
+            if ( $unreachable >= $min_count && $rate >= $min_rate && ( time() - $last_alert_time ) >= $cooldown ) {
+                ws_url_monitor_send_transport_alert_email( [
+                    'scope'       => $scope,
+                    'checked_urls'=> $checked_urls,
+                    'unreachable' => $unreachable,
+                    'rate'        => $rate,
+                ] );
+                update_option( $alert_option, time() );
+            }
+        }
+    } catch ( Throwable $e ) {
+        update_option( $error_option, 'Run aborted: ' . $e->getMessage() );
+        update_option( $stats_option, [
+            'status'         => 'error',
+            'scope'          => $scope,
+            'timestamp'      => time(),
+            'checked_urls'   => 0,
+            'unreachable'    => 0,
+            'scanned_posts'  => 0,
+            'warnings'       => 0,
+            'failures'       => 0,
+            'recoveries'     => 0,
+        ] );
+
+        if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+            error_log( '[ws-core][url-monitor][' . $scope . '] ' . $e->getMessage() );
         }
     } finally {
         delete_option( $lock_option );
@@ -478,6 +569,119 @@ function ws_url_monitor_send_recovery_email( array $recoveries ) {
 
 
 // ════════════════════════════════════════════════════════════════════════════
+// Private Helper: Send Transport Degradation Email
+// ════════════════════════════════════════════════════════════════════════════
+
+/**
+ * Sends an escalation email when unreachable URL checks cross configured
+ * count and rate thresholds.
+ *
+ * @param array $stats Scope and transport stats for the run.
+ */
+function ws_url_monitor_send_transport_alert_email( array $stats ) {
+
+    $emails = ws_url_monitor_get_admin_emails();
+    if ( empty( $emails ) ) {
+        return;
+    }
+
+    $site    = get_bloginfo( 'name' );
+    $scope   = esc_html( strtoupper( (string) ( $stats['scope'] ?? 'STANDARD' ) ) );
+    $checked = (int) ( $stats['checked_urls'] ?? 0 );
+    $unreach = (int) ( $stats['unreachable'] ?? 0 );
+    $rate    = (float) ( $stats['rate'] ?? 0 );
+    $subject = "[{$site}] URL Health Monitor — Transport Degradation ({$scope})";
+
+    $body  = "The URL monitor detected elevated unreachable responses.\n\n";
+    $body .= "Scope:       {$scope}\n";
+    $body .= "Checked:     {$checked}\n";
+    $body .= "Unreachable: {$unreach}\n";
+    $body .= "Rate:        " . number_format_i18n( $rate * 100, 1 ) . "%\n\n";
+    $body .= "This usually indicates network, DNS, TLS, firewall, or upstream transport issues.\n";
+    $body .= "Dashboard: " . admin_url( 'index.php' ) . "\n\n";
+    $body .= "WhistleblowerShield URL Health Monitor\n";
+    $body .= get_bloginfo( 'url' ) . "\n";
+
+    foreach ( $emails as $email ) {
+        wp_mail( $email, $subject, $body );
+    }
+}
+
+
+// ════════════════════════════════════════════════════════════════════════════
+// Private Helper: Run Self-Test
+// ════════════════════════════════════════════════════════════════════════════
+
+/**
+ * Runs monitor prerequisite checks and returns detailed results.
+ *
+ * @return array
+ */
+function ws_url_monitor_run_self_test() {
+
+    $tests = [];
+
+    $standard_cron = wp_next_scheduled( 'ws_url_health_check' );
+    $priority_cron = wp_next_scheduled( 'ws_url_priority_health_check' );
+    $tests[] = [
+        'label'   => 'Standard cron scheduled',
+        'pass'    => (bool) $standard_cron,
+        'details' => $standard_cron ? date_i18n( 'Y-m-d H:i', $standard_cron ) : 'Not scheduled',
+    ];
+    $tests[] = [
+        'label'   => 'Priority cron scheduled',
+        'pass'    => (bool) $priority_cron,
+        'details' => $priority_cron ? date_i18n( 'Y-m-d H:i', $priority_cron ) : 'Not scheduled',
+    ];
+
+    $admin_emails = ws_url_monitor_get_admin_emails();
+    $tests[] = [
+        'label'   => 'Admin email recipients',
+        'pass'    => ! empty( $admin_emails ),
+        'details' => ! empty( $admin_emails ) ? (string) count( $admin_emails ) : 'No administrator emails found',
+    ];
+
+    $tmp_key = 'ws_url_monitor_self_test_tmp_' . wp_generate_password( 8, false );
+    $write_ok = update_option( $tmp_key, 'ok', false );
+    $read_ok  = ( get_option( $tmp_key, '' ) === 'ok' );
+    delete_option( $tmp_key );
+    $tests[] = [
+        'label'   => 'Option persistence (read/write)',
+        'pass'    => (bool) ( $write_ok && $read_ok ),
+        'details' => ( $write_ok && $read_ok ) ? 'OK' : 'Failed option write/read',
+    ];
+
+    $transport = wp_remote_head( 'https://example.com', [
+        'timeout'     => 10,
+        'redirection' => 0,
+        'user-agent'  => 'WhistleblowerShield URL Monitor Self-Test/1.0',
+    ] );
+    if ( is_wp_error( $transport ) ) {
+        $tests[] = [
+            'label'   => 'Outbound HTTP transport',
+            'pass'    => false,
+            'details' => $transport->get_error_message(),
+        ];
+    } else {
+        $status = (int) wp_remote_retrieve_response_code( $transport );
+        $tests[] = [
+            'label'   => 'Outbound HTTP transport',
+            'pass'    => ( $status >= 200 && $status < 500 ),
+            'details' => 'HTTP ' . $status,
+        ];
+    }
+
+    $all_passed = ! in_array( false, array_column( $tests, 'pass' ), true );
+
+    return [
+        'timestamp'  => time(),
+        'all_passed' => $all_passed,
+        'tests'      => $tests,
+    ];
+}
+
+
+// ════════════════════════════════════════════════════════════════════════════
 // Dashboard Widget
 //
 // Displays the current URL monitor log grouped by type (failures first,
@@ -513,6 +717,10 @@ function ws_url_monitor_render_widget() {
     $last_run_priority = (int) get_option( 'ws_url_monitor_last_run_priority', 0 );
     $next_run          = wp_next_scheduled( 'ws_url_health_check' );
     $next_priority_run = wp_next_scheduled( 'ws_url_priority_health_check' );
+    $stats_standard    = get_option( 'ws_url_monitor_last_stats_standard', [] );
+    $stats_priority    = get_option( 'ws_url_monitor_last_stats_priority', [] );
+    $err_standard      = (string) get_option( 'ws_url_monitor_last_error_standard', '' );
+    $err_priority      = (string) get_option( 'ws_url_monitor_last_error_priority', '' );
 
     // ── Manual trigger ────────────────────────────────────────────────────
 
@@ -527,6 +735,10 @@ function ws_url_monitor_render_widget() {
         $log               = array_merge( $standard_log, $priority_log );
         $last_run_standard = (int) get_option( 'ws_url_monitor_last_run_standard', 0 );
         $last_run_priority = (int) get_option( 'ws_url_monitor_last_run_priority', 0 );
+        $stats_standard    = get_option( 'ws_url_monitor_last_stats_standard', [] );
+        $stats_priority    = get_option( 'ws_url_monitor_last_stats_priority', [] );
+        $err_standard      = (string) get_option( 'ws_url_monitor_last_error_standard', '' );
+        $err_priority      = (string) get_option( 'ws_url_monitor_last_error_priority', '' );
     }
 
     if ( isset( $_POST['ws_url_monitor_run_priority_now'] )
@@ -542,7 +754,22 @@ function ws_url_monitor_render_widget() {
         $log          = array_merge( $standard_log, $priority_log );
         $last_run_standard = (int) get_option( 'ws_url_monitor_last_run_standard', 0 );
         $last_run_priority = (int) get_option( 'ws_url_monitor_last_run_priority', 0 );
+        $stats_standard    = get_option( 'ws_url_monitor_last_stats_standard', [] );
+        $stats_priority    = get_option( 'ws_url_monitor_last_stats_priority', [] );
+        $err_standard      = (string) get_option( 'ws_url_monitor_last_error_standard', '' );
+        $err_priority      = (string) get_option( 'ws_url_monitor_last_error_priority', '' );
     }
+
+    if ( isset( $_POST['ws_url_monitor_self_test_now'] )
+        && check_admin_referer( 'ws_url_monitor_self_test' )
+        && current_user_can( 'manage_options' )
+    ) {
+        $result = ws_url_monitor_run_self_test();
+        set_transient( 'ws_url_monitor_self_test_' . get_current_user_id(), $result, 15 * MINUTE_IN_SECONDS );
+        echo '<div class="notice notice-info inline"><p>URL monitor self-test completed.</p></div>';
+    }
+
+    $self_test = get_transient( 'ws_url_monitor_self_test_' . get_current_user_id() );
 
     // ── Meta bar ──────────────────────────────────────────────────────────
 
@@ -566,6 +793,30 @@ function ws_url_monitor_render_widget() {
         . ' &nbsp;|&nbsp; Next priority run: ' . $next_priority_run_str
         . '</p>';
 
+    $std_checked = (int) ( $stats_standard['checked_urls'] ?? 0 );
+    $std_unreach = (int) ( $stats_standard['unreachable'] ?? 0 );
+    $pri_checked = (int) ( $stats_priority['checked_urls'] ?? 0 );
+    $pri_unreach = (int) ( $stats_priority['unreachable'] ?? 0 );
+    $std_status  = (string) ( $stats_standard['status'] ?? 'unknown' );
+    $pri_status  = (string) ( $stats_priority['status'] ?? 'unknown' );
+
+    echo '<p style="color:#666;font-size:11px;margin-top:-6px;">'
+        . 'Standard checked/unreachable: ' . esc_html( $std_checked ) . '/' . esc_html( $std_unreach )
+        . ' &nbsp;|&nbsp; Priority checked/unreachable: ' . esc_html( $pri_checked ) . '/' . esc_html( $pri_unreach )
+        . ' &nbsp;|&nbsp; Status: ' . esc_html( $std_status ) . ' / ' . esc_html( $pri_status )
+        . '</p>';
+
+    if ( $err_standard || $err_priority ) {
+        echo '<p style="color:#b32d2e;font-size:11px;margin-top:-4px;">';
+        if ( $err_standard ) {
+            echo '<strong>Standard run error:</strong> ' . esc_html( $err_standard ) . ' ';
+        }
+        if ( $err_priority ) {
+            echo '<strong>Priority run error:</strong> ' . esc_html( $err_priority );
+        }
+        echo '</p>';
+    }
+
     // ── Manual trigger form ───────────────────────────────────────────────
 
     echo '<form method="post">';
@@ -578,7 +829,32 @@ function ws_url_monitor_render_widget() {
     wp_nonce_field( 'ws_url_monitor_trigger_priority' );
     echo '<input type="hidden" name="ws_url_monitor_run_priority_now" value="1">';
     submit_button( 'Run Priority Check Now', 'secondary small', '', false );
+    echo '</form>';
+
+    echo '<form method="post" style="margin-top:8px;">';
+    wp_nonce_field( 'ws_url_monitor_self_test' );
+    echo '<input type="hidden" name="ws_url_monitor_self_test_now" value="1">';
+    submit_button( 'Run Monitor Self-Test', 'secondary small', '', false );
     echo '</form><br>';
+
+    if ( is_array( $self_test ) && ! empty( $self_test['tests'] ) ) {
+        $badge = ! empty( $self_test['all_passed'] ) ? '#46b450' : '#d63638';
+        echo '<p><strong style="color:' . esc_attr( $badge ) . ';">Self-Test '
+            . ( ! empty( $self_test['all_passed'] ) ? 'PASS' : 'FAIL' )
+            . '</strong> '
+            . '<span style="font-size:11px;color:#666;">'
+            . esc_html( date_i18n( 'Y-m-d H:i', (int) $self_test['timestamp'] ) )
+            . '</span></p>';
+        echo '<ul style="margin:0 0 12px;padding-left:1.2em;">';
+        foreach ( $self_test['tests'] as $test ) {
+            $ok = ! empty( $test['pass'] );
+            echo '<li>'
+                . ( $ok ? '<span style="color:#46b450;">&#10003;</span> ' : '<span style="color:#d63638;">&#10007;</span> ' )
+                . esc_html( $test['label'] )
+                . ' — <span style="color:#666;">' . esc_html( (string) $test['details'] ) . '</span></li>';
+        }
+        echo '</ul>';
+    }
 
     // ── Log output ────────────────────────────────────────────────────────
 
@@ -653,14 +929,45 @@ function ws_url_monitor_admin_notice() {
     $priority_log = get_option( 'ws_url_monitor_log_priority', [] );
     $log          = array_merge( $standard_log, $priority_log );
     $failures = array_filter( $log, fn( $e ) => $e['type'] === 'failure' );
-    if ( empty( $failures ) ) {
+
+    if ( ! empty( $failures ) ) {
+        $count = count( $failures );
+        $label = $count === 1 ? '1 URL failure' : $count . ' URL failures';
+        echo '<div class="notice notice-error"><p>'
+            . '<strong>WhistleblowerShield URL Monitor:</strong> '
+            . esc_html( $label ) . ' detected. '
+            . '<a href="' . esc_url( admin_url( 'index.php' ) ) . '">View on Dashboard &rarr;</a>'
+            . '</p></div>';
         return;
     }
-    $count = count( $failures );
-    $label = $count === 1 ? '1 URL failure' : $count . ' URL failures';
-    echo '<div class="notice notice-error"><p>'
-        . '<strong>WhistleblowerShield URL Monitor:</strong> '
-        . esc_html( $label ) . ' detected. '
-        . '<a href="' . esc_url( admin_url( 'index.php' ) ) . '">View on Dashboard &rarr;</a>'
-        . '</p></div>';
+
+    $stats_standard = get_option( 'ws_url_monitor_last_stats_standard', [] );
+    $stats_priority = get_option( 'ws_url_monitor_last_stats_priority', [] );
+    $status_standard = (string) ( $stats_standard['status'] ?? '' );
+    $status_priority = (string) ( $stats_priority['status'] ?? '' );
+    $err_standard = (string) get_option( 'ws_url_monitor_last_error_standard', '' );
+    $err_priority = (string) get_option( 'ws_url_monitor_last_error_priority', '' );
+
+    if ( in_array( $status_standard, [ 'error', 'skipped_locked' ], true ) || in_array( $status_priority, [ 'error', 'skipped_locked' ], true ) ) {
+        echo '<div class="notice notice-warning"><p>'
+            . '<strong>WhistleblowerShield URL Monitor:</strong> '
+            . 'Last run status is degraded (' . esc_html( $status_standard ?: 'unknown' ) . ' / ' . esc_html( $status_priority ?: 'unknown' ) . '). '
+            . ( $err_standard ? 'Standard: ' . esc_html( $err_standard ) . '. ' : '' )
+            . ( $err_priority ? 'Priority: ' . esc_html( $err_priority ) . '. ' : '' )
+            . '<a href="' . esc_url( admin_url( 'index.php' ) ) . '">View on Dashboard &rarr;</a>'
+            . '</p></div>';
+        return;
+    }
+
+    $unreachable    = (int) ( $stats_standard['unreachable'] ?? 0 ) + (int) ( $stats_priority['unreachable'] ?? 0 );
+    $checked        = (int) ( $stats_standard['checked_urls'] ?? 0 ) + (int) ( $stats_priority['checked_urls'] ?? 0 );
+
+    if ( $checked > 0 && $unreachable > 0 ) {
+        echo '<div class="notice notice-warning"><p>'
+            . '<strong>WhistleblowerShield URL Monitor:</strong> '
+            . esc_html( $unreachable ) . ' of ' . esc_html( $checked ) . ' URL checks were unreachable in the last run. '
+            . 'This may indicate transient network or DNS issues. '
+            . '<a href="' . esc_url( admin_url( 'index.php' ) ) . '">View on Dashboard &rarr;</a>'
+            . '</p></div>';
+    }
 }

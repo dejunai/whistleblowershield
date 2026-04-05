@@ -70,6 +70,145 @@ function ws_prompt_output_dir(): string {
     return $dir;
 }
 
+// ── Jurisdiction and exclusion helpers ─────────────────────────────────────
+
+function ws_prompt_resolve_jx_context( string $jx_id ): array {
+    $jx = strtoupper( sanitize_text_field( $jx_id ) );
+    $context = [
+        'jx_id'           => $jx,
+        'jx_name'         => $jx,
+        'jx_type'         => ( $jx === 'US' ) ? 'federal' : 'state',
+        'legislature_url' => '',
+    ];
+
+    if ( $jx === '' ) {
+        return $context;
+    }
+
+    if ( function_exists( 'ws_get_jurisdiction_data' ) ) {
+        $data = ws_get_jurisdiction_data( $jx );
+        if ( is_array( $data ) ) {
+            $context['jx_name'] = (string) ( $data['name'] ?? $context['jx_name'] );
+            $class = strtolower( trim( (string) ( $data['class'] ?? '' ) ) );
+            if ( $class !== '' ) {
+                $context['jx_type'] = $class;
+            }
+            $context['legislature_url'] = esc_url_raw( (string) ( $data['gov']['legislature_url'] ?? '' ) );
+            return $context;
+        }
+    }
+
+    $term = get_term_by( 'slug', strtolower( $jx ), WS_JURISDICTION_TAXONOMY );
+    if ( $term && ! is_wp_error( $term ) ) {
+        $context['jx_name'] = (string) $term->name;
+    }
+
+    return $context;
+}
+
+function ws_prompt_record_type_to_post_type( string $record_type ): string {
+    switch ( $record_type ) {
+        case 'statute':
+            return 'jx-statute';
+        case 'common-law':
+            return 'jx-common-law';
+        case 'citation':
+            return 'jx-citation';
+        case 'interpretation':
+            return 'jx-interpretation';
+        default:
+            return '';
+    }
+}
+
+function ws_prompt_extract_record_identifier( string $record_type, int $post_id ): string {
+    if ( $record_type === 'common-law' ) {
+        $doctrine_id = trim( (string) get_post_meta( $post_id, 'ws_cl_doctrine_id', true ) );
+        if ( $doctrine_id !== '' ) {
+            return $doctrine_id;
+        }
+    }
+
+    return trim( (string) get_the_title( $post_id ) );
+}
+
+function ws_prompt_get_auto_exclusions( string $record_type, string $jx_id ): array {
+    $post_type = ws_prompt_record_type_to_post_type( $record_type );
+    if ( $post_type === '' || $jx_id === '' ) {
+        return [];
+    }
+
+    $posts = get_posts( [
+        'post_type'              => $post_type,
+        'post_status'            => 'draft',
+        'posts_per_page'         => -1,
+        'fields'                 => 'ids',
+        'no_found_rows'          => true,
+        'update_post_meta_cache' => false,
+        'update_post_term_cache' => false,
+        'tax_query'              => [
+            [
+                'taxonomy' => WS_JURISDICTION_TAXONOMY,
+                'field'    => 'slug',
+                'terms'    => [ strtolower( $jx_id ) ],
+            ],
+        ],
+    ] );
+
+    if ( empty( $posts ) ) {
+        return [];
+    }
+
+    $ids = [];
+    foreach ( $posts as $pid ) {
+        $value = ws_prompt_extract_record_identifier( $record_type, (int) $pid );
+        if ( $value !== '' ) {
+            $ids[] = $value;
+        }
+    }
+
+    $ids = array_values( array_unique( $ids ) );
+    sort( $ids, SORT_NATURAL | SORT_FLAG_CASE );
+    return $ids;
+}
+
+function ws_prompt_merge_exclusions( string $manual_exclusions, array $auto_exclusions ): string {
+    $merged = [];
+
+    foreach ( explode( "\n", (string) $manual_exclusions ) as $line ) {
+        $line = trim( $line );
+        if ( $line !== '' ) {
+            $merged[] = $line;
+        }
+    }
+
+    foreach ( $auto_exclusions as $line ) {
+        $line = trim( (string) $line );
+        if ( $line !== '' ) {
+            $merged[] = $line;
+        }
+    }
+
+    $merged = array_values( array_unique( $merged ) );
+    sort( $merged, SORT_NATURAL | SORT_FLAG_CASE );
+
+    return implode( "\n", $merged );
+}
+
+function ws_prompt_split_lines( string $text ): array {
+    $lines = [];
+    foreach ( explode( "\n", $text ) as $line ) {
+        $line = trim( $line );
+        if ( $line !== '' ) {
+            $lines[] = $line;
+        }
+    }
+
+    $lines = array_values( array_unique( $lines ) );
+    sort( $lines, SORT_NATURAL | SORT_FLAG_CASE );
+    return $lines;
+}
+
 
 // ── Taxonomy data — read from WordPress database ─────────────────────────
 //
@@ -1074,6 +1213,8 @@ function ws_generate_statute_prompt( array $scope ): string {
     $out .= "Record type:        statute\n";
     if ( $records > 0 ) {
         $out .= "Records Requested:  {$records}\n";
+    } else {
+        $out .= "Records Requested:  as many as you can comfortably find\n";
     }
     if ( $notes ) {
         $out .= "Scope:              {$notes}\n";
@@ -1103,6 +1244,7 @@ function ws_generate_common_law_prompt( array $scope ): string {
     $jx       = strtoupper( sanitize_text_field( $scope['jx_id'] ) );
     $jx_name  = sanitize_text_field( $scope['jx_name'] );
     $leg_url  = esc_url_raw( $scope['legislature_url'] );
+    $records  = (int) $scope['records_requested'];
     $notes    = sanitize_textarea_field( $scope['scope_notes'] );
     $excludes = sanitize_textarea_field( $scope['exclusion_list'] );
 
@@ -1137,6 +1279,11 @@ function ws_generate_common_law_prompt( array $scope ): string {
     $out .= "Jurisdiction ID:    {$jx}\n";
     $out .= "Legislature URL:    {$leg_url}\n";
     $out .= "Record type:        common-law\n";
+    if ( $records > 0 ) {
+        $out .= "Records Requested:  {$records}\n";
+    } else {
+        $out .= "Records Requested:  as many as you can comfortably find\n";
+    }
     if ( $notes ) {
         $out .= "Scope:              {$notes}\n";
     }
@@ -1294,21 +1441,37 @@ function ws_handle_prompt_generation(): array {
 
     $record_type = sanitize_text_field( $_POST['record_type'] ?? '' );
     $jx_id       = strtoupper( sanitize_text_field( $_POST['jx_id'] ?? '' ) );
-    $jx_name     = sanitize_text_field( $_POST['jx_name'] ?? '' );
-    $leg_url     = esc_url_raw( $_POST['legislature_url'] ?? '' );
+    $records_requested = max( 0, (int) ( $_POST['records_requested'] ?? 0 ) );
 
-    if ( ! $record_type || ! $jx_id || ! $jx_name ) {
-        $result['message'] = 'Record type, Jurisdiction ID, and Jurisdiction Name are required.';
+    if ( ! $record_type || ! preg_match( '/^[A-Z]{2}$/', $jx_id ) ) {
+        $result['message'] = 'Record type and a valid two-letter jurisdiction code are required.';
         return $result;
     }
+
+    $jx_context = ws_prompt_resolve_jx_context( $jx_id );
+    $jx_name    = $jx_context['jx_name'];
+    $leg_url    = $jx_context['legislature_url'];
+
+    $scope_notes = sanitize_textarea_field( $_POST['scope_notes'] ?? '' );
+    if ( $scope_notes === '' && in_array( $record_type, [ 'statute', 'common-law' ], true ) ) {
+        $jx_type     = sanitize_key( $jx_context['jx_type'] ?: 'state' );
+        $scope_notes = $jx_type . '-level whistleblower laws and protections';
+    }
+
+    $auto_exclusions = ws_prompt_get_auto_exclusions( $record_type, $jx_id );
+    $auto_exclusions_input = sanitize_textarea_field( $_POST['exclusion_list_auto'] ?? implode( "\n", $auto_exclusions ) );
+    $exclusion_list  = ws_prompt_merge_exclusions(
+        (string) ( $_POST['exclusion_list_manual'] ?? ( $_POST['exclusion_list'] ?? '' ) ),
+        ws_prompt_split_lines( $auto_exclusions_input )
+    );
 
     $scope = [
         'jx_id'           => $jx_id,
         'jx_name'         => $jx_name,
         'legislature_url' => $leg_url,
-        'records_requested' => (int) ( $_POST['records_requested'] ?? 0 ),
-        'scope_notes'     => sanitize_textarea_field( $_POST['scope_notes'] ?? 'state-level whistleblower laws and protections' ),
-        'exclusion_list'  => sanitize_textarea_field( $_POST['exclusion_list'] ?? '' ),
+        'records_requested' => $records_requested,
+        'scope_notes'     => $scope_notes,
+        'exclusion_list'  => $exclusion_list,
         'min_quality'     => sanitize_text_field( $_POST['min_quality'] ?? 'moderate' ),
         'statute_type'    => sanitize_text_field( $_POST['statute_type'] ?? 'state' ),
     ];
@@ -1332,7 +1495,7 @@ function ws_handle_prompt_generation(): array {
     }
 
     $dir      = ws_prompt_output_dir();
-    $filename = strtoupper( $jx_id ) . '-' . $_POST['records_requested'] . '-' . ucfirst($record_type) . '-' . date( 'Ymd-Hi' ) . '.txt';
+    $filename = strtoupper( $jx_id ) . '-' . $records_requested . '-' . ucfirst( $record_type ) . '-' . date( 'Ymd-Hi' ) . '.txt';
     $filepath = $dir . '/' . $filename;
 
     if ( file_put_contents( $filepath, $prompt ) === false ) {
@@ -1363,6 +1526,28 @@ function ws_render_prompt_generator_page() {
     }
 
     $record_type = sanitize_text_field( $_POST['record_type'] ?? 'statute' );
+    $posted_jx   = strtoupper( sanitize_text_field( $_POST['jx_id'] ?? '' ) );
+    $auto_exclusions = ( $posted_jx && $record_type ) ? ws_prompt_get_auto_exclusions( $record_type, $posted_jx ) : [];
+    $default_scope_note = 'state-level whistleblower laws and protections';
+    if ( $posted_jx ) {
+        $ctx = ws_prompt_resolve_jx_context( $posted_jx );
+        $default_scope_note = sanitize_key( $ctx['jx_type'] ?: 'state' ) . '-level whistleblower laws and protections';
+    }
+    $scope_note_value = sanitize_textarea_field( $_POST['scope_notes'] ?? '' );
+    if ( $scope_note_value === '' && in_array( $record_type, [ 'statute', 'common-law' ], true ) ) {
+        $scope_note_value = $default_scope_note;
+    }
+    $manual_exclusions = sanitize_textarea_field( $_POST['exclusion_list_manual'] ?? ( $_POST['exclusion_list'] ?? '' ) );
+    $auto_exclusions_text = sanitize_textarea_field( $_POST['exclusion_list_auto'] ?? implode( "\n", $auto_exclusions ) );
+    $auto_count = count( ws_prompt_split_lines( $auto_exclusions_text ) );
+    $manual_count = count( ws_prompt_split_lines( $manual_exclusions ) );
+    $merged_count = count( ws_prompt_split_lines( ws_prompt_merge_exclusions( $manual_exclusions, ws_prompt_split_lines( $auto_exclusions_text ) ) ) );
+    $jx_terms = get_terms( [
+        'taxonomy'   => WS_JURISDICTION_TAXONOMY,
+        'hide_empty' => false,
+        'orderby'    => 'slug',
+        'order'      => 'ASC',
+    ] );
 
     ?>
     <div class="wrap">
@@ -1401,32 +1586,24 @@ function ws_render_prompt_generator_page() {
                 </tr>
 
                 <tr>
-                    <th scope="row"><label for="jx_name">Jurisdiction Name</label></th>
-                    <td>
-                        <input type="text" name="jx_name" id="jx_name"
-                               value="<?php echo esc_attr( $_POST['jx_name'] ?? '' ); ?>"
-                               class="regular-text" placeholder="e.g. New Jersey" required>
-                    </td>
-                </tr>
-
-                <tr>
                     <th scope="row"><label for="jx_id">Jurisdiction ID</label></th>
                     <td>
+                        <select id="jx_select" class="regular-text" onchange="wsPromptApplyJxFromSelect()">
+                            <option value="">Select jurisdiction code...</option>
+                            <?php if ( ! is_wp_error( $jx_terms ) ): ?>
+                                <?php foreach ( $jx_terms as $term ): ?>
+                                    <option value="<?php echo esc_attr( strtoupper( $term->slug ) ); ?>" <?php selected( strtoupper( $posted_jx ), strtoupper( $term->slug ) ); ?>>
+                                        <?php echo esc_html( strtoupper( $term->slug ) . ' — ' . $term->name ); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </select>
+                        <br><br>
                         <input type="text" name="jx_id" id="jx_id"
-                               value="<?php echo esc_attr( $_POST['jx_id'] ?? '' ); ?>"
-                               class="small-text" placeholder="e.g. NJ" maxlength="4" required
+                               value="<?php echo esc_attr( $posted_jx ); ?>"
+                               class="small-text" placeholder="e.g. NJ" maxlength="2" required
                                style="text-transform:uppercase;">
-                        <p class="description">USPS two-letter code or US for federal.</p>
-                    </td>
-                </tr>
-
-                <tr>
-                    <th scope="row"><label for="legislature_url">Legislature URL</label></th>
-                    <td>
-                        <input type="url" name="legislature_url" id="legislature_url"
-                               value="<?php echo esc_attr( $_POST['legislature_url'] ?? '' ); ?>"
-                               class="regular-text" placeholder="https://www.njleg.state.nj.us/">
-                        <p class="description">Official legislature homepage for this jurisdiction.</p>
+                        <p class="description">Required: two-letter USPS code (or US). Use dropdown or type manually.</p>
                     </td>
                 </tr>
 
@@ -1436,7 +1613,7 @@ function ws_render_prompt_generator_page() {
                         <input type="number" name="records_requested" id="records_requested"
                                value="<?php echo esc_attr( $_POST['records_requested'] ?? '' ); ?>"
                                class="small-text" min="0" max="20" placeholder="0 = no limit">
-                        <p class="description">Leave blank or 0 for no limit.</p>
+                        <p class="description">Required. Set to 0 to tell the model: as many as you can comfortably find.</p>
                     </td>
                 </tr>
 
@@ -1444,8 +1621,8 @@ function ws_render_prompt_generator_page() {
                     <th scope="row"><label for="scope_notes">Scope Notes</label></th>
                     <td>
                         <textarea name="scope_notes" id="scope_notes" rows="3" class="large-text"
-                                  placeholder="e.g. Please include CEPA, with citations"><?php echo esc_textarea( $_POST['scope_notes'] ?? '' ); ?></textarea>
-                        <p class="description">Optional guidance for the model — specific statutes to include, priorities, etc. — Defaults to: state-level whistleblower laws and protections (if empty)</p>
+                                  placeholder="e.g. Please include CEPA, with citations"><?php echo esc_textarea( $scope_note_value ); ?></textarea>
+                        <p class="description">Optional. If blank, defaults to: <?php echo esc_html( $default_scope_note ); ?>.</p>
                     </td>
                 </tr>
 
@@ -1481,11 +1658,21 @@ function ws_render_prompt_generator_page() {
                 </tr>
 
                 <tr>
-                    <th scope="row"><label for="exclusion_list">Exclusion List</label></th>
+                    <th scope="row"><label for="exclusion_list_auto">Auto Exclusions (Drafts)</label></th>
                     <td>
-                        <textarea name="exclusion_list" id="exclusion_list" rows="4" class="large-text"
-                                  placeholder="NJ-34:19-1&#10;NJ-2A:32C-10"><?php echo esc_textarea( $_POST['exclusion_list'] ?? '' ); ?></textarea>
-                        <p class="description">One ID per line. Records already ingested — model will not produce duplicates.</p>
+                        <textarea name="exclusion_list_auto" id="exclusion_list_auto" rows="4" class="large-text code"
+                                  placeholder="No existing draft exclusions found for this jurisdiction/CPT."><?php echo esc_textarea( $auto_exclusions_text ); ?></textarea>
+                        <p class="description">Prefilled from existing draft records for this jurisdiction + CPT. Editable if you want to intentionally regenerate an existing record.</p>
+                    </td>
+                </tr>
+
+                <tr>
+                    <th scope="row"><label for="exclusion_list_manual">Manual Exclusions (Optional)</label></th>
+                    <td>
+                        <textarea name="exclusion_list_manual" id="exclusion_list_manual" rows="4" class="large-text"
+                                  placeholder="NJ-34:19-1&#10;NJ-2A:32C-10"><?php echo esc_textarea( $manual_exclusions ); ?></textarea>
+                        <p class="description">Add any extra IDs. Manual and auto exclusions are merged into the prompt.</p>
+                        <p class="description"><strong>Merged exclusions:</strong> <?php echo (int) $merged_count; ?> unique (<?php echo (int) $auto_count; ?> auto + <?php echo (int) $manual_count; ?> manual before dedupe).</p>
                     </td>
                 </tr>
 
@@ -1500,6 +1687,17 @@ function ws_render_prompt_generator_page() {
     </div>
 
     <script>
+    function wsPromptApplyJxFromSelect() {
+        var select = document.getElementById('jx_select');
+        var input = document.getElementById('jx_id');
+        if (!select || !input) {
+            return;
+        }
+        if (select.value) {
+            input.value = select.value.toUpperCase();
+        }
+    }
+
     function wsPromptToggleFields() {
         var type = document.getElementById('record_type').value;
         var groups = {
@@ -1519,7 +1717,13 @@ function ws_render_prompt_generator_page() {
                 el.style.display = '';
             });
         });
+
+        var countInput = document.getElementById('records_requested');
+        if (countInput) {
+            countInput.required = (type === 'statute' || type === 'common-law');
+        }
     }
+
     document.addEventListener('DOMContentLoaded', wsPromptToggleFields);
     </script>
     <?php
