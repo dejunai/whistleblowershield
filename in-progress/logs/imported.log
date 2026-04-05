@@ -1,3 +1,8 @@
-[2026-04-05 03:56:35 UTC]  NJ-7-Statute-NotebookLM.json  NJ  created:7  skipped:0  failed:0  errors:false
-[2026-04-05 03:57:00 UTC]  MA-7-Statute-NotebookLM.json  MA  created:7  skipped:0  failed:0  errors:true
-[2026-04-05 04:02:02 UTC]  CA-22-Statute-NotebookLM.json  CA  created:22  skipped:0  failed:0  errors:true
+[2026-04-05 19:15:28 UTC]  CA-22-Statute-NotebookLM.json  CA  created:0  skipped:22  failed:0  errors:true
+[2026-04-05 19:15:28 UTC]  MA-7-Statute-NotebookLM.json  MA  created:0  skipped:7  failed:0  errors:true
+[2026-04-05 19:15:28 UTC]  NJ-7-Statute-NotebookLM.json  NJ  created:0  skipped:7  failed:0  errors:true
+[2026-04-05 19:15:28 UTC]  PA-11-Statute-NotebookLM.json  PA  created:0  skipped:11  failed:0  errors:true
+[2026-04-05 19:18:41 UTC]  CA-22-Statute-NotebookLM.json  CA  created:22  skipped:0  failed:0  errors:false
+[2026-04-05 19:18:42 UTC]  MA-7-Statute-NotebookLM.json  MA  created:7  skipped:0  failed:0  errors:true
+[2026-04-05 19:18:42 UTC]  NJ-7-Statute-NotebookLM.json  NJ  created:7  skipped:0  failed:0  errors:false
+[2026-04-05 19:18:42 UTC]  PA-11-Statute-NotebookLM.json  PA  created:11  skipped:0  failed:0  errors:true
