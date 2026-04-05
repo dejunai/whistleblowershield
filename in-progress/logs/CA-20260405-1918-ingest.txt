@@ -1,205 +1,193 @@
 ================================================
 WS INGEST RUN LOG
 ================================================
-Run timestamp:    2026-04-05 04:02:02 UTC
+Run timestamp:    2026-04-05 19:18:41 UTC
 Jurisdiction:     CA
 Source:           NotebookLM Reconciliation
 Source method:    ai_assisted
-Batch completed:  2026-04-04 20:00 UTC
+Batch completed:  2026-04-04 23:25 UTC
 
 ── SUMMARY ──────────────────────────────────────
 Created:          22
 Skipped (dupe):   0
 Failed:           0
-Proposed new:     3
+Proposed new:     0
 Proposed merged:  3
-Blacklist size:   4
-
-── PREFLIGHT WARNINGS ───────────────────────────
-  Assistant reported with_errors: true.
-    → CA-6310: limit_ambiguous is true because 6-month limit derived from cross-referenced procedures.
-    → CA-1102.5: limit_ambiguous is true; SOL value derived from CCP § 338(a).
-    → CA-1278.5: limit_ambiguous is true; SOL value derived from general civil procedure.
-    → CA-98.6: limit_ambiguous is true; SOL value derived from general civil procedure.
-    → CA-232.5: limit_ambiguous is true; SOL value derived from general civil procedure.
-    → CA-44112: limit_ambiguous is true; SOL value derived from general civil procedure.
-    → CA-98.7: limit_ambiguous is true because SOL is derived from general practices.
-    → CA-1102.6: limit_ambiguous is true because SOL is derived from general civil procedure.
-    → CA-9149.30: limit_ambiguous is true because no explicit SOL in statute.
-    → CA-1102.8: limit_ambiguous is true because primarily a posting requirement tied to underlying claims.
-    → CA-6399.7: limit_ambiguous is true because SOL is tied to general retaliation periods.
-    → CA-6409.6: limit_ambiguous is true because general periods apply.
-    → CA-1596.881: limit_ambiguous is true because deadline derived from secondary provisions.
-    → CA-6311: limit_ambiguous is true because 6-month limit derived from cross-referenced procedures.
-    → CA-6312: limit_ambiguous is true because 6-month limit derived from Lab Code 98.7.
-    → CA-53296: limit_ambiguous is true because SOL derived from associated sections.
-    → Retained existing verified URLs and citations per specific user directive overriding standard URL-verification omission rules.
+Blacklist size:   8
 
 ── RECORD DETAIL ────────────────────────────────
-✓ CA-6310 [post #1868]
-    ⚠ CA-6310 [ws_disclosure_type]: removed 'public-health' (proposed term (pending))
+✓ CA-6310 [post #1948]
     · jurisdiction: assigned 'ca'
     · omitted (no ACF field): enforcement.primary_agency = Division of Labor Standards Enforcement (DLSE) / Cal/OSHA
     · omitted (no ACF field): links.is_official = 1
     · omitted (no ACF field): _review_notes = Merged from ChatGPT, UM1, and Grok. Retained limit_ambiguous true flag. Correcte
+    · omitted (no ACF field): _reconciled_notes = Removed unapproved term 'public-health' from disclosure_types and moved to new_t
     · omitted (no ACF field): citations.attached_citations = McDonald v. State of Cal. || addresses exhaustion pathway || https://law.justia.
     · omitted (no ACF field): citations.citation_count = 2
-    · CA-6310: created as post #1868 (draft, unverified)
-✓ CA-1102.5 [post #1869]
-    ⚠ CA-1102.5 [ws_disclosure_type]: removed 'labor-law' (proposed term (pending))
+    · CA-6310: created as post #1948 (draft, unverified)
+✓ CA-1102.5 [post #1949]
     · jurisdiction: assigned 'ca'
     · omitted (no ACF field): enforcement.primary_agency = California Labor Commissioner / Division of Labor Standards Enforcement
     · omitted (no ACF field): links.is_official = 1
     · omitted (no ACF field): _review_notes = Merged OpenAI, Gemini, and Grok records. Standardized limit_ambiguous flag to tr
+    · omitted (no ACF field): _reconciled_notes = Removed unapproved proposed term 'labor-law' from disclosure_types array; genera
     · omitted (no ACF field): citations.attached_citations = Lawson v. PPG Architectural Finishes, Inc. || establishes burden framework || ht
     · omitted (no ACF field): citations.citation_count = 2
-    · CA-1102.5: created as post #1869 (draft, unverified)
-✓ CA-1278.5 [post #1870]
-    ⚠ CA-1278.5 [ws_disclosure_type]: removed 'public-health' (proposed term (pending))
+    · CA-1102.5: created as post #1949 (draft, unverified)
+✓ CA-1278.5 [post #1950]
     · jurisdiction: assigned 'ca'
     · omitted (no ACF field): enforcement.primary_agency = California Department of Public Health
     · omitted (no ACF field): links.is_official = 1
     · omitted (no ACF field): _review_notes = Merged NotebookLM and Gemini records. Adopted has-details protected class to cov
+    · omitted (no ACF field): _reconciled_notes = Removed unapproved term 'public-health' from disclosure_types array and tracked 
     · omitted (no ACF field): citations.citation_count = 0
-    · CA-1278.5: created as post #1870 (draft, unverified)
-✓ CA-98.6 [post #1871]
-    ⚠ CA-98.6 [ws_disclosure_type]: removed 'labor-law' (proposed term (pending))
+    · CA-1278.5: created as post #1950 (draft, unverified)
+✓ CA-98.6 [post #1951]
     · jurisdiction: assigned 'ca'
     · omitted (no ACF field): enforcement.primary_agency = Labor Commissioner's Office (DLSE)
     · omitted (no ACF field): links.is_official = 1
     · omitted (no ACF field): _review_notes = Merged Gemini and NotebookLM records, capturing the $10,000 civil penalty remedy
+    · omitted (no ACF field): _reconciled_notes = Removed unapproved term 'labor-law', leaving the disclosure_types array empty, w
     · omitted (no ACF field): citations.citation_count = 0
-    · CA-98.6: created as post #1871 (draft, unverified)
-✓ CA-12653 [post #1872]
+    · CA-98.6: created as post #1951 (draft, unverified)
+✓ CA-12653 [post #1952]
     · jurisdiction: assigned 'ca'
     · omitted (no ACF field): enforcement.primary_agency = Office of the Attorney General
     · omitted (no ACF field): links.is_official = 1
     · omitted (no ACF field): _review_notes = CFCA anti-retaliation provision protecting those reporting false claims. Merged 
+    · omitted (no ACF field): _reconciled_notes = Taxonomy validation applied: Replaced parent slug 'all-sectors' with registered 
     · omitted (no ACF field): citations.citation_count = 0
-    · CA-12653: created as post #1872 (draft, unverified)
-✓ CA-232.5 [post #1873]
-    ⚠ CA-232.5 [ws_disclosure_type]: removed 'labor-law' (proposed term (pending))
+    · CA-12653: created as post #1952 (draft, unverified)
+✓ CA-232.5 [post #1953]
     · jurisdiction: assigned 'ca'
     · omitted (no ACF field): enforcement.primary_agency = Labor Commissioner's Office
     · omitted (no ACF field): links.is_official = 1
     · omitted (no ACF field): _review_notes = Protects employees discussing working conditions. Included directly from Gemini 
+    · omitted (no ACF field): _reconciled_notes = Removed unapproved term 'labor-law' and left valid child slug 'general-wrongdoin
     · omitted (no ACF field): citations.citation_count = 0
-    · CA-232.5: created as post #1873 (draft, unverified)
-✓ CA-44112 [post #1874]
-    ⚠ CA-44112 [ws_disclosure_type]: removed 'public-health' (proposed term (pending))
+    · CA-232.5: created as post #1953 (draft, unverified)
+✓ CA-44112 [post #1954]
     · jurisdiction: assigned 'ca'
     · omitted (no ACF field): links.is_official = 1
     · omitted (no ACF field): _review_notes = Included directly from NotebookLM. Protects public school employees reporting im
+    · omitted (no ACF field): _reconciled_notes = Removed unapproved taxonomy term 'public-health' to comply with strict child slu
     · omitted (no ACF field): citations.citation_count = 0
-    · CA-44112: created as post #1874 (draft, unverified)
-✓ CA-98.7 [post #1875]
+    · CA-44112: created as post #1954 (draft, unverified)
+✓ CA-98.7 [post #1955]
     · jurisdiction: assigned 'ca'
     · omitted (no ACF field): enforcement.primary_agency = Division of Labor Standards Enforcement (Labor Commissioner)
     · omitted (no ACF field): links.is_official = 1
     · omitted (no ACF field): _review_notes = This section authorizes the Labor Commissioner to investigate retaliation compla
+    · omitted (no ACF field): _reconciled_notes = Replaced parent slug 'all-sectors' with verified child slug 'all-employees' to p
     · omitted (no ACF field): citations.citation_count = 0
-    · CA-98.7: created as post #1875 (draft, unverified)
-✓ CA-1102.6 [post #1876]
+    · CA-98.7: created as post #1955 (draft, unverified)
+✓ CA-1102.6 [post #1956]
     · jurisdiction: assigned 'ca'
     · omitted (no ACF field): links.is_official = 1
     · omitted (no ACF field): _review_notes = Merged from ChatGPT and Grok. This section is procedural and provides the burden
+    · omitted (no ACF field): _reconciled_notes = Removed parent slug 'all-sectors' and substituted with strict child mapping 'all
     · omitted (no ACF field): citations.attached_citations = Lawson v. PPG Architectural Finishes, Inc. || clarifies burden-shifting framewor
     · omitted (no ACF field): citations.citation_count = 1
-    · CA-1102.6: created as post #1876 (draft, unverified)
-✓ CA-9149.30 [post #1877]
+    · CA-1102.6: created as post #1956 (draft, unverified)
+✓ CA-9149.30 [post #1957]
     · jurisdiction: assigned 'ca'
     · omitted (no ACF field): links.is_official = 1
     · omitted (no ACF field): _review_notes = Specific protections for legislative employees reporting violations of law or le
+    · omitted (no ACF field): _reconciled_notes = No taxonomy modifications required; arrays were properly composed using register
     · omitted (no ACF field): citations.citation_count = 0
-    · CA-9149.30: created as post #1877 (draft, unverified)
-✓ CA-1102.8 [post #1878]
+    · CA-9149.30: created as post #1957 (draft, unverified)
+✓ CA-1102.8 [post #1958]
     · jurisdiction: assigned 'ca'
     · omitted (no ACF field): enforcement.primary_agency = Labor Commissioner
     · omitted (no ACF field): links.is_official = 1
     · omitted (no ACF field): _review_notes = Requires employers to post model notice of whistleblower rights and responsibili
+    · omitted (no ACF field): _reconciled_notes = Audited array formats and swapped unregistered parent slug 'all-sectors' with co
     · omitted (no ACF field): citations.citation_count = 0
-    · CA-1102.8: created as post #1878 (draft, unverified)
-✓ CA-6399.7 [post #1879]
+    · CA-1102.8: created as post #1958 (draft, unverified)
+✓ CA-6399.7 [post #1959]
     · jurisdiction: assigned 'ca'
     · omitted (no ACF field): enforcement.primary_agency = Division of Labor Standards Enforcement
     · omitted (no ACF field): links.is_official = 1
     · omitted (no ACF field): _review_notes = Protects employees from retaliation for complaining or testifying about violatio
+    · omitted (no ACF field): _reconciled_notes = Replaced 'all-sectors' parent taxonomy slug with valid 'all-employees' child slu
     · omitted (no ACF field): citations.citation_count = 0
-    · CA-6399.7: created as post #1879 (draft, unverified)
-✓ CA-6409.6 [post #1880]
-    ⚠ CA-6409.6 [ws_disclosure_type]: removed 'public-health' (proposed term (pending))
+    · CA-6399.7: created as post #1959 (draft, unverified)
+✓ CA-6409.6 [post #1960]
     · jurisdiction: assigned 'ca'
     · omitted (no ACF field): links.is_official = 1
     · omitted (no ACF field): _review_notes = Specific protection against retaliation for disclosing COVID-19 related health i
+    · omitted (no ACF field): _reconciled_notes = Identified 'public-health' as unapproved and removed it from disclosure_types, w
     · omitted (no ACF field): citations.citation_count = 0
-    · CA-6409.6: created as post #1880 (draft, unverified)
-✓ CA-1596.881 [post #1881]
-    ⚠ CA-1596.881 [ws_disclosure_type]: removed 'consumer-protection' (proposed term (pending))
+    · CA-6409.6: created as post #1960 (draft, unverified)
+✓ CA-1596.881 [post #1961]
     · jurisdiction: assigned 'ca'
     · omitted (no ACF field): enforcement.primary_agency = Division of Labor Standards Enforcement
     · omitted (no ACF field): links.is_official = 1
     · omitted (no ACF field): _review_notes = Protects child day care facility employees from retaliation for reporting licens
+    · omitted (no ACF field): _reconciled_notes = Removed unapproved term 'consumer-protection' from disclosure_types and omitted 
     · omitted (no ACF field): citations.citation_count = 0
-    · CA-1596.881: created as post #1881 (draft, unverified)
-✓ CA-6311 [post #1882]
+    · CA-1596.881: created as post #1961 (draft, unverified)
+✓ CA-6311 [post #1962]
     · jurisdiction: assigned 'ca'
     · omitted (no ACF field): links.is_official = 1
     · omitted (no ACF field): _review_notes = Focuses on refusal to do dangerous work rather than complaints or reporting. The
+    · omitted (no ACF field): _reconciled_notes = Validated record schema and replaced parent slug 'all-sectors' with verified 'al
     · omitted (no ACF field): citations.citation_count = 0
-    · CA-6311: created as post #1882 (draft, unverified)
-✓ CA-6312 [post #1883]
+    · CA-6311: created as post #1962 (draft, unverified)
+✓ CA-6312 [post #1963]
     · jurisdiction: assigned 'ca'
     · omitted (no ACF field): enforcement.primary_agency = Labor Commissioner
     · omitted (no ACF field): links.is_official = 1
     · omitted (no ACF field): _review_notes = This section is procedural. It directs employees alleging violations of Sections
+    · omitted (no ACF field): _reconciled_notes = Changed parent taxonomy slug 'all-sectors' to registered child slug 'all-employe
     · omitted (no ACF field): citations.citation_count = 0
-    · CA-6312: created as post #1883 (draft, unverified)
-✓ CA-8547.8 [post #1884]
-    ⚠ CA-8547.8 [ws_disclosure_type]: removed 'public-health' (proposed term (pending))
+    · CA-6312: created as post #1963 (draft, unverified)
+✓ CA-8547.8 [post #1964]
     · jurisdiction: assigned 'ca'
     · omitted (no ACF field): enforcement.primary_agency = State Personnel Board
     · omitted (no ACF field): links.is_official = 1
     · omitted (no ACF field): _review_notes = This is the key enforcement section for rank-and-file California state employees
+    · omitted (no ACF field): _reconciled_notes = Removed unapproved term 'public-health' from disclosure_types and mapped to prop
     · omitted (no ACF field): citations.citation_count = 0
-    · CA-8547.8: created as post #1884 (draft, unverified)
-✓ CA-8547.10 [post #1885]
-    ⚠ CA-8547.10 [ws_disclosure_type]: removed 'public-health' (proposed term (pending))
+    · CA-8547.8: created as post #1964 (draft, unverified)
+✓ CA-8547.10 [post #1965]
     · jurisdiction: assigned 'ca'
     · omitted (no ACF field): links.is_official = 1
     · omitted (no ACF field): _review_notes = Mirrors the core state-employee model but is tailored to the University of Calif
+    · omitted (no ACF field): _reconciled_notes = Scrubbed unapproved term 'public-health' from disclosure_types. Confirmed and re
     · omitted (no ACF field): citations.citation_count = 0
-    · CA-8547.10: created as post #1885 (draft, unverified)
-✓ CA-8547.12 [post #1886]
-    ⚠ CA-8547.12 [ws_disclosure_type]: removed 'public-health' (proposed term (pending))
+    · CA-8547.10: created as post #1965 (draft, unverified)
+✓ CA-8547.12 [post #1966]
     · jurisdiction: assigned 'ca'
     · omitted (no ACF field): links.is_official = 1
     · omitted (no ACF field): _review_notes = California State University analogue to the University of California whistleblow
+    · omitted (no ACF field): _reconciled_notes = Scrubbed 'public-health' proposal from record array.
     · omitted (no ACF field): citations.citation_count = 0
-    · CA-8547.12: created as post #1886 (draft, unverified)
-✓ CA-8547.13 [post #1887]
-    ⚠ CA-8547.13 [ws_disclosure_type]: removed 'public-health' (proposed term (pending))
+    · CA-8547.12: created as post #1966 (draft, unverified)
+✓ CA-8547.13 [post #1967]
     · jurisdiction: assigned 'ca'
     · omitted (no ACF field): enforcement.primary_agency = State Personnel Board
     · omitted (no ACF field): links.is_official = 1
     · omitted (no ACF field): _review_notes = Extends California whistleblower retaliation protections into the judicial branc
+    · omitted (no ACF field): _reconciled_notes = Identified 'public-health' term in record array, removed it and correctly mapped
     · omitted (no ACF field): citations.citation_count = 0
-    · CA-8547.13: created as post #1887 (draft, unverified)
-✓ CA-53296 [post #1888]
-    ⚠ CA-53296 [ws_disclosure_type]: removed 'public-health' (proposed term (pending))
+    · CA-8547.13: created as post #1967 (draft, unverified)
+✓ CA-53296 [post #1968]
     · jurisdiction: assigned 'ca'
     · omitted (no ACF field): links.is_official = 1
     · omitted (no ACF field): _review_notes = Section 53296 is definitional but serves as the entry-point. Record reflects SOL
+    · omitted (no ACF field): _reconciled_notes = Removed unapproved term 'public-health' to proposed queue to meet strict validat
     · omitted (no ACF field): citations.citation_count = 0
-    · CA-53296: created as post #1888 (draft, unverified)
-✓ CA-87160 [post #1889]
-    ⚠ CA-87160 [ws_disclosure_type]: removed 'public-health' (proposed term (pending))
+    · CA-53296: created as post #1968 (draft, unverified)
+✓ CA-87160 [post #1969]
     · jurisdiction: assigned 'ca'
     · omitted (no ACF field): enforcement.primary_agency = State Personnel Board
     · omitted (no ACF field): links.is_official = 1
     · omitted (no ACF field): _review_notes = Summarizes the community-college whistleblower article using the entry point. Op
+    · omitted (no ACF field): _reconciled_notes = Moved unapproved 'public-health' slug to proposed terms queue. Ensured specific 
     · omitted (no ACF field): citations.attached_citations = Mize-Kurzman v. Marin Community College Dist. || interprets protected disclosure
     · omitted (no ACF field): citations.citation_count = 1
-    · CA-87160: created as post #1889 (draft, unverified)
+    · CA-87160: created as post #1969 (draft, unverified)
 
 ================================================
 END OF LOG

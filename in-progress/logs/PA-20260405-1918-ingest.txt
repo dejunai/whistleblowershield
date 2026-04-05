@@ -1,0 +1,95 @@
+================================================
+WS INGEST RUN LOG
+================================================
+Run timestamp:    2026-04-05 19:18:42 UTC
+Jurisdiction:     PA
+Source:           NotebookLM Reconciliation
+Source method:    ai_assisted
+Batch completed:  2026-04-05 01:28 UTC
+
+── SUMMARY ──────────────────────────────────────
+Created:          11
+Skipped (dupe):   0
+Failed:           0
+Proposed new:     0
+Proposed merged:  4
+Blacklist size:   8
+
+── RECORD DETAIL ────────────────────────────────
+✓ PA-1421 [post #1984]
+    · jurisdiction: assigned 'pa'
+    · omitted (no ACF field): links.is_official = 1
+    · omitted (no ACF field): _review_notes = Primary law for public employees and employees of entities receiving public fund
+    · omitted (no ACF field): _reconciled_notes = Merged records from Gemini (PA-1421), Grok (PA-1421) and ChatGPT (PA-169). Repla
+    · omitted (no ACF field): citations.attached_citations = Bailets v. Pennsylvania Turnpike Commission || expands definition of public body
+    · omitted (no ACF field): citations.citation_count = 3
+    · PA-1421: created as post #1984 (draft, unverified)
+✓ PA-448.814 [post #1985]
+    ⚠ PA-448.814 [ws_disclosure_type]: removed 'public-health-safety' (parent slug)
+    · jurisdiction: assigned 'pa'
+    · omitted (no ACF field): links.is_official = 1
+    · omitted (no ACF field): _review_notes = Protects healthcare facility staff reporting health and safety violations. SOL i
+    · omitted (no ACF field): _reconciled_notes = Sourced from Gemini. Kept limit_ambiguous true and correctly removed empty citat
+    · PA-448.814: created as post #1985 (draft, unverified)
+✓ PA-333.112 [post #1986]
+    · jurisdiction: assigned 'pa'
+    · omitted (no ACF field): links.is_official = 1
+    · omitted (no ACF field): _review_notes = Anti-retaliation provision within the Minimum Wage Act. Note that SOL is not exp
+    · omitted (no ACF field): _reconciled_notes = Sourced from Gemini. Retained limit_ambiguous true.
+    · PA-333.112: created as post #1986 (draft, unverified)
+✓ PA-260.9a [post #1987]
+    · jurisdiction: assigned 'pa'
+    · omitted (no ACF field): links.is_official = 1
+    · omitted (no ACF field): _review_notes = WPCL provides a longer 3-year statute of limitations compared to many other PA l
+    · omitted (no ACF field): _reconciled_notes = Sourced from Gemini.
+    · PA-260.9a: created as post #1987 (draft, unverified)
+✓ PA-10225.303 [post #1988]
+    ⚠ PA-10225.303 [ws_disclosure_type]: removed 'public-health-safety' (parent slug)
+    · jurisdiction: assigned 'pa'
+    · omitted (no ACF field): links.is_official = 1
+    · omitted (no ACF field): _review_notes = Protects staff in long-term care or elderly services reporting abuse. Note the s
+    · omitted (no ACF field): _reconciled_notes = Merged Gemini (PA-10225.303) and ChatGPT (PA-302-OAPSA). Resolved SOL conflict b
+    · PA-10225.303: created as post #1988 (draft, unverified)
+✓ PA-6018.611 [post #1989]
+    · jurisdiction: assigned 'pa'
+    · omitted (no ACF field): links.is_official = 1
+    · omitted (no ACF field): _review_notes = Specific environmental whistleblower protection. Map 'actual damages' to compens
+    · omitted (no ACF field): _reconciled_notes = Sourced from Gemini. Maintained limit_ambiguous rule compliance.
+    · PA-6018.611: created as post #1989 (draft, unverified)
+✓ PA-1422 [post #1990]
+    · jurisdiction: assigned 'pa'
+    · omitted (no ACF field): links.is_official = 1
+    · omitted (no ACF field): _review_notes = Specifically protects legislative staff. SOL mirrors the general Whistleblower L
+    · omitted (no ACF field): _reconciled_notes = Sourced from Gemini. Upgraded retaliation-protection to general-wrongdoing to re
+    · PA-1422: created as post #1990 (draft, unverified)
+✓ PA-3316 [post #1991]
+    · jurisdiction: assigned 'pa'
+    · omitted (no ACF field): links.is_official = 1
+    · omitted (no ACF field): _review_notes = Actual damages was mapped to compensatory-damages. The statute authorizes a civi
+    · omitted (no ACF field): _reconciled_notes = Sourced from ChatGPT. Retained all specific elements.
+    · PA-3316: created as post #1991 (draft, unverified)
+✓ PA-6320 [post #1992]
+    ⚠ PA-6320 [ws_disclosure_type]: removed 'public-health-safety' (parent slug)
+    · jurisdiction: assigned 'pa'
+    · omitted (no ACF field): links.is_official = 1
+    · omitted (no ACF field): _review_notes = This section expressly provides for a civil action, venue in the county where th
+    · omitted (no ACF field): _reconciled_notes = Sourced from ChatGPT. Added public-health-safety to disclosure types in addition
+    · PA-6320: created as post #1992 (draft, unverified)
+✓ PA-302 [post #1993]
+    ⚠ PA-302 [ws_disclosure_type]: removed 'public-health-safety' (parent slug)
+    · jurisdiction: assigned 'pa'
+    · omitted (no ACF field): links.is_official = 1
+    · omitted (no ACF field): _review_notes = Section 302(d)(2) and (e)(2) authorize recovery of treble compensatory damages, 
+    · omitted (no ACF field): _reconciled_notes = Sourced from ChatGPT. Renamed statute_id from PA-302-APSA to PA-302 to comply wi
+    · PA-302: created as post #1993 (draft, unverified)
+✓ PA-1108 [post #1994]
+    · jurisdiction: assigned 'pa'
+    · omitted (no ACF field): enforcement.primary_agency = State Ethics Commission
+    · omitted (no ACF field): links.is_official = 1
+    · omitted (no ACF field): _review_notes = This is an anti-retaliation provision embedded in the Ethics Act's investigation
+    · omitted (no ACF field): _reconciled_notes = Sourced from ChatGPT. Replaced general-wrongdoing with public-corruption-ethics 
+    · PA-1108: created as post #1994 (draft, unverified)
+
+================================================
+END OF LOG
+================================================

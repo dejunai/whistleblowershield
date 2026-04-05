@@ -1,94 +1,10 @@
 {
     "proposed_terms": [
         {
-            "taxonomy": "ws_disclosure_targets",
-            "term_id": "internal-management",
-            "term_label": "Internal Management",
-            "notes": "General management disclosure target when specific supervisors or HR are not solely identified.",
-            "seen_in": [
-                "CA-6310",
-                "CA-1102.5",
-                "CA-1278.5",
-                "CA-98.6",
-                "CA-12653",
-                "CA-232.5",
-                "CA-44112",
-                "CA-98.7",
-                "CA-9149.30",
-                "CA-1102.8",
-                "CA-6409.6",
-                "CA-8547.8",
-                "CA-8547.10",
-                "CA-8547.12",
-                "CA-8547.13",
-                "CA-87160"
-            ],
-            "count": 16,
-            "status": "approved",
-            "resolved_on": "2026-04-04",
-            "resolution": "registered"
-        },
-        {
-            "taxonomy": "ws_disclosure_type",
-            "term_id": "general-wrongdoing",
-            "term_label": "General Wrongdoing",
-            "notes": "Catch-all for statutes prohibiting retaliation for reporting any violation of law.",
-            "seen_in": [
-                "CA-1102.5",
-                "CA-232.5",
-                "CA-98.7",
-                "CA-1102.6",
-                "CA-9149.30",
-                "CA-1102.8"
-            ],
-            "count": 6,
-            "status": "approved",
-            "resolved_on": "2026-04-04",
-            "resolution": "registered"
-        },
-        {
-            "taxonomy": "ws_protected_class",
-            "term_id": "all-sectors",
-            "term_label": "All Employees / All Sectors",
-            "notes": "Frequently cited in statutes providing broad coverage without specific sector limitations.",
-            "seen_in": [
-                "CA-6310",
-                "CA-1102.5",
-                "CA-98.6",
-                "CA-12653",
-                "CA-232.5",
-                "CA-98.7",
-                "CA-1102.6",
-                "CA-1102.8",
-                "CA-6399.7",
-                "CA-6409.6",
-                "CA-1596.881",
-                "CA-6311",
-                "CA-6312"
-            ],
-            "count": 13,
-            "status": "approved",
-            "resolved_on": "2026-04-04",
-            "resolution": "registered"
-        },
-        {
-            "taxonomy": "ws_protected_class",
-            "term_id": "victim-of-domestic-violence-or-sexual-assault",
-            "term_label": "Victim of Domestic Violence or Sexual Assault",
-            "notes": "Specifically protected under the NJ SAFE Act for taking leave or seeking assistance. No existing slug in ws_protected_class covers this specific status.",
-            "seen_in": [
-                "NJ-34:11C-1"
-            ],
-            "count": 1,
-            "status": "pending",
-            "resolved_on": null,
-            "resolution": null
-        },
-        {
             "taxonomy": "ws_disclosure_type",
             "term_id": "public-health",
             "term_label": "Public Health",
-            "notes": "Specifically protects reports concerning broader public health risks rather than solely workplace safety.",
+            "notes": "Specifically protects reports concerning broader public health risks rather than solely workplace safety. Existing child slugs under public-health-safety do not cover broad disease or generic patient safety reporting.",
             "seen_in": [
                 "CA-6310",
                 "CA-1278.5",
@@ -110,7 +26,7 @@
             "taxonomy": "ws_disclosure_type",
             "term_id": "labor-law",
             "term_label": "Labor Law",
-            "notes": "Reporting violations of state or federal labor codes.",
+            "notes": "Reporting violations of state or federal labor codes. Existing workplace-employment child slugs are specific (wage/hour, safety) and do not comprehensively cover general Labor Code violations.",
             "seen_in": [
                 "CA-1102.5",
                 "CA-98.6",
@@ -125,9 +41,74 @@
             "taxonomy": "ws_disclosure_type",
             "term_id": "consumer-protection",
             "term_label": "Consumer Protection",
-            "notes": "Reporting violations affecting consumers or clients in non-financial contexts (e.g., child care facilities).",
+            "notes": "Reporting violations affecting consumers or clients in non-financial contexts (e.g., child care facilities). Existing slug consumer-financial-protection is too narrow.",
             "seen_in": [
                 "CA-1596.881"
+            ],
+            "count": 1,
+            "status": "pending",
+            "resolved_on": null,
+            "resolution": null
+        },
+        {
+            "taxonomy": "ws_protected_class",
+            "term_id": "victim-of-domestic-violence-or-sexual-assault",
+            "term_label": "Victim of Domestic Violence or Sexual Assault",
+            "notes": "Specifically protected under the NJ SAFE Act for taking leave or seeking assistance. No existing slug in ws_protected_class covers this specific status.",
+            "seen_in": [
+                "NJ-34:11C-1"
+            ],
+            "count": 1,
+            "status": "pending",
+            "resolved_on": null,
+            "resolution": null
+        },
+        {
+            "taxonomy": "ws_disclosure_type",
+            "term_id": "child-abuse-reporting",
+            "term_label": "Child Abuse Reporting",
+            "notes": "Used for statutes protecting reports of suspected child abuse. Existing terms like general-wrongdoing are only a rough fallback and do not capture the specific child-protection reporting context.",
+            "seen_in": [
+                "PA-6320"
+            ],
+            "count": 1,
+            "status": "pending",
+            "resolved_on": null,
+            "resolution": null
+        },
+        {
+            "taxonomy": "ws_disclosure_type",
+            "term_id": "older-adult-abuse-reporting",
+            "term_label": "Older Adult Abuse Reporting",
+            "notes": "Used for statutes protecting reports of abuse, neglect, exploitation or abandonment of older adults. Existing disclosure-type terms do not cleanly capture elder-protective-services reporting.",
+            "seen_in": [
+                "PA-10225.303"
+            ],
+            "count": 1,
+            "status": "pending",
+            "resolved_on": null,
+            "resolution": null
+        },
+        {
+            "taxonomy": "ws_disclosure_type",
+            "term_id": "vulnerable-adult-abuse-reporting",
+            "term_label": "Vulnerable Adult Abuse Reporting",
+            "notes": "Used for statutes protecting reports of abuse, neglect, exploitation or abandonment of adults in need of protective services. Existing terms do not precisely fit adult-protective-services reporting.",
+            "seen_in": [
+                "PA-302"
+            ],
+            "count": 1,
+            "status": "pending",
+            "resolved_on": null,
+            "resolution": null
+        },
+        {
+            "taxonomy": "ws_disclosure_type",
+            "term_id": "government-ethics-reporting",
+            "term_label": "Government Ethics Reporting",
+            "notes": "Used for anti-retaliation provisions tied to filing complaints with or providing information to the State Ethics Commission. General-wrongdoing is a fallback but does not capture the ethics-enforcement context.",
+            "seen_in": [
+                "PA-1108"
             ],
             "count": 1,
             "status": "pending",
