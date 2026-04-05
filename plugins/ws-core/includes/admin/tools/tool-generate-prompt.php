@@ -122,6 +122,23 @@ function ws_prompt_record_type_to_post_type( string $record_type ): string {
 }
 
 function ws_prompt_extract_record_identifier( string $record_type, int $post_id ): string {
+    if ( $record_type === 'statute' ) {
+        $record_key = trim( (string) get_post_meta( $post_id, 'ws_ingest_record_key', true ) );
+        if ( $record_key !== '' && str_contains( $record_key, '::' ) ) {
+            $parts = explode( '::', $record_key, 2 );
+            $sid   = trim( (string) ( $parts[1] ?? '' ) );
+            if ( $sid !== '' ) {
+                return $sid;
+            }
+        }
+
+        // Legacy fallback for records created before ws_ingest_record_key.
+        $citation = trim( (string) get_post_meta( $post_id, 'ws_jx_statute_citation', true ) );
+        if ( $citation !== '' ) {
+            return $citation;
+        }
+    }
+
     if ( $record_type === 'common-law' ) {
         $doctrine_id = trim( (string) get_post_meta( $post_id, 'ws_cl_doctrine_id', true ) );
         if ( $doctrine_id !== '' ) {
@@ -140,7 +157,7 @@ function ws_prompt_get_auto_exclusions( string $record_type, string $jx_id ): ar
 
     $posts = get_posts( [
         'post_type'              => $post_type,
-        'post_status'            => 'draft',
+        'post_status'            => [ 'publish', 'draft', 'auto-draft', 'pending' ],
         'posts_per_page'         => -1,
         'fields'                 => 'ids',
         'no_found_rows'          => true,
@@ -154,6 +171,27 @@ function ws_prompt_get_auto_exclusions( string $record_type, string $jx_id ): ar
             ],
         ],
     ] );
+
+    // Statute fallback: handle records where taxonomy scope was not assigned
+    // but ingest key exists and can still scope by jurisdiction code.
+    if ( empty( $posts ) && $record_type === 'statute' ) {
+        $posts = get_posts( [
+            'post_type'              => $post_type,
+            'post_status'            => [ 'publish', 'draft', 'auto-draft', 'pending' ],
+            'posts_per_page'         => -1,
+            'fields'                 => 'ids',
+            'no_found_rows'          => true,
+            'update_post_meta_cache' => false,
+            'update_post_term_cache' => false,
+            'meta_query'             => [
+                [
+                    'key'     => 'ws_ingest_record_key',
+                    'value'   => strtoupper( $jx_id ) . '::',
+                    'compare' => 'LIKE',
+                ],
+            ],
+        ] );
+    }
 
     if ( empty( $posts ) ) {
         return [];
