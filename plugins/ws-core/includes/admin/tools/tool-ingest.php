@@ -1412,6 +1412,9 @@ function ws_render_ingest_tool_page() {
                     ⏭ Skipped (duplicate): <strong><?php echo (int) $s['skipped']; ?></strong> &nbsp;|&nbsp;
                     ❌ Failed: <strong><?php echo (int) $s['failed']; ?></strong>
                 </p>
+                <?php if ( (int) $s['skipped'] > 0 ): ?>
+                    <p>Batch process detected duplicates. Duplicates were skipped.</p>
+                <?php endif; ?>
                 <p>
                     Source: <strong><?php echo esc_html( $s['source_name'] ); ?></strong>
                     (<?php echo esc_html( $s['source_method'] ); ?>) &nbsp;|&nbsp;
@@ -1470,12 +1473,23 @@ function ws_render_ingest_tool_page() {
                         &nbsp;|&nbsp; Corrected JSON previews: <strong><?php echo (int) ( $f['corrected_files'] ?? 0 ); ?></strong>
                     </p>
                     <p>No records were written and no files were moved in dry run mode.</p>
+                    <?php if ( (int) ( $f['ready_files'] ?? 0 ) > 0 ): ?>
+                        <form method="post" action="" style="margin:8px 0 0 0;">
+                            <?php wp_nonce_field( 'ws_run_ingest', 'ws_ingest_nonce' ); ?>
+                            <input type="hidden" name="ws_ingest_mode" value="folder">
+                            <input type="hidden" name="ws_ingest_folder_limit" value="<?php echo esc_attr( (string) ( $f['limit'] ?? 25 ) ); ?>">
+                            <input type="submit" class="button button-primary" value="Execute Now (Run Without Dry Run)">
+                        </form>
+                    <?php endif; ?>
                 <?php else: ?>
                     <p>
                         Records — ✅ Created: <strong><?php echo (int) ( $f['created_total'] ?? 0 ); ?></strong>
                         &nbsp;|&nbsp; ⏭ Skipped: <strong><?php echo (int) ( $f['skipped_total'] ?? 0 ); ?></strong>
                         &nbsp;|&nbsp; ❌ Failed: <strong><?php echo (int) ( $f['failed_total'] ?? 0 ); ?></strong>
                     </p>
+                    <?php if ( (int) ( $f['skipped_total'] ?? 0 ) > 0 ): ?>
+                        <p>Batch process detected duplicates. Duplicates were skipped.</p>
+                    <?php endif; ?>
                     <p>
                         Archived files: <strong><?php echo (int) ( $f['archived_files'] ?? 0 ); ?></strong>
                         &nbsp;|&nbsp; Corrected JSON files: <strong><?php echo (int) ( $f['corrected_files'] ?? 0 ); ?></strong>
