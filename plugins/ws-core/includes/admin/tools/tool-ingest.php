@@ -756,6 +756,11 @@ function ws_ingest_process_statute_record( array $record, array $meta, array $bl
         update_post_meta( $post_id, 'ws_ingest_record_key', $record_key );
     }
 
+    if ( $sid !== '' && $sid !== 'UNKNOWN' ) {
+        // Canonical hidden key used by prompt exclusions.
+        update_post_meta( $post_id, '_ws_jx_statute_id', sanitize_text_field( $sid ) );
+    }
+
     // ── Step 5: Field map ────────────────────────────────────────────────
     $field_map      = ws_ingest_statute_field_map_v2();
     $tax_removals   = [];

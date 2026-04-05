@@ -123,20 +123,7 @@ function ws_prompt_record_type_to_post_type( string $record_type ): string {
 
 function ws_prompt_extract_record_identifier( string $record_type, int $post_id ): string {
     if ( $record_type === 'statute' ) {
-        $record_key = trim( (string) get_post_meta( $post_id, 'ws_ingest_record_key', true ) );
-        if ( $record_key !== '' && str_contains( $record_key, '::' ) ) {
-            $parts = explode( '::', $record_key, 2 );
-            $sid   = trim( (string) ( $parts[1] ?? '' ) );
-            if ( $sid !== '' ) {
-                return $sid;
-            }
-        }
-
-        // Legacy fallback for records created before ws_ingest_record_key.
-        $citation = trim( (string) get_post_meta( $post_id, 'ws_jx_statute_citation', true ) );
-        if ( $citation !== '' ) {
-            return $citation;
-        }
+        return trim( (string) get_post_meta( $post_id, '_ws_jx_statute_id', true ) );
     }
 
     if ( $record_type === 'common-law' ) {
@@ -155,9 +142,84 @@ function ws_prompt_get_auto_exclusions( string $record_type, string $jx_id ): ar
         return [];
     }
 
+    $allowed_statuses = [ 'publish', 'private', 'draft', 'auto-draft', 'pending', 'future' ];
+    $jx_slug = strtolower( $jx_id );
+
+    if ( $record_type === 'statute' ) {
+        $posts = get_posts( [
+            'post_type'              => $post_type,
+            'post_status'            => $allowed_statuses,
+            'posts_per_page'         => -1,
+            'fields'                 => 'ids',
+            'no_found_rows'          => true,
+            'update_post_meta_cache' => false,
+            'update_post_term_cache' => false,
+            'tax_query'              => [
+                [
+                    'taxonomy' => WS_JURISDICTION_TAXONOMY,
+                    'field'    => 'slug',
+                    'terms'    => [ $jx_slug ],
+                ],
+            ],
+            'meta_query'             => [
+                [
+                    'key'     => '_ws_jx_statute_id',
+                    'value'   => '',
+                    'compare' => '!=',
+                ],
+            ],
+        ] );
+
+        if ( empty( $posts ) ) {
+            return [];
+        }
+
+        $ids = [];
+        foreach ( $posts as $pid ) {
+            $sid = trim( (string) get_post_meta( (int) $pid, '_ws_jx_statute_id', true ) );
+            if ( $sid !== '' ) {
+                $ids[] = $sid;
+            }
+        }
+
+        $ids = array_values( array_unique( $ids ) );
+        sort( $ids, SORT_NATURAL | SORT_FLAG_CASE );
+        return $ids;
+    }
+
+    $post_matches_jx = static function( int $pid ) use ( $record_type, $jx_id, $jx_slug ): bool {
+        $terms = wp_get_post_terms( $pid, WS_JURISDICTION_TAXONOMY, [ 'fields' => 'slugs' ] );
+        if ( ! is_wp_error( $terms ) && in_array( $jx_slug, array_map( 'strtolower', (array) $terms ), true ) ) {
+            return true;
+        }
+
+        if ( $record_type === 'statute' ) {
+            $rk = strtoupper( trim( (string) get_post_meta( $pid, 'ws_ingest_record_key', true ) ) );
+            if ( $rk !== '' && str_starts_with( $rk, strtoupper( $jx_id ) . '::' ) ) {
+                return true;
+            }
+        }
+
+        if ( $record_type === 'common-law' ) {
+            $did = strtoupper( trim( (string) get_post_meta( $pid, 'ws_cl_doctrine_id', true ) ) );
+            if ( $did !== '' && str_starts_with( $did, strtoupper( $jx_id ) . '-CL-' ) ) {
+                return true;
+            }
+        }
+
+        if ( in_array( $record_type, [ 'citation', 'interpretation' ], true ) ) {
+            $title = strtoupper( trim( (string) get_the_title( $pid ) ) );
+            if ( $title !== '' && str_starts_with( $title, strtoupper( $jx_id ) . '-' ) ) {
+                return true;
+            }
+        }
+
+        return false;
+    };
+
     $posts = get_posts( [
         'post_type'              => $post_type,
-        'post_status'            => [ 'publish', 'draft', 'auto-draft', 'pending' ],
+        'post_status'            => $allowed_statuses,
         'posts_per_page'         => -1,
         'fields'                 => 'ids',
         'no_found_rows'          => true,
@@ -167,7 +229,7 @@ function ws_prompt_get_auto_exclusions( string $record_type, string $jx_id ): ar
             [
                 'taxonomy' => WS_JURISDICTION_TAXONOMY,
                 'field'    => 'slug',
-                'terms'    => [ strtolower( $jx_id ) ],
+                'terms'    => [ $jx_slug ],
             ],
         ],
     ] );
@@ -177,7 +239,7 @@ function ws_prompt_get_auto_exclusions( string $record_type, string $jx_id ): ar
     if ( empty( $posts ) && $record_type === 'statute' ) {
         $posts = get_posts( [
             'post_type'              => $post_type,
-            'post_status'            => [ 'publish', 'draft', 'auto-draft', 'pending' ],
+            'post_status'            => $allowed_statuses,
             'posts_per_page'         => -1,
             'fields'                 => 'ids',
             'no_found_rows'          => true,
@@ -191,6 +253,24 @@ function ws_prompt_get_auto_exclusions( string $record_type, string $jx_id ): ar
                 ],
             ],
         ] );
+    }
+
+    // Final fallback for mixed legacy data: scan all posts of this CPT and
+    // include anything that can be confidently matched to this JX.
+    if ( empty( $posts ) ) {
+        $all_posts = get_posts( [
+            'post_type'              => $post_type,
+            'post_status'            => $allowed_statuses,
+            'posts_per_page'         => -1,
+            'fields'                 => 'ids',
+            'no_found_rows'          => true,
+            'update_post_meta_cache' => false,
+            'update_post_term_cache' => false,
+        ] );
+
+        if ( ! empty( $all_posts ) ) {
+            $posts = array_values( array_filter( array_map( 'intval', $all_posts ), $post_matches_jx ) );
+        }
     }
 
     if ( empty( $posts ) ) {
@@ -208,6 +288,45 @@ function ws_prompt_get_auto_exclusions( string $record_type, string $jx_id ): ar
     $ids = array_values( array_unique( $ids ) );
     sort( $ids, SORT_NATURAL | SORT_FLAG_CASE );
     return $ids;
+}
+
+function ws_prompt_get_statute_posts_missing_hidden_id( string $jx_id ): array {
+    $jx_slug = strtolower( trim( $jx_id ) );
+    if ( $jx_slug === '' ) {
+        return [];
+    }
+
+    $allowed_statuses = [ 'publish', 'private', 'draft', 'auto-draft', 'pending', 'future' ];
+    $posts = get_posts( [
+        'post_type'              => 'jx-statute',
+        'post_status'            => $allowed_statuses,
+        'posts_per_page'         => -1,
+        'fields'                 => 'ids',
+        'no_found_rows'          => true,
+        'update_post_meta_cache' => false,
+        'update_post_term_cache' => false,
+        'tax_query'              => [
+            [
+                'taxonomy' => WS_JURISDICTION_TAXONOMY,
+                'field'    => 'slug',
+                'terms'    => [ $jx_slug ],
+            ],
+        ],
+    ] );
+
+    if ( empty( $posts ) ) {
+        return [];
+    }
+
+    $missing = [];
+    foreach ( $posts as $pid ) {
+        $sid = trim( (string) get_post_meta( (int) $pid, '_ws_jx_statute_id', true ) );
+        if ( $sid === '' ) {
+            $missing[] = get_the_title( (int) $pid ) ?: ('post #' . (int) $pid);
+        }
+    }
+
+    return $missing;
 }
 
 function ws_prompt_merge_exclusions( string $manual_exclusions, array $auto_exclusions ): string {
@@ -1566,6 +1685,9 @@ function ws_render_prompt_generator_page() {
     $record_type = sanitize_text_field( $_POST['record_type'] ?? 'statute' );
     $posted_jx   = strtoupper( sanitize_text_field( $_POST['jx_id'] ?? '' ) );
     $auto_exclusions = ( $posted_jx && $record_type ) ? ws_prompt_get_auto_exclusions( $record_type, $posted_jx ) : [];
+    $missing_statute_hidden_ids = ( $record_type === 'statute' && $posted_jx )
+        ? ws_prompt_get_statute_posts_missing_hidden_id( $posted_jx )
+        : [];
     $default_scope_note = 'state-level whistleblower laws and protections';
     if ( $posted_jx ) {
         $ctx = ws_prompt_resolve_jx_context( $posted_jx );
@@ -1700,7 +1822,12 @@ function ws_render_prompt_generator_page() {
                     <td>
                         <textarea name="exclusion_list_auto" id="exclusion_list_auto" rows="4" class="large-text code"
                                   placeholder="No existing draft exclusions found for this jurisdiction/CPT."><?php echo esc_textarea( $auto_exclusions_text ); ?></textarea>
-                        <p class="description">Prefilled from existing draft records for this jurisdiction + CPT. Editable if you want to intentionally regenerate an existing record.</p>
+                        <p class="description">Prefilled from existing records for this jurisdiction + CPT using canonical hidden statute key <code>_ws_jx_statute_id</code>. Editable if you want to intentionally regenerate an existing record.</p>
+                        <?php if ( ! empty( $missing_statute_hidden_ids ) ): ?>
+                            <p class="description" style="color:#c00;">
+                                Flag: <?php echo (int) count( $missing_statute_hidden_ids ); ?> statute post(s) are missing <code>_ws_jx_statute_id</code> and are not auto-excluded.
+                            </p>
+                        <?php endif; ?>
                     </td>
                 </tr>
 

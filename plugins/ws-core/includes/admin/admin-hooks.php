@@ -933,6 +933,127 @@ function ws_source_verify_post_types() {
     ];
 }
 
+// ════════════════════════════════════════════════════════════════════════════
+// Hidden Statute ID Sync
+//
+// Ensures every jx-statute has canonical hidden `_ws_jx_statute_id` even when
+// created/edited manually in wp-admin. This key is consumed by prompt
+// generator exclusions and is independent of ACF field definitions.
+//
+// Derivation order:
+//   1) existing _ws_jx_statute_id (normalized)
+//   2) ws_ingest_record_key (JX::STATUTE_ID)
+//   3) title prefix like "CA-1102.5 ..."
+//   4) ws_jx_statute_citation + assigned jx taxonomy code
+//
+// If derivation fails, set `_ws_jx_statute_id_missing = 1` as an explicit flag.
+// ════════════════════════════════════════════════════════════════════════════
+
+function ws_normalize_hidden_statute_id( string $value ): string {
+    $v = strtoupper( trim( $value ) );
+    $v = preg_replace( '/\s+/', '', $v );
+    $v = preg_replace( '/[^A-Z0-9\.\:\-]/', '', $v );
+    return (string) $v;
+}
+
+function ws_get_statute_jx_code( int $post_id ): string {
+    $terms = wp_get_post_terms( $post_id, WS_JURISDICTION_TAXONOMY, [ 'fields' => 'slugs' ] );
+    if ( is_wp_error( $terms ) || empty( $terms ) ) {
+        return '';
+    }
+    return strtoupper( trim( (string) $terms[0] ) );
+}
+
+function ws_extract_statute_section_from_citation( string $citation ): string {
+    $raw = trim( $citation );
+    if ( $raw === '' ) {
+        return '';
+    }
+
+    // Explicit JX-prefixed id embedded in citation text.
+    if ( preg_match( '/\b([A-Z]{2})\s*[-:]\s*([A-Z0-9\.\:\-]+)\b/i', $raw, $m ) ) {
+        return ws_normalize_hidden_statute_id( strtoupper( $m[1] ) . '-' . $m[2] );
+    }
+
+    // Common legal citation marker, e.g. "... § 1102.5".
+    if ( preg_match( '/§{1,2}\s*([0-9A-Z\.\:\-]+)/i', $raw, $m ) ) {
+        return ws_normalize_hidden_statute_id( $m[1] );
+    }
+
+    return '';
+}
+
+function ws_derive_hidden_statute_id( int $post_id ): string {
+    $existing = ws_normalize_hidden_statute_id( (string) get_post_meta( $post_id, '_ws_jx_statute_id', true ) );
+    if ( $existing !== '' ) {
+        return $existing;
+    }
+
+    $record_key = trim( (string) get_post_meta( $post_id, 'ws_ingest_record_key', true ) );
+    if ( $record_key !== '' && str_contains( $record_key, '::' ) ) {
+        [ $rk_jx, $rk_sid ] = array_pad( explode( '::', strtoupper( $record_key ), 2 ), 2, '' );
+        $candidate = ws_normalize_hidden_statute_id( $rk_jx . '-' . $rk_sid );
+        if ( preg_match( '/^[A-Z]{2}-[A-Z0-9\.\:\-]+$/', $candidate ) ) {
+            return $candidate;
+        }
+    }
+
+    $title = trim( (string) get_the_title( $post_id ) );
+    if ( preg_match( '/^([A-Z]{2}-[A-Z0-9\.\:\-]+)/i', $title, $m ) ) {
+        $candidate = ws_normalize_hidden_statute_id( $m[1] );
+        if ( preg_match( '/^[A-Z]{2}-[A-Z0-9\.\:\-]+$/', $candidate ) ) {
+            return $candidate;
+        }
+    }
+
+    $jx_code  = ws_get_statute_jx_code( $post_id );
+    $citation = (string) get_post_meta( $post_id, 'ws_jx_statute_citation', true );
+    $section  = ws_extract_statute_section_from_citation( $citation );
+
+    if ( $jx_code !== '' && $section !== '' ) {
+        // If section already includes JX, keep it. Otherwise prefix with JX.
+        if ( preg_match( '/^[A-Z]{2}-/', $section ) ) {
+            $candidate = $section;
+        } else {
+            $candidate = ws_normalize_hidden_statute_id( $jx_code . '-' . $section );
+        }
+
+        if ( preg_match( '/^[A-Z]{2}-[A-Z0-9\.\:\-]+$/', $candidate ) ) {
+            return $candidate;
+        }
+    }
+
+    return '';
+}
+
+function ws_sync_hidden_statute_id_for_post( int $post_id ): void {
+    if ( ! $post_id || get_post_type( $post_id ) !== 'jx-statute' ) {
+        return;
+    }
+
+    $candidate = ws_derive_hidden_statute_id( $post_id );
+    if ( $candidate !== '' ) {
+        update_post_meta( $post_id, '_ws_jx_statute_id', $candidate );
+        delete_post_meta( $post_id, '_ws_jx_statute_id_missing' );
+    } else {
+        update_post_meta( $post_id, '_ws_jx_statute_id_missing', 1 );
+    }
+}
+
+add_action( 'acf/save_post', function( $post_id ) {
+    $pid = is_numeric( $post_id ) ? (int) $post_id : 0;
+    if ( $pid ) {
+        ws_sync_hidden_statute_id_for_post( $pid );
+    }
+}, 30 );
+
+add_action( 'save_post_jx-statute', function( $post_id, $post, $update ) {
+    if ( wp_is_post_revision( $post_id ) || wp_is_post_autosave( $post_id ) ) {
+        return;
+    }
+    ws_sync_hidden_statute_id_for_post( (int) $post_id );
+}, 30, 3 );
+
 
 // ════════════════════════════════════════════════════════════════════════════
 // HOOK 1 of 5 — Set source_method at post creation (priority 5, first save)
