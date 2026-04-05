@@ -942,7 +942,7 @@ function ws_source_verify_post_types() {
 //
 // Derivation order:
 //   1) existing _ws_jx_statute_id (normalized)
-//   2) ws_ingest_record_key (JX::STATUTE_ID)
+//   2) _ws_ingest_record_key (jx|statute_id)
 //   3) title prefix like "CA-1102.5 ..."
 //   4) ws_jx_statute_citation + assigned jx taxonomy code
 //
@@ -989,9 +989,10 @@ function ws_derive_hidden_statute_id( int $post_id ): string {
         return $existing;
     }
 
-    $record_key = trim( (string) get_post_meta( $post_id, 'ws_ingest_record_key', true ) );
-    if ( $record_key !== '' && str_contains( $record_key, '::' ) ) {
-        [ $rk_jx, $rk_sid ] = array_pad( explode( '::', strtoupper( $record_key ), 2 ), 2, '' );
+    $record_key = trim( (string) get_post_meta( $post_id, '_ws_ingest_record_key', true ) );
+    if ( $record_key !== '' && str_contains( $record_key, '|' ) ) {
+        $normalized_key = strtoupper( $record_key );
+        [ $rk_jx, $rk_sid ] = array_pad( explode( '|', $normalized_key, 2 ), 2, '' );
         $candidate = ws_normalize_hidden_statute_id( $rk_jx . '-' . $rk_sid );
         if ( preg_match( '/^[A-Z]{2}-[A-Z0-9\.\:\-]+$/', $candidate ) ) {
             return $candidate;

@@ -680,7 +680,7 @@ function ws_ingest_process_statute_record( array $record, array $meta, array $bl
             'post_type'      => 'jx-statute',
             'post_status'    => 'any',
             'meta_query'     => [ [
-                'key'     => 'ws_ingest_record_key',
+                'key'     => '_ws_ingest_record_key',
                 'value'   => $record_key,
                 'compare' => '=',
             ] ],
@@ -688,25 +688,6 @@ function ws_ingest_process_statute_record( array $record, array $meta, array $bl
             'fields'         => 'ids',
             'no_found_rows'  => true,
         ] );
-    }
-
-    // Legacy fallback for records ingested before ws_ingest_record_key existed.
-    if ( empty( $duplicates ) ) {
-        $legacy_citation = (string) ( $record['legal_basis']['statute_citation'] ?? '' );
-        if ( $legacy_citation !== '' ) {
-            $duplicates = get_posts( [
-                'post_type'      => 'jx-statute',
-                'post_status'    => 'any',
-                'meta_query'     => [ [
-                    'key'     => 'ws_jx_statute_citation',
-                    'value'   => $legacy_citation,
-                    'compare' => '=',
-                ] ],
-                'posts_per_page' => 1,
-                'fields'         => 'ids',
-                'no_found_rows'  => true,
-            ] );
-        }
     }
 
     if ( ! empty( $duplicates ) ) {
@@ -753,7 +734,7 @@ function ws_ingest_process_statute_record( array $record, array $meta, array $bl
     }
 
     if ( $record_key ) {
-        update_post_meta( $post_id, 'ws_ingest_record_key', $record_key );
+        update_post_meta( $post_id, '_ws_ingest_record_key', $record_key );
     }
 
     if ( $sid !== '' && $sid !== 'UNKNOWN' ) {
