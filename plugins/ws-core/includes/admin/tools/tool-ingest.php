@@ -170,14 +170,28 @@ function ws_ingest_merge_proposed_terms( array &$log, array $new_terms ): array 
  * Builds a blacklist of pending proposed term slugs.
  * Used to strip proposed terms from taxonomy arrays before writing records.
  *
+ * Only blacklists terms that are BOTH pending AND not yet registered
+ * in WordPress. A term that has been approved and seeded should never
+ * be blacklisted even if its log status has not been updated.
+ *
  * @return array [ 'term_id' => 'taxonomy_slug' ]
  */
 function ws_ingest_build_blacklist( array $log ): array {
     $blacklist = [];
     foreach ( $log['proposed_terms'] as $term ) {
-        if ( ( $term['status'] ?? 'pending' ) === 'pending' ) {
-            $blacklist[ $term['term_id'] ] = $term['taxonomy'] ?? '';
-        }
+        $status   = $term['status']   ?? 'pending';
+        $term_id  = $term['term_id']  ?? '';
+        $taxonomy = $term['taxonomy'] ?? '';
+
+        if ( $status !== 'pending' ) continue;
+        if ( ! $term_id || ! $taxonomy ) continue;
+
+        // Do not blacklist if the term is already registered in WordPress.
+        // This protects against the case where a term was approved and seeded
+        // but the log status was not updated before the next ingest run.
+        if ( term_exists( $term_id, $taxonomy ) ) continue;
+
+        $blacklist[ $term_id ] = $taxonomy;
     }
     return $blacklist;
 }
@@ -350,10 +364,17 @@ function ws_ingest_get_valid_slugs( string $taxonomy ): array {
     static $cache = [];
     if ( isset( $cache[ $taxonomy ] ) ) return $cache[ $taxonomy ];
 
+    // Bypass object cache to ensure newly seeded terms are visible.
+    // Without this, get_terms() may return stale results if the
+    // persistent object cache has not been invalidated since seeding.
+    clean_taxonomy_cache( $taxonomy );
+
     $terms = get_terms( [
-        'taxonomy'   => $taxonomy,
-        'hide_empty' => false,
-        'fields'     => 'slugs',
+        'taxonomy'        => $taxonomy,
+        'hide_empty'      => false,
+        'fields'          => 'slugs',
+        'cache_results'   => false,
+        'update_term_meta_cache' => false,
     ] );
 
     $cache[ $taxonomy ] = is_wp_error( $terms ) ? [] : $terms;
@@ -491,6 +512,12 @@ function ws_ingest_process_statute_record( array $record, array $meta, array $bl
     update_post_meta( $post_id, 'ws_auto_source_name',   sanitize_text_field( $meta['source_name']   ?? '' ) );
     update_post_meta( $post_id, 'ws_verification_status', 'unverified' );
     update_post_meta( $post_id, 'ws_needs_review',        0 );
+
+    // Source chain — full provenance record of all contributing models.
+    // Populated by NotebookLM from its input files. Stored as JSON string.
+    if ( ! empty( $meta['source_chain'] ) && is_array( $meta['source_chain'] ) ) {
+        update_post_meta( $post_id, 'ws_auto_source_chain', wp_json_encode( $meta['source_chain'] ) );
+    }
 
     // ── Step 4: Assign ws_jurisdiction taxonomy term ──────────────────────
     $jx_slug = strtolower( $record['jurisdiction_id'] ?? '' );

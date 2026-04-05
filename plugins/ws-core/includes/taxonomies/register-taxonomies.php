@@ -25,7 +25,10 @@
  *         ws_disclosure_targets, ws_protected_class, ws_employer_defense. Signals
  *         that a companion ACF freetext field holds detail beyond available slugs.
  *         Gate versions bumped to 1.1.0 for affected seeders.
- * 3.12.0  ws_employee_standard added (jx-statute). Flat taxonomy replacing freetext
+ * 3.12.0  ws_employee_standard added
+ * 3.14.1  all-sectors added to ws_protected_class as parent; all-employees added as child.
+ *          internal-management added to ws_disclosure_targets under internal parent.
+ *          general-legal parent + general-wrongdoing child added to ws_disclosure_type. (jx-statute). Flat taxonomy replacing freetext
  *         employee_standard field. Seven terms including has-details sentinel.
  * 3.13.0  jx-common-law added to object_types for all shared doctrinal taxonomies:
  *         ws_disclosure_type, ws_protected_class, ws_disclosure_targets,
@@ -676,73 +679,73 @@ function ws_bulk_insert_hierarchical( array $hierarchy, string $taxonomy ) {
 
 add_action( 'admin_init', function() {
 
-    if ( get_option( 'ws_seeded_disclosure_type' ) !== '1.1.2' ) {
+    if ( get_option( 'ws_seeded_disclosure_type' ) !== '1.1.0' ) {
         ws_seed_disclosure_taxonomy();
-        update_option( 'ws_seeded_disclosure_type', '1.1.2' );
+        update_option( 'ws_seeded_disclosure_type', '1.1.0' );
     }
-    if ( get_option( 'ws_seeded_process_type' ) !== '1.1.2' ) {
+    if ( get_option( 'ws_seeded_process_type' ) !== '1.0.0' ) {
         ws_seed_process_taxonomy();
-        update_option( 'ws_seeded_process_type', '1.1.2' );
+        update_option( 'ws_seeded_process_type', '1.0.0' );
     }
-    if ( get_option( 'ws_seeded_remedies' ) !== '1.1.2' ) {
+    if ( get_option( 'ws_seeded_remedies' ) !== '1.1.0' ) {
         ws_seed_remedies_taxonomy();
-        update_option( 'ws_seeded_remedies', '1.1.2' );
+        update_option( 'ws_seeded_remedies', '1.1.0' );
     }
-    if ( get_option( 'ws_seeded_protected_class' ) !== '1.1.2' ) {
+    if ( get_option( 'ws_seeded_protected_class' ) !== '1.3.0' ) {
         ws_seed_protected_class_taxonomy();
-        update_option( 'ws_seeded_protected_class', '1.1.2' );
+        update_option( 'ws_seeded_protected_class', '1.3.0' );
     }
-    if ( get_option( 'ws_seeded_adverse_action_types' ) !== '1.1.2' ) {
+    if ( get_option( 'ws_seeded_adverse_action_types' ) !== '1.1.0' ) {
         ws_seed_adverse_action_types_taxonomy();
-        update_option( 'ws_seeded_adverse_action_types', '1.1.2' );
+        update_option( 'ws_seeded_adverse_action_types', '1.1.0' );
     }
-    if ( get_option( 'ws_seeded_languages_taxonomy' ) !== '1.1.2' ) {
+    if ( get_option( 'ws_seeded_languages_taxonomy' ) !== '1.0.0' ) {
         ws_seed_languages_taxonomy();
-        update_option( 'ws_seeded_languages_taxonomy', '1.1.2' );
+        update_option( 'ws_seeded_languages_taxonomy', '1.0.0' );
     }
-    if ( get_option( 'ws_seeded_case_stage' ) !== '1.1.2' ) {
+    if ( get_option( 'ws_seeded_case_stage' ) !== '1.0.0' ) {
         ws_seed_case_stage_taxonomy();
-        update_option( 'ws_seeded_case_stage', '1.1.2' );
+        update_option( 'ws_seeded_case_stage', '1.0.0' );
     }
-    if ( get_option( 'ws_seeded_jurisdiction' ) !== '1.1.2' ) {
+    if ( get_option( 'ws_seeded_jurisdiction' ) !== '1.0.0' ) {
         ws_seed_jurisdiction_taxonomy();
-        update_option( 'ws_seeded_jurisdiction', '1.1.2' );
+        update_option( 'ws_seeded_jurisdiction', '1.0.0' );
     }
-    if ( get_option( 'ws_seeded_disclosure_targets' ) !== '1.1.2' ) {
+    if ( get_option( 'ws_seeded_disclosure_targets' ) !== '1.2.0' ) {
         ws_seed_disclosure_targets_taxonomy();
-        update_option( 'ws_seeded_disclosure_targets', '1.1.2' );
+        update_option( 'ws_seeded_disclosure_targets', '1.2.0' );
     }
-    if ( get_option( 'ws_seeded_fee_shifting' ) !== '1.1.2' ) {
+    if ( get_option( 'ws_seeded_fee_shifting' ) !== '1.0.0' ) {
         ws_seed_fee_shifting_taxonomy();
-        update_option( 'ws_seeded_fee_shifting', '1.1.2' );
+        update_option( 'ws_seeded_fee_shifting', '1.0.0' );
     }
-    if ( get_option( 'ws_seeded_employer_defense' ) !== '1.1.2' ) {
+    if ( get_option( 'ws_seeded_employer_defense' ) !== '1.1.0' ) {
         ws_seed_employer_defense_taxonomy();
-        update_option( 'ws_seeded_employer_defense', '1.1.2' );
+        update_option( 'ws_seeded_employer_defense', '1.1.0' );
     }
-    if ( get_option( 'ws_seeded_aorg_type' ) !== '1.1.2' ) {
+    if ( get_option( 'ws_seeded_aorg_type' ) !== '1.0.0' ) {
         ws_seed_aorg_type_taxonomy();
-        update_option( 'ws_seeded_aorg_type', '1.1.2' );
+        update_option( 'ws_seeded_aorg_type', '1.0.0' );
     }
-    if ( get_option( 'ws_seeded_employment_sector' ) !== '1.1.2' ) {
+    if ( get_option( 'ws_seeded_employment_sector' ) !== '1.0.0' ) {
         ws_seed_employment_sector_taxonomy();
-        update_option( 'ws_seeded_employment_sector', '1.1.2' );
+        update_option( 'ws_seeded_employment_sector', '1.0.0' );
     }
-    if ( get_option( 'ws_seeded_aorg_service' ) !== '1.1.2' ) {
+    if ( get_option( 'ws_seeded_aorg_service' ) !== '1.0.0' ) {
         ws_seed_aorg_service_taxonomy();
-        update_option( 'ws_seeded_aorg_service', '1.1.2' );
+        update_option( 'ws_seeded_aorg_service', '1.0.0' );
     }
-    if ( get_option( 'ws_seeded_aorg_cost_model' ) !== '1.1.2' ) {
+    if ( get_option( 'ws_seeded_aorg_cost_model' ) !== '1.0.0' ) {
         ws_seed_aorg_cost_model_taxonomy();
-        update_option( 'ws_seeded_aorg_cost_model', '1.1.2' );
+        update_option( 'ws_seeded_aorg_cost_model', '1.0.0' );
     }
-    if ( get_option( 'ws_seeded_procedure_type' ) !== '1.1.2' ) {
+    if ( get_option( 'ws_seeded_procedure_type' ) !== '1.0.0' ) {
         ws_seed_proc_type_taxonomy();
-        update_option( 'ws_seeded_procedure_type', '1.1.2' );
+        update_option( 'ws_seeded_procedure_type', '1.0.0' );
     }
-    if ( get_option( 'ws_seeded_employee_standard' ) !== '1.1.2' ) {
+    if ( get_option( 'ws_seeded_employee_standard' ) !== '1.0.0' ) {
         ws_seed_employee_standard_taxonomy();
-        update_option( 'ws_seeded_employee_standard', '1.1.2' );
+        update_option( 'ws_seeded_employee_standard', '1.0.0' );
     }
 
 } );
@@ -811,6 +814,12 @@ function ws_seed_disclosure_taxonomy() {
                 'intelligence-community'       => 'Intelligence Community Reporting',
                 'classified-information'       => 'Classified Information Disclosures',
                 'export-sanctions-compliance'  => 'Export Controls & Sanctions Compliance',
+            ],
+        ],
+        'general-legal' => [
+            'name'     => 'General Legal',
+            'children' => [
+                'general-wrongdoing' => 'General Wrongdoing / Violation of Law',
             ],
         ],
     ];
@@ -926,6 +935,28 @@ function ws_seed_protected_class_taxonomy() {
     // holds protected class detail beyond available slugs.
     if ( ! term_exists( 'has-details', 'ws_protected_class' ) ) {
         wp_insert_term( 'Has Details', 'ws_protected_class', [ 'slug' => 'has-details' ] );
+    }
+
+    // all-sectors parent + all-employees child — v3.14.1.
+    // Covers statutes that explicitly protect all employees regardless
+    // of sector. Structured as parent+child so the taxonomy table renders
+    // correctly and research models use the child slug all-employees.
+    if ( ! term_exists( 'all-sectors', 'ws_protected_class' ) ) {
+        $parent = wp_insert_term( 'All Sectors', 'ws_protected_class', [ 'slug' => 'all-sectors' ] );
+        if ( ! is_wp_error( $parent ) ) {
+            wp_insert_term( 'All Employees', 'ws_protected_class', [
+                'slug'   => 'all-employees',
+                'parent' => $parent['term_id'],
+            ] );
+        }
+    } elseif ( ! term_exists( 'all-employees', 'ws_protected_class' ) ) {
+        $parent_term = get_term_by( 'slug', 'all-sectors', 'ws_protected_class' );
+        if ( $parent_term ) {
+            wp_insert_term( 'All Employees', 'ws_protected_class', [
+                'slug'   => 'all-employees',
+                'parent' => $parent_term->term_id,
+            ] );
+        }
     }
 }
 
@@ -1109,6 +1140,7 @@ function ws_seed_disclosure_targets_taxonomy() {
                 'internal-hr'          => 'Human Resources',
                 'internal-compliance'  => 'Compliance / Ethics Hotline',
                 'internal-legal'       => 'In-House Legal Counsel',
+                'internal-management'  => 'Management (General)',
             ],
         ],
         'external-agency' => [

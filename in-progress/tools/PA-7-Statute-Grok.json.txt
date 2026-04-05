@@ -1,0 +1,100 @@
+{
+  "meta": {
+    "json_format_version": "2.0",
+    "source_method": "ai_assisted",
+    "source_name": "Grok",
+    "jurisdiction_id": "PA",
+    "generated_date": "2026-04-05",
+    "generated_by": "Grok by xAI (2026 model)",
+    "record_count": 1,
+    "proposed_count": 0,
+    "new_terms_proposed": [],
+    "json_run_notes": "Primary Pennsylvania Whistleblower Law (43 P.S. §§ 1421-1428) researched via official legislature site and confirmed sources. No other major standalone whistleblower statutes identified with equivalent breadth; sector-specific provisions (e.g., healthcare, environmental) exist but are narrower and often cross-reference or defer to this law or general remedies. Record count limited to 1 due to the central statute covering the core protections requested in scope. SOL is explicit in the statute text. No new terms proposed.",
+    "batch_completed": "2026-04-05 07:32 UTC"
+  },
+  "records": [
+    {
+      "jurisdiction_id": "PA",
+      "statute_id": "PA-1421",
+      "official_name": "Whistleblower Law",
+      "common_name": "",
+      "legal_basis": {
+        "statute_citation": "43 P.S. §§ 1421-1428",
+        "disclosure_types": [
+          "general-wrongdoing"
+        ],
+        "protected_class": [
+          "public-sector",
+          "private-sector"
+        ],
+        "disclosure_targets": [
+          "internal",
+          "external-agency"
+        ],
+        "adverse_action_scope": "No employer may discharge, threaten, or otherwise discriminate or retaliate against an employee regarding the employee's compensation, terms, conditions, location or privileges of employment."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": false,
+        "limit_value": 180,
+        "limit_unit": "days",
+        "trigger": "occurrence of the alleged violation",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "primary_agency": "",
+        "process_type": [
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "constructive-discharge",
+          "demotion",
+          "suspension",
+          "disciplinary-action",
+          "transfer",
+          "schedule-change",
+          "pay-reduction",
+          "harassment"
+        ],
+        "remedies": [
+          "reinstatement",
+          "back-pay",
+          "benefits-restoration",
+          "compensatory-damages",
+          "attorney-fees",
+          "litigation-costs",
+          "injunctive-relief"
+        ],
+        "fee_shifting": "unilateral-pro-plaintiff"
+      },
+      "burden_of_proof": {
+        "employee_standard": [
+          "preponderance"
+        ],
+        "employer_defense": [
+          "legitimate-non-retaliatory-reason"
+        ],
+        "burden_of_proof_details": "Employee must show by a preponderance of the evidence that, prior to the alleged reprisal, the employee (or person acting on behalf) had reported or was about to report in good faith an instance of wrongdoing or waste. Employer defense: action occurred for separate and legitimate reasons not merely pretextual.",
+        "burden_of_proof_flag": "preponderance employee burden with legitimate reason defense"
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://www.legis.state.pa.us/WU01/LI/LI/US/HTM/1986/0/0169..HTM",
+        "is_official": true
+      },
+      "citations": {
+        "attached_citations": [
+          "Bailets v. Pennsylvania Turnpike Commission || expands remedies || https://www.pacourts.us/assets/opinions/Supreme/out/majority%20opinion%20%20affirmed%20%2010348138434622319.pdf || pacourts.us || high"
+        ],
+        "citation_count": 1
+      },
+      "_review_notes": "Core PA Whistleblower Law (enacted 1986, significantly amended 2014 to expand coverage to certain private entities receiving public funds). Covers good faith reports of 'wrongdoing' (violation of law/regulation/code of conduct not merely technical/minimal) or 'waste' (substantial abuse/misuse/loss of public funds/resources). Protected disclosures to employer/superiors/agent or appropriate authority (government bodies with jurisdiction over law enforcement, regulatory violations, ethics, waste). 2014 amendments broadened 'public body,' 'employer,' and protections. 'Actual damages' interpreted by PA Supreme Court to include non-economic damages (e.g., emotional distress, reputation harm). No qui tam or bounty. No mandatory administrative exhaustion prior to civil suit. Fee shifting available to prevailing complainant. Parent slugs not used.",
+      "_reconciled_notes": ""
+    }
+  ],
+  "integrity": {
+    "with_errors": false
+  }
+}

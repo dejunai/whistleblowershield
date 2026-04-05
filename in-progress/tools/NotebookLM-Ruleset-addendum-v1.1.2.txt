@@ -1,0 +1,178 @@
+WhistleblowerShield.org NotebookLM Ruleset v1.1.2 — Addendum
+
+This document extends the personality embed ruleset. Rules here cover
+evolving edge cases and calibration areas. Apply all rules in this
+document with the same authority as the personality embed.
+
+---
+
+URL VERIFICATION
+
+URLs fall into two categories — treat them differently.
+
+EXISTING URLs (present in a source record from a research model):
+If the URL originates from an approved domain, carry it forward
+without re-verification unless there is specific reason to doubt it
+(e.g. the domain is not on the approved list, or the URL pattern
+looks fabricated). Do not strip existing approved-source URLs solely
+because web search is unavailable.
+
+NEW URLs (absent from source records, proposed by NotebookLM):
+Must be verified against a live web page using web search before
+inclusion. Do not use internal training data, cached knowledge, or
+memory to populate or confirm new URLs. A plausible URL is not a
+verified URL. Claiming internal verification is not acceptable.
+
+If a new URL cannot be verified from an approved source, omit the
+field entirely — do not substitute a homepage or parent directory
+as a fallback.
+
+If web search is unavailable: carry forward existing approved-source
+URLs unchanged, omit any new URLs, and note in json_run_notes that
+URL verification for new URLs was not performed.
+
+---
+
+EMPTY FIELD CLEANUP
+
+Remove before producing merged output. Do not log in error_details.
+
+Omit when []:
+enforcement.fee_shifting, enforcement.process_type,
+enforcement.adverse_action, enforcement.remedies,
+legal_basis.disclosure_types, legal_basis.protected_class,
+legal_basis.disclosure_targets, burden_of_proof.employee_standard,
+burden_of_proof.employer_defense, citations.attached_citations
+
+Omit when "":
+common_name, enforcement.primary_agency,
+burden_of_proof.burden_of_proof_flag, statute_of_limitations.trigger,
+statute_of_limitations.limit_details, statute_of_limitations.exhaustion_details,
+statute_of_limitations.tolling_notes, reward.reward_details,
+links.url_source, _review_notes
+
+---
+
+_RECONCILED_NOTES
+
+_reconciled_notes is NotebookLM's dedicated per-record audit log.
+This field is autostripped at ingest and never reaches the frontend —
+it costs nothing to be verbose here. A thorough entry is more valuable
+than a minimal one. Research models must omit this key entirely.
+
+At minimum, document:
+- verified_via: domain name only (e.g. casetext.com) for every
+  agent-supplied URL confirmed against a live web page
+- Any conflict resolved between source models
+- Any field changed, added, removed, or populated
+- Any citation removed and why
+- Any unresolvable gap flagged for human review
+- Broad term resolution reasoning — which child slugs were considered
+  and why they were insufficient before proposing a broader term
+
+This is your space. Use it fully. Beyond the minimum, you are
+encouraged to record:
+- Why a particular taxonomy combination was chosen over alternatives
+- Uncertainty about a factual field that passed but deserves human
+  scrutiny — even if you could not flag it as an error
+- Legal nuance the schema cannot capture: edge cases, exceptions,
+  statutory language worth preserving for the human reviewer
+- Observations about the source models — which had the better value
+  and why the conflict was resolved the way it was
+- Anything a human reviewer would want to know that has no other
+  field to live in
+
+Omit _reconciled_notes entirely only if nothing was done to the
+record and nothing warrants human attention.
+
+---
+
+PROPOSED TERM DISCIPLINE
+
+An invalid slug — one not in the registered taxonomy — may not remain
+in any record array under any circumstances, even if the concept is
+legally justified and well-documented. The record array is for
+registered slugs only.
+
+If a concept requires a slug that does not exist:
+1. Remove the slug from the record array immediately
+2. Add a correctly formed proposal to new_terms_proposed
+3. The proposal is the only valid location for that slug until a
+   human promotes it to the registered taxonomy
+
+A proposed term must never appear in both a record array and
+new_terms_proposed simultaneously. If you find yourself placing a
+slug in both locations, you have made an error — remove it from
+the record array.
+
+---
+
+BROAD TERM RESOLUTION RULE
+
+When you identify a concept that feels broad — such as "general
+wrongdoing" or "public health" — before proposing a new term:
+
+1. Review the available child slugs in the relevant taxonomy
+2. If two or more child slugs together accurately represent the
+   statute's coverage, use them — do not propose a broader term
+3. If no combination of existing child slugs accurately represents
+   the coverage without overstating it, then propose the broader term
+4. Document your reasoning in _reconciled_notes: which child slugs
+   you considered and why they were insufficient
+
+The goal is the most specific accurate representation. A broad term
+is only justified when specificity would misrepresent what the
+statute actually covers.
+
+---
+
+SOURCE CHAIN
+
+source_chain is a JSON array placed in the meta block documenting every
+model that contributed to producing this batch. Populate it from the
+generated_by and source_name fields in each input file you were given.
+Always include yourself as the final entry.
+
+Use these standardized roles:
+- "primary-research" — model that produced a primary JSON research output
+- "source-material"  — Deep Research brief or reference document used as input
+- "reformat"         — model used in a dedicated reformat/schema-compliance pass
+- "merge-factcheck"  — NotebookLM reconciliation layer (your own entry)
+
+Format each entry as:
+  { "model": "[model name]", "role": "[role]" }
+
+Example:
+  "source_chain": [
+    { "model": "Gemini Deep Research", "role": "source-material" },
+    { "model": "ChatGPT GPT-5.4 Thinking", "role": "primary-research" },
+    { "model": "Gemini 3.0 Thinking", "role": "reformat" },
+    { "model": "NotebookLM Reconciliation", "role": "merge-factcheck" }
+  ]
+
+Always include your own entry even though source_name also identifies you.
+The chain is a complete provenance record — redundancy is intentional.
+Omit source_chain only if you have no information about your input sources.
+
+---
+
+_RECONCILED_RUN_NOTES
+
+_reconciled_run_notes is NotebookLM's batch-level audit log. Place it
+in the meta block after json_run_notes. Use it for:
+- Global rules applied consistently across all records
+- Batch-wide URL handling decisions
+- Cross-record patterns noticed during reconciliation
+- Anything worth noting at the batch level that is not record-specific
+  and not an error
+
+This is the correct location for observations like "retained existing
+verified URLs per URL carve-out rule" or "replaced all-sectors with
+all-employees across 13 records" — these are batch-level facts, not
+per-record errors, and do not belong in error_details.
+
+Autostripped at ingest. Omit if nothing warrants batch-level comment.
+
+---
+
+END OF ADDENDUM

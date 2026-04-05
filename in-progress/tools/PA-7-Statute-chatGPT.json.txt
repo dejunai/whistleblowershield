@@ -1,0 +1,417 @@
+{
+  "meta": {
+    "json_format_version": "2.0",
+    "source_method": "ai_assisted",
+    "source_name": "OpenAI",
+    "jurisdiction_id": "PA",
+    "generated_date": "2026-04-05",
+    "generated_by": "GPT-5.4 Thinking",
+    "record_count": 6,
+    "proposed_count": 4,
+    "new_terms_proposed": [
+      {
+        "taxonomy": "ws_disclosure_type",
+        "term_id": "child-abuse-reporting",
+        "term_label": "Child Abuse Reporting",
+        "notes": "Used for statutes protecting reports of suspected child abuse. Existing terms like general-wrongdoing are only a rough fallback and do not capture the specific child-protection reporting context.",
+        "seen_in": ["PA-6320"],
+        "count": 1
+      },
+      {
+        "taxonomy": "ws_disclosure_type",
+        "term_id": "older-adult-abuse-reporting",
+        "term_label": "Older Adult Abuse Reporting",
+        "notes": "Used for statutes protecting reports of abuse, neglect, exploitation or abandonment of older adults. Existing disclosure-type terms do not cleanly capture elder-protective-services reporting.",
+        "seen_in": ["PA-302-OAPSA"],
+        "count": 1
+      },
+      {
+        "taxonomy": "ws_disclosure_type",
+        "term_id": "vulnerable-adult-abuse-reporting",
+        "term_label": "Vulnerable Adult Abuse Reporting",
+        "notes": "Used for statutes protecting reports of abuse, neglect, exploitation or abandonment of adults in need of protective services. Existing terms do not precisely fit adult-protective-services reporting.",
+        "seen_in": ["PA-302-APSA"],
+        "count": 1
+      },
+      {
+        "taxonomy": "ws_disclosure_type",
+        "term_id": "government-ethics-reporting",
+        "term_label": "Government Ethics Reporting",
+        "notes": "Used for anti-retaliation provisions tied to filing complaints with or providing information to the State Ethics Commission. General-wrongdoing is a fallback but does not capture the ethics-enforcement context.",
+        "seen_in": ["PA-1108"],
+        "count": 1
+      }
+    ],
+    "json_run_notes": "Batch limited to six statutes located with sufficient confidence from approved official Pennsylvania legislative sources. For uniqueness, unconsolidated-act records use act/section hybrids in statute_id where a bare section number would collide across separate acts. No parent taxonomy slugs were retained after self-check. Several statutes contain anti-retaliation causes of action or protections but do not state an express filing deadline in the located statute text; those records are marked limit_ambiguous true and flagged in integrity.",
+    "batch_completed": "2026-04-05 14:35 UTC"
+  },
+  "records": [
+    {
+      "jurisdiction_id": "PA",
+      "statute_id": "PA-169",
+      "official_name": "Whistleblower Law",
+      "common_name": "Pennsylvania Whistleblower Law",
+      "legal_basis": {
+        "statute_citation": "Act of Dec. 12, 1986, P.L. 1559, No. 169",
+        "disclosure_types": [
+          "general-wrongdoing"
+        ],
+        "protected_class": [
+          "has-details"
+        ],
+        "protected_class_details": "Covers an \"employee\" of a public body and employees of entities receiving money from a public body to perform work or provide services relative to work for a public body.",
+        "disclosure_targets": [
+          "internal-supervisor",
+          "internal-management",
+          "agency-federal",
+          "agency-state",
+          "agency-local",
+          "law-enforcement"
+        ],
+        "adverse_action_scope": "Discharge, threats, discrimination or retaliation regarding compensation, terms, conditions, location or privileges of employment for reporting or about-to-report wrongdoing or waste, or for participating when requested in an investigation, hearing, inquiry or court action."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": false,
+        "limit_value": 180,
+        "limit_unit": "days",
+        "trigger": "after the occurrence of the alleged violation",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "process_type": [
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "pay-reduction",
+          "has-details"
+        ],
+        "adverse_action_details": "Also expressly covers threats and retaliation affecting terms, conditions, location or privileges of employment.",
+        "remedies": [
+          "reinstatement",
+          "back-pay",
+          "benefits-restoration",
+          "compensatory-damages",
+          "attorney-fees",
+          "litigation-costs",
+          "injunctive-relief"
+        ],
+        "fee_shifting": "discretionary"
+      },
+      "burden_of_proof": {
+        "employee_standard": [
+          "preponderance"
+        ],
+        "employer_defense": [
+          "legitimate-non-retaliatory-reason"
+        ]
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://www.legis.state.pa.us/WU01/LI/LI/US/HTM/1986/0/0169..HTM",
+        "is_official": true
+      },
+      "citations": {
+        "citation_count": 0
+      },
+      "_review_notes": "The statute authorizes a civil fine against the violator, but that fine is payable to the State Treasurer rather than the claimant, so it was not tagged as a claimant remedy. \"Actual damages\" was mapped to compensatory-damages.",
+      "_reconciled_notes": ""
+    },
+    {
+      "jurisdiction_id": "PA",
+      "statute_id": "PA-3316",
+      "official_name": "Protection of public utility employees",
+      "common_name": "Public Utility Employee Whistleblower Protection",
+      "legal_basis": {
+        "statute_citation": "66 Pa.C.S. § 3316",
+        "disclosure_types": [
+          "general-wrongdoing"
+        ],
+        "protected_class": [
+          "corporate-staff"
+        ],
+        "disclosure_targets": [
+          "internal-management",
+          "agency-state",
+          "law-enforcement"
+        ],
+        "adverse_action_scope": "Protects public utility employees from discharge, threats, discrimination or retaliation regarding compensation, terms, conditions, location or privileges of employment for good-faith reports of wrongdoing or waste or for participation in an investigation, hearing, inquiry or court action relating to the public utility."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": false,
+        "limit_value": 180,
+        "limit_unit": "days",
+        "trigger": "after the occurrence of the alleged violation",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "process_type": [
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "pay-reduction",
+          "has-details"
+        ],
+        "adverse_action_details": "Also expressly covers threats and retaliation affecting terms, conditions, location or privileges of employment.",
+        "remedies": [
+          "reinstatement",
+          "back-pay",
+          "benefits-restoration",
+          "compensatory-damages",
+          "attorney-fees",
+          "litigation-costs",
+          "injunctive-relief"
+        ],
+        "fee_shifting": "discretionary"
+      },
+      "burden_of_proof": {
+        "employee_standard": [
+          "preponderance"
+        ],
+        "employer_defense": [
+          "legitimate-non-retaliatory-reason"
+        ]
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://www.legis.state.pa.us/WU01/LI/LI/CT/HTM/66/00.033.016.000..HTM",
+        "is_official": true
+      },
+      "citations": {
+        "citation_count": 0
+      },
+      "_review_notes": "\"Actual damages\" was mapped to compensatory-damages. The statute authorizes a civil fine payable to the State Treasurer, not the claimant.",
+      "_reconciled_notes": ""
+    },
+    {
+      "jurisdiction_id": "PA",
+      "statute_id": "PA-6320",
+      "official_name": "Protection from employment discrimination",
+      "common_name": "Child Abuse Reporting Employment Protection",
+      "legal_basis": {
+        "statute_citation": "23 Pa.C.S. § 6320",
+        "disclosure_types": [
+          "general-wrongdoing"
+        ],
+        "protected_class": [
+          "has-details"
+        ],
+        "protected_class_details": "Covers a person required to report under 23 Pa.C.S. § 6311 and a person encouraged to report under 23 Pa.C.S. § 6312, so long as the person acted in good faith in making or causing the report of suspected child abuse to be made.",
+        "disclosure_targets": [
+          "agency-state",
+          "law-enforcement"
+        ],
+        "adverse_action_scope": "Covers discharge or discrimination with respect to compensation, hire, tenure, terms, conditions or privileges of employment resulting from a good-faith report or caused report of suspected child abuse."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": true,
+        "limit_details": "No express filing deadline was identified in the located text of 23 Pa.C.S. § 6320.",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "process_type": [
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "pay-reduction",
+          "has-details"
+        ],
+        "adverse_action_details": "Also expressly covers discrimination with respect to compensation, hire, tenure, terms, conditions or privileges of employment.",
+        "remedies": [
+          "reinstatement",
+          "back-pay"
+        ]
+      },
+      "burden_of_proof": {},
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://www.legis.state.pa.us/CFDOCS/LEGIS/LI/consCheck.cfm?chpt=063.&div=00.&sctn=020.&subSctn=000&ttl=23&txtType=HTM",
+        "is_official": true
+      },
+      "citations": {
+        "citation_count": 0
+      },
+      "_review_notes": "This section expressly provides for a civil action, venue in the county where the discharge or discrimination occurred, and relief that may include reinstatement with back pay. I did not locate an express fee-shifting provision or a stated filing deadline in the statute text reviewed.",
+      "_reconciled_notes": ""
+    },
+    {
+      "jurisdiction_id": "PA",
+      "statute_id": "PA-302-OAPSA",
+      "official_name": "Reporting; protection from retaliation; immunity",
+      "common_name": "Older Adult Abuse Reporting Anti-Retaliation",
+      "legal_basis": {
+        "statute_citation": "Older Adults Protective Services Act, Act of Nov. 6, 1987, P.L. 381, No. 79, § 302",
+        "disclosure_types": [
+          "general-wrongdoing"
+        ],
+        "protected_class": [
+          "has-details"
+        ],
+        "protected_class_details": "Covers any person making a report or cooperating with the agency, including testimony in an administrative or judicial proceeding, and also protects the victim from retaliatory action.",
+        "disclosure_targets": [
+          "has-details"
+        ],
+        "disclosure_targets_details": "Report is made to the local provider of protective services (the agency).",
+        "adverse_action_scope": "Any discriminatory, retaliatory or disciplinary action by an employer or any other person or entity against the reporter, cooperating person or victim."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": true,
+        "limit_details": "No express filing deadline was identified in the located text of OAPSA § 302 for the civil lawsuit authorized by subsection (c).",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "process_type": [
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "disciplinary-action",
+          "has-details"
+        ],
+        "adverse_action_details": "The statute broadly bars discriminatory, retaliatory or disciplinary action by an employer or any other person or entity.",
+        "remedies": [
+          "treble-damages",
+          "compensatory-damages",
+          "punitive-damages"
+        ]
+      },
+      "burden_of_proof": {},
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://www.legis.state.pa.us/WU01/LI/LI/US/HTM/1987/0/0079..HTM",
+        "is_official": true
+      },
+      "citations": {
+        "citation_count": 0
+      },
+      "_review_notes": "Section 302(c) allows the reporter or victim to recover treble compensatory damages, compensatory and punitive damages, or $5,000, whichever is greater. I did not map the fixed-dollar floor separately because no existing remedy slug cleanly fits it.",
+      "_reconciled_notes": ""
+    },
+    {
+      "jurisdiction_id": "PA",
+      "statute_id": "PA-302-APSA",
+      "official_name": "Reporting",
+      "common_name": "Adult Protective Services Reporting Anti-Retaliation",
+      "legal_basis": {
+        "statute_citation": "Adult Protective Services Act, Act of Oct. 7, 2010, P.L. 484, No. 70, § 302",
+        "disclosure_types": [
+          "general-wrongdoing"
+        ],
+        "protected_class": [
+          "has-details"
+        ],
+        "protected_class_details": "Covers any person who makes a report or cooperates with the agency, including testimony in an administrative or judicial proceeding, and also protects an adult in need of protective services.",
+        "disclosure_targets": [
+          "has-details"
+        ],
+        "disclosure_targets_details": "Report is made to the agency responsible for adult protective services; Chapter 5 may impose additional reporting requirements in some facility cases.",
+        "adverse_action_scope": "Any discriminatory, retaliatory or disciplinary action by an employer or any other person or entity against the reporter, cooperating person or adult in need of protective services."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": true,
+        "limit_details": "No express filing deadline was identified in the located text of APSA § 302 for the civil action authorized by subsection (d).",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "process_type": [
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "disciplinary-action",
+          "has-details"
+        ],
+        "adverse_action_details": "The statute broadly bars discriminatory, retaliatory or disciplinary action by an employer or any other person or entity.",
+        "remedies": [
+          "treble-damages",
+          "compensatory-damages",
+          "punitive-damages"
+        ]
+      },
+      "burden_of_proof": {},
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://www.legis.state.pa.us/WU01/LI/LI/US/HTM/2010/0/0070..HTM",
+        "is_official": true
+      },
+      "citations": {
+        "citation_count": 0
+      },
+      "_review_notes": "Section 302(d)(2) and (e)(2) authorize recovery of treble compensatory damages, compensatory and punitive damages, or $5,000, whichever is greater. I did not map the fixed-dollar floor separately because no existing remedy slug cleanly fits it.",
+      "_reconciled_notes": ""
+    },
+    {
+      "jurisdiction_id": "PA",
+      "statute_id": "PA-1108",
+      "official_name": "Investigations by commission",
+      "common_name": "State Ethics Commission Retaliation Protection",
+      "legal_basis": {
+        "statute_citation": "65 Pa.C.S. § 1108(j)",
+        "disclosure_types": [
+          "general-wrongdoing"
+        ],
+        "protected_class": [
+          "state-employee",
+          "local-gov-staff"
+        ],
+        "disclosure_targets": [
+          "agency-state"
+        ],
+        "adverse_action_scope": "Protects public officials and public employees from discharge, changes in rank, grade or compensation, denial of promotion, or threats based on filing a complaint with, providing information to, or testifying in a proceeding before the State Ethics Commission. A second sentence separately protects commission employees who provide information about internal commission operations to legislators or legislative staff or who testify in legislative proceedings."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": true,
+        "limit_details": "No express private filing deadline or express independent civil cause of action was identified in the located text of 65 Pa.C.S. § 1108(j).",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "primary_agency": "State Ethics Commission",
+        "process_type": [
+          "administrative-complaint"
+        ],
+        "adverse_action": [
+          "termination",
+          "demotion",
+          "pay-reduction",
+          "has-details"
+        ],
+        "adverse_action_details": "Also expressly covers denial of promotion and threats."
+      },
+      "burden_of_proof": {},
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://www.legis.state.pa.us/WU01/LI/LI/CT/HTM/65/65.HTM",
+        "is_official": true
+      },
+      "citations": {
+        "citation_count": 0
+      },
+      "_review_notes": "This is an anti-retaliation provision embedded in the Ethics Act's investigation section. I did not identify an express standalone civil remedy in the located statutory text and therefore left remedies and fee shifting omitted.",
+      "_reconciled_notes": ""
+    }
+  ],
+  "integrity": {
+    "with_errors": true,
+    "error_details": [
+      "Batch contains 6 records, fewer than 7 requested, because only six Pennsylvania statutes were located and researched with sufficient confidence from approved official legislative sources.",
+      "PA-6320: Express filing deadline not identified in located statute text; statute_of_limitations.limit_ambiguous set to true.",
+      "PA-302-OAPSA: Express filing deadline not identified in located statute text; statute_of_limitations.limit_ambiguous set to true.",
+      "PA-302-APSA: Express filing deadline not identified in located statute text; statute_of_limitations.limit_ambiguous set to true.",
+      "PA-1108: Express filing deadline not identified in located statute text and no standalone private civil action was confirmed; statute_of_limitations.limit_ambiguous set to true.",
+      "Case citations were omitted across the batch because no sufficiently verified approved-source case URLs were completed during this run."
+    ],
+    "error_count": 6
+  }
+}

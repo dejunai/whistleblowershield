@@ -99,7 +99,7 @@ and must never appear in any record array.
 
 SELF-CHECK REQUIRED: Before writing your final JSON, scan every taxonomy
 array in every record. If you find any parent slug — including but not
-limited to "financial-corporate", "government-accountability", "national-security", "privacy-data-integrity", "public-health-safety", "workplace-employment", "healthcare-staff", "private-sector", "public-sector", "special-status", "external-agency", "internal", "judicial", "legislative", "public" — you must:
+limited to "financial-corporate", "general-legal", "government-accountability", "national-security", "privacy-data-integrity", "public-health-safety", "workplace-employment", "all-sectors", "healthcare-staff", "private-sector", "public-sector", "special-status", "external-agency", "internal", "judicial", "legislative", "public" — you must:
 
   1. Delete it from the array immediately
   2. Leave the array empty if no valid child slug applies
@@ -171,6 +171,10 @@ intelligence-community             Intelligence Community Reporting
 classified-information             Classified Information Disclosures
 export-sanctions-compliance        Export Controls & Sanctions Compliance
 
+--- general-legal ---
+general-legal                      General Legal (parent)
+general-wrongdoing                 General Wrongdoing / Violation of Law
+
 ────────────────────────────────────────────────────────────────────────────
 TAXONOMY: ws_protected_class
 Applies to: jx-statute
@@ -205,6 +209,10 @@ job-applicant                      Job Applicant
 former-employee                    Former Employee
 perceived-whistleblower            Perceived Whistleblower
 
+--- all-sectors ---
+all-sectors                        All Employees / All Sectors (parent)
+all-employees                      All Employees
+
 has-details                        Has Details (sentinel — use with ws_protected_class_details)
 
 ────────────────────────────────────────────────────────────────────────────
@@ -221,6 +229,7 @@ internal-supervisor                Supervisor / Manager
 internal-hr                        Human Resources
 internal-compliance                Compliance / Ethics Hotline
 internal-legal                     In-House Legal Counsel
+internal-management                Management (General)
 
 --- external-agency ---
 external-agency                    External: Government Agency (parent)
@@ -653,10 +662,11 @@ entirely. The ingest tool treats a missing key differently from an empty array.
 ---
 RUN SCOPE
 
-Jurisdiction:       California
-Jurisdiction ID:    CA
-Legislature URL:    https://legislature.ca.gov/
+Jurisdiction:       Pennsylvania
+Jurisdiction ID:    PA
+Legislature URL:    https://www.legis.state.pa.us/
 Record type:        statute
+Records Requested:  7
 
 
 This template covers `statute` records only.

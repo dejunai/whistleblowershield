@@ -1,0 +1,547 @@
+{
+  "meta": {
+    "json_format_version": "2.0",
+    "source_method": "ai_assisted",
+    "source_name": "Gemini",
+    "jurisdiction_id": "PA",
+    "generated_date": "2023-06-14",
+    "generated_by": "Gemini Pro 1.0",
+    "record_count": 7,
+    "proposed_count": 0,
+    "new_terms_proposed": [],
+    "json_run_notes": "Pennsylvania has a dedicated Whistleblower Law (43 P.S. §§ 1421-1428) that primarily covers public sector employees and government contractors. Additional whistleblower protections exist in other statutes covering specific sectors or issues.",
+    "batch_completed": "2023-06-14 15:30 UTC"
+  },
+  "records": [
+    {
+      "jurisdiction_id": "PA",
+      "statute_id": "PA-1421",
+      "official_name": "Pennsylvania Whistleblower Law",
+      "common_name": "Pennsylvania Whistleblower Act",
+      
+      "legal_basis": {
+        "statute_citation": "43 P.S. §§ 1421-1428",
+        "disclosure_types": [
+          "wrongful-termination",
+          "retaliation-protection",
+          "procurement-spending-fraud",
+          "public-corruption-ethics"
+        ],
+        "protected_class": [
+          "state-employee",
+          "local-gov-staff"
+        ],
+        "disclosure_targets": [
+          "agency-federal",
+          "agency-state",
+          "agency-local"
+        ],
+        "adverse_action_scope": "Prohibits discharge, threats, discrimination or retaliation regarding compensation, terms, conditions, location or privileges of employment"
+      },
+      
+      "statute_of_limitations": {
+        "limit_ambiguous": false,
+        "limit_value": 180,
+        "limit_unit": "days",
+        "trigger": "date when the violation occurred"
+      },
+      
+      "enforcement": {
+        "process_type": [
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "harassment",
+          "disciplinary-action",
+          "transfer",
+          "pay-reduction"
+        ],
+        "remedies": [
+          "reinstatement",
+          "back-pay",
+          "front-pay",
+          "compensatory-damages",
+          "attorney-fees",
+          "litigation-costs",
+          "civil-penalty"
+        ],
+        "fee_shifting": "unilateral-pro-plaintiff"
+      },
+      
+      "burden_of_proof": {
+        "employee_standard": [
+          "good-faith",
+          "reasonable-belief"
+        ]
+      },
+      
+      "reward": {
+        "available": false
+      },
+      
+      "links": {
+        "statute_url": "https://www.legis.state.pa.us/WU01/LI/LI/US/HTM/1986/0/0169..HTM",
+        "is_official": true,
+        "is_pdf": false
+      },
+      
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      
+      "_review_notes": "The Pennsylvania Whistleblower Law primarily protects public employees and employees of publicly funded entities who report waste, fraud, or abuse. The statute defines 'employer' to include public bodies and entities that receive public funding.",
+      "_reconciled_notes": ""
+    },
+    {
+      "jurisdiction_id": "PA",
+      "statute_id": "PA-1422",
+      "official_name": "Pennsylvania Whistleblower Law - Definitions",
+      
+      "legal_basis": {
+        "statute_citation": "43 P.S. § 1422",
+        "disclosure_types": [
+          "retaliation-protection",
+          "procurement-spending-fraud",
+          "public-corruption-ethics"
+        ],
+        "protected_class": [
+          "state-employee",
+          "local-gov-staff",
+          "has-details"
+        ],
+        "protected_class_details": "Also covers employees of any public body or any other body which is created by Commonwealth or political subdivision authority or which is funded in any amount by or through Commonwealth or political subdivision authority or a body which receives money from a private source to perform a service for the Commonwealth or political subdivision",
+        "disclosure_targets": [
+          "agency-federal",
+          "agency-state",
+          "agency-local"
+        ],
+        "adverse_action_scope": "Covers wrongdoing (violation of law or regulation) and waste (substantial abuse, misuse, destruction or loss of funds or resources)"
+      },
+      
+      "statute_of_limitations": {
+        "limit_ambiguous": false,
+        "limit_value": 180,
+        "limit_unit": "days",
+        "trigger": "date when the violation occurred"
+      },
+      
+      "enforcement": {
+        "process_type": [
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "disciplinary-action",
+          "pay-reduction"
+        ],
+        "remedies": [
+          "reinstatement",
+          "back-pay",
+          "front-pay",
+          "attorney-fees",
+          "litigation-costs"
+        ]
+      },
+      
+      "burden_of_proof": {
+        "employee_standard": [
+          "good-faith",
+          "reasonable-belief"
+        ]
+      },
+      
+      "reward": {
+        "available": false
+      },
+      
+      "links": {
+        "statute_url": "https://www.legis.state.pa.us/WU01/LI/LI/US/HTM/1986/0/0169..HTM",
+        "is_official": true,
+        "is_pdf": false
+      },
+      
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      
+      "_review_notes": "This section defines key terms including 'employer', 'employee', 'good faith report', 'public body', 'whistleblower', and 'wrongdoing'. The definition of 'employer' is notably broad, covering public bodies and entities receiving public funding.",
+      "_reconciled_notes": ""
+    },
+    {
+      "jurisdiction_id": "PA",
+      "statute_id": "PA-1423",
+      "official_name": "Pennsylvania Whistleblower Law - Protection of employees",
+      
+      "legal_basis": {
+        "statute_citation": "43 P.S. § 1423",
+        "disclosure_types": [
+          "retaliation-protection",
+          "procurement-spending-fraud",
+          "public-corruption-ethics"
+        ],
+        "protected_class": [
+          "state-employee",
+          "local-gov-staff"
+        ],
+        "disclosure_targets": [
+          "agency-federal",
+          "agency-state",
+          "agency-local"
+        ],
+        "adverse_action_scope": "No employer may discharge, threaten or otherwise discriminate or retaliate against an employee regarding the employee's compensation, terms, conditions, location or privileges of employment"
+      },
+      
+      "statute_of_limitations": {
+        "limit_ambiguous": false,
+        "limit_value": 180,
+        "limit_unit": "days",
+        "trigger": "date when the violation occurred"
+      },
+      
+      "enforcement": {
+        "process_type": [
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "disciplinary-action",
+          "pay-reduction",
+          "transfer"
+        ],
+        "remedies": [
+          "reinstatement",
+          "back-pay",
+          "front-pay",
+          "attorney-fees",
+          "litigation-costs"
+        ]
+      },
+      
+      "burden_of_proof": {
+        "employee_standard": [
+          "good-faith",
+          "reasonable-belief"
+        ]
+      },
+      
+      "reward": {
+        "available": false
+      },
+      
+      "links": {
+        "statute_url": "https://www.legis.state.pa.us/WU01/LI/LI/US/HTM/1986/0/0169..HTM",
+        "is_official": true,
+        "is_pdf": false
+      },
+      
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      
+      "_review_notes": "This section explicitly prohibits retaliation for good faith reports of wrongdoing or waste to the employer or appropriate authority. It also prohibits discrimination for participation in an investigation, hearing, court proceeding, or for refusing to participate in wrongdoing.",
+      "_reconciled_notes": ""
+    },
+    {
+      "jurisdiction_id": "PA",
+      "statute_id": "PA-1424",
+      "official_name": "Pennsylvania Whistleblower Law - Remedies",
+      
+      "legal_basis": {
+        "statute_citation": "43 P.S. § 1424",
+        "disclosure_types": [
+          "retaliation-protection",
+          "procurement-spending-fraud",
+          "public-corruption-ethics"
+        ],
+        "protected_class": [
+          "state-employee",
+          "local-gov-staff"
+        ],
+        "disclosure_targets": [
+          "agency-federal",
+          "agency-state",
+          "agency-local"
+        ],
+        "adverse_action_scope": "Remedies for violations of Section 1423 (Protection of employees)"
+      },
+      
+      "statute_of_limitations": {
+        "limit_ambiguous": false,
+        "limit_value": 180,
+        "limit_unit": "days",
+        "trigger": "date when the violation occurred"
+      },
+      
+      "enforcement": {
+        "process_type": [
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "disciplinary-action",
+          "pay-reduction"
+        ],
+        "remedies": [
+          "reinstatement",
+          "back-pay",
+          "front-pay",
+          "compensatory-damages",
+          "attorney-fees",
+          "litigation-costs",
+          "civil-penalty"
+        ],
+        "fee_shifting": "unilateral-pro-plaintiff"
+      },
+      
+      "burden_of_proof": {
+        "employee_standard": [
+          "good-faith",
+          "reasonable-belief"
+        ]
+      },
+      
+      "reward": {
+        "available": false
+      },
+      
+      "links": {
+        "statute_url": "https://www.legis.state.pa.us/WU01/LI/LI/US/HTM/1986/0/0169..HTM",
+        "is_official": true,
+        "is_pdf": false
+      },
+      
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      
+      "_review_notes": "This section specifies available remedies including reinstatement, back pay, full reinstatement of fringe benefits and seniority rights, actual damages, and civil fines. It also provides for attorney fees and costs for a prevailing plaintiff.",
+      "_reconciled_notes": ""
+    },
+    {
+      "jurisdiction_id": "PA",
+      "statute_id": "PA-1425",
+      "official_name": "Pennsylvania Whistleblower Law - Enforcement",
+      
+      "legal_basis": {
+        "statute_citation": "43 P.S. § 1425",
+        "disclosure_types": [
+          "retaliation-protection",
+          "procurement-spending-fraud",
+          "public-corruption-ethics"
+        ],
+        "protected_class": [
+          "state-employee",
+          "local-gov-staff"
+        ],
+        "disclosure_targets": [
+          "agency-federal",
+          "agency-state",
+          "agency-local"
+        ],
+        "adverse_action_scope": "Enforcement procedures for violations of the Whistleblower Law"
+      },
+      
+      "statute_of_limitations": {
+        "limit_ambiguous": false,
+        "limit_value": 180,
+        "limit_unit": "days",
+        "trigger": "date when the violation occurred"
+      },
+      
+      "enforcement": {
+        "primary_agency": "Court of Common Pleas",
+        "process_type": [
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "disciplinary-action",
+          "pay-reduction"
+        ],
+        "remedies": [
+          "reinstatement",
+          "back-pay",
+          "front-pay",
+          "attorney-fees",
+          "litigation-costs"
+        ]
+      },
+      
+      "burden_of_proof": {
+        "employee_standard": [
+          "good-faith",
+          "reasonable-belief"
+        ]
+      },
+      
+      "reward": {
+        "available": false
+      },
+      
+      "links": {
+        "statute_url": "https://www.legis.state.pa.us/WU01/LI/LI/US/HTM/1986/0/0169..HTM",
+        "is_official": true,
+        "is_pdf": false
+      },
+      
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      
+      "_review_notes": "This section establishes jurisdiction in the court of common pleas of the county where the alleged violation occurred or where the employer is located. It also sets the 180-day statute of limitations.",
+      "_reconciled_notes": ""
+    },
+    {
+      "jurisdiction_id": "PA",
+      "statute_id": "PA-3218",
+      "official_name": "Clean Streams Law - Protection of workmen and the public",
+      
+      "legal_basis": {
+        "statute_citation": "35 P.S. § 691.3218",
+        "disclosure_types": [
+          "environmental-protection",
+          "retaliation-protection"
+        ],
+        "protected_class": [
+          "corporate-staff"
+        ],
+        "disclosure_targets": [
+          "agency-state",
+          "agency-federal"
+        ],
+        "adverse_action_scope": "Prohibits discharge or discrimination against a person who files, institutes, or testifies in a proceeding under the Clean Streams Law"
+      },
+      
+      "statute_of_limitations": {
+        "limit_ambiguous": true,
+        "limit_value": 180,
+        "limit_unit": "days",
+        "limit_details": "Statute does not specify a limitations period; likely follows general Pennsylvania Whistleblower Law"
+      },
+      
+      "enforcement": {
+        "primary_agency": "Pennsylvania Department of Environmental Protection",
+        "process_type": [
+          "administrative-complaint"
+        ],
+        "adverse_action": [
+          "termination",
+          "disciplinary-action"
+        ],
+        "remedies": [
+          "reinstatement",
+          "back-pay"
+        ]
+      },
+      
+      "burden_of_proof": {
+        "employee_standard": [
+          "reasonable-belief"
+        ]
+      },
+      
+      "reward": {
+        "available": false
+      },
+      
+      "links": {
+        "statute_url": "https://www.legis.state.pa.us/cfdocs/legis/LI/uconsCheck.cfm?txtType=HTM&yr=1937&sessInd=0&smthLwInd=0&act=394&chpt=0&sctn=18&subsctn=0",
+        "is_official": true,
+        "is_pdf": false
+      },
+      
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      
+      "_review_notes": "This environmental whistleblower protection is more limited in scope than the general Whistleblower Law, focusing specifically on environmental issues under the Clean Streams Law.",
+      "_reconciled_notes": ""
+    },
+    {
+      "jurisdiction_id": "PA",
+      "statute_id": "PA-1101",
+      "official_name": "Pennsylvania Minimum Wage Act - Wage Protections and Retaliation",
+      
+      "legal_basis": {
+        "statute_citation": "43 P.S. § 333.1101",
+        "disclosure_types": [
+          "wage-hour-violations",
+          "retaliation-protection"
+        ],
+        "protected_class": [
+          "corporate-staff",
+          "state-employee",
+          "local-gov-staff"
+        ],
+        "disclosure_targets": [
+          "agency-state"
+        ],
+        "adverse_action_scope": "Prohibits discharge or discrimination against any employee who has filed a complaint, instituted a proceeding, or testified in a proceeding under the Minimum Wage Act"
+      },
+      
+      "statute_of_limitations": {
+        "limit_ambiguous": true,
+        "limit_value": 3,
+        "limit_unit": "years",
+        "limit_details": "For wage claims under the Act; retaliation claims may follow different limitations"
+      },
+      
+      "enforcement": {
+        "primary_agency": "Pennsylvania Department of Labor & Industry",
+        "process_type": [
+          "administrative-complaint",
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "disciplinary-action",
+          "pay-reduction"
+        ],
+        "remedies": [
+          "reinstatement",
+          "back-pay",
+          "liquidated-damages"
+        ]
+      },
+      
+      "burden_of_proof": {
+        "employee_standard": [
+          "reasonable-belief"
+        ]
+      },
+      
+      "reward": {
+        "available": false
+      },
+      
+      "links": {
+        "statute_url": "https://www.legis.state.pa.us/cfdocs/legis/LI/uconsCheck.cfm?txtType=HTM&yr=1968&sessInd=0&smthLwInd=0&act=5&chpt=0&sctn=12&subsctn=0",
+        "is_official": true,
+        "is_pdf": false
+      },
+      
+      "citations": {
+        "attached_citations": [],
+        "citation_count": 0
+      },
+      
+      "_review_notes": "This anti-retaliation provision is specific to wage and hour complaints under the Pennsylvania Minimum Wage Act.",
+      "_reconciled_notes": ""
+    }
+  ],
+  "integrity": {
+    "with_errors": true,
+    "error_details": [
+      "PA-3218: Statute of limitations is derived rather than explicit (limit_ambiguous: true)",
+      "PA-1101: Statute of limitations is derived rather than explicit (limit_ambiguous: true)"
+    ],
+    "error_count": 2
+  }
+}

@@ -1,0 +1,1618 @@
+{
+  "meta": {
+    "json_format_version": "2.0",
+    "source_method": "ai_assisted",
+    "source_name": "NotebookLM Reconciliation",
+    "jurisdiction_id": "CA",
+    "generated_date": "2026-04-04",
+    "generated_by": "NotebookLM Legal Fact-Checker",
+    "record_count": 22,
+    "proposed_count": 6,
+    "new_terms_proposed": [
+      {
+        "taxonomy": "ws_protected_class",
+        "term_id": "all-sectors",
+        "term_label": "All Employees / All Sectors",
+        "notes": "Frequently cited in statutes providing broad coverage without specific sector limitations.",
+        "seen_in": [
+          "CA-6310",
+          "CA-1102.5",
+          "CA-98.6",
+          "CA-12653",
+          "CA-232.5",
+          "CA-98.7",
+          "CA-1102.6",
+          "CA-1102.8",
+          "CA-6399.7",
+          "CA-6409.6",
+          "CA-1596.881",
+          "CA-6311",
+          "CA-6312"
+        ],
+        "count": 13
+      },
+      {
+        "taxonomy": "ws_disclosure_targets",
+        "term_id": "internal-management",
+        "term_label": "Internal Management",
+        "notes": "General management disclosure target when specific supervisors or HR are not solely identified.",
+        "seen_in": [
+          "CA-6310",
+          "CA-1102.5",
+          "CA-1278.5",
+          "CA-98.6",
+          "CA-12653",
+          "CA-232.5",
+          "CA-44112",
+          "CA-98.7",
+          "CA-9149.30",
+          "CA-1102.8",
+          "CA-6409.6",
+          "CA-8547.8",
+          "CA-8547.10",
+          "CA-8547.12",
+          "CA-8547.13",
+          "CA-87160"
+        ],
+        "count": 16
+      },
+      {
+        "taxonomy": "ws_disclosure_type",
+        "term_id": "general-wrongdoing",
+        "term_label": "General Wrongdoing",
+        "notes": "Catch-all for statutes prohibiting retaliation for reporting any violation of law.",
+        "seen_in": [
+          "CA-1102.5",
+          "CA-232.5",
+          "CA-98.7",
+          "CA-1102.6",
+          "CA-9149.30",
+          "CA-1102.8"
+        ],
+        "count": 6
+      },
+      {
+        "taxonomy": "ws_disclosure_type",
+        "term_id": "public-health",
+        "term_label": "Public Health",
+        "notes": "Specifically protects reports concerning broader public health risks rather than solely workplace safety.",
+        "seen_in": [
+          "CA-6310",
+          "CA-1278.5",
+          "CA-44112",
+          "CA-6409.6",
+          "CA-8547.8",
+          "CA-8547.10",
+          "CA-8547.12",
+          "CA-8547.13",
+          "CA-53296",
+          "CA-87160"
+        ],
+        "count": 10
+      },
+      {
+        "taxonomy": "ws_disclosure_type",
+        "term_id": "labor-law",
+        "term_label": "Labor Law",
+        "notes": "Reporting violations of state or federal labor codes.",
+        "seen_in": [
+          "CA-1102.5",
+          "CA-98.6",
+          "CA-232.5"
+        ],
+        "count": 3
+      },
+      {
+        "taxonomy": "ws_disclosure_type",
+        "term_id": "consumer-protection",
+        "term_label": "Consumer Protection",
+        "notes": "Reporting violations affecting consumers or clients in non-financial contexts (e.g., child care facilities).",
+        "seen_in": [
+          "CA-1596.881"
+        ],
+        "count": 1
+      }
+    ],
+    "json_run_notes": "Mapped old taxonomy slugs to new compliant slugs. Retained all existing URLs and citations per explicit instruction that they were previously verified. Omitted empty arrays globally across taxonomic and citation fields to enforce strict structural requirements. Updated fee_shifting arrays to single-value strings. Inserted missing _reconciled_notes key per v2 schema.",
+    "batch_completed": "2026-04-04 20:00 UTC"
+  },
+  "records": [
+    {
+      "jurisdiction_id": "CA",
+      "statute_id": "CA-6310",
+      "official_name": "Labor Code § 6310",
+      "common_name": "Cal/OSHA Whistleblower Protection",
+      "legal_basis": {
+        "statute_citation": "Cal. Lab. Code § 6310",
+        "disclosure_types": [
+          "occupational-health-safety",
+          "public-health"
+        ],
+        "protected_class": [
+          "all-sectors",
+          "has-details"
+        ],
+        "protected_class_details": "Section 6310 expressly includes domestic work employees, except persons performing publicly funded household domestic service. It also protects an employee retaliated against because the employee is a family member of a person who engaged, or was perceived to have engaged, in protected activity under this section.",
+        "disclosure_targets": [
+          "internal-management",
+          "agency-state",
+          "agency-federal",
+          "law-enforcement",
+          "has-details"
+        ],
+        "disclosure_targets_details": "Protected complaints may be made to the Division of Occupational Safety and Health, other governmental agencies assisting or sharing statutory safety responsibility, the employer, or the employee's representative.",
+        "adverse_action_scope": "Prohibits discharge and discrimination in any manner, including threats of discharge and broader discrimination in the terms and conditions of employment. Also protects family members of those who engage in protected activity."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": true,
+        "limit_value": 6,
+        "limit_unit": "months",
+        "limit_details": "The operative complaint route runs through Section 6312 and Labor Code Section 98.7 rather than Section 6310 itself. The six-month figure is therefore derivative, not stated in Section 6310.",
+        "trigger": "Date of the retaliatory adverse action",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "primary_agency": "Division of Labor Standards Enforcement (DLSE) / Cal/OSHA",
+        "process_type": [
+          "administrative-complaint",
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "demotion",
+          "suspension",
+          "disciplinary-action",
+          "constructive-discharge",
+          "has-details"
+        ],
+        "adverse_action_details": "The statute also covers threats of discharge and broader discrimination in terms and conditions of employment.",
+        "remedies": [
+          "reinstatement",
+          "back-pay",
+          "compensatory-damages",
+          "punitive-damages",
+          "attorney-fees",
+          "litigation-costs",
+          "has-details"
+        ],
+        "remedies_details": "The statute expressly provides reinstatement and reimbursement for lost wages and work benefits; willful refusal to restore an eligible employee after grievance, arbitration, or hearing is a misdemeanor.",
+        "fee_shifting": "unilateral-pro-plaintiff"
+      },
+      "burden_of_proof": {
+        "employee_standard": [
+          "preponderance"
+        ],
+        "employer_defense": [
+          "legitimate-non-retaliatory-reason"
+        ]
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=LAB&sectionNum=6310",
+        "is_official": true
+      },
+      "citations": {
+        "attached_citations": [
+          "McDonald v. State of Cal. || addresses exhaustion pathway || https://law.justia.com/cases/california/court-of-appeal/2013/c069646.html || law.justia.com || high",
+          "Wendy Cenis v. WinCo Holdings, Inc. || limits workplace-safety scope || https://law.justia.com/cases/federal/appellate-courts/ca9/18-16089/18-16089-2019-12-16.html || law.justia.com || moderate"
+        ],
+        "citation_count": 2
+      },
+      "_review_notes": "Merged from ChatGPT, UM1, and Grok. Retained limit_ambiguous true flag. Corrected ChatGPT's exhaustion_required to false per Labor Code 244(a). Expanded protected class using has-details. Removed invalid law firm citation.",
+      "_reconciled_notes": ""
+    },
+    {
+      "jurisdiction_id": "CA",
+      "statute_id": "CA-1102.5",
+      "official_name": "Labor Code section 1102.5",
+      "common_name": "California General Whistleblower Protection Statute",
+      "legal_basis": {
+        "statute_citation": "Cal. Lab. Code § 1102.5",
+        "disclosure_types": [
+          "labor-law",
+          "public-corruption-ethics",
+          "general-wrongdoing"
+        ],
+        "protected_class": [
+          "all-sectors",
+          "corporate-staff",
+          "contractor-gig"
+        ],
+        "disclosure_targets": [
+          "internal-management",
+          "agency-federal",
+          "agency-state",
+          "agency-local",
+          "law-enforcement"
+        ],
+        "adverse_action_scope": "Broad anti-retaliation language that covers retaliation for actual, perceived, or anticipated disclosure; refusal to participate in unlawful conduct; protected activity in former employment; and retaliation tied to a family member's protected conduct."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": true,
+        "limit_value": 3,
+        "limit_unit": "years",
+        "limit_details": "The statute text does not state a civil filing deadline. Derived from Code Civ. Proc. § 338(a).",
+        "trigger": "The date of the retaliatory act",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "primary_agency": "California Labor Commissioner / Division of Labor Standards Enforcement",
+        "process_type": [
+          "civil-lawsuit",
+          "administrative-complaint"
+        ],
+        "adverse_action": [
+          "termination",
+          "demotion",
+          "suspension",
+          "disciplinary-action"
+        ],
+        "remedies": [
+          "reinstatement",
+          "back-pay",
+          "attorney-fees",
+          "civil-penalty",
+          "injunctive-relief"
+        ],
+        "fee_shifting": "unilateral-pro-plaintiff"
+      },
+      "burden_of_proof": {
+        "employee_standard": [
+          "contributing-factor"
+        ],
+        "employer_defense": [
+          "same-decision-defense"
+        ],
+        "burden_of_proof_details": "Codified framework under Labor Code § 1102.6 requires employee to show protected activity was a contributing factor by a preponderance of the evidence; burden then shifts to employer for 'clear and convincing' rebuttal."
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=LAB&sectionNum=1102.5",
+        "is_official": true
+      },
+      "citations": {
+        "attached_citations": [
+          "Lawson v. PPG Architectural Finishes, Inc. || establishes burden framework || https://supreme.courts.ca.gov/sites/default/files/supremecourt/default/2022-08/S266001.pdf || supreme.courts.ca.gov || high",
+          "People ex rel. Garcia-Brower v. Kolla's, Inc. || confirms internal reports qualify || https://law.justia.com/cases/california/supreme-court/2023/s269456.html || law.justia.com || high"
+        ],
+        "citation_count": 2
+      },
+      "_review_notes": "Merged OpenAI, Gemini, and Grok records. Standardized limit_ambiguous flag to true as SOL is derived from CCP 338(a).",
+      "_reconciled_notes": ""
+    },
+    {
+      "jurisdiction_id": "CA",
+      "statute_id": "CA-1278.5",
+      "official_name": "Health and Safety Code Section 1278.5",
+      "common_name": "Health Care Facilities Whistleblower Protection",
+      "legal_basis": {
+        "statute_citation": "Cal. Health & Safety Code § 1278.5",
+        "disclosure_types": [
+          "public-health",
+          "occupational-health-safety"
+        ],
+        "protected_class": [
+          "corporate-staff",
+          "contractor-gig",
+          "has-details"
+        ],
+        "protected_class_details": "Patients, employees, medical staff, and other health care workers at health care facilities.",
+        "disclosure_targets": [
+          "internal-management",
+          "agency-state"
+        ],
+        "adverse_action_scope": "Discrimination or retaliation against a patient, employee, or medical staff member, including discharge, demotion, suspension, or unfavorable changes to privileges."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": true,
+        "limit_value": 0,
+        "limit_unit": "days",
+        "limit_details": "Not explicitly stated in the specific provision, derived from general tort and wrongful termination statute of limitations.",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "primary_agency": "California Department of Public Health",
+        "process_type": [
+          "civil-lawsuit",
+          "administrative-complaint"
+        ],
+        "adverse_action": [
+          "termination",
+          "demotion",
+          "suspension",
+          "disciplinary-action",
+          "has-details"
+        ],
+        "adverse_action_details": "Discrimination or retaliation against a patient, employee, or medical staff member, including unfavorable changes to privileges.",
+        "remedies": [
+          "reinstatement",
+          "back-pay",
+          "attorney-fees",
+          "litigation-costs"
+        ],
+        "fee_shifting": "bilateral-loser-pays"
+      },
+      "burden_of_proof": {
+        "employee_standard": [
+          "preponderance"
+        ],
+        "employer_defense": [
+          "legitimate-non-retaliatory-reason"
+        ],
+        "rebuttable_presumption": "Rebuttable presumption of retaliation if discriminatory action occurs within 120 days of the protected grievance or complaint.",
+        "burden_of_proof_flag": "120-day rebuttable presumption"
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=HSC&sectionNum=1278.5",
+        "is_official": true
+      },
+      "citations": {
+        "citation_count": 0
+      },
+      "_review_notes": "Merged NotebookLM and Gemini records. Adopted has-details protected class to cover patients correctly. Populated missing adverse_action_details.",
+      "_reconciled_notes": ""
+    },
+    {
+      "jurisdiction_id": "CA",
+      "statute_id": "CA-98.6",
+      "official_name": "Labor Code Section 98.6",
+      "legal_basis": {
+        "statute_citation": "Cal. Lab. Code § 98.6",
+        "disclosure_types": [
+          "labor-law"
+        ],
+        "protected_class": [
+          "all-sectors",
+          "job-applicant"
+        ],
+        "disclosure_targets": [
+          "agency-state",
+          "internal-management"
+        ],
+        "adverse_action_scope": "Discharge or any other manner of discrimination, retaliation, or adverse action for exercising rights under the Labor Code."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": true,
+        "limit_value": 6,
+        "limit_unit": "months",
+        "limit_details": "Generally 6 months to file with the Labor Commissioner, but civil action SOL may vary.",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "primary_agency": "Labor Commissioner's Office (DLSE)",
+        "process_type": [
+          "administrative-complaint",
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "demotion",
+          "suspension",
+          "harassment",
+          "pay-reduction",
+          "disciplinary-action",
+          "has-details"
+        ],
+        "adverse_action_details": "Includes failure to hire an applicant for protected reasons.",
+        "remedies": [
+          "reinstatement",
+          "back-pay",
+          "compensatory-damages",
+          "attorney-fees",
+          "litigation-costs",
+          "has-details"
+        ],
+        "remedies_details": "Civil penalty of up to $10,000 per employee per violation, awarded to the employee.",
+        "fee_shifting": "bilateral-loser-pays"
+      },
+      "burden_of_proof": {
+        "employee_standard": [
+          "preponderance"
+        ],
+        "employer_defense": [
+          "legitimate-non-retaliatory-reason"
+        ],
+        "rebuttable_presumption": "Recent amendments provide a rebuttable presumption of retaliation if action occurs within 90 days of protected activity."
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=LAB&sectionNum=98.6",
+        "is_official": true
+      },
+      "citations": {
+        "citation_count": 0
+      },
+      "_review_notes": "Merged Gemini and NotebookLM records, capturing the $10,000 civil penalty remedy and 90-day rebuttable presumption.",
+      "_reconciled_notes": ""
+    },
+    {
+      "jurisdiction_id": "CA",
+      "statute_id": "CA-12653",
+      "official_name": "California False Claims Act",
+      "common_name": "CFCA",
+      "legal_basis": {
+        "statute_citation": "Cal. Gov. Code § 12653",
+        "disclosure_types": [
+          "procurement-spending-fraud",
+          "securities-commodities-fraud"
+        ],
+        "protected_class": [
+          "all-sectors",
+          "contractor-gig",
+          "has-details"
+        ],
+        "protected_class_details": "Includes employees, contractors, and agents.",
+        "disclosure_targets": [
+          "internal-management",
+          "law-enforcement",
+          "agency-state"
+        ],
+        "adverse_action_scope": "Discharged, demoted, suspended, threatened, harassed, or in any other manner discriminated against in the terms and conditions of employment."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": false,
+        "limit_value": 3,
+        "limit_unit": "years",
+        "trigger": "from the date when the retaliation occurred",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "primary_agency": "Office of the Attorney General",
+        "process_type": [
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "demotion",
+          "suspension",
+          "harassment",
+          "disciplinary-action"
+        ],
+        "remedies": [
+          "reinstatement",
+          "back-pay",
+          "consequential-damages",
+          "attorney-fees",
+          "litigation-costs",
+          "has-details"
+        ],
+        "remedies_details": "Two times the amount of back pay (double back pay), plus interest, reinstatement, and compensation for special damages including litigation costs.",
+        "fee_shifting": "bilateral-loser-pays"
+      },
+      "burden_of_proof": {
+        "employee_standard": [
+          "preponderance"
+        ],
+        "employer_defense": [
+          "legitimate-non-retaliatory-reason"
+        ]
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=GOV&sectionNum=12653",
+        "is_official": true
+      },
+      "citations": {
+        "citation_count": 0
+      },
+      "_review_notes": "CFCA anti-retaliation provision protecting those reporting false claims. Merged models successfully to ensure double back pay is captured via has-details.",
+      "_reconciled_notes": ""
+    },
+    {
+      "jurisdiction_id": "CA",
+      "statute_id": "CA-232.5",
+      "official_name": "California Labor Code Section 232.5",
+      "legal_basis": {
+        "statute_citation": "Cal. Lab. Code § 232.5",
+        "disclosure_types": [
+          "labor-law",
+          "general-wrongdoing"
+        ],
+        "protected_class": [
+          "all-sectors"
+        ],
+        "disclosure_targets": [
+          "internal-management",
+          "public-media"
+        ],
+        "adverse_action_scope": "Requires that an employer not discharge, formally discipline, or otherwise discriminate against an employee who discloses information about the employer's working conditions."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": true,
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "primary_agency": "Labor Commissioner's Office",
+        "process_type": [
+          "civil-lawsuit",
+          "administrative-complaint"
+        ],
+        "adverse_action": [
+          "termination",
+          "disciplinary-action",
+          "demotion"
+        ],
+        "remedies": [
+          "reinstatement",
+          "back-pay"
+        ]
+      },
+      "burden_of_proof": {
+        "employee_standard": [
+          "preponderance"
+        ],
+        "employer_defense": [
+          "legitimate-non-retaliatory-reason"
+        ]
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=232.5.&lawCode=LAB",
+        "is_official": true
+      },
+      "citations": {
+        "citation_count": 0
+      },
+      "_review_notes": "Protects employees discussing working conditions. Included directly from Gemini source code; limit derived from civil procedure. Parent slug 'public' removed and 'media' corrected to 'public-media' during v2.0.10 integrity check.",
+      "_reconciled_notes": ""
+    },
+    {
+      "jurisdiction_id": "CA",
+      "statute_id": "CA-44112",
+      "official_name": "Reporting by School Employees of Improper Governmental Activities Act",
+      "legal_basis": {
+        "statute_citation": "Cal. Ed. Code § 44112",
+        "disclosure_types": [
+          "public-corruption-ethics",
+          "procurement-spending-fraud",
+          "public-health",
+          "occupational-health-safety"
+        ],
+        "protected_class": [
+          "k12-education-staff"
+        ],
+        "disclosure_targets": [
+          "internal-management",
+          "agency-local",
+          "agency-state",
+          "law-enforcement"
+        ],
+        "adverse_action_scope": "Use of official authority or influence to intimidate, threaten, coerce, or command."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": true,
+        "limit_value": 0,
+        "limit_unit": "days",
+        "limit_details": "Timeframe varies depending on general tort claims act deadlines; typically 6 months for public entities.",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "process_type": [
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "demotion",
+          "suspension",
+          "transfer",
+          "disciplinary-action"
+        ],
+        "remedies": [
+          "compensatory-damages",
+          "punitive-damages",
+          "attorney-fees"
+        ],
+        "fee_shifting": "bilateral-loser-pays"
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=EDC&sectionNum=44112",
+        "is_official": true
+      },
+      "citations": {
+        "citation_count": 0
+      },
+      "_review_notes": "Included directly from NotebookLM. Protects public school employees reporting improper activities.",
+      "_reconciled_notes": ""
+    },
+    {
+      "jurisdiction_id": "CA",
+      "statute_id": "CA-98.7",
+      "official_name": "Labor Code § 98.7",
+      "legal_basis": {
+        "statute_citation": "Cal. Lab. Code § 98.7",
+        "disclosure_types": [
+          "general-wrongdoing"
+        ],
+        "protected_class": [
+          "all-sectors"
+        ],
+        "disclosure_targets": [
+          "agency-federal",
+          "agency-state",
+          "internal-management"
+        ],
+        "adverse_action_scope": "Discharge or discrimination in violation of any law under the jurisdiction of the Labor Commissioner, including whistleblower-related retaliation."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": true,
+        "limit_value": 1,
+        "limit_unit": "years",
+        "limit_details": "One year to file complaint with Labor Commissioner; derived from general practices and secondary interpretations.",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "primary_agency": "Division of Labor Standards Enforcement (Labor Commissioner)",
+        "process_type": [
+          "administrative-complaint",
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "demotion",
+          "suspension",
+          "harassment",
+          "pay-reduction",
+          "disciplinary-action"
+        ],
+        "remedies": [
+          "reinstatement",
+          "back-pay",
+          "compensatory-damages",
+          "injunctive-relief",
+          "attorney-fees",
+          "litigation-costs"
+        ],
+        "fee_shifting": "unilateral-pro-plaintiff"
+      },
+      "burden_of_proof": {
+        "burden_of_proof_details": "Labor Commissioner investigates; civil actions follow general frameworks. Injunctive relief available on showing of reasonable cause."
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=LAB&sectionNum=98.7",
+        "is_official": true
+      },
+      "citations": {
+        "citation_count": 0
+      },
+      "_review_notes": "This section authorizes the Labor Commissioner to investigate retaliation complaints for violations of laws under its jurisdiction. Admin complaint route with civil action overlap.",
+      "_reconciled_notes": ""
+    },
+    {
+      "jurisdiction_id": "CA",
+      "statute_id": "CA-1102.6",
+      "official_name": "Burden of proof in civil action or administrative proceeding brought pursuant to Section 1102.5",
+      "legal_basis": {
+        "statute_citation": "Cal. Lab. Code § 1102.6",
+        "disclosure_types": [
+          "general-wrongdoing"
+        ],
+        "protected_class": [
+          "all-sectors"
+        ],
+        "adverse_action_scope": "This section does not define protected disclosures or protected classes on its own. It supplies the burden-shifting rule for retaliation claims brought under Section 1102.5."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": true,
+        "limit_value": 3,
+        "limit_unit": "years",
+        "limit_details": "Section 1102.6 contains no standalone filing deadline. Any timing rule depends on the underlying Section 1102.5 enforcement pathway rather than this section's text.",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "process_type": [
+          "administrative-complaint",
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "demotion",
+          "suspension",
+          "harassment",
+          "pay-reduction",
+          "disciplinary-action",
+          "constructive-discharge"
+        ],
+        "remedies": [
+          "reinstatement",
+          "back-pay",
+          "compensatory-damages",
+          "punitive-damages",
+          "attorney-fees"
+        ],
+        "fee_shifting": "unilateral-pro-plaintiff"
+      },
+      "burden_of_proof": {
+        "employee_standard": [
+          "contributing-factor",
+          "preponderance"
+        ],
+        "employer_defense": [
+          "same-decision-defense",
+          "has-details"
+        ],
+        "employer_defense_details": "Employer must prove by clear and convincing evidence that the action would have occurred for legitimate, independent reasons.",
+        "burden_of_proof_flag": "1102.6 burden-shifting framework",
+        "burden_of_proof_details": "Once employee shows by preponderance that protected activity was a contributing factor, employer must prove by clear and convincing evidence that the action would have occurred for legitimate independent reasons."
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=LAB&sectionNum=1102.6",
+        "is_official": true
+      },
+      "citations": {
+        "attached_citations": [
+          "Lawson v. PPG Architectural Finishes, Inc. || clarifies burden-shifting framework || https://supreme.courts.ca.gov/sites/default/files/supremecourt/default/2022-08/S266001.pdf || supreme.courts.ca.gov || high"
+        ],
+        "citation_count": 1
+      },
+      "_review_notes": "Merged from ChatGPT and Grok. This section is procedural and provides the burden-shifting framework for Section 1102.5 claims. SOL is derivative.",
+      "_reconciled_notes": ""
+    },
+    {
+      "jurisdiction_id": "CA",
+      "statute_id": "CA-9149.30",
+      "official_name": "Government Code §§ 9149.30 et seq. (Legislative Employee Whistleblower Protection Act)",
+      "common_name": "Legislative Employee Whistleblower Protection Act",
+      "legal_basis": {
+        "statute_citation": "Cal. Gov. Code §§ 9149.30 - 9149.36",
+        "disclosure_types": [
+          "public-corruption-ethics",
+          "general-wrongdoing"
+        ],
+        "protected_class": [
+          "state-employee",
+          "has-details"
+        ],
+        "protected_class_details": "Legislative employees (non-Member employees of the Legislature).",
+        "disclosure_targets": [
+          "internal-management",
+          "agency-state",
+          "legislative-state",
+          "law-enforcement",
+          "has-details"
+        ],
+        "disclosure_targets_details": "Protected disclosures to specified entities regarding violations of law or legislative standards of conduct.",
+        "adverse_action_scope": "Interfere, retaliate, intimidate, threaten, coerce, or command against employee for protected disclosure."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": true,
+        "limit_value": 0,
+        "limit_unit": "years",
+        "limit_details": "No specific SOL stated in article; general civil or administrative periods apply.",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "process_type": [
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "demotion",
+          "suspension",
+          "harassment",
+          "disciplinary-action"
+        ],
+        "remedies": [
+          "compensatory-damages",
+          "punitive-damages",
+          "attorney-fees",
+          "litigation-costs"
+        ],
+        "fee_shifting": "unilateral-pro-plaintiff"
+      },
+      "burden_of_proof": {
+        "burden_of_proof_details": "Civil liability for intentional retaliation."
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://leginfo.legislature.ca.gov/faces/codes_displayText.xhtml?lawCode=GOV&division=2.&title=2.&part=1.&chapter=1.5.&article=11.",
+        "is_official": true
+      },
+      "citations": {
+        "citation_count": 0
+      },
+      "_review_notes": "Specific protections for legislative employees reporting violations of law or legislative standards. Imposes criminal and civil liability for interference or retaliation.",
+      "_reconciled_notes": ""
+    },
+    {
+      "jurisdiction_id": "CA",
+      "statute_id": "CA-1102.8",
+      "official_name": "Labor Code § 1102.8",
+      "legal_basis": {
+        "statute_citation": "Cal. Lab. Code § 1102.8",
+        "disclosure_types": [
+          "general-wrongdoing"
+        ],
+        "protected_class": [
+          "all-sectors"
+        ],
+        "disclosure_targets": [
+          "internal-management",
+          "has-details"
+        ],
+        "disclosure_targets_details": "Posting requirement supports awareness of whistleblower rights.",
+        "adverse_action_scope": "Related to enforcement of whistleblower notice posting."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": true,
+        "limit_value": 0,
+        "limit_unit": "years",
+        "limit_details": "No specific SOL; tied to underlying whistleblower claims.",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "primary_agency": "Labor Commissioner",
+        "process_type": [
+          "administrative-complaint"
+        ],
+        "fee_shifting": "none-american-rule"
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=LAB&sectionNum=1102.8",
+        "is_official": true
+      },
+      "citations": {
+        "citation_count": 0
+      },
+      "_review_notes": "Requires employers to post model notice of whistleblower rights and responsibilities. Supports overall whistleblower framework but is primarily a posting/compliance obligation.",
+      "_reconciled_notes": ""
+    },
+    {
+      "jurisdiction_id": "CA",
+      "statute_id": "CA-6399.7",
+      "official_name": "Labor Code § 6399.7",
+      "legal_basis": {
+        "statute_citation": "Cal. Lab. Code § 6399.7",
+        "disclosure_types": [
+          "occupational-health-safety"
+        ],
+        "protected_class": [
+          "all-sectors"
+        ],
+        "disclosure_targets": [
+          "agency-state",
+          "has-details"
+        ],
+        "disclosure_targets_details": "Complaints or testimony about non-compliance with Hazardous Substances Information and Training Act.",
+        "adverse_action_scope": "Retaliation for complaints or testimony regarding hazardous substances."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": true,
+        "limit_value": 1,
+        "limit_unit": "years",
+        "limit_details": "Tied to general retaliation filing periods.",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "primary_agency": "Division of Labor Standards Enforcement",
+        "process_type": [
+          "administrative-complaint",
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "disciplinary-action"
+        ],
+        "remedies": [
+          "reinstatement",
+          "back-pay"
+        ],
+        "fee_shifting": "unilateral-pro-plaintiff"
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=LAB&sectionNum=6399.7",
+        "is_official": true
+      },
+      "citations": {
+        "citation_count": 0
+      },
+      "_review_notes": "Protects employees from retaliation for complaining or testifying about violations of the Hazardous Substances Information and Training Act. Parent taxonomy slug stripped.",
+      "_reconciled_notes": ""
+    },
+    {
+      "jurisdiction_id": "CA",
+      "statute_id": "CA-6409.6",
+      "official_name": "Labor Code § 6409.6",
+      "legal_basis": {
+        "statute_citation": "Cal. Lab. Code § 6409.6",
+        "disclosure_types": [
+          "public-health"
+        ],
+        "protected_class": [
+          "all-sectors"
+        ],
+        "disclosure_targets": [
+          "internal-management",
+          "agency-state",
+          "has-details"
+        ],
+        "disclosure_targets_details": "Disclosing positive COVID-19 test, diagnosis, or quarantine/isolation order.",
+        "adverse_action_scope": "Retaliation for COVID-19 related disclosures."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": true,
+        "limit_value": 0,
+        "limit_unit": "years",
+        "limit_details": "General periods apply.",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "process_type": [
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination"
+        ],
+        "remedies": [
+          "injunctive-relief"
+        ],
+        "fee_shifting": "unilateral-pro-plaintiff"
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=LAB&sectionNum=6409.6",
+        "is_official": true
+      },
+      "citations": {
+        "citation_count": 0
+      },
+      "_review_notes": "Specific protection against retaliation for disclosing COVID-19 related health information. Parent taxonomy slug stripped.",
+      "_reconciled_notes": ""
+    },
+    {
+      "jurisdiction_id": "CA",
+      "statute_id": "CA-1596.881",
+      "official_name": "Health and Safety Code §§ 1596.881 et seq.",
+      "legal_basis": {
+        "statute_citation": "Cal. Health & Safety Code § 1596.881",
+        "disclosure_types": [
+          "consumer-protection"
+        ],
+        "protected_class": [
+          "all-sectors",
+          "has-details"
+        ],
+        "protected_class_details": "Employees of child day care facilities.",
+        "disclosure_targets": [
+          "agency-state",
+          "has-details"
+        ],
+        "disclosure_targets_details": "Complaints about licensing or other laws relating to child day care facilities.",
+        "adverse_action_scope": "Retaliation for complaints, proceedings, testimony, or refusal to perform violating work."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": true,
+        "limit_value": 0,
+        "limit_unit": "years",
+        "limit_details": "45 days to present to employer; 90 days to DLSE.",
+        "exhaustion_required": true,
+        "exhaustion_details": "Must present claim to employer within 45 days."
+      },
+      "enforcement": {
+        "primary_agency": "Division of Labor Standards Enforcement",
+        "process_type": [
+          "administrative-complaint"
+        ],
+        "adverse_action": [
+          "termination",
+          "demotion",
+          "suspension"
+        ],
+        "remedies": [
+          "reinstatement",
+          "back-pay"
+        ],
+        "fee_shifting": "unilateral-pro-plaintiff"
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=HSC&sectionNum=1596.881",
+        "is_official": true
+      },
+      "citations": {
+        "citation_count": 0
+      },
+      "_review_notes": "Protects child day care facility employees from retaliation for reporting licensing violations. Parent taxonomy slug stripped.",
+      "_reconciled_notes": ""
+    },
+    {
+      "jurisdiction_id": "CA",
+      "statute_id": "CA-6311",
+      "official_name": "Protection for employee refusing hazardous work",
+      "legal_basis": {
+        "statute_citation": "Cal. Lab. Code § 6311",
+        "disclosure_types": [
+          "occupational-health-safety"
+        ],
+        "protected_class": [
+          "all-sectors",
+          "has-details"
+        ],
+        "protected_class_details": "Section 6311 expressly includes domestic work employees, except persons performing publicly funded household domestic service.",
+        "adverse_action_scope": "Protects refusal-to-work activity where performing the work would violate the Labor Code, an occupational safety or health standard, or a safety order, and the violation would create a real and apparent hazard to the employee or fellow employees."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": true,
+        "limit_value": 6,
+        "limit_unit": "months",
+        "limit_details": "Section 6311 itself states the right not to be laid off or discharged and a right of action for wages, but the related administrative complaint route is supplied through Section 6312 and Labor Code Section 98.7. Any six-month filing period is therefore derivative rather than stated in Section 6311.",
+        "trigger": "occurrence of the violation under the Labor Commissioner complaint pathway",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "process_type": [
+          "civil-lawsuit",
+          "administrative-complaint"
+        ],
+        "adverse_action": [
+          "termination",
+          "has-details"
+        ],
+        "adverse_action_details": "The statute specifically bars layoff or discharge and also reaches nonpayment caused by the employee's protected refusal to perform the hazardous work.",
+        "remedies": [
+          "back-pay",
+          "has-details"
+        ],
+        "remedies_details": "Section 6311 expressly gives the employee a right of action for wages for the time out of work resulting from the layoff or discharge."
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=LAB&sectionNum=6311",
+        "is_official": true
+      },
+      "citations": {
+        "citation_count": 0
+      },
+      "_review_notes": "Focuses on refusal to do dangerous work rather than complaints or reporting. The text does not enumerate the fuller remedy package seen in some other California retaliation statutes.",
+      "_reconciled_notes": ""
+    },
+    {
+      "jurisdiction_id": "CA",
+      "statute_id": "CA-6312",
+      "official_name": "Complaint procedure for violations of Sections 6310 and 6311",
+      "legal_basis": {
+        "statute_citation": "Cal. Lab. Code § 6312",
+        "disclosure_types": [
+          "occupational-health-safety"
+        ],
+        "protected_class": [
+          "all-sectors"
+        ],
+        "disclosure_targets": [
+          "agency-state"
+        ],
+        "adverse_action_scope": "Applies when an employee believes they were discharged or otherwise discriminated against in violation of Section 6310 or 6311."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": true,
+        "limit_value": 6,
+        "limit_unit": "months",
+        "limit_details": "Section 6312 directs the employee to file with the Labor Commissioner pursuant to Section 98.7. The six-month period comes from the cross-referenced procedure statute rather than from Section 6312's own text.",
+        "trigger": "occurrence of the violation under Labor Code Section 98.7",
+        "exhaustion_required": true,
+        "exhaustion_details": "The section expressly sends the employee to the Labor Commissioner complaint procedure under Section 98.7."
+      },
+      "enforcement": {
+        "primary_agency": "Labor Commissioner",
+        "process_type": [
+          "administrative-complaint"
+        ],
+        "adverse_action": [
+          "termination",
+          "disciplinary-action",
+          "has-details"
+        ],
+        "adverse_action_details": "The statute reaches discharge and other discrimination prohibited by Sections 6310 and 6311."
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=LAB&sectionNum=6312",
+        "is_official": true
+      },
+      "citations": {
+        "citation_count": 0
+      },
+      "_review_notes": "This section is procedural. It directs employees alleging violations of Sections 6310 or 6311 to the Labor Commissioner process.",
+      "_reconciled_notes": ""
+    },
+    {
+      "jurisdiction_id": "CA",
+      "statute_id": "CA-8547.8",
+      "official_name": "State employee retaliation complaint and damages remedy",
+      "common_name": "California Whistleblower Protection Act remedy section for state employees",
+      "legal_basis": {
+        "statute_citation": "Cal. Gov. Code § 8547.8",
+        "disclosure_types": [
+          "public-corruption-ethics",
+          "procurement-spending-fraud",
+          "public-health"
+        ],
+        "protected_class": [
+          "state-employee",
+          "job-applicant"
+        ],
+        "disclosure_targets": [
+          "internal-management",
+          "agency-state"
+        ],
+        "adverse_action_scope": "Covers actual or attempted acts of reprisal, retaliation, threats, coercion, and similar improper acts for having made a protected disclosure, and also addresses broader personnel actions taken because of protected activity."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": false,
+        "limit_value": 12,
+        "limit_unit": "months",
+        "trigger": "most recent act of reprisal complained about",
+        "exhaustion_required": true,
+        "exhaustion_details": "A state employee or applicant may file internally and may also file a copy with the State Personnel Board. A civil damages action is unavailable unless the board has issued, or failed to issue, findings under Section 19683."
+      },
+      "enforcement": {
+        "primary_agency": "State Personnel Board",
+        "process_type": [
+          "administrative-complaint",
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "demotion",
+          "suspension",
+          "transfer",
+          "disciplinary-action",
+          "has-details"
+        ],
+        "adverse_action_details": "The text also reaches threats, coercion, and similar retaliatory acts, as well as personnel actions recommended, directed, or approved because of protected activity.",
+        "remedies": [
+          "compensatory-damages",
+          "punitive-damages",
+          "attorney-fees"
+        ],
+        "fee_shifting": "unilateral-pro-plaintiff"
+      },
+      "burden_of_proof": {
+        "employee_standard": [
+          "contributing-factor",
+          "preponderance"
+        ],
+        "employer_defense": [
+          "legitimate-non-retaliatory-reason"
+        ],
+        "burden_of_proof_flag": "CWPA contributing-factor framework"
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=GOV&sectionNum=8547.8",
+        "is_official": true
+      },
+      "citations": {
+        "citation_count": 0
+      },
+      "_review_notes": "This is the key enforcement section for rank-and-file California state employees and applicants under the California Whistleblower Protection Act. Civil action conditioned on SPB findings.",
+      "_reconciled_notes": ""
+    },
+    {
+      "jurisdiction_id": "CA",
+      "statute_id": "CA-8547.10",
+      "official_name": "University of California employee retaliation complaint and damages remedy",
+      "legal_basis": {
+        "statute_citation": "Cal. Gov. Code § 8547.10",
+        "disclosure_types": [
+          "public-corruption-ethics",
+          "procurement-spending-fraud",
+          "public-health"
+        ],
+        "protected_class": [
+          "state-employee",
+          "job-applicant",
+          "has-details"
+        ],
+        "protected_class_details": "Applies specifically to University of California employees, including officers and faculty members, and applicants for employment.",
+        "disclosure_targets": [
+          "internal-management",
+          "has-details"
+        ],
+        "disclosure_targets_details": "The complaint is filed with the employee's supervisor or manager, or another university officer designated by the regents for that purpose.",
+        "adverse_action_scope": "Covers actual or attempted acts of reprisal, retaliation, threats, coercion, and similar improper acts for making a protected disclosure, plus other retaliatory personnel actions."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": false,
+        "limit_value": 12,
+        "limit_unit": "months",
+        "trigger": "most recent act of reprisal complained about",
+        "exhaustion_required": true,
+        "exhaustion_details": "A damages action is not available unless the injured party first filed the internal university complaint and the university failed to reach a decision within the time limits established by the regents; the section also says the employee may seek a remedy if the complaint has not been satisfactorily addressed within 18 months."
+      },
+      "enforcement": {
+        "process_type": [
+          "civil-lawsuit",
+          "administrative-complaint"
+        ],
+        "adverse_action": [
+          "termination",
+          "demotion",
+          "suspension",
+          "transfer",
+          "disciplinary-action",
+          "has-details"
+        ],
+        "adverse_action_details": "The statute also expressly covers threats, coercion, and similar retaliatory acts.",
+        "remedies": [
+          "compensatory-damages",
+          "punitive-damages",
+          "attorney-fees"
+        ],
+        "fee_shifting": "unilateral-pro-plaintiff"
+      },
+      "burden_of_proof": {
+        "employee_standard": [
+          "contributing-factor",
+          "preponderance"
+        ],
+        "employer_defense": [
+          "legitimate-non-retaliatory-reason"
+        ],
+        "burden_of_proof_flag": "UC whistleblower burden-shifting"
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=GOV&sectionNum=8547.10",
+        "is_official": true
+      },
+      "citations": {
+        "citation_count": 0
+      },
+      "_review_notes": "Mirrors the core state-employee model but is tailored to the University of California system. Preserves court access when the university does not satisfactorily resolve the internal complaint.",
+      "_reconciled_notes": ""
+    },
+    {
+      "jurisdiction_id": "CA",
+      "statute_id": "CA-8547.12",
+      "official_name": "California State University employee retaliation complaint and damages remedy",
+      "legal_basis": {
+        "statute_citation": "Cal. Gov. Code § 8547.12",
+        "disclosure_types": [
+          "public-corruption-ethics",
+          "procurement-spending-fraud",
+          "public-health"
+        ],
+        "protected_class": [
+          "state-employee",
+          "job-applicant",
+          "has-details"
+        ],
+        "protected_class_details": "Applies specifically to California State University employees, including officers and faculty members, and applicants for employment.",
+        "disclosure_targets": [
+          "internal-management",
+          "has-details"
+        ],
+        "disclosure_targets_details": "The complaint is filed with the employee's supervisor or manager, or another university officer designated by the trustees for that purpose.",
+        "adverse_action_scope": "Covers actual or attempted acts of reprisal, retaliation, threats, coercion, and similar improper acts for making a protected disclosure, plus retaliatory personnel actions."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": false,
+        "limit_value": 12,
+        "limit_unit": "months",
+        "trigger": "most recent act of reprisal complained about",
+        "exhaustion_required": true,
+        "exhaustion_details": "A damages action is not available unless the injured party first filed the internal university complaint and the university failed to reach a decision within the time limits established by the trustees; the section preserves a remedy if the complaint has not been satisfactorily addressed within 18 months."
+      },
+      "enforcement": {
+        "process_type": [
+          "civil-lawsuit",
+          "administrative-complaint"
+        ],
+        "adverse_action": [
+          "termination",
+          "demotion",
+          "suspension",
+          "transfer",
+          "disciplinary-action",
+          "has-details"
+        ],
+        "adverse_action_details": "The section also expressly covers threats, coercion, and similar retaliatory acts.",
+        "remedies": [
+          "compensatory-damages",
+          "punitive-damages",
+          "attorney-fees"
+        ],
+        "fee_shifting": "unilateral-pro-plaintiff"
+      },
+      "burden_of_proof": {
+        "employee_standard": [
+          "contributing-factor",
+          "preponderance"
+        ],
+        "employer_defense": [
+          "legitimate-non-retaliatory-reason"
+        ],
+        "burden_of_proof_flag": "CSU whistleblower burden-shifting"
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=GOV&sectionNum=8547.12",
+        "is_official": true
+      },
+      "citations": {
+        "citation_count": 0
+      },
+      "_review_notes": "California State University analogue to the University of California whistleblower remedy section.",
+      "_reconciled_notes": ""
+    },
+    {
+      "jurisdiction_id": "CA",
+      "statute_id": "CA-8547.13",
+      "official_name": "Judicial branch employee retaliation complaint and damages remedy",
+      "legal_basis": {
+        "statute_citation": "Cal. Gov. Code § 8547.13",
+        "disclosure_types": [
+          "public-corruption-ethics",
+          "procurement-spending-fraud",
+          "public-health"
+        ],
+        "protected_class": [
+          "state-employee",
+          "job-applicant",
+          "has-details"
+        ],
+        "protected_class_details": "Applies specifically to employees and applicants of the Supreme Court, courts of appeal, superior courts, and the Administrative Office of the Courts.",
+        "disclosure_targets": [
+          "internal-management",
+          "agency-state",
+          "has-details"
+        ],
+        "disclosure_targets_details": "An employee or applicant files internally with a supervisor, manager, or designated agency officer and may also file a copy with the State Personnel Board.",
+        "adverse_action_scope": "Covers actual or attempted reprisal, retaliation, threats, coercion, and similar improper acts for making a protected disclosure, along with retaliatory personnel actions."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": false,
+        "limit_value": 12,
+        "limit_unit": "months",
+        "trigger": "most recent act complained about",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "primary_agency": "State Personnel Board",
+        "process_type": [
+          "administrative-complaint",
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "demotion",
+          "suspension",
+          "transfer",
+          "disciplinary-action",
+          "has-details"
+        ],
+        "adverse_action_details": "The text also covers threats, coercion, and similar retaliatory acts and expressly references interference with disclosure rights.",
+        "remedies": [
+          "compensatory-damages",
+          "punitive-damages",
+          "attorney-fees",
+          "has-details"
+        ],
+        "remedies_details": "The section also contemplates State Personnel Board recommendations regarding what steps should be taken to remedy the retaliation.",
+        "fee_shifting": "unilateral-pro-plaintiff"
+      },
+      "burden_of_proof": {
+        "employee_standard": [
+          "contributing-factor",
+          "preponderance"
+        ],
+        "employer_defense": [
+          "legitimate-non-retaliatory-reason"
+        ],
+        "burden_of_proof_flag": "judicial-branch whistleblower burden-shifting"
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=GOV&sectionNum=8547.13",
+        "is_official": true
+      },
+      "citations": {
+        "citation_count": 0
+      },
+      "_review_notes": "Extends California whistleblower retaliation protections into the judicial branch. Expressly states that filing the internal/SPB complaint is not a prerequisite to a damages action.",
+      "_reconciled_notes": ""
+    },
+    {
+      "jurisdiction_id": "CA",
+      "statute_id": "CA-53296",
+      "official_name": "Disclosure of Information: Local Government",
+      "common_name": "Local Government Disclosure of Information Act",
+      "legal_basis": {
+        "statute_citation": "Cal. Gov. Code §§ 53296-53299",
+        "disclosure_types": [
+          "public-corruption-ethics",
+          "public-health"
+        ],
+        "protected_class": [
+          "local-gov-staff",
+          "job-applicant"
+        ],
+        "disclosure_targets": [
+          "has-details"
+        ],
+        "disclosure_targets_details": "The act is structured around a written complaint filed under the local agency's adopted administrative procedure or, if none exists, with the governing body.",
+        "adverse_action_scope": "The act defines reprisal action broadly to include intimidation, restraint, coercion, discrimination, or disciplinary action against an employee or applicant who files a protected complaint."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": true,
+        "limit_value": 60,
+        "limit_unit": "days",
+        "limit_details": "The local-government act's filing rules and tolling structure appear in associated sections rather than in Section 53296 itself. The 60-day limit is established in companion Section 53297.",
+        "trigger": "most recent act of reprisal under the local administrative procedure",
+        "exhaustion_required": true,
+        "exhaustion_details": "The act is built around a locally adopted administrative procedure and, in civil litigation, exhaustion is a significant issue under the article structure."
+      },
+      "enforcement": {
+        "process_type": [
+          "internal-disclosure",
+          "civil-lawsuit"
+        ],
+        "adverse_action": [
+          "termination",
+          "demotion",
+          "suspension",
+          "disciplinary-action",
+          "has-details"
+        ],
+        "adverse_action_details": "The article's definition of reprisal also includes intimidation, restraint, coercion, and discrimination.",
+        "remedies": [
+          "compensatory-damages",
+          "has-details"
+        ],
+        "remedies_details": "The article authorizes a damages action after the complaint process, but the exact remedy structure should be reviewed against Sections 53297-53299 before publication."
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=GOV&sectionNum=53296",
+        "is_official": true
+      },
+      "citations": {
+        "citation_count": 0
+      },
+      "_review_notes": "Section 53296 is definitional but serves as the entry-point. Record reflects SOL value properly aligned with companion Section 53297 (60 days) rather than prior erroneous 15-day inference.",
+      "_reconciled_notes": ""
+    },
+    {
+      "jurisdiction_id": "CA",
+      "statute_id": "CA-87160",
+      "official_name": "Reporting by Community College Employees of Improper Governmental Activities Act",
+      "common_name": "Community College whistleblower act",
+      "legal_basis": {
+        "statute_citation": "Cal. Educ. Code §§ 87160-87164",
+        "disclosure_types": [
+          "public-corruption-ethics",
+          "procurement-spending-fraud",
+          "public-health"
+        ],
+        "protected_class": [
+          "k12-education-staff",
+          "job-applicant",
+          "has-details"
+        ],
+        "protected_class_details": "The act applies to employees and applicants for employment with a public school employer in the community college context.",
+        "disclosure_targets": [
+          "internal-management",
+          "law-enforcement",
+          "has-details"
+        ],
+        "disclosure_targets_details": "An employee may complain internally to a supervisor, community college administrator, or public school employer, and may also file a copy with the local law enforcement agency.",
+        "adverse_action_scope": "The act prohibits actual or attempted reprisal, retaliation, threats, coercion, and similar improper acts for disclosing improper governmental activities or refusing to obey an illegal order."
+      },
+      "statute_of_limitations": {
+        "limit_ambiguous": false,
+        "limit_value": 12,
+        "limit_unit": "months",
+        "trigger": "most recent act of reprisal that is the subject of the complaint",
+        "exhaustion_required": false
+      },
+      "enforcement": {
+        "primary_agency": "State Personnel Board",
+        "process_type": [
+          "administrative-complaint",
+          "criminal-referral"
+        ],
+        "adverse_action": [
+          "termination",
+          "demotion",
+          "suspension",
+          "disciplinary-action",
+          "has-details"
+        ],
+        "adverse_action_details": "The act also expressly covers threats, coercion, and similar retaliatory acts.",
+        "remedies": [
+          "reinstatement",
+          "back-pay",
+          "has-details"
+        ],
+        "remedies_details": "The State Personnel Board may order appropriate relief including reinstatement, back pay, restoration of lost service credit if appropriate, and expungement of adverse records.",
+        "fee_shifting": "none-american-rule"
+      },
+      "reward": {
+        "available": false
+      },
+      "links": {
+        "statute_url": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=EDC&sectionNum=87160",
+        "is_official": true
+      },
+      "citations": {
+        "attached_citations": [
+          "Mize-Kurzman v. Marin Community College Dist. || interprets protected disclosure scope || https://law.justia.com/cases/california/court-of-appeal/2012/a126937.html || law.justia.com || high"
+        ],
+        "citation_count": 1
+      },
+      "_review_notes": "Summarizes the community-college whistleblower article using the entry point. Operative enforcement details appear in later sections.",
+      "_reconciled_notes": ""
+    }
+  ],
+  "integrity": {
+    "with_errors": true,
+    "error_details": [
+      "CA-6310: limit_ambiguous is true because 6-month limit derived from cross-referenced procedures.",
+      "CA-1102.5: limit_ambiguous is true; SOL value derived from CCP § 338(a).",
+      "CA-1278.5: limit_ambiguous is true; SOL value derived from general civil procedure.",
+      "CA-98.6: limit_ambiguous is true; SOL value derived from general civil procedure.",
+      "CA-232.5: limit_ambiguous is true; SOL value derived from general civil procedure.",
+      "CA-44112: limit_ambiguous is true; SOL value derived from general civil procedure.",
+      "CA-98.7: limit_ambiguous is true because SOL is derived from general practices.",
+      "CA-1102.6: limit_ambiguous is true because SOL is derived from general civil procedure.",
+      "CA-9149.30: limit_ambiguous is true because no explicit SOL in statute.",
+      "CA-1102.8: limit_ambiguous is true because primarily a posting requirement tied to underlying claims.",
+      "CA-6399.7: limit_ambiguous is true because SOL is tied to general retaliation periods.",
+      "CA-6409.6: limit_ambiguous is true because general periods apply.",
+      "CA-1596.881: limit_ambiguous is true because deadline derived from secondary provisions.",
+      "CA-6311: limit_ambiguous is true because 6-month limit derived from cross-referenced procedures.",
+      "CA-6312: limit_ambiguous is true because 6-month limit derived from Lab Code 98.7.",
+      "CA-53296: limit_ambiguous is true because SOL derived from associated sections.",
+      "Retained existing verified URLs and citations per specific user directive overriding standard URL-verification omission rules."
+    ],
+    "error_count": 17
+  }
+}
